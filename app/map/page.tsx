@@ -1,22 +1,34 @@
 "use client";
-import { useMemo, useState, useEffect } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import MapClient from "@/app/components/MapClient";
-import { mockListings } from "@/data/mockListings";
-import { mockStories } from "@/data/mockStories";
 import type { Listing } from "@/types/listing";
 
 type Region = { state?: string; county?: string };
 
 export default function MapPage() {
-  const allListings = useMemo(() => mockListings, []);
-
+  const [allListings, setAllListings] = useState<Listing[]>([]);
   const [selectedState, setSelectedState] = useState<string>("All");
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // live region from map exploration (no user location prompt)
   const [mapRegion, setMapRegion] = useState<Region>({});
+
+  useEffect(() => {
+    async function loadListings() {
+      const res = await fetch("/api/listings");
+      const data = await res.json();
+
+      const normalized = (Array.isArray(data) ? data : []).map((item) => ({
+        ...item,
+        name: item.name ?? item.title ?? "Untitled",
+      }));
+
+      setAllListings(normalized);
+    }
+
+    loadListings();
+  }, []);
 
   const states = useMemo(() => {
     const s = new Set<string>();
@@ -35,57 +47,47 @@ export default function MapPage() {
     return ["All", ...Array.from(c).sort()];
   }, [allListings, selectedState]);
 
-  const filteredListings = useMemo(() => {
-    return allListings.filter((l) => {
-      const stateOk = selectedState === "All" || l.state === selectedState;
-      const countyOk =
-        selectedCounty === "All" || (l.county && l.county === selectedCounty);
-      return stateOk && countyOk;
-    });
-  }, [allListings, selectedState, selectedCounty]);
-
-  // If filters change and selectedId is no longer visible, clear selection
-  useEffect(() => {
-    if (!selectedId) return;
-    const stillThere = filteredListings.some((l) => l.id === selectedId);
-    if (!stillThere) setSelectedId(null);
-  }, [filteredListings, selectedId]);
-
-  // Prefer dropdown region if user chose it; otherwise use live map region
   const effectiveState =
     selectedState !== "All" ? selectedState : mapRegion.state || "";
+
   const effectiveCounty =
     selectedCounty !== "All" ? selectedCounty : mapRegion.county || "";
 
-  // County-specific listing count (for the county currently being viewed/selected)
-  const countyLightCount = useMemo(() => {
-    if (!effectiveCounty) return null;
-    const count = allListings.filter(
-      (l) =>
-        l.county &&
-        l.county.toLowerCase() === effectiveCounty.toLowerCase()
-    ).length;
-    return count;
-  }, [allListings, effectiveCounty]);
+  const activeListings = useMemo(() => {
+    if (!effectiveCounty) return [];
 
-  // County-specific story count
-  const countyStoryCount = useMemo(() => {
-    if (!effectiveCounty || !effectiveState) return null;
-    const count = mockStories.filter(
-      (s) =>
-        s.state.toLowerCase() === effectiveState.toLowerCase() &&
-        s.county.toLowerCase() === effectiveCounty.toLowerCase()
-    ).length;
-    return count;
-  }, [effectiveCounty, effectiveState]);
-const submitListingHref = useMemo(() => {
-  const params = new URLSearchParams();
-  if (effectiveState) params.set("state", effectiveState);
-  if (effectiveCounty) params.set("county", effectiveCounty);
-  const qs = params.toString();
-  return qs ? `/submit?${qs}` : "/submit";
-}, [effectiveState, effectiveCounty]);
-  // Stories links (view + submit)
+    return allListings
+      .filter((l) => {
+        const countyOk =
+          !!l.county &&
+          l.county.toLowerCase() === effectiveCounty.toLowerCase();
+
+        const stateOk = effectiveState
+          ? !!l.state && l.state.toLowerCase() === effectiveState.toLowerCase()
+          : true;
+
+        return countyOk && stateOk;
+      })
+      .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [allListings, effectiveCounty, effectiveState]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const stillThere = activeListings.some((l) => l.id === selectedId);
+    if (!stillThere) setSelectedId(null);
+  }, [activeListings, selectedId]);
+
+  const hasCountyContext = Boolean(effectiveCounty);
+  const hasListingsHere = activeListings.length > 0;
+
+  const submitListingHref = useMemo(() => {
+    const params = new URLSearchParams();
+    if (effectiveState) params.set("state", effectiveState);
+    if (effectiveCounty) params.set("county", effectiveCounty);
+    const qs = params.toString();
+    return qs ? `/submit?${qs}` : "/submit";
+  }, [effectiveState, effectiveCounty]);
+
   const storiesViewHref = useMemo(() => {
     const params = new URLSearchParams();
     if (effectiveState) params.set("state", effectiveState);
@@ -94,17 +96,14 @@ const submitListingHref = useMemo(() => {
     return qs ? `/stories?${qs}` : "/stories";
   }, [effectiveState, effectiveCounty]);
 
-  const storiesSubmitHref = useMemo(() => {
-    const params = new URLSearchParams();
-    if (effectiveState) params.set("state", effectiveState);
-    if (effectiveCounty) params.set("county", effectiveCounty);
-    const qs = params.toString();
-    return qs ? `/stories/submit?${qs}` : "/stories/submit";
-  }, [effectiveState, effectiveCounty]);
+  const countyLabel = effectiveCounty
+    ? effectiveCounty.includes("County")
+      ? effectiveCounty
+      : `${effectiveCounty} County`
+    : "";
 
   return (
     <main style={{ display: "flex", height: "100vh", width: "100%" }}>
-      {/* Sidebar */}
       <div
         style={{
           width: 380,
@@ -114,62 +113,30 @@ const submitListingHref = useMemo(() => {
           background: "#fafafa",
         }}
       >
-        {/* Threshold */}
-        <section
-          style={{
-            marginBottom: 12,
-            padding: "14px 14px 12px",
-            border: "1px solid rgba(0,0,0,0.12)",
-            borderRadius: 12,
-            background: "rgba(255,255,255,0.75)",
-            backdropFilter: "blur(6px)",
-          }}
-        >
-          <div style={{ fontSize: 18, lineHeight: 1.25, fontWeight: 600 }}>
-            Some lights are already on.
-          </div>
-          <div style={{ marginTop: 6, fontSize: 13, lineHeight: 1.35, opacity: 0.82 }}>
-            This map turns toward what’s alive and life-supporting.
-          </div>
-        </section>
-
-        {/* Add listing button */}
-        <Link
-          href={submitListingHref}
-          style={{ display: "block", textDecoration: "none", marginBottom: 16 }}
-        >
-          <div
-            style={{
-              padding: "10px 12px",
-              borderRadius: 12,
-              border: "1px solid rgba(0,0,0,0.14)",
-              background: "rgba(255,255,255,0.9)",
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            See something missing? Add it here
-            <div style={{ marginTop: 4, fontSize: 12, fontWeight: 400, opacity: 0.75 }}>
-              (Prefills the region you’re looking at)
-            </div>
-          </div>
-        </Link>
-
-        {/* Geography controls */}
         <section
           style={{
             marginBottom: 16,
             padding: 12,
             border: "1px solid rgba(0,0,0,0.10)",
             borderRadius: 12,
-            background: "rgba(255,255,255,0.6)",
+            background: "rgba(255,255,255,0.72)",
           }}
         >
-          <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Region</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>
+            Region
+          </div>
 
-          <label style={{ display: "block", fontSize: 12, marginBottom: 6, opacity: 0.85 }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: 12,
+              marginBottom: 6,
+              opacity: 0.85,
+            }}
+          >
             State
           </label>
+
           <select
             value={selectedState}
             onChange={(e) => {
@@ -193,9 +160,17 @@ const submitListingHref = useMemo(() => {
             ))}
           </select>
 
-          <label style={{ display: "block", fontSize: 12, marginBottom: 6, opacity: 0.85 }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: 12,
+              marginBottom: 6,
+              opacity: 0.85,
+            }}
+          >
             County
           </label>
+
           <select
             value={selectedCounty}
             onChange={(e) => {
@@ -216,45 +191,174 @@ const submitListingHref = useMemo(() => {
               </option>
             ))}
           </select>
-
-          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.7 }}>
-            Showing {filteredListings.length} light{filteredListings.length === 1 ? "" : "s"}
-          </div>
         </section>
 
-        {/* Listings */}
-        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-          Explore
-        </div>
+        <section
+          style={{
+            marginBottom: 16,
+            padding: "14px 14px 12px",
+            border: "1px solid rgba(0,0,0,0.12)",
+            borderRadius: 12,
+            background: "rgba(255,255,255,0.78)",
+            backdropFilter: "blur(6px)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              lineHeight: 1.35,
+              fontWeight: 600,
+              marginBottom: 10,
+            }}
+          >
+            {hasCountyContext
+              ? `${countyLabel}${effectiveState ? `, ${effectiveState}` : ""}`
+              : "Choose a place"}
+          </div>
 
-        {filteredListings.map((listing) => {
-          const isSelected = selectedId === listing.id;
-          return (
-            <div
-              key={listing.id}
-              onClick={() => setSelectedId(listing.id)}
-              style={{
-                padding: "10px 12px",
-                marginBottom: 8,
-                borderRadius: 10,
-                cursor: "pointer",
-                background: isSelected ? "rgba(0,0,0,0.08)" : "transparent",
-              }}
-            >
-              <div style={{ fontWeight: 600 }}>{listing.name}</div>
-              <div style={{ fontSize: 12, opacity: 0.72 }}>
-                {listing.city}, {listing.state}
-                {listing.county ? ` • ${listing.county} County` : ""}
-              </div>
+          {!hasCountyContext ? (
+            <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82 }}>
+              Enter a state and county, or move the map into a place you want to
+              explore.
             </div>
-          );
-        })}
+          ) : (
+            <>
+              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 10 }}>
+                Visible here
+              </div>
+
+              {hasListingsHere ? (
+                <>
+                  <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.85 }}>
+                    {activeListings.length} light
+                    {activeListings.length === 1 ? "" : "s"} visible in this
+                    place
+                  </div>
+
+                  <div style={{ marginTop: 12 }}>
+                    {activeListings.map((listing) => {
+                      const isSelected = selectedId === listing.id;
+
+                      const locationParts = [listing.city, listing.state].filter(
+                        Boolean
+                      ) as string[];
+
+                      return (
+                        <div
+                          key={listing.id}
+                          onClick={() => setSelectedId(listing.id)}
+                          style={{
+                            padding: "10px 12px",
+                            marginBottom: 8,
+                            borderRadius: 10,
+                            cursor: "pointer",
+                            border: "1px solid rgba(0,0,0,0.08)",
+                            background: isSelected
+                              ? "rgba(0,0,0,0.08)"
+                              : "rgba(0,0,0,0.02)",
+                          }}
+                        >
+                          <div style={{ fontWeight: 600 }}>{listing.name}</div>
+                          <div
+                            style={{
+                              fontSize: 12,
+                              opacity: 0.72,
+                              marginTop: 2,
+                            }}
+                          >
+                            {locationParts.join(", ") || effectiveState}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.88 }}>
+                  No lights mapped here yet.
+                </div>
+              )}
+
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: 10,
+                  border: "1px solid rgba(0,0,0,0.10)",
+                  borderRadius: 10,
+                  background: "rgba(0,0,0,0.03)",
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Not seeing it here?
+                </div>
+
+                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82 }}>
+                  Help make this place more visible, or look beyond this area for
+                  aligned options.
+                </div>
+
+                <div style={{ marginTop: 8 }}>
+                  <Link
+                    href={submitListingHref}
+                    style={{
+                      display: "block",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                      fontWeight: 600,
+                      color: "inherit",
+                      fontSize: 13,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Place it in the constellation
+                  </Link>
+
+                  <Link
+                    href="/support"
+                    style={{
+                      display: "block",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                      fontWeight: 600,
+                      color: "inherit",
+                      fontSize: 13,
+                    }}
+                  >
+                    Explore support resources
+                  </Link>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: 10,
+                  border: "1px solid rgba(0,0,0,0.10)",
+                  borderRadius: 10,
+                  background: "rgba(0,0,0,0.03)",
+                }}
+              >
+                <Link
+                  href={storiesViewHref}
+                  style={{
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                    fontWeight: 600,
+                    color: "inherit",
+                    fontSize: 13,
+                  }}
+                >
+                  Story of place
+                </Link>
+              </div>
+            </>
+          )}
+        </section>
       </div>
 
-      {/* Map + Overlays */}
       <div style={{ flex: 1, position: "relative" }}>
         <MapClient
-          listings={filteredListings}
+          listings={hasCountyContext ? activeListings : []}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onRegionChange={setMapRegion}
@@ -262,88 +366,41 @@ const submitListingHref = useMemo(() => {
           highlightState={effectiveState}
         />
 
-        {/* County label + lights + stories + invitation */}
         <div
           style={{
             position: "absolute",
             top: 12,
             left: 12,
-            padding: "10px 12px",
+            padding: "12px 14px",
             borderRadius: 12,
             background: "rgba(0,0,0,0.58)",
             color: "rgba(255,255,255,0.93)",
             fontSize: 13,
-            lineHeight: 1.3,
-            maxWidth: 390,
+            lineHeight: 1.35,
+            maxWidth: 420,
           }}
         >
-          <div style={{ fontWeight: 700 }}>
-            {effectiveCounty ? `${effectiveCounty} County` : "Exploring"}
-            {effectiveState ? `, ${effectiveState}` : ""}
-          </div>
-
-          <div style={{ marginTop: 4, opacity: 0.88 }}>
-            {effectiveCounty ? (
-              countyLightCount && countyLightCount > 0 ? (
-                <>Lights on here: {countyLightCount}</>
-              ) : (
-                <>No lights here yet</>
-              )
-            ) : (
-              <>Move the map to name the county</>
-            )}
-          </div>
-
-          {/* Stories line */}
-          {effectiveCounty && effectiveState ? (
-            <div style={{ marginTop: 6 }}>
-              {countyStoryCount && countyStoryCount > 0 ? (
-                <Link
-                  href={storiesViewHref}
-                  style={{
-                    color: "rgba(255,255,255,0.95)",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                    fontWeight: 600,
-                  }}
-                >
-                  Stories from this place ({countyStoryCount})
-                </Link>
-              ) : (
-                <Link
-                  href={storiesSubmitHref}
-                  style={{
-                    color: "rgba(255,255,255,0.95)",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                    fontWeight: 600,
-                  }}
-                >
-                  Know a good story here? Add one.
-                </Link>
-              )}
-            </div>
-          ) : null}
-
-          {/* Listing invitation line (only when county is known and has 0 lights) */}
-          {effectiveCounty && countyLightCount === 0 ? (
-            <div style={{ marginTop: 6 }}>
-              <Link
-                href={submitListingHref}
-                style={{
-                  color: "rgba(255,255,255,0.95)",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                  fontWeight: 600,
-                }}
-              >
-                See something missing? Add a light.
-              </Link>
-            </div>
-          ) : null}
+          {hasCountyContext ? (
+            <>
+              <div style={{ fontWeight: 700 }}>
+                {countyLabel}
+                {effectiveState ? `, ${effectiveState}` : ""}
+              </div>
+              <div style={{ marginTop: 4, opacity: 0.88 }}>
+                A living map of places where life-affirming options are visible.
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontWeight: 700 }}>A living map</div>
+              <div style={{ marginTop: 4, opacity: 0.88 }}>
+                Move into a place, or choose a state and county to see what is
+                visible there.
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Bottom Orientation Text */}
         <div
           style={{
             position: "absolute",
@@ -355,15 +412,11 @@ const submitListingHref = useMemo(() => {
             background: "rgba(0,0,0,0.50)",
             color: "rgba(255,255,255,0.92)",
             fontSize: 13,
-            lineHeight: 1.4,
             textAlign: "center",
-            maxWidth: 640,
             pointerEvents: "none",
           }}
         >
-          <div>There is somewhere else to look.</div>
-          <div>Another story is already being written.</div>
-          <div>Come see where tomorrow’s children are playing.</div>
+          Take part
         </div>
       </div>
     </main>

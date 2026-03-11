@@ -281,12 +281,11 @@ export default function MapClient({
         .setLngLat({ lng: listing.lng, lat: listing.lat })
         .addTo(map);
     });
-
-    if (!selectedId && listings.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
-      map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
-    }
+if (!selectedId && listings.length > 0) {
+  const bounds = new mapboxgl.LngLatBounds();
+  listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
+  map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
+}
   }, [listings, onSelect, selectedId, highlightCounty, highlightState]);
 
   // Update selected + in-county warmth without rebuilding markers
@@ -310,7 +309,22 @@ export default function MapClient({
       if (inCounty) el.classList.add("ar-marker--in-county");
       else el.classList.remove("ar-marker--in-county");
     });
-  }, [selectedId, listings, highlightCounty, highlightState]);
+   }, [selectedId, listings, highlightCounty, highlightState]);
 
-  return <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />;
-}
+// Fly to listing when selected from sidebar
+useEffect(() => {
+  if (!selectedId) return;
+  const map = mapRef.current;
+  if (!map) return;
+
+  const listing = listings.find((l) => l.id === selectedId);
+  if (!listing) return;
+
+  map.flyTo({
+    center: [listing.lng, listing.lat],
+    zoom: Math.max(map.getZoom(), 9),
+    duration: 800,
+  });
+}, [selectedId, listings]);
+
+return <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />;}
