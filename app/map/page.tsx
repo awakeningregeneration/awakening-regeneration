@@ -13,7 +13,7 @@ export default function MapPage() {
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapRegion, setMapRegion] = useState<Region>({});
-
+const [storyCount, setStoryCount] = useState<number>(0);
   useEffect(() => {
     async function loadListings() {
       const res = await fetch("/api/listings");
@@ -76,6 +76,31 @@ export default function MapPage() {
     const stillThere = activeListings.some((l) => l.id === selectedId);
     if (!stillThere) setSelectedId(null);
   }, [activeListings, selectedId]);
+  useEffect(() => {
+  async function loadStories() {
+    if (!effectiveCounty || !effectiveState) {
+      setStoryCount(0);
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("state", effectiveState);
+    params.set("county", effectiveCounty);
+
+    try {
+      const res = await fetch(`/api/stories?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch stories");
+
+      const data = await res.json();
+      setStoryCount(Array.isArray(data) ? data.length : 0);
+    } catch (error) {
+      console.error("Failed to load story count:", error);
+      setStoryCount(0);
+    }
+  }
+
+  loadStories();
+}, [effectiveState, effectiveCounty]);
 
   const hasCountyContext = Boolean(effectiveCounty);
   const hasListingsHere = activeListings.length > 0;
@@ -329,28 +354,38 @@ export default function MapPage() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  borderRadius: 10,
-                  background: "rgba(0,0,0,0.03)",
-                }}
-              >
-                <Link
-                  href={storiesViewHref}
-                  style={{
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                    fontWeight: 600,
-                    color: "inherit",
-                    fontSize: 13,
-                  }}
-                >
-                  Story of place
-                </Link>
-              </div>
+<div
+  style={{
+    marginTop: 14,
+    padding: 10,
+    border: "1px solid rgba(0,0,0,0.10)",
+    borderRadius: 10,
+    background: "rgba(0,0,0,0.03)",
+  }}
+>
+  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+    Story of place
+  </div>
+
+  <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82, marginBottom: 8 }}>
+    {storyCount > 0
+      ? `${storyCount} stor${storyCount === 1 ? "y" : "ies"} visible here.`
+      : "Begin the story of this place."}
+  </div>
+
+  <Link
+    href={storiesViewHref}
+    style={{
+      textDecoration: "underline",
+      textUnderlineOffset: 3,
+      fontWeight: 600,
+      color: "inherit",
+      fontSize: 13,
+    }}
+  >
+    {storyCount > 0 ? "Explore stories" : "Add the first story"}
+  </Link>
+</div>
             </>
           )}
         </section>

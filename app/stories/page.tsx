@@ -1,96 +1,320 @@
-// app/stories/page.tsx
-export default function StoriesPage() {
+import Link from "next/link";
+
+type StoriesPageProps = {
+  searchParams?: Promise<{
+    state?: string;
+    county?: string;
+  }>;
+};
+
+type Story = {
+  id: string;
+  created_at: string;
+  state: string;
+  county: string;
+  title?: string | null;
+  body: string;
+  link?: string | null;
+};
+
+export default async function StoriesPage({
+  searchParams,
+}: StoriesPageProps) {
+  const params = (await searchParams) ?? {};
+  const state = params.state ?? "";
+  const county = params.county ?? "";
+
+  const countyLabel = county
+    ? county.includes("County")
+      ? county
+      : `${county} County`
+    : "";
+
+  const placeLabel =
+    countyLabel && state
+      ? `${countyLabel}, ${state}`
+      : countyLabel || state || "this place";
+
+  const qs = new URLSearchParams();
+  if (state) qs.set("state", state);
+  if (county) qs.set("county", county);
+
+  const storiesUrl = qs.toString()
+    ? `http://localhost:3000/api/stories?${qs.toString()}`
+    : `http://localhost:3000/api/stories`;
+
+  let stories: Story[] = [];
+
+  try {
+    const res = await fetch(storiesUrl, { cache: "no-store" });
+
+    if (res.ok) {
+      stories = await res.json();
+    }
+  } catch (error) {
+    console.error("Failed to load stories:", error);
+  }
+
+  const hasStories = stories.length > 0;
+
   return (
-    <main style={{ padding: "2rem", fontFamily: "system-ui", maxWidth: 800, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.6rem", marginBottom: "0.75rem" }}>
-        Stories & Spotlights (MVP)
-      </h1>
-      <p style={{ marginBottom: "1.5rem", color: "#374151" }}>
-        This space is for slow, human-scale stories of regeneration — told from more than one
-        vantage point, so we remember that many truths can live side by side.
-      </p>
-
-      {/* Simple grounding / pause block */}
-      <section
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f7f7f5",
+        color: "#1f1f1c",
+        padding: "32px 20px 48px",
+      }}
+    >
+      <div
         style={{
-          marginBottom: "1.5rem",
-          padding: "0.9rem 1rem",
-          borderRadius: "0.75rem",
-          background: "rgba(219, 234, 254, 0.6)",
-          border: "1px solid rgba(147, 197, 253, 0.9)",
+          maxWidth: 760,
+          margin: "0 auto",
         }}
       >
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.4rem", color: "#1d4ed8" }}>
-          A moment to land before you read
-        </h2>
-        <p style={{ fontSize: "0.92rem", margin: "0 0 0.25rem", color: "#1f2937" }}>
-          Before taking in another story, let your body arrive:
-        </p>
-        <ul
+        <div style={{ marginBottom: 18 }}>
+          <Link
+            href={county || state ? `/map` : "/"}
+            style={{
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              color: "inherit",
+              fontSize: 14,
+            }}
+          >
+            Back to map
+          </Link>
+        </div>
+
+        <section
           style={{
-            margin: 0,
-            paddingLeft: "1.1rem",
-            fontSize: "0.9rem",
-            color: "#111827",
+            padding: "20px 20px 18px",
+            border: "1px solid rgba(0,0,0,0.10)",
+            borderRadius: 16,
+            background: "rgba(255,255,255,0.78)",
+            marginBottom: 18,
           }}
         >
-          <li>Notice one place in your body that feels a little more spacious than the rest.</li>
-          <li>Let your breath soften there for three easy breaths.</li>
-          <li>Remember: you don&apos;t have to hold the whole world to be in relationship with it.</li>
-        </ul>
-      </section>
+          <div
+            style={{
+              fontSize: 12,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              opacity: 0.65,
+              marginBottom: 8,
+            }}
+          >
+            Story of place
+          </div>
 
-      {/* Example multi-perspective story */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <article
+          <h1
+            style={{
+              fontSize: 30,
+              lineHeight: 1.15,
+              fontWeight: 600,
+              margin: 0,
+              marginBottom: 10,
+            }}
+          >
+            {placeLabel}
+          </h1>
+
+          <div
+            style={{
+              fontSize: 16,
+              lineHeight: 1.5,
+              opacity: 0.82,
+              maxWidth: 640,
+            }}
+          >
+            Places hold memory, relationship, effort, and quiet forms of care.
+            This is where the story of a place can become visible.
+          </div>
+        </section>
+
+        {hasStories ? (
+          <section
+            style={{
+              padding: "20px",
+              border: "1px solid rgba(0,0,0,0.10)",
+              borderRadius: 16,
+              background: "white",
+              marginBottom: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                marginBottom: 14,
+              }}
+            >
+              Stories
+            </div>
+
+            <div style={{ display: "grid", gap: 14 }}>
+              {stories.map((story) => (
+                <article
+                  key={story.id}
+                  style={{
+                    padding: "16px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    background: "rgba(0,0,0,0.02)",
+                  }}
+                >
+                  {story.title ? (
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 600,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {story.title}
+                    </div>
+                  ) : null}
+
+                  <div
+                    style={{
+                      fontSize: 15,
+                      lineHeight: 1.65,
+                      whiteSpace: "pre-wrap",
+                      opacity: 0.88,
+                    }}
+                  >
+                    {story.body}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 12,
+                      fontSize: 12,
+                      opacity: 0.6,
+                    }}
+                  >
+                    {story.county}, {story.state}
+                  </div>
+
+                  {story.link ? (
+                    <div style={{ marginTop: 8 }}>
+                      <a
+                        href={story.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          textDecoration: "underline",
+                          textUnderlineOffset: 3,
+                          color: "inherit",
+                          fontSize: 14,
+                        }}
+                      >
+                        Visit link
+                      </a>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <>
+            <section
+              style={{
+                padding: "20px",
+                border: "1px solid rgba(0,0,0,0.10)",
+                borderRadius: 16,
+                background: "white",
+                marginBottom: 18,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  marginBottom: 12,
+                }}
+              >
+                The story of {placeLabel} is still gathering here.
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.65,
+                  opacity: 0.82,
+                  marginBottom: 14,
+                }}
+              >
+                No local stories have been shared in this space yet. That
+                doesn&apos;t mean nothing is happening. It means the telling has
+                not begun here yet.
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.65,
+                  opacity: 0.82,
+                }}
+              >
+                What is tending life here? What is growing quietly? What belongs
+                to the story of this place?
+              </div>
+            </section>
+          </>
+        )}
+
+        <section
           style={{
-            padding: "0.9rem 1rem",
-            borderRadius: "0.75rem",
-            border: "1px solid rgba(156, 163, 175, 0.7)",
-            background: "white",
+            padding: "20px",
+            border: "1px solid rgba(0,0,0,0.10)",
+            borderRadius: 16,
+            background: "rgba(0,0,0,0.03)",
           }}
         >
-          <h2 style={{ fontSize: "1rem", margin: "0 0 0.4rem", color: "#064e3b" }}>
-            From the land steward
-          </h2>
-          <p style={{ fontSize: "0.92rem", color: "#374151", margin: 0 }}>
-            &quot;When I first arrived here, the stream was choked with blackberry and trash. I didn&apos;t
-            know where to begin, so I started with one small section. Each season we&apos;ve opened a
-            little more light and a few more native plants have come back on their own.&quot;
-          </p>
-        </article>
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              marginBottom: 8,
+            }}
+          >
+            Add to the story layer
+          </div>
 
-        <article
-          style={{
-            padding: "0.9rem 1rem",
-            borderRadius: "0.75rem",
-            border: "1px solid rgba(156, 163, 175, 0.7)",
-            background: "white",
-          }}
-        >
-          <h2 style={{ fontSize: "1rem", margin: "0 0 0.4rem", color: "#6b21a8" }}>
-            From a neighbor downstream
-          </h2>
-          <p style={{ fontSize: "0.92rem", color: "#374151", margin: 0 }}>
-            &quot;I didn&apos;t know what they were doing up there at first — I just noticed the water
-            stopped smelling like algae in late summer. Later I found out there&apos;d been years of
-            small, steady work upstream. It changed how I see this whole hillside.&quot;
-          </p>
-        </article>
-      </section>
+          <div
+            style={{
+              fontSize: 14,
+              lineHeight: 1.6,
+              opacity: 0.8,
+              marginBottom: 12,
+            }}
+          >
+            A story helps make visible what lives here and what this place is
+            becoming.
+          </div>
 
-      <p style={{ fontSize: "0.9rem", color: "#4b5563" }}>
-        In the full version of this app, each project will be able to hold more than one voice:
-        steward, neighbor, visitor, and the place itself. This page is the gentle beginning of that
-        pattern.
-      </p>
+          <Link
+            href={
+              county || state
+                ? `/stories/submit?county=${encodeURIComponent(
+                    county
+                  )}&state=${encodeURIComponent(state)}`
+                : "/stories/submit"
+            }
+            style={{
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              fontWeight: 600,
+              color: "inherit",
+              fontSize: 14,
+            }}
+          >
+            Add a story
+          </Link>
+        </section>
+      </div>
     </main>
   );
 }

@@ -28,11 +28,11 @@ export default function SubmitStoryPage() {
     return qs ? `/stories?${qs}` : "/stories";
   }, [state, county]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!state || !county || !body.trim()) {
-      alert("Please include at least state, county, and a short story.");
+      alert("Please include at least state, county, and the story.");
       return;
     }
 
@@ -46,12 +46,24 @@ export default function SubmitStoryPage() {
       link: link.trim(),
     };
 
-    // MVP: log only (persistence later)
-    console.log("STORY SUBMIT (MVP):", payload);
+ try {
+  const res = await fetch("/api/stories", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
-    alert(
-      "Captured locally for now (console log). Next step is wiring stories to persistence."
-    );
+  if (!res.ok) {
+    throw new Error("Failed to save story");
+  }
+
+  alert("Story saved.");
+} catch (err) {
+  console.error(err);
+  alert("Something went wrong saving the story.");
+}
 
     // light reset (keep region)
     setTitle("");
@@ -63,10 +75,12 @@ export default function SubmitStoryPage() {
     <main style={{ maxWidth: 760, margin: "0 auto", padding: 20 }}>
       <header style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Add a story</div>
-        <div style={{ marginTop: 6, opacity: 0.78, lineHeight: 1.4 }}>
-          Keep it short. 3–6 sentences. Place-based. No performance.
+        <div style={{ marginTop: 6, opacity: 0.78, lineHeight: 1.5 }}>
+          Tell the story of what is happening here.
           <br />
-          This is a way of marking what’s alive here.
+          Place-based. Honest. No performance.
+          <br />
+          A few paragraphs is welcome.
         </div>
 
         <div style={{ marginTop: 12 }}>
@@ -166,13 +180,13 @@ export default function SubmitStoryPage() {
             marginBottom: 6,
           }}
         >
-          Story (short)
+          Story
         </label>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="3–6 sentences. What happened? Why does it matter here?"
-          rows={7}
+          placeholder="Tell the story of this place. What is happening here? What is being tended, restored, protected, or made possible? Why does it matter in this community?"
+          rows={12}
           style={{
             width: "100%",
             padding: 10,
@@ -180,7 +194,7 @@ export default function SubmitStoryPage() {
             border: "1px solid rgba(0,0,0,0.18)",
             marginBottom: 12,
             resize: "vertical",
-            lineHeight: 1.4,
+            lineHeight: 1.55,
           }}
         />
 
@@ -222,7 +236,7 @@ export default function SubmitStoryPage() {
         </button>
 
         <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65 }}>
-          (MVP note: this currently logs to the browser console. Persistence comes next.)
+          (MVP note: this now saves to the stories table in Supabase.)
         </div>
       </form>
     </main>
