@@ -10,6 +10,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("affiliate_resources")
     .select("*")
+    .eq("status", "approved")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
           description: body.description,
           url: body.url,
           category: body.category,
+          status: "pending",
         },
       ])
       .select()
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { message: "Affiliate link added.", resource: data },
+      { message: "Affiliate submitted for review.", resource: data },
       { status: 201 }
     );
   } catch (err) {

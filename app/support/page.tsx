@@ -1,7 +1,44 @@
-import { supportResources } from "@/data/supportResources";
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { supportResources } from "@/data/supportResources";
 
 export default function SupportPage() {
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(
+        supportResources
+          .map((resource) => (resource.category || "").trim())
+          .filter(Boolean)
+      )
+    ).sort();
+
+    return ["All", ...unique];
+  }, []);
+
+  const filteredResources = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return supportResources.filter((resource) => {
+      const matchesCategory =
+        selectedCategory === "All" || resource.category === selectedCategory;
+
+      const matchesSearch =
+        !q ||
+        resource.name.toLowerCase().includes(q) ||
+        resource.description.toLowerCase().includes(q) ||
+        resource.category.toLowerCase().includes(q) ||
+        (resource.whyItsHere || "").toLowerCase().includes(q) ||
+        (resource.tags || []).some((tag) => tag.toLowerCase().includes(q));
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, selectedCategory]);
+
   return (
     <main
       style={{
@@ -18,26 +55,13 @@ export default function SupportPage() {
         }}
       >
         <div style={{ maxWidth: "760px" }}>
-          <p
-            style={{
-              fontSize: "12px",
-              textTransform: "uppercase",
-              letterSpacing: "0.18em",
-              color: "#6b7c94",
-              margin: 0,
-            }}
-          >
-            Support Life Anywhere
-          </p>
-
           <h1
             style={{
-              marginTop: "12px",
-              fontSize: "2.5rem",
-              fontWeight: 600,
-              lineHeight: 1.1,
-              letterSpacing: "-0.02em",
-              color: "#1f2a3a",
+              fontSize: "clamp(2.4rem, 5vw, 4rem)",
+              lineHeight: 1.05,
+              margin: 0,
+              marginBottom: "18px",
+              fontWeight: 700,
             }}
           >
             When you can’t find it nearby, here are aligned options.
@@ -45,10 +69,11 @@ export default function SupportPage() {
 
           <p
             style={{
-              marginTop: "20px",
-              fontSize: "1.125rem",
-              lineHeight: 1.8,
-              color: "#4a5a70",
+              fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
+              lineHeight: 1.7,
+              color: "#506178",
+              margin: 0,
+              marginBottom: "36px",
             }}
           >
             Sometimes the local light is not visible yet. This page exists to
@@ -59,93 +84,166 @@ export default function SupportPage() {
 
         <div
           style={{
-            marginTop: "48px",
             display: "grid",
-            gap: "24px",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "14px",
+            gridTemplateColumns: "1fr",
+            maxWidth: "760px",
+            marginBottom: "36px",
+            padding: "18px",
+            border: "1px solid rgba(31,42,58,0.10)",
+            borderRadius: "18px",
+            background: "rgba(255,255,255,0.55)",
+            backdropFilter: "blur(6px)",
           }}
         >
-          {supportResources.map((item) => {
-            const href = item.affiliateUrl || item.websiteUrl;
+          <input
+            type="text"
+            placeholder="Search by name, description, tags, or category"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "1px solid rgba(31,42,58,0.14)",
+              fontSize: "0.98rem",
+              background: "white",
+              color: "#1f2a3a",
+            }}
+          />
 
-            return (
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "1px solid rgba(31,42,58,0.14)",
+              fontSize: "0.98rem",
+              background: "white",
+              color: "#1f2a3a",
+            }}
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category === "All" ? "All categories" : category}
+              </option>
+            ))}
+          </select>
+
+          <div
+            style={{
+              fontSize: "0.95rem",
+              color: "#5f6f84",
+            }}
+          >
+            {filteredResources.length} result
+            {filteredResources.length === 1 ? "" : "s"}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "24px",
+            alignItems: "start",
+          }}
+        >
+          {filteredResources.length === 0 ? (
+            <div
+              style={{
+                padding: "20px",
+                borderRadius: "18px",
+                background: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(31,42,58,0.10)",
+                color: "#506178",
+              }}
+            >
+              No aligned options match this search yet.
+            </div>
+          ) : (
+            filteredResources.map((resource) => (
               <article
-                key={item.id}
+                key={resource.id}
                 style={{
-                  borderRadius: "16px",
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  background: "rgba(255,255,255,0.78)",
-                  padding: "24px",
+                  background: "rgba(255,255,255,0.72)",
+                  borderRadius: "18px",
+                  border: "1px solid rgba(31,42,58,0.10)",
+                  padding: "24px 26px",
+                  boxShadow: "0 1px 0 rgba(255,255,255,0.28) inset",
                 }}
               >
-                <p
+                <div
                   style={{
-                    fontSize: "12px",
+                    fontSize: "0.9rem",
+                    letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    letterSpacing: "0.16em",
-                    color: "#6b7c94",
-                    margin: 0,
+                    color: "#70839a",
+                    marginBottom: "12px",
                   }}
                 >
-                  {item.category}
-                </p>
+                  {resource.category}
+                </div>
 
                 <h2
                   style={{
-                    marginTop: "8px",
-                    fontSize: "1.25rem",
-                    fontWeight: 600,
-                    color: "#1f2a3a",
+                    fontSize: "1.1rem",
+                    lineHeight: 1.35,
+                    margin: 0,
+                    marginBottom: "14px",
+                    fontWeight: 700,
                   }}
                 >
-                  {item.title}
+                  {resource.name}
                 </h2>
 
                 <p
                   style={{
-                    marginTop: "12px",
-                    fontSize: "14px",
-                    lineHeight: 1.8,
-                    color: "#4a5a70",
+                    fontSize: "1rem",
+                    lineHeight: 1.6,
+                    color: "#556679",
+                    margin: 0,
+                    marginBottom: "16px",
                   }}
                 >
-                  {item.description}
+                  {resource.description}
                 </p>
 
-                {item.whyItMatters && (
+                {resource.whyItsHere && (
                   <p
                     style={{
-                      marginTop: "16px",
-                      fontSize: "14px",
-                      lineHeight: 1.8,
-                      color: "#5b6b82",
+                      fontSize: "0.98rem",
+                      lineHeight: 1.65,
+                      color: "#627488",
+                      margin: 0,
+                      marginBottom: "16px",
                     }}
                   >
-                    <span style={{ color: "#1f2a3a", fontWeight: 600 }}>
-                      Why this is here:
-                    </span>{" "}
-                    {item.whyItMatters}
+                    <strong style={{ color: "#1f2a3a" }}>Why this is here:</strong>{" "}
+                    {resource.whyItsHere}
                   </p>
                 )}
 
-                {item.tags?.length ? (
+                {resource.tags?.length ? (
                   <div
                     style={{
-                      marginTop: "16px",
                       display: "flex",
                       flexWrap: "wrap",
                       gap: "8px",
+                      marginBottom: "20px",
                     }}
                   >
-                  {item.tags.map((tag: string) => (
+                    {resource.tags.map((tag) => (
                       <span
                         key={tag}
                         style={{
+                          fontSize: "0.88rem",
+                          color: "#70839a",
+                          border: "1px solid rgba(31,42,58,0.12)",
                           borderRadius: "999px",
-                          border: "1px solid rgba(0,0,0,0.10)",
-                          padding: "4px 12px",
-                          fontSize: "12px",
-                          color: "#5b6b82",
+                          padding: "6px 12px",
                           background: "rgba(255,255,255,0.55)",
                         }}
                       >
@@ -156,62 +254,56 @@ export default function SupportPage() {
                 ) : null}
 
                 <a
-                  href={href}
+                  href={resource.url}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   style={{
-                    marginTop: "24px",
-                    display: "inline-flex",
+                    display: "inline-block",
+                    padding: "12px 18px",
                     borderRadius: "999px",
-                    border: "1px solid rgba(0,0,0,0.18)",
-                    padding: "10px 16px",
-                    fontSize: "14px",
-                    color: "#0e3a66",
+                    border: "1px solid rgba(31,42,58,0.16)",
+                    color: "#1c4a7d",
+                    fontWeight: 700,
                     textDecoration: "underline",
                     textUnderlineOffset: 3,
-                    fontWeight: 600,
-                    background: "rgba(255,255,255,0.85)",
+                    background: "rgba(255,255,255,0.6)",
                   }}
                 >
                   Visit resource
                 </a>
               </article>
-            );
-          })}
+            ))
+          )}
         </div>
 
         <div
           style={{
-            marginTop: "50px",
+            marginTop: "52px",
             textAlign: "center",
+            color: "#5c6d82",
+            fontSize: "1.05rem",
+            lineHeight: 1.7,
           }}
         >
-          <p
-            style={{
-              marginBottom: "10px",
-              color: "#4a5a70",
-            }}
-          >
+          <p style={{ marginBottom: "18px" }}>
             Know an aligned business or resource others should be able to find?
           </p>
 
-          <Link href="/affiliates/submit">
-            <span
-              style={{
-                display: "inline-block",
-                padding: "10px 18px",
-                borderRadius: "999px",
-                border: "1px solid rgba(0,0,0,0.18)",
-                background: "rgba(255,255,255,0.85)",
-                color: "#0e3a66",
-                cursor: "pointer",
-                fontWeight: 600,
-                textDecoration: "underline",
-                textUnderlineOffset: 3,
-              }}
-            >
-              Submit your aligned affiliate business
-            </span>
+          <Link
+            href="/support/submit"
+            style={{
+              display: "inline-block",
+              padding: "14px 22px",
+              borderRadius: "999px",
+              border: "1px solid rgba(31,42,58,0.14)",
+              background: "rgba(255,255,255,0.68)",
+              color: "#1c4a7d",
+              fontWeight: 700,
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            Submit your aligned affiliate business
           </Link>
         </div>
       </section>

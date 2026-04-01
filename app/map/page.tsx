@@ -129,7 +129,9 @@ const countyListings = useMemo(() => {
     hasStateSelection,
     hasCountySelection,
   ]);
-
+const selectedListing = useMemo(() => {
+  return allListings.find((l) => l.id === selectedId) || null;
+}, [allListings, selectedId]);
   useEffect(() => {
     if (!selectedId) return;
 
@@ -301,7 +303,53 @@ const countyListings = useMemo(() => {
             background: "rgba(255,255,255,0.78)",
             backdropFilter: "blur(6px)",
           }}
-        >
+        >{selectedListing && (
+  <div
+    style={{
+      marginBottom: 14,
+      padding: 12,
+      border: "1px solid rgba(0,0,0,0.12)",
+      borderRadius: 12,
+      background: "rgba(255,255,255,0.85)",
+    }}
+  >
+    <div style={{ fontWeight: 700, fontSize: 15 }}>
+      {selectedListing.name}
+    </div>
+
+    <div
+      style={{
+        fontSize: 12,
+        opacity: 0.7,
+        marginTop: 2,
+        marginBottom: 6,
+      }}
+    >
+      {selectedListing.category} • {selectedListing.city},{" "}
+      {selectedListing.state}
+    </div>
+
+    <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9 }}>
+      {selectedListing.description}
+    </div>
+
+    {selectedListing.website && (
+      <a
+        href={selectedListing.website}
+        target="_blank"
+        style={{
+          display: "inline-block",
+          marginTop: 8,
+          textDecoration: "underline",
+          fontSize: 13,
+          fontWeight: 600,
+        }}
+      >
+        Visit website
+      </a>
+    )}
+  </div>
+)}
           {!hasStateSelection ? (
             <>
               <div
