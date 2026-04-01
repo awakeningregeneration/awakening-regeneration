@@ -43,6 +43,11 @@ export default async function StoriesPage({
     ? `http://localhost:3000/api/stories?${qs.toString()}`
     : `http://localhost:3000/api/stories`;
 
+  const mapHref = qs.toString() ? `/map?${qs.toString()}` : "/map";
+  const addStoryHref = qs.toString()
+    ? `/stories/submit?${qs.toString()}`
+    : "/stories/submit";
+
   let stories: Story[] = [];
 
   try {
@@ -59,9 +64,9 @@ export default async function StoriesPage({
 
   return (
     <main
-      style={{
-        minHeight: "100vh",
-        background: "#f7f7f5",
+  style={{
+    minHeight: "100vh",
+    background: "#d3e4f7",
         color: "#1f1f1c",
         padding: "32px 20px 48px",
       }}
@@ -74,7 +79,7 @@ export default async function StoriesPage({
       >
         <div style={{ marginBottom: 18 }}>
           <Link
-            href={county || state ? `/map` : "/"}
+            href={mapHref}
             style={{
               textDecoration: "underline",
               textUnderlineOffset: 3,
@@ -127,8 +132,8 @@ export default async function StoriesPage({
               maxWidth: 640,
             }}
           >
-            Places hold memory, relationship, effort, and quiet forms of care.
-            This is where the story of a place can become visible.
+            Every place holds memory, relationship, effort, and quiet forms of
+            care. This is where the story of this place becomes visible.
           </div>
         </section>
 
@@ -149,7 +154,7 @@ export default async function StoriesPage({
                 marginBottom: 14,
               }}
             >
-              Stories
+              Stories rooted here
             </div>
 
             <div style={{ display: "grid", gap: 14 }}>
@@ -218,51 +223,48 @@ export default async function StoriesPage({
             </div>
           </section>
         ) : (
-          <>
-            <section
+          <section
+            style={{
+              padding: "20px",
+              border: "1px solid rgba(0,0,0,0.10)",
+              borderRadius: 16,
+              background: "white",
+              marginBottom: 18,
+            }}
+          >
+            <div
               style={{
-                padding: "20px",
-                border: "1px solid rgba(0,0,0,0.10)",
-                borderRadius: 16,
-                background: "white",
-                marginBottom: 18,
+                fontSize: 20,
+                fontWeight: 600,
+                marginBottom: 12,
               }}
             >
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 600,
-                  marginBottom: 12,
-                }}
-              >
-                The story of {placeLabel} is still gathering here.
-              </div>
+              The story of this place is still gathering here.
+            </div>
 
-              <div
-                style={{
-                  fontSize: 15,
-                  lineHeight: 1.65,
-                  opacity: 0.82,
-                  marginBottom: 14,
-                }}
-              >
-                No local stories have been shared in this space yet. That
-                doesn&apos;t mean nothing is happening. It means the telling has
-                not begun here yet.
-              </div>
+            <div
+              style={{
+                fontSize: 15,
+                lineHeight: 1.65,
+                opacity: 0.82,
+                marginBottom: 14,
+              }}
+            >
+              No local stories have been shared yet. That doesn&apos;t mean
+              nothing is happening. It means the telling has not begun here yet.
+            </div>
 
-              <div
-                style={{
-                  fontSize: 15,
-                  lineHeight: 1.65,
-                  opacity: 0.82,
-                }}
-              >
-                What is tending life here? What is growing quietly? What belongs
-                to the story of this place?
-              </div>
-            </section>
-          </>
+            <div
+              style={{
+                fontSize: 15,
+                lineHeight: 1.65,
+                opacity: 0.82,
+              }}
+            >
+              What is tending life here? What is growing quietly? What belongs
+              to the story of this place?
+            </div>
+          </section>
         )}
 
         <section
@@ -271,6 +273,7 @@ export default async function StoriesPage({
             border: "1px solid rgba(0,0,0,0.10)",
             borderRadius: 16,
             background: "rgba(0,0,0,0.03)",
+            marginBottom: 18,
           }}
         >
           <div
@@ -291,18 +294,12 @@ export default async function StoriesPage({
               marginBottom: 12,
             }}
           >
-            A story helps make visible what lives here and what this place is
+            Stories help make visible what lives here and what this place is
             becoming.
           </div>
 
           <Link
-            href={
-              county || state
-                ? `/stories/submit?county=${encodeURIComponent(
-                    county
-                  )}&state=${encodeURIComponent(state)}`
-                : "/stories/submit"
-            }
+            href={addStoryHref}
             style={{
               textDecoration: "underline",
               textUnderlineOffset: 3,
@@ -312,6 +309,50 @@ export default async function StoriesPage({
             }}
           >
             Add a story
+          </Link>
+        </section>
+
+        <section
+          style={{
+            padding: "20px",
+            border: "1px solid rgba(0,0,0,0.10)",
+            borderRadius: 16,
+            background: "rgba(255,255,255,0.72)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              marginBottom: 8,
+            }}
+          >
+            Looking for inspiration from the wider world?
+          </div>
+
+          <div
+            style={{
+              fontSize: 14,
+              lineHeight: 1.6,
+              opacity: 0.8,
+              marginBottom: 12,
+            }}
+          >
+            Explore stories from other places where people are building
+            life-forward ways of being.
+          </div>
+
+          <Link
+            href="/constellation"
+            style={{
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              fontWeight: 600,
+              color: "inherit",
+              fontSize: 14,
+            }}
+          >
+            Explore the constellation of stories
           </Link>
         </section>
       </div>

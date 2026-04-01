@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
@@ -20,13 +20,45 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const { error } = await supabase.from("constellation").insert([body]);
+    const title = body.title?.trim();
+    const description = body.description?.trim();
+    const region = body.region?.trim();
+    const category = body.category?.trim();
+    const link = body.link?.trim();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!title || !description || !region || !category || !link) {
+      return NextResponse.json(
+        { error: "Missing required fields." },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("constellation")
+      .insert([
+        {
+          title,
+          description,
+          region,
+          category,
+          link,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, signal: data });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Something went wrong." },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ success: true });
 }

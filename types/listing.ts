@@ -9,7 +9,10 @@ export type Invitation =
 
 export type Listing = {
   id: string;
+
   name: string;
+  title?: string;
+
   category: string;
 
   description?: string;
@@ -17,14 +20,11 @@ export type Listing = {
 
   city: string;
   state: string;
-
-  // ✅ add this for the state → county flow
   county?: string;
 
   lng: number;
   lat: number;
 
-  // Meaning layer (already in your saved state)
   focus?: string;
   invitation?: Invitation;
 

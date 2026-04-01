@@ -72,7 +72,15 @@ export default function SubmitStoryPage() {
   };
 
   return (
-    <main style={{ maxWidth: 760, margin: "0 auto", padding: 20 }}>
+    <main
+  style={{
+    minHeight: "100vh",
+    background: "#d3e4f7",
+    maxWidth: 760,
+    margin: "0 auto",
+    padding: 20,
+  }}
+>
       <header style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Add a story</div>
         <div style={{ marginTop: 6, opacity: 0.78, lineHeight: 1.5 }}>
@@ -82,12 +90,11 @@ export default function SubmitStoryPage() {
           <br />
           A few paragraphs is welcome.
         </div>
-
-        <div style={{ marginTop: 12 }}>
-          <Link href={storiesViewHref}>← Back to stories</Link>
-          <span style={{ margin: "0 10px", opacity: 0.5 }}>|</span>
-          <Link href="/map">Back to map</Link>
-        </div>
+<div style={{ marginTop: 12 }}>
+  <Link href={storiesViewHref}>← Back to stories</Link>
+  <span style={{ margin: "0 10px", opacity: 0.5 }}>|</span>
+  <Link href="/map">Back to map</Link>
+</div>
       </header>
 
       <form
@@ -96,7 +103,7 @@ export default function SubmitStoryPage() {
           padding: 16,
           borderRadius: 14,
           border: "1px solid rgba(0,0,0,0.12)",
-          background: "rgba(255,255,255,0.98)",
+          background: "rgba(255,255,255,0.78)",
         }}
       >
         <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
@@ -221,20 +228,20 @@ export default function SubmitStoryPage() {
           }}
         />
 
-        <button
-          type="submit"
-          style={{
-            padding: "10px 14px",
-            borderRadius: 12,
-            border: "1px solid rgba(0,0,0,0.18)",
-            background: "white",
-            fontWeight: 800,
-            cursor: "pointer",
-          }}
-        >
-          Submit story
-        </button>
-
+<button
+  type="submit"
+  style={{
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1px solid rgba(0,0,0,0.18)",
+    backgroundColor: "rgba(255,255,255,0.85)",
+    color: "#0e3a66",
+    fontWeight: 800,
+    cursor: "pointer",
+  }}
+>
+  Submit story
+</button>
         <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65 }}>
           (MVP note: this now saves to the stories table in Supabase.)
         </div>

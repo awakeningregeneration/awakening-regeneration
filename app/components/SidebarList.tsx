@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import type { Listing } from "../../types/listing";
 
 type Props = {
   listings: Listing[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  search: string;
+  setSearch: Dispatch<SetStateAction<string>>;
+  category: string;
+  setCategory: Dispatch<SetStateAction<string>>;
 };
 
 function preview(text: string, maxChars = 110) {
@@ -15,7 +19,15 @@ function preview(text: string, maxChars = 110) {
   return t.slice(0, maxChars).trimEnd() + "…";
 }
 
-export default function SidebarList({ listings, selectedId, onSelect }: Props) {
+export default function SidebarList({
+  listings,
+  selectedId,
+  onSelect,
+  search,
+  setSearch,
+  category,
+  setCategory,
+}: Props) {
   // Keep refs to each card so we can scroll to the selected one
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -31,10 +43,48 @@ export default function SidebarList({ listings, selectedId, onSelect }: Props) {
       });
     }
   }, [selectedId]);
+return (
+  <div style={{ padding: 16, width: 360, overflowY: "auto", background: "#f8fafc" }}>
+    <div style={{ marginBottom: 16 }}>
+      <input
+        type="text"
+        placeholder="Search by name, city, state, or category"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          marginBottom: 10,
+          borderRadius: 8,
+          border: "1px solid #d1d5db",
+          fontSize: 14,
+        }}
+      />
 
-  return (
-    <div style={{ padding: 16 }}>
-      {listings.map((listing) => {
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          borderRadius: 8,
+          border: "1px solid #d1d5db",
+          fontSize: 14,
+          background: "white",
+        }}
+      >
+        <option value="All">All categories</option>
+        {[...new Set(listings.map((listing) => listing.category))]
+          .sort()
+          .map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+      </select>
+    </div>
+
+    {listings.map((listing) => {
         const isSelected = listing.id === selectedId;
 
         return (
@@ -73,7 +123,7 @@ export default function SidebarList({ listings, selectedId, onSelect }: Props) {
                   lineHeight: 1.35,
                 }}
               >
-                {preview(listing.description, 110)}
+                {preview(listing.description ?? "", 110)}
               </div>
             )}
           </div>

@@ -1,171 +1,231 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
-if (!supabaseUrl) {
-  throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-}
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-if (!supabaseServiceRoleKey) {
-  throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
-}
-
-if (!mapboxToken) {
-  throw new Error("Missing NEXT_PUBLIC_MAPBOX_TOKEN");
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-type ListingPayload = {
-  title: string;
-  description?: string;
-  website?: string;
-  categories?: string[];
-  address: string;
-  city: string;
-  state: string;
+const STATE_ABBREVIATIONS: Record<string, string> = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming",
+  DC: "District of Columbia",
 };
 
-async function geocodeAddress(address: string, city: string, state: string) {
-  const query = `${address}, ${city}, ${state}`;
+function toTitleCase(value: string) {
+  return value
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function normalizeState(value?: string) {
+  const raw = value?.trim();
+  if (!raw) return "";
+
+  const upper = raw.toUpperCase();
+  if (STATE_ABBREVIATIONS[upper]) {
+    return STATE_ABBREVIATIONS[upper];
+  }
+
+  return toTitleCase(raw);
+}
+
+function normalizeCounty(value?: string) {
+  const raw = value?.trim();
+  if (!raw) return "";
+
+  const withoutCounty = raw.replace(/\s+county$/i, "").trim();
+  if (!withoutCounty) return "";
+
+  return `${toTitleCase(withoutCounty)} County`;
+}
+
+function normalizeCity(value?: string) {
+  const raw = value?.trim();
+  if (!raw) return "";
+  return toTitleCase(raw);
+}
+
+async function geocodeLocation(params: {
+  address?: string;
+  city?: string;
+  county?: string;
+  state?: string;
+}) {
+  const parts = [
+    params.address?.trim(),
+    params.city?.trim(),
+    params.county?.trim(),
+    params.state?.trim(),
+    "USA",
+  ].filter(Boolean);
+
+  const query = parts.join(", ");
+
+  if (!query) {
+    throw new Error("No location information provided for geocoding.");
+  }
 
   const url =
-    `https://api.mapbox.com/search/geocode/v6/forward` +
-    `?q=${encodeURIComponent(query)}` +
-    `&access_token=${encodeURIComponent(mapboxToken)}` +
-    `&limit=1` +
-    `&country=US` +
-    `&autocomplete=false` +
-    `&permanent=true`;
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/` +
+    `${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=1`;
 
-  const res = await fetch(url, {
-    method: "GET",
-    cache: "no-store",
-  });
+  const response = await fetch(url);
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Mapbox geocoding failed: ${res.status} ${text}`);
+  if (!response.ok) {
+    throw new Error("Failed to geocode location.");
   }
 
-  const data = await res.json();
+  const data = await response.json();
+
   const feature = data?.features?.[0];
+  const center = feature?.center;
 
-  if (!feature) {
-    throw new Error("Address could not be geocoded.");
+  if (!center || center.length < 2) {
+    throw new Error("Could not determine map coordinates for that location.");
   }
 
-  const coords = feature?.geometry?.coordinates;
+  const [lng, lat] = center;
 
-  if (!Array.isArray(coords) || coords.length < 2) {
-    throw new Error("No valid coordinates returned from Mapbox.");
-  }
-
-  const lng = coords[0];
-  const lat = coords[1];
-
-  const context = feature?.properties?.context ?? {};
-
-  const normalizedState = context.region?.name || state || null;
-  const county = context.district?.name || null;
-  const normalizedCity =
-    context.place?.name ||
-    context.locality?.name ||
-    city ||
-    null;
-
-  return {
-    lat,
-    lng,
-    state: normalizedState,
-    county,
-    city: normalizedCity,
-  };
+  return { lng, lat };
 }
 
+// GET listings (only active ones)
 export async function GET() {
-  try {
-    const { data, error } = await supabase
-      .from("listings")
-      .select("*")
-      .eq("status", "active")
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("status", "active");
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown server error";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  if (error) {
+    console.error("GET listings error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  return NextResponse.json(data);
 }
 
-export async function POST(request: Request) {
+// POST new listing
+export async function POST(req: Request) {
   try {
-    const body: ListingPayload = await request.json();
+    const body = await req.json();
 
     const {
       title,
       description,
       website,
-      categories,
       address,
       city,
       state,
+      county,
+      categories,
     } = body;
 
-    if (!title?.trim()) {
-      return NextResponse.json({ error: "Title is required." }, { status: 400 });
-    }
+    const normalizedCity = normalizeCity(city);
+    const normalizedState = normalizeState(state);
+    const normalizedCounty = normalizeCounty(county);
 
-    if (!address?.trim() || !city?.trim() || !state?.trim()) {
-      return NextResponse.json(
-        { error: "Address, city, and state are required." },
-        { status: 400 }
-      );
-    }
+    const category =
+      Array.isArray(categories) && categories.length > 0
+        ? categories.join(", ")
+        : "";
 
-    const geo = await geocodeAddress(address, city, state);
-
-    const row = {
-      title: title.trim(),
-      description: description?.trim() || null,
-      website: website?.trim() || null,
-      category:
-        Array.isArray(categories) && categories.length > 0
-          ? categories.join(", ")
-          : null,
-      address: address.trim(),
-      city: geo.city,
-      state: geo.state,
-      county: geo.county,
-      lat: geo.lat,
-      lng: geo.lng,
-      status: "active",
-    };
+    const { lng, lat } = await geocodeLocation({
+      address,
+      city: normalizedCity,
+      county: normalizedCounty,
+      state: normalizedState,
+    });
 
     const { data, error } = await supabase
       .from("listings")
-      .insert([row])
+      .insert([
+        {
+          title: title?.trim() || "",
+          description: description?.trim() || "",
+          website: website?.trim() || null,
+          address: address?.trim() || null,
+          city: normalizedCity || null,
+          state: normalizedState || null,
+          county: normalizedCounty || null,
+          category,
+          lng,
+          lat,
+          status: "active",
+        },
+      ])
       .select()
       .single();
 
     if (error) {
+      console.error("POST listing error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown server error";
+    console.error("POST listings error:", error);
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create listing",
+      },
+      { status: 500 }
+    );
   }
 }

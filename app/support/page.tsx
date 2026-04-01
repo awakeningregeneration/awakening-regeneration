@@ -1,57 +1,153 @@
 import { supportResources } from "@/data/supportResources";
+import Link from "next/link";
 
 export default function SupportPage() {
   return (
-    <main className="min-h-screen bg-[#04142b] text-white">
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="max-w-3xl">
-          <p className="text-sm uppercase tracking-[0.18em] text-white/60">
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#d3e4f7",
+        color: "#1f2a3a",
+      }}
+    >
+      <section
+        style={{
+          maxWidth: "1152px",
+          margin: "0 auto",
+          padding: "64px 24px",
+        }}
+      >
+        <div style={{ maxWidth: "760px" }}>
+          <p
+            style={{
+              fontSize: "12px",
+              textTransform: "uppercase",
+              letterSpacing: "0.18em",
+              color: "#6b7c94",
+              margin: 0,
+            }}
+          >
             Support Life Anywhere
           </p>
 
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight">
+          <h1
+            style={{
+              marginTop: "12px",
+              fontSize: "2.5rem",
+              fontWeight: 600,
+              lineHeight: 1.1,
+              letterSpacing: "-0.02em",
+              color: "#1f2a3a",
+            }}
+          >
             When you can’t find it nearby, here are aligned options.
           </h1>
 
-          <p className="mt-5 text-lg leading-8 text-white/75">
+          <p
+            style={{
+              marginTop: "20px",
+              fontSize: "1.125rem",
+              lineHeight: 1.8,
+              color: "#4a5a70",
+            }}
+          >
             Sometimes the local light is not visible yet. This page exists to
             help you find more harmonious, life-supporting options online while
             the wider constellation continues to grow.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div
+          style={{
+            marginTop: "48px",
+            display: "grid",
+            gap: "24px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          }}
+        >
           {supportResources.map((item) => {
             const href = item.affiliateUrl || item.websiteUrl;
 
             return (
               <article
                 key={item.id}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
+                style={{
+                  borderRadius: "16px",
+                  border: "1px solid rgba(0,0,0,0.10)",
+                  background: "rgba(255,255,255,0.78)",
+                  padding: "24px",
+                }}
               >
-                <p className="text-xs uppercase tracking-[0.16em] text-white/50">
+                <p
+                  style={{
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: "#6b7c94",
+                    margin: 0,
+                  }}
+                >
                   {item.category}
                 </p>
 
-                <h2 className="mt-2 text-xl font-medium">{item.title}</h2>
+                <h2
+                  style={{
+                    marginTop: "8px",
+                    fontSize: "1.25rem",
+                    fontWeight: 600,
+                    color: "#1f2a3a",
+                  }}
+                >
+                  {item.title}
+                </h2>
 
-                <p className="mt-3 text-sm leading-7 text-white/75">
+                <p
+                  style={{
+                    marginTop: "12px",
+                    fontSize: "14px",
+                    lineHeight: 1.8,
+                    color: "#4a5a70",
+                  }}
+                >
                   {item.description}
                 </p>
 
                 {item.whyItMatters && (
-                  <p className="mt-4 text-sm leading-7 text-white/60">
-                    <span className="text-white/80">Why this is here:</span>{" "}
+                  <p
+                    style={{
+                      marginTop: "16px",
+                      fontSize: "14px",
+                      lineHeight: 1.8,
+                      color: "#5b6b82",
+                    }}
+                  >
+                    <span style={{ color: "#1f2a3a", fontWeight: 600 }}>
+                      Why this is here:
+                    </span>{" "}
                     {item.whyItMatters}
                   </p>
                 )}
 
                 {item.tags?.length ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
+                  <div
+                    style={{
+                      marginTop: "16px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                    }}
+                  >
+                  {item.tags.map((tag: string) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/65"
+                        style={{
+                          borderRadius: "999px",
+                          border: "1px solid rgba(0,0,0,0.10)",
+                          padding: "4px 12px",
+                          fontSize: "12px",
+                          color: "#5b6b82",
+                          background: "rgba(255,255,255,0.55)",
+                        }}
                       >
                         {tag}
                       </span>
@@ -63,13 +159,60 @@ export default function SupportPage() {
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-6 inline-flex rounded-full border border-white/15 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+                  style={{
+                    marginTop: "24px",
+                    display: "inline-flex",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(0,0,0,0.18)",
+                    padding: "10px 16px",
+                    fontSize: "14px",
+                    color: "#0e3a66",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                    fontWeight: 600,
+                    background: "rgba(255,255,255,0.85)",
+                  }}
                 >
                   Visit resource
                 </a>
               </article>
             );
           })}
+        </div>
+
+        <div
+          style={{
+            marginTop: "50px",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              marginBottom: "10px",
+              color: "#4a5a70",
+            }}
+          >
+            Know an aligned business or resource others should be able to find?
+          </p>
+
+          <Link href="/affiliates/submit">
+            <span
+              style={{
+                display: "inline-block",
+                padding: "10px 18px",
+                borderRadius: "999px",
+                border: "1px solid rgba(0,0,0,0.18)",
+                background: "rgba(255,255,255,0.85)",
+                color: "#0e3a66",
+                cursor: "pointer",
+                fontWeight: 600,
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Submit your aligned affiliate business
+            </span>
+          </Link>
         </div>
       </section>
     </main>
