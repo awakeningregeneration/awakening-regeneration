@@ -1,4 +1,4 @@
-import type { Story } from "@/types/story";
+import type { Story } from "../app/types/stories";
 
 export const mockStories: Story[] = [
   {

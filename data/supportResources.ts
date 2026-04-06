@@ -1,4 +1,4 @@
-import { SupportResource } from "@/types/supportResource";
+import type { SupportResource } from "../app/types/supportResource";
 
 export const supportResources: SupportResource[] = [
   {

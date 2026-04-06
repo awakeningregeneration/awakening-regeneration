@@ -29,11 +29,11 @@ export default function SupportPage() {
 
       const matchesSearch =
         !q ||
-        resource.name.toLowerCase().includes(q) ||
+        resource.title.toLowerCase().includes(q) ||
         resource.description.toLowerCase().includes(q) ||
         resource.category.toLowerCase().includes(q) ||
-        (resource.whyItsHere || "").toLowerCase().includes(q) ||
-        (resource.tags || []).some((tag) => tag.toLowerCase().includes(q));
+        (resource.whyItMatters || "").toLowerCase().includes(q) ||
+        (resource.tags || []).some((tag: string) => tag.toLowerCase().includes(q));
 
       return matchesCategory && matchesSearch;
     });
@@ -98,7 +98,7 @@ export default function SupportPage() {
         >
           <input
             type="text"
-            placeholder="Search by name, description, tags, or category"
+            placeholder="Search by title, description, tags, or category"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -196,7 +196,7 @@ export default function SupportPage() {
                     fontWeight: 700,
                   }}
                 >
-                  {resource.name}
+                  {resource.title}
                 </h2>
 
                 <p
@@ -211,7 +211,7 @@ export default function SupportPage() {
                   {resource.description}
                 </p>
 
-                {resource.whyItsHere && (
+                {resource.whyItMatters && (
                   <p
                     style={{
                       fontSize: "0.98rem",
@@ -221,8 +221,8 @@ export default function SupportPage() {
                       marginBottom: "16px",
                     }}
                   >
-                    <strong style={{ color: "#1f2a3a" }}>Why this is here:</strong>{" "}
-                    {resource.whyItsHere}
+                    <strong style={{ color: "#1f2a3a" }}>Why this matters:</strong>{" "}
+                    {resource.whyItMatters}
                   </p>
                 )}
 
@@ -235,7 +235,7 @@ export default function SupportPage() {
                       marginBottom: "20px",
                     }}
                   >
-                    {resource.tags.map((tag) => (
+                    {resource.tags.map((tag: string) => (
                       <span
                         key={tag}
                         style={{
@@ -254,7 +254,7 @@ export default function SupportPage() {
                 ) : null}
 
                 <a
-                  href={resource.url}
+                  href={resource.affiliateUrl || resource.websiteUrl || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -267,6 +267,9 @@ export default function SupportPage() {
                     textDecoration: "underline",
                     textUnderlineOffset: 3,
                     background: "rgba(255,255,255,0.6)",
+                    pointerEvents:
+                      resource.affiliateUrl || resource.websiteUrl ? "auto" : "none",
+                    opacity: resource.affiliateUrl || resource.websiteUrl ? 1 : 0.6,
                   }}
                 >
                   Visit resource

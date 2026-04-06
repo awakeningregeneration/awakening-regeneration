@@ -1,45 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import MapClient from "../components/MapClient";
-
-type ListingStatus = "community_submitted" | "pending_review";
+import { useState } from "react";
 
 export type Listing = {
   id: string;
   name: string;
   category: string;
   description: string;
-  website?: string;
-  city?: string;
-  state?: string;
+  website: string;
+  city: string;
+  state: string;
   lat: number;
   lng: number;
-  status: ListingStatus;
+  status: "active" | "hidden";
   createdAt: string;
 };
 
-const starterListings: Listing[] = [
-  {
-    id: "seed-1",
-    name: "Example Regenerative Project",
-    category: "Farm",
-    description: "Starter listing to prove the pipeline. Replace with real ones.",
-    website: "https://example.com",
-    city: "Ashland",
-    state: "OR",
-    lat: 42.1946,
-    lng: -122.7095,
-    status: "community_submitted",
-    createdAt: new Date().toISOString(),
-  },
-];
-
 export default function MapPage() {
-  const [listings, setListings] = useState<Listing[]>(starterListings);
+  const [listings, setListings] = useState<Listing[]>([]);
 
-  // Mode A now; Mode B later:
-  const DEFAULT_STATUS: ListingStatus = "community_submitted";
+  const DEFAULT_STATUS: "active" | "hidden" = "active";
 
   function addListing(newListing: Omit<Listing, "id" | "createdAt">) {
     setListings((prev) => [
@@ -52,27 +32,45 @@ export default function MapPage() {
     ]);
   }
 
-  const mapCenter = useMemo(() => {
-    // Center on first listing if we have one
-    const first = listings[0];
-    return first ? ([first.lng, first.lat] as [number, number]) : ([-122.7095, 42.1946] as [number, number]);
-  }, [listings]);
-
   return (
     <main style={{ padding: 24 }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
-        Regenerative Map (MVP)
+        Participate
       </h1>
+
       <p style={{ marginBottom: 16, maxWidth: 860 }}>
-        Submit a project and it will appear immediately as <b>Community submitted</b>.
-        (We’ll add “Pending review” mode later as traction grows.)
+        Submit a project and it will appear in the review pipeline.
       </p>
 
-      <SubmitProjectForm onSubmit={(values) => addListing({ ...values, status: DEFAULT_STATUS })} />
+      <SubmitProjectForm
+        onSubmit={(values) => addListing({ ...values, status: DEFAULT_STATUS })}
+      />
 
       <div style={{ height: 16 }} />
 
-      <MapClient />
+      {listings.length > 0 && (
+        <section
+          style={{
+            border: "1px solid rgba(0,0,0,0.12)",
+            borderRadius: 12,
+            padding: 16,
+            maxWidth: 860,
+          }}
+        >
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>
+            Submitted in this session
+          </h2>
+
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {listings.map((listing) => (
+              <li key={listing.id} style={{ marginBottom: 10 }}>
+                <b>{listing.name}</b> — {listing.category}
+                <div style={{ fontSize: 14, opacity: 0.8 }}>{listing.description}</div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </main>
   );
 }
@@ -103,7 +101,13 @@ function SubmitProjectForm({
   }
 
   return (
-    <section style={{ border: "1px solid rgba(0,0,0,0.12)", borderRadius: 12, padding: 16 }}>
+    <section
+      style={{
+        border: "1px solid rgba(0,0,0,0.12)",
+        borderRadius: 12,
+        padding: 16,
+      }}
+    >
       <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>
         Submit a Project
       </h2>
@@ -119,6 +123,7 @@ function SubmitProjectForm({
             alert("Please add a name and short description.");
             return;
           }
+
           if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
             alert("Please enter valid latitude and longitude numbers.");
             return;
@@ -128,12 +133,12 @@ function SubmitProjectForm({
             name: name.trim(),
             category,
             description: description.trim(),
-            website: website.trim() || undefined,
-            city: city.trim() || undefined,
-            state: state.trim() || undefined,
+            website: website.trim(),
+            city: city.trim(),
+            state: state.trim(),
             lat: latNum,
             lng: lngNum,
-            status: "community_submitted", // will be overwritten by caller if needed
+            status: "active",
           });
 
           reset();
@@ -142,12 +147,20 @@ function SubmitProjectForm({
       >
         <label>
           <div style={{ fontSize: 13, marginBottom: 4 }}>Name *</div>
-          <input value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
+          />
         </label>
 
         <label>
           <div style={{ fontSize: 13, marginBottom: 4 }}>Category</div>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle}>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={inputStyle}
+          >
             <option>Farm</option>
             <option>Nonprofit</option>
             <option>School</option>
@@ -161,38 +174,68 @@ function SubmitProjectForm({
 
         <label>
           <div style={{ fontSize: 13, marginBottom: 4 }}>Description *</div>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={inputStyle} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            style={inputStyle}
+          />
         </label>
 
         <label>
           <div style={{ fontSize: 13, marginBottom: 4 }}>Website (optional)</div>
-          <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://…" style={inputStyle} />
+          <input
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://…"
+            style={inputStyle}
+          />
         </label>
 
         <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr 1fr" }}>
           <label>
             <div style={{ fontSize: 13, marginBottom: 4 }}>City (optional)</div>
-            <input value={city} onChange={(e) => setCity(e.target.value)} style={inputStyle} />
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              style={inputStyle}
+            />
           </label>
+
           <label>
             <div style={{ fontSize: 13, marginBottom: 4 }}>State (optional)</div>
-            <input value={state} onChange={(e) => setState(e.target.value)} style={inputStyle} />
+            <input
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              style={inputStyle}
+            />
           </label>
         </div>
 
         <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr 1fr" }}>
           <label>
             <div style={{ fontSize: 13, marginBottom: 4 }}>Latitude *</div>
-            <input value={lat} onChange={(e) => setLat(e.target.value)} placeholder="42.1946" style={inputStyle} />
+            <input
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="42.1946"
+              style={inputStyle}
+            />
           </label>
+
           <label>
             <div style={{ fontSize: 13, marginBottom: 4 }}>Longitude *</div>
-            <input value={lng} onChange={(e) => setLng(e.target.value)} placeholder="-122.7095" style={inputStyle} />
+            <input
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              placeholder="-122.7095"
+              style={inputStyle}
+            />
           </label>
         </div>
 
         <button type="submit" style={buttonStyle}>
-          Add to Map (Community submitted)
+          Add to Map
         </button>
       </form>
     </section>
