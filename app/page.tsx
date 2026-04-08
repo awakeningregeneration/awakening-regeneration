@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ThresholdMap from "@/app/components/ThresholdMap";
+import Link from "next/link";
 
 const STATES = [
   "Alabama",
@@ -266,6 +267,14 @@ What we give our attention to grows.
   >
     About this project
   </a>
+</div>
+<div className="mt-6 flex justify-center">
+  <Link
+    href="/founders"
+    className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+  >
+    Become a Founder
+  </Link>
 </div>
         </div>
       </div>
