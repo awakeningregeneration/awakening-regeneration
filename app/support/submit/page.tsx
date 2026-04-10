@@ -3,6 +3,43 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const PRIMARY_CATEGORY_OPTIONS = [
+  "Food & Nourishment",
+  "Home & Shelter",
+  "Health & Wellbeing",
+  "Energy & Infrastructure",
+  "Land & Ecology",
+  "Materials & Goods",
+  "Learning & Education",
+  "Travel & Movement",
+  "Community & Culture",
+  "Communication & Conflict Transformation",
+  "Finance & Systems",
+];
+
+const PRACTICE_OPTIONS = [
+  "Organic",
+  "Regenerative",
+  "Permaculture",
+  "Fair Trade",
+  "Biodegradable",
+  "Compostable",
+  "Recycled Materials",
+  "Upcycled Materials",
+  "Low Waste",
+  "Zero Waste",
+  "Local",
+  "Worker-Owned / Cooperative",
+  "Community Owned",
+  "Renewable Energy",
+  "Educational",
+  "Accessible / Sliding Scale",
+  "Volunteer Run",
+  "Nonprofit / Mission Driven",
+  "Indigenous Led",
+  "Women Led",
+];
+
 export default function SubmitSupportPage() {
   const router = useRouter();
 
@@ -10,7 +47,16 @@ export default function SubmitSupportPage() {
   const [category, setCategory] = useState("");
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [practices, setPractices] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  function togglePractice(practice: string) {
+    setPractices((current) =>
+      current.includes(practice)
+        ? current.filter((item) => item !== practice)
+        : [...current, practice]
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,6 +73,7 @@ export default function SubmitSupportPage() {
           category,
           url,
           description,
+          practices,
         }),
       });
 
@@ -101,20 +148,53 @@ export default function SubmitSupportPage() {
             }}
           />
 
-          <input
-            placeholder="Category (water, home, garden, materials, etc.)"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              borderRadius: 12,
-              border: "1px solid rgba(31,42,58,0.14)",
-              fontSize: "0.98rem",
-              background: "white",
-            }}
-          />
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 8,
+                fontSize: "0.92rem",
+                fontWeight: 600,
+                color: "#1f2a3a",
+              }}
+            >
+              Primary Category
+            </label>
+
+            <p
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                color: "#5b6b80",
+                lineHeight: 1.5,
+                fontSize: "0.92rem",
+              }}
+            >
+              Choose the main area of life this resource belongs to.
+            </p>
+
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "14px 16px",
+                borderRadius: 12,
+                border: "1px solid rgba(31,42,58,0.14)",
+                fontSize: "0.98rem",
+                background: "white",
+                color: "#1f2a3a",
+              }}
+            >
+              <option value="">Select a category</option>
+              {PRIMARY_CATEGORY_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <input
             placeholder="Website link"
@@ -146,6 +226,65 @@ export default function SubmitSupportPage() {
               resize: "vertical",
             }}
           />
+
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 8,
+                fontSize: "0.92rem",
+                fontWeight: 600,
+                color: "#1f2a3a",
+              }}
+            >
+              Practices / Values
+            </label>
+
+            <p
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                color: "#5b6b80",
+                lineHeight: 1.5,
+                fontSize: "0.92rem",
+                fontStyle: "italic",
+              }}
+            >
+              Mark all that apply.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+              }}
+            >
+              {PRACTICE_OPTIONS.map((practice) => {
+                const isSelected = practices.includes(practice);
+
+                return (
+                  <button
+                    key={practice}
+                    type="button"
+                    onClick={() => togglePractice(practice)}
+                    style={{
+                      borderRadius: 999,
+                      border: "1px solid rgba(31,42,58,0.14)",
+                      padding: "10px 14px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      background: isSelected ? "#0e3a66" : "rgba(255,255,255,0.75)",
+                      color: isSelected ? "white" : "#4a5a70",
+                    }}
+                  >
+                    {practice}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <button
             type="submit"

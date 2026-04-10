@@ -64,9 +64,9 @@ export default async function StoriesPage({
 
   return (
     <main
-  style={{
-    minHeight: "100vh",
-    background: "#d3e4f7",
+      style={{
+        minHeight: "100vh",
+        background: "#d3e4f7",
         color: "#1f1f1c",
         padding: "32px 20px 48px",
       }}
@@ -77,6 +77,7 @@ export default async function StoriesPage({
           margin: "0 auto",
         }}
       >
+        {/* Back */}
         <div style={{ marginBottom: 18 }}>
           <Link
             href={mapHref}
@@ -91,6 +92,7 @@ export default async function StoriesPage({
           </Link>
         </div>
 
+        {/* Header + Rose/Thorn */}
         <section
           style={{
             padding: "20px 20px 18px",
@@ -118,7 +120,7 @@ export default async function StoriesPage({
               lineHeight: 1.15,
               fontWeight: 600,
               margin: 0,
-              marginBottom: 10,
+              marginBottom: 12,
             }}
           >
             {placeLabel}
@@ -127,16 +129,33 @@ export default async function StoriesPage({
           <div
             style={{
               fontSize: 16,
-              lineHeight: 1.5,
-              opacity: 0.82,
+              lineHeight: 1.6,
+              opacity: 0.85,
               maxWidth: 640,
             }}
           >
-            Every place holds memory, relationship, effort, and quiet forms of
-            care. This is where the story of this place becomes visible.
+           
+
+            <p style={{ marginBottom: 10 }}>
+              The world has become practiced in reporting the thorn — what is
+              broken, extractive, alarming, and in need of repair.
+            </p>
+
+            <p style={{ marginBottom: 10 }}>
+              The thorn is real, and what needs healing cannot be denied.
+            </p>
+
+            <p style={{ marginBottom: 10 }}>The rose is real too.</p>
+
+            <p>
+              The rose is what is already healing, already working, already
+              beautiful, and already helping life take root. The rose is the
+              beauty that calms and belongs you.
+            </p>
           </div>
         </section>
 
+        {/* STORIES LIST */}
         {hasStories ? (
           <section
             style={{
@@ -154,7 +173,7 @@ export default async function StoriesPage({
                 marginBottom: 14,
               }}
             >
-              Stories rooted here
+              Roses rooted here
             </div>
 
             <div style={{ display: "grid", gap: 14 }}>
@@ -168,7 +187,7 @@ export default async function StoriesPage({
                     background: "rgba(0,0,0,0.02)",
                   }}
                 >
-                  {story.title ? (
+                  {story.title && (
                     <div
                       style={{
                         fontSize: 18,
@@ -178,7 +197,7 @@ export default async function StoriesPage({
                     >
                       {story.title}
                     </div>
-                  ) : null}
+                  )}
 
                   <div
                     style={{
@@ -201,7 +220,7 @@ export default async function StoriesPage({
                     {story.county}, {story.state}
                   </div>
 
-                  {story.link ? (
+                  {story.link && (
                     <div style={{ marginTop: 8 }}>
                       <a
                         href={story.link}
@@ -217,7 +236,7 @@ export default async function StoriesPage({
                         Visit link
                       </a>
                     </div>
-                  ) : null}
+                  )}
                 </article>
               ))}
             </div>
@@ -239,7 +258,7 @@ export default async function StoriesPage({
                 marginBottom: 12,
               }}
             >
-              The story of this place is still gathering here.
+              No roses have been shared here yet.
             </div>
 
             <div
@@ -250,8 +269,8 @@ export default async function StoriesPage({
                 marginBottom: 14,
               }}
             >
-              No local stories have been shared yet. That doesn&apos;t mean
-              nothing is happening. It means the telling has not begun here yet.
+              No roses have been named here yet. That doesn’t mean nothing is
+              happening — it means the seeing and sharing has not begun here yet.
             </div>
 
             <div
@@ -261,12 +280,13 @@ export default async function StoriesPage({
                 opacity: 0.82,
               }}
             >
-              What is tending life here? What is growing quietly? What belongs
-              to the story of this place?
+              What is growing here? What is helping life take root? What rose
+              belongs to this place?
             </div>
           </section>
         )}
 
+        {/* CTA */}
         <section
           style={{
             padding: "20px",
@@ -283,7 +303,7 @@ export default async function StoriesPage({
               marginBottom: 8,
             }}
           >
-            Add to the story layer
+            Share a rose from this place
           </div>
 
           <div
@@ -294,8 +314,8 @@ export default async function StoriesPage({
               marginBottom: 12,
             }}
           >
-            Stories help make visible what lives here and what this place is
-            becoming.
+            Stories help make visible what is healing, growing, and becoming
+            possible here.
           </div>
 
           <Link
@@ -308,10 +328,11 @@ export default async function StoriesPage({
               fontSize: 14,
             }}
           >
-            Add a story
+            Share a rose
           </Link>
         </section>
 
+        {/* Constellation */}
         <section
           style={{
             padding: "20px",
@@ -338,8 +359,8 @@ export default async function StoriesPage({
               marginBottom: 12,
             }}
           >
-            Explore stories from other places where people are building
-            life-forward ways of being.
+            Explore roses from other places where people are helping life take
+            root in different ways.
           </div>
 
           <Link

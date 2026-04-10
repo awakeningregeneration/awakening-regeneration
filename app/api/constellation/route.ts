@@ -29,6 +29,14 @@ export async function POST(req: Request) {
     const category = body.category?.trim();
     const link = body.link?.trim();
 
+    const practices = Array.isArray(body.practices)
+      ? body.practices
+          .map((item: unknown) =>
+            typeof item === "string" ? item.trim() : ""
+          )
+          .filter(Boolean)
+      : [];
+
     if (!title || !description || !region || !category || !link) {
       return NextResponse.json(
         { error: "Missing required fields." },
@@ -44,6 +52,7 @@ export async function POST(req: Request) {
           description,
           region,
           category,
+          practices,
           link,
         },
       ])

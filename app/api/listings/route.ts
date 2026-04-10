@@ -134,7 +134,7 @@ async function geocodeLocation(params: {
   const center = feature?.center;
 
   if (!center || center.length < 2) {
-    throw new Error("Could not determine map coordinates for that location.");
+    throw new Error("Could not determine map coordinates.");
   }
 
   const [lng, lat] = center;
@@ -142,7 +142,7 @@ async function geocodeLocation(params: {
   return { lng, lat };
 }
 
-// GET listings (only active ones)
+// GET
 export async function GET() {
   const { data, error } = await supabase
     .from("listings")
@@ -150,14 +150,13 @@ export async function GET() {
     .eq("status", "active");
 
   if (error) {
-    console.error("GET listings error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   return NextResponse.json(data);
 }
 
-// POST new listing
+// POST
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -171,6 +170,7 @@ export async function POST(req: Request) {
       state,
       county,
       categories,
+      practices,
     } = body;
 
     const normalizedCity = normalizeCity(city);
@@ -179,8 +179,16 @@ export async function POST(req: Request) {
 
     const category =
       Array.isArray(categories) && categories.length > 0
-        ? categories.join(", ")
+        ? categories[0]
         : "";
+
+    const cleanPractices = Array.isArray(practices)
+      ? practices
+          .map((p: unknown) =>
+            typeof p === "string" ? p.trim() : ""
+          )
+          .filter(Boolean)
+      : [];
 
     const { lng, lat } = await geocodeLocation({
       address,
@@ -201,6 +209,7 @@ export async function POST(req: Request) {
           state: normalizedState || null,
           county: normalizedCounty || null,
           category,
+          practices: cleanPractices,
           lng,
           lat,
           status: "active",
@@ -210,14 +219,11 @@ export async function POST(req: Request) {
       .single();
 
     if (error) {
-      console.error("POST listing error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("POST listings error:", error);
-
     return NextResponse.json(
       {
         error:

@@ -56,22 +56,34 @@ export default function AboutPage() {
       </div>
 
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl text-center">
           <p className="mb-3 text-sm uppercase tracking-[0.22em] text-[#9fb8d8]">
-            Awakening Regeneration
+            Canary Commons
           </p>
 
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            About this map
+            About this project
           </h1>
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#d3e3f7]">
+          <p className="mt-5 text-lg leading-8 text-[#d3e3f7]">
             A living orientation to what this platform is, why it exists, and
             what kinds of lights belong here.
           </p>
-          </div>
 
-         
+          <div className="mt-8 space-y-4 text-[17px] leading-8 text-[#d3e3f7]">
+            <p>Life moves through a few simple needs:</p>
+
+            <p className="font-medium text-[#f4f8ff]">
+              air, water, soil, energy, and relationship.
+            </p>
+
+            <p>
+              Canary Commons helps make visible what is already moving in those
+              directions — in many different forms, across many different
+              places.
+            </p>
+          </div>
+        </div>
 
         <div className="mx-auto mt-12 grid max-w-4xl gap-6">
           <section className="rounded-3xl border border-white/10 bg-white/8 p-6 backdrop-blur-sm sm:p-8">
@@ -81,8 +93,8 @@ export default function AboutPage() {
 
             <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
               <p>
-                Awakening Regeneration is a map of what is already
-                life-supporting.
+                Canary Commons is a living platform that helps make visible what
+                is already life-supporting.
               </p>
 
               <p>
@@ -93,8 +105,8 @@ export default function AboutPage() {
 
               <p>
                 Most maps show us where to extract, consume, or pass through.
-                This map is different. This map helps us see where we can
-                participate, support, learn, build, and belong.
+                This is different. It helps us see where we can participate,
+                support, learn, build, and belong.
               </p>
             </div>
           </section>
@@ -105,9 +117,7 @@ export default function AboutPage() {
             </h2>
 
             <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>
-                This is not a map of perfection. It is a map of direction.
-              </p>
+              <p>This is not a map of perfection. It is a map of direction.</p>
 
               <p>
                 We are not here to decide who is doing everything “right.” We
@@ -121,7 +131,7 @@ export default function AboutPage() {
               </p>
 
               <p>
-                Every listing on this map is a point of light — something that
+                Every listing in this field is a point of light — something that
                 is contributing, in its own way, to a more life-supporting
                 future. Individually, these places may seem small. Together,
                 they form a constellation.
@@ -136,7 +146,7 @@ export default function AboutPage() {
 
             <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
               <p>
-                This map can hold farms, food projects, repair shops, tool
+                This project can hold farms, food projects, repair shops, tool
                 libraries, community spaces, education projects, land
                 restoration efforts, healing practices, mutual aid networks,
                 local businesses, arts spaces, housing projects, regenerative
@@ -150,8 +160,12 @@ export default function AboutPage() {
               </p>
 
               <p>
-                If you are unsure whether something belongs, ask:
+                These expressions often support the basic conditions of life —
+                breathable air, drinkable water, living soil, clean energy, and
+                relationships rooted in care and reciprocity.
               </p>
+
+              <p>If you are unsure whether something belongs, ask:</p>
 
               <p className="rounded-2xl border border-white/10 bg-black/15 px-5 py-4 font-medium text-[#f4f8ff]">
                 Does this help people, land, community, or future generations
@@ -168,7 +182,7 @@ export default function AboutPage() {
             </h2>
 
             <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>You can use this map to:</p>
+              <p>You can use this project to:</p>
 
               <ul className="space-y-3 pl-6 text-[#d3e3f7]">
                 <li className="list-disc">Find places near you</li>
@@ -176,19 +190,20 @@ export default function AboutPage() {
                 <li className="list-disc">Read stories of place</li>
                 <li className="list-disc">Add something that should be visible</li>
                 <li className="list-disc">Support projects and businesses</li>
-                <li className="list-disc">Help build the map over time</li>
+                <li className="list-disc">Help build the field over time</li>
               </ul>
 
               <p>
-                This map grows through participation. It becomes more useful,
-                more true, and more alive as people help reveal what is already
-                here.
+                This project grows through participation. It becomes more
+                useful, more true, and more alive as people help reveal what is
+                already here.
               </p>
+
               <div className="mt-8 pt-6 text-center">
-  <p className="text-xl font-semibold tracking-wide text-[#f3d36a] sm:text-2xl">
-    A Billion Points of Light Connected, We Dawn Brighter.
-  </p>
-</div>
+                <p className="text-xl font-semibold tracking-wide text-[#f3d36a] sm:text-2xl">
+                  All lights connected, we dawn brighter.
+                </p>
+              </div>
             </div>
           </section>
         </div>

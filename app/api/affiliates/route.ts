@@ -28,14 +28,35 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const name = body.name?.trim();
+    const description = body.description?.trim();
+    const url = body.url?.trim();
+    const category = body.category?.trim();
+
+    const practices = Array.isArray(body.practices)
+      ? body.practices
+          .map((item: unknown) =>
+            typeof item === "string" ? item.trim() : ""
+          )
+          .filter(Boolean)
+      : [];
+
+    if (!name || !description || !url || !category) {
+      return NextResponse.json(
+        { error: "Missing required fields." },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("affiliate_resources")
       .insert([
         {
-          name: body.name,
-          description: body.description,
-          url: body.url,
-          category: body.category,
+          name,
+          description,
+          url,
+          category,
+          practices,
           status: "pending",
         },
       ])
@@ -45,7 +66,7 @@ export async function POST(req: Request) {
     if (error) {
       console.error("Affiliate insert error:", error);
       return NextResponse.json(
-        { error: "Failed to add affiliate link." },
+        { error: error.message || "Failed to add affiliate link." },
         { status: 500 }
       );
     }

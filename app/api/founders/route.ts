@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -50,7 +53,32 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ founder: data }, { status: 201 });
+    try {
+      await resend.emails.send({
+        from: "Canary Commons <onboarding@resend.dev>",
+        to: email,
+        subject: "You’re in — welcome to the Foundation",
+        html: `
+          <h2>Welcome to Canary Commons</h2>
+          <p>Thank you for stepping into the Foundation.</p>
+          <p>We’ve received your founder submission and will be in touch with next steps soon.</p>
+          <p>You are helping turn on the first lights.</p>
+          <br />
+          <p>— Canary Commons</p>
+        `,
+      });
+       } catch (emailError) {
+      console.error("Resend email error:", emailError);
+      return NextResponse.json(
+        { error: "Founder saved, but email failed to send." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Founder interest received. Thank you.", founder: data },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(

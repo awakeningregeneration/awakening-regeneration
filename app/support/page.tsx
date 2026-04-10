@@ -1,43 +1,76 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Link from "next/link";
-import { supportResources } from "@/data/supportResources";
+import { createClient } from "@supabase/supabase-js";
 
-export default function SupportPage() {
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+type SupportResource = {
+  id: string | number;
+  name: string;
+  description: string | null;
+  url: string | null;
+  category: string | null;
+  practices: string[] | null;
+  status?: string | null;
+  created_at?: string | null;
+};
 
-  const categories = useMemo(() => {
-    const unique = Array.from(
-      new Set(
-        supportResources
-          .map((resource) => (resource.category || "").trim())
-          .filter(Boolean)
-      )
-    ).sort();
+const PRIMARY_CATEGORY_OPTIONS = [
+  "Food & Nourishment",
+  "Home & Shelter",
+  "Health & Wellbeing",
+  "Energy & Infrastructure",
+  "Land & Ecology",
+  "Materials & Goods",
+  "Learning & Education",
+  "Travel & Movement",
+  "Community & Culture",
+  "Communication & Conflict Transformation",
+  "Finance & Systems",
+] as const;
 
-    return ["All", ...unique];
-  }, []);
+export default async function SupportPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ category?: string; q?: string }>;
+}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const selectedCategory = resolvedSearchParams.category ?? "All";
+  const searchQuery = (resolvedSearchParams.q ?? "").trim().toLowerCase();
 
-  const filteredResources = useMemo(() => {
-    const q = search.trim().toLowerCase();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
-    return supportResources.filter((resource) => {
-      const matchesCategory =
-        selectedCategory === "All" || resource.category === selectedCategory;
+  const { data, error } = await supabase
+    .from("affiliate_resources")
+    .select("*")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
 
-      const matchesSearch =
-        !q ||
-        resource.title.toLowerCase().includes(q) ||
-        resource.description.toLowerCase().includes(q) ||
-        resource.category.toLowerCase().includes(q) ||
-        (resource.whyItMatters || "").toLowerCase().includes(q) ||
-        (resource.tags || []).some((tag: string) => tag.toLowerCase().includes(q));
+  if (error) {
+    console.error("Failed to load support resources:", error.message);
+  }
 
-      return matchesCategory && matchesSearch;
-    });
-  }, [search, selectedCategory]);
+  const resources: SupportResource[] = (data ?? []) as SupportResource[];
+
+  const categories = ["All", ...PRIMARY_CATEGORY_OPTIONS];
+
+  const filteredResources = resources.filter((resource) => {
+    const matchesCategory =
+      selectedCategory === "All" || resource.category === selectedCategory;
+
+    const haystack = [
+      resource.name,
+      resource.description ?? "",
+      resource.category ?? "",
+      ...(resource.practices ?? []),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch = !searchQuery || haystack.includes(searchQuery);
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <main
@@ -64,7 +97,7 @@ export default function SupportPage() {
               fontWeight: 700,
             }}
           >
-            When you can’t find it nearby, here are aligned options.
+            Support what is already life-giving
           </h1>
 
           <p
@@ -76,9 +109,9 @@ export default function SupportPage() {
               marginBottom: "36px",
             }}
           >
-            Sometimes the local light is not visible yet. This page exists to
-            help you find more harmonious, life-supporting options online while
-            the wider constellation continues to grow.
+            Sometimes the local light is not visible yet. This space helps you
+            find aligned options you can support from anywhere — while the
+            constellation continues to grow.
           </p>
         </div>
 
@@ -96,41 +129,59 @@ export default function SupportPage() {
             backdropFilter: "blur(6px)",
           }}
         >
-          <input
-            type="text"
-            placeholder="Search by title, description, tags, or category"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              borderRadius: "12px",
-              border: "1px solid rgba(31,42,58,0.14)",
-              fontSize: "0.98rem",
-              background: "white",
-              color: "#1f2a3a",
-            }}
-          />
+          <form method="GET" style={{ display: "grid", gap: "14px" }}>
+            <input
+              type="text"
+              name="q"
+              placeholder="Search by name, description, or practices"
+              defaultValue={resolvedSearchParams.q ?? ""}
+              style={{
+                width: "100%",
+                padding: "14px 16px",
+                borderRadius: "12px",
+                border: "1px solid rgba(31,42,58,0.14)",
+                fontSize: "0.98rem",
+                background: "white",
+                color: "#1f2a3a",
+              }}
+            />
 
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              borderRadius: "12px",
-              border: "1px solid rgba(31,42,58,0.14)",
-              fontSize: "0.98rem",
-              background: "white",
-              color: "#1f2a3a",
-            }}
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category === "All" ? "All categories" : category}
-              </option>
-            ))}
-          </select>
+            <select
+              name="category"
+              defaultValue={selectedCategory}
+              style={{
+                width: "100%",
+                padding: "14px 16px",
+                borderRadius: "12px",
+                border: "1px solid rgba(31,42,58,0.14)",
+                fontSize: "0.98rem",
+                background: "white",
+                color: "#1f2a3a",
+              }}
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category === "All" ? "All categories" : category}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              style={{
+                width: "fit-content",
+                padding: "12px 18px",
+                borderRadius: "999px",
+                border: "1px solid rgba(31,42,58,0.14)",
+                background: "rgba(255,255,255,0.9)",
+                color: "#1c4a7d",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Apply filters
+            </button>
+          </form>
 
           <div
             style={{
@@ -166,7 +217,7 @@ export default function SupportPage() {
           ) : (
             filteredResources.map((resource) => (
               <article
-                key={resource.id}
+                key={String(resource.id)}
                 style={{
                   background: "rgba(255,255,255,0.72)",
                   borderRadius: "18px",
@@ -177,14 +228,14 @@ export default function SupportPage() {
               >
                 <div
                   style={{
-                    fontSize: "0.9rem",
-                    letterSpacing: "0.14em",
+                    fontSize: "0.85rem",
+                    letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "#70839a",
                     marginBottom: "12px",
                   }}
                 >
-                  {resource.category}
+                  {resource.category || "Uncategorized"}
                 </div>
 
                 <h2
@@ -196,37 +247,24 @@ export default function SupportPage() {
                     fontWeight: 700,
                   }}
                 >
-                  {resource.title}
+                  {resource.name}
                 </h2>
 
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    lineHeight: 1.6,
-                    color: "#556679",
-                    margin: 0,
-                    marginBottom: "16px",
-                  }}
-                >
-                  {resource.description}
-                </p>
-
-                {resource.whyItMatters && (
+                {resource.description ? (
                   <p
                     style={{
-                      fontSize: "0.98rem",
-                      lineHeight: 1.65,
-                      color: "#627488",
+                      fontSize: "1rem",
+                      lineHeight: 1.6,
+                      color: "#556679",
                       margin: 0,
                       marginBottom: "16px",
                     }}
                   >
-                    <strong style={{ color: "#1f2a3a" }}>Why this matters:</strong>{" "}
-                    {resource.whyItMatters}
+                    {resource.description}
                   </p>
-                )}
+                ) : null}
 
-                {resource.tags?.length ? (
+                {resource.practices?.length ? (
                   <div
                     style={{
                       display: "flex",
@@ -235,11 +273,11 @@ export default function SupportPage() {
                       marginBottom: "20px",
                     }}
                   >
-                    {resource.tags.map((tag: string) => (
+                    {resource.practices.map((practice) => (
                       <span
-                        key={tag}
+                        key={practice}
                         style={{
-                          fontSize: "0.88rem",
+                          fontSize: "0.85rem",
                           color: "#70839a",
                           border: "1px solid rgba(31,42,58,0.12)",
                           borderRadius: "999px",
@@ -247,14 +285,14 @@ export default function SupportPage() {
                           background: "rgba(255,255,255,0.55)",
                         }}
                       >
-                        {tag}
+                        {practice}
                       </span>
                     ))}
                   </div>
                 ) : null}
 
                 <a
-                  href={resource.affiliateUrl || resource.websiteUrl || "#"}
+                  href={resource.url || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -267,9 +305,8 @@ export default function SupportPage() {
                     textDecoration: "underline",
                     textUnderlineOffset: 3,
                     background: "rgba(255,255,255,0.6)",
-                    pointerEvents:
-                      resource.affiliateUrl || resource.websiteUrl ? "auto" : "none",
-                    opacity: resource.affiliateUrl || resource.websiteUrl ? 1 : 0.6,
+                    pointerEvents: resource.url ? "auto" : "none",
+                    opacity: resource.url ? 1 : 0.6,
                   }}
                 >
                   Visit resource
@@ -289,7 +326,8 @@ export default function SupportPage() {
           }}
         >
           <p style={{ marginBottom: "18px" }}>
-            Know an aligned business or resource others should be able to find?
+            Know something that helps life move forward that others should be
+            able to find?
           </p>
 
           <Link
@@ -306,7 +344,7 @@ export default function SupportPage() {
               textUnderlineOffset: 3,
             }}
           >
-            Submit your aligned affiliate business
+            Add a resource
           </Link>
         </div>
       </section>

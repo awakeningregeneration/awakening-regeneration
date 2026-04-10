@@ -4,23 +4,20 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-const CATEGORY_OPTIONS = [
-  "Regenerative Food & Farming",
+const PRIMARY_CATEGORY_OPTIONS = [
+  "Food & Nourishment",
+  "Home & Shelter",
+  "Health & Wellbeing",
+  "Energy & Infrastructure",
   "Land & Ecology",
-  "Recycling, Upcycling & Materials",
-  "Repair, Reuse & Tool Sharing",
-  "Healing & Wellness",
-  "Community & Education",
-  "Arts & Culture",
-  "Mutual Aid & Community Care",
-  "Housing & Shelter",
-  "Local Goods & Small Business",
-  "Cooperative & Alternative Economies",
-  "Regenerative Building & Infrastructure",
-  "Energy, Waste & Practical Systems",
-  "Civic & Community Advocacy",
-  "Other",
+  "Materials & Goods",
+  "Learning & Education",
+  "Travel & Movement",
+  "Community & Culture",
+  "Communication & Conflict Transformation",
+  "Finance & Systems",
 ];
+
 const PRACTICE_OPTIONS = [
   "Organic",
   "Regenerative",
@@ -57,7 +54,7 @@ export default function SubmitPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState(prefilledState);
   const [county, setCounty] = useState(prefilledCounty);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [primaryCategory, setPrimaryCategory] = useState("");
   const [practices, setPractices] = useState<string[]>([]);
   const [submittedBy, setSubmittedBy] = useState("");
   const [email, setEmail] = useState("");
@@ -74,20 +71,14 @@ export default function SubmitPage() {
     return "";
   }, [county, state]);
 
-  function toggleCategory(category: string) {
-    setCategories((current) =>
-      current.includes(category)
-        ? current.filter((item) => item !== category)
-        : [...current, category]
+  function togglePractice(practice: string) {
+    setPractices((current) =>
+      current.includes(practice)
+        ? current.filter((item) => item !== practice)
+        : [...current, practice]
     );
   }
-function togglePractice(practice: string) {
-  setPractices((current) =>
-    current.includes(practice)
-      ? current.filter((item) => item !== practice)
-      : [...current, practice]
-  );
-}
+
   function validateForm() {
     if (!title.trim()) {
       setErrorMessage("Please add a name for the place, project, or offering.");
@@ -109,8 +100,8 @@ function togglePractice(practice: string) {
       return false;
     }
 
-    if (categories.length === 0) {
-      setErrorMessage("Please choose at least one category.");
+    if (!primaryCategory.trim()) {
+      setErrorMessage("Please choose a primary category.");
       return false;
     }
 
@@ -138,19 +129,20 @@ function togglePractice(practice: string) {
     setIsSubmitting(true);
 
     try {
-     const payload = {
-  title: title.trim(),
-  description: description.trim(),
-  website: website.trim(),
-  address: address.trim(),
-  city: city.trim(),
-  state: state.trim(),
-  county: county.trim(),
-  categories,
-  practices,
-  submittedBy: submittedBy.trim(),
-  email: email.trim(),
-};
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        website: website.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        county: county.trim(),
+        category: primaryCategory,
+        categories: primaryCategory ? [primaryCategory] : [],
+        practices,
+        submittedBy: submittedBy.trim(),
+        email: email.trim(),
+      };
 
       const response = await fetch("/api/listings", {
         method: "POST",
@@ -177,7 +169,7 @@ function togglePractice(practice: string) {
       setCity("");
       setState(prefilledState);
       setCounty(prefilledCounty);
-      setCategories([]);
+      setPrimaryCategory("");
       setPractices([]);
       setSubmittedBy("");
       setEmail("");
@@ -198,7 +190,7 @@ function togglePractice(practice: string) {
       <div className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
         <div className="mb-10">
           <p className="mb-3 text-sm uppercase tracking-[0.22em] text-[#6b7c94]">
-            Awakening Regeneration
+            Canary Commons
           </p>
 
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -209,15 +201,17 @@ function togglePractice(practice: string) {
             Help make what is already life-giving more visible. Share a place,
             project, offering, or effort that belongs on the map.
           </p>
-<p className="mt-4 text-sm leading-6 text-[#4a5a70]">
-  Not sure what belongs here?{" "}
-  <Link
-    href="/about"
-    className="font-medium text-[#0e3a66] underline underline-offset-4"
-  >
-    Read about the project and what belongs on the map.
-  </Link>
-</p>
+
+          <p className="mt-4 text-sm leading-6 text-[#4a5a70]">
+            Not sure what belongs here?{" "}
+            <Link
+              href="/about"
+              className="font-medium text-[#0e3a66] underline underline-offset-4"
+            >
+              Read about the project and what belongs on the map.
+            </Link>
+          </p>
+
           {regionLabel ? (
             <div className="mt-6 inline-flex rounded-full border border-black/10 bg-white/55 px-4 py-2 text-sm text-[#4a5a70]">
               Region prefilled: {regionLabel}
@@ -234,8 +228,8 @@ function togglePractice(practice: string) {
                     Name of place or project
                   </label>
                   <input
-                  name="ar-place-title"
-                   autoComplete="off"
+                    name="ar-place-title"
+                    autoComplete="off"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder=""
@@ -247,107 +241,70 @@ function togglePractice(practice: string) {
                   <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
                     Description
                   </label>
-                 <textarea
-  name="ar-description"
-  autoComplete="off"
-  value={description}
-  onChange={(e) => setDescription(e.target.value)}
-  placeholder="Tell people what this is and why it matters."
-  rows={5}
-  className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
-/>
+                  <textarea
+                    name="ar-description"
+                    autoComplete="off"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Tell people what this is and why it matters."
+                    rows={5}
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                  />
                 </div>
 
-               <div>
-  <label className="mb-1 block text-sm font-medium text-[#1e2a38]">
-    Categories
-  </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
+                    Primary Category
+                  </label>
+                  <p className="mb-3 text-sm leading-6 text-[#4a5a70]">
+                    Choose the main area of life this belongs to.
+                  </p>
 
- <p className="mb-3 text-sm italic text-[#4a5a70]">
-  Select all that apply.
-</p>
+                  <select
+                    value={primaryCategory}
+                    onChange={(e) => setPrimaryCategory(e.target.value)}
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none focus:border-black/20"
+                  >
+                    <option value="">Select a category</option>
+                    {PRIMARY_CATEGORY_OPTIONS.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-  <div className="flex flex-wrap gap-3">
-                    {CATEGORY_OPTIONS.map((category) => {
-                      <div>
-  <label className="mb-3 block text-sm font-medium text-[#1e2a38]">
-    Practices / Values
-  </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
+                    Practices / Values
+                  </label>
 
-<p className="mb-3 text-sm italic leading-6 text-[#4a5a70]">
-  Select all that apply. These describe how this place, project, or offering operates.
-</p>
+                  <p className="mb-3 text-sm italic leading-6 text-[#4a5a70]">
+                    Mark all that apply.
+                  </p>
 
-  <div className="flex flex-wrap gap-3">
-    {PRACTICE_OPTIONS.map((practice) => {
-      const isSelected = practices.includes(practice);
-
-      return (
-        <button
-          key={practice}
-          type="button"
-          onClick={() => togglePractice(practice)}
-          className={`rounded-full border px-4 py-2 text-sm transition ${
-            isSelected
-              ? "border-black/20 bg-[#0e3a66] text-white"
-              : "border-black/10 bg-white/70 text-[#4a5a70] hover:bg-white"
-          }`}
-        >
-          {practice}
-        </button>
-      );
-    })}
-  </div>
-</div>
-                      const isSelected = categories.includes(category);
+                  <div className="flex flex-wrap gap-3">
+                    {PRACTICE_OPTIONS.map((practice) => {
+                      const isSelected = practices.includes(practice);
 
                       return (
                         <button
-                          key={category}
+                          key={practice}
                           type="button"
-                          onClick={() => toggleCategory(category)}
+                          onClick={() => togglePractice(practice)}
                           className={`rounded-full border px-4 py-2 text-sm transition ${
                             isSelected
                               ? "border-black/20 bg-[#0e3a66] text-white"
                               : "border-black/10 bg-white/70 text-[#4a5a70] hover:bg-white"
                           }`}
                         >
-                          {category}
+                          {practice}
                         </button>
                       );
                     })}
                   </div>
                 </div>
-<div>
-  <label className="mb-3 block text-sm font-medium text-[#1e2a38]">
-    Practices / Values
-  </label>
 
-  <p className="mb-3 text-sm leading-6 text-[#4a5a70]">
-    These describe how this place, project, or offering operates.
-  </p>
-
-  <div className="flex flex-wrap gap-3">
-    {PRACTICE_OPTIONS.map((practice) => {
-      const isSelected = practices.includes(practice);
-
-      return (
-        <button
-          key={practice}
-          type="button"
-          onClick={() => togglePractice(practice)}
-          className={`rounded-full border px-4 py-2 text-sm transition ${
-            isSelected
-              ? "border-black/20 bg-[#0e3a66] text-white"
-              : "border-black/10 bg-white/70 text-[#4a5a70] hover:bg-white"
-          }`}
-        >
-          {practice}
-        </button>
-      );
-    })}
-  </div>
-</div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
                     Website
@@ -498,19 +455,30 @@ function togglePractice(practice: string) {
 
                 <div className="rounded-2xl border border-black/10 bg-white p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                    Categories
+                    Primary Category
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <span
-                        key={category}
-                        className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-sm text-[#4a5a70]"
-                      >
-                        {category}
-                      </span>
-                    ))}
+                  <div className="mt-2 text-base text-[#1e2a38]">
+                    {primaryCategory}
                   </div>
                 </div>
+
+                {practices.length > 0 ? (
+                  <div className="rounded-2xl border border-black/10 bg-white p-4">
+                    <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
+                      Practices / Values
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {practices.map((practice) => (
+                        <span
+                          key={practice}
+                          className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-sm text-[#4a5a70]"
+                        >
+                          {practice}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
                 {website ? (
                   <div className="rounded-2xl border border-black/10 bg-white p-4">
@@ -523,7 +491,7 @@ function togglePractice(practice: string) {
                   </div>
                 ) : null}
 
-                {(address || city || county || state) ? (
+                {address || city || county || state ? (
                   <div className="rounded-2xl border border-black/10 bg-white p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
                       Location
@@ -535,7 +503,7 @@ function togglePractice(practice: string) {
                   </div>
                 ) : null}
 
-                {(submittedBy || email) ? (
+                {submittedBy || email ? (
                   <div className="rounded-2xl border border-black/10 bg-white p-4">
                     <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
                       Submitted by

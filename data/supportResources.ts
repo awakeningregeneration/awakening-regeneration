@@ -4,32 +4,34 @@ export const supportResources: SupportResource[] = [
   {
     id: "water-filter-example",
     title: "Water Filter Example",
-    category: "Water",
+    category: "Food & Nourishment",
     description: "A practical option for cleaner daily drinking water.",
-    whyItMatters: "Water is a foundational life-support layer.",
+    whyItMatters: "Clean water is one of the basic conditions that supports life.",
     websiteUrl: "https://example.com",
     affiliateUrl: "",
-    tags: ["water", "filtration"],
+    tags: ["water", "filtration", "clean water"],
   },
   {
     id: "non-toxic-home-example",
     title: "Non-Toxic Home Example",
-    category: "Home",
+    category: "Home & Shelter",
     description: "An aligned option for lower-toxin home materials.",
-    whyItMatters: "Home materials shape daily exposure and long-term wellbeing.",
+    whyItMatters:
+      "What surrounds daily life shapes exposure, comfort, and long-term wellbeing.",
     websiteUrl: "https://example.com",
     affiliateUrl: "",
-    tags: ["home", "materials", "non-toxic"],
+    tags: ["home", "materials", "non-toxic", "healthy home"],
   },
   {
     id: "garden-soil-example",
     title: "Garden + Soil Example",
-    category: "Garden",
+    category: "Land & Ecology",
     description:
       "A resource for building healthier soil and regenerative growing practices.",
-    whyItMatters: "Soil health is one of the foundations of life-supporting systems.",
+    whyItMatters:
+      "Living soil is one of the foundations of resilient, life-supporting systems.",
     websiteUrl: "https://example.com",
     affiliateUrl: "",
-    tags: ["soil", "garden", "regenerative"],
+    tags: ["soil", "garden", "regenerative", "growing food"],
   },
 ];

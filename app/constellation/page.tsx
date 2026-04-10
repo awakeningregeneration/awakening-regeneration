@@ -8,8 +8,17 @@ type ConstellationSignal = {
   region: string | null;
   category: string | null;
   link: string;
+  practices?: string[] | null;
   created_at?: string;
 };
+
+const PRIMARY_CATEGORIES = [
+  "Land & Food",
+  "Water & Flow",
+  "Energy & Infrastructure",
+  "Air & Atmosphere",
+  "Community & Care",
+];
 
 export default async function ConstellationPage({
   searchParams,
@@ -33,23 +42,14 @@ export default async function ConstellationPage({
     console.error("Failed to load constellation:", error.message);
   }
 
-  const risingConstellation: ConstellationSignal[] = (data ?? []) as ConstellationSignal[];
+  const signals: ConstellationSignal[] = (data ?? []) as ConstellationSignal[];
 
-  const categories = [
-    "All",
-    ...Array.from(
-      new Set(
-        risingConstellation
-          .map((signal) => signal.category)
-          .filter((category): category is string => Boolean(category && category.trim()))
-      )
-    ),
-  ];
+  const categories = ["All", ...PRIMARY_CATEGORIES];
 
   const filteredSignals =
     selectedCategory === "All"
-      ? risingConstellation
-      : risingConstellation.filter((signal) => signal.category === selectedCategory);
+      ? signals
+      : signals.filter((signal) => signal.category === selectedCategory);
 
   const lights = [
     { left: "8%", top: "10%", size: 10, glow: 1.2 },
@@ -111,13 +111,7 @@ export default async function ConstellationPage({
         }}
       />
 
-      <div
-        style={{
-          pointerEvents: "none",
-          position: "absolute",
-          inset: 0,
-        }}
-      >
+      <div style={{ pointerEvents: "none", position: "absolute", inset: 0 }}>
         {lights.map((light, index) => (
           <div
             key={index}
@@ -129,147 +123,21 @@ export default async function ConstellationPage({
               height: light.size,
               borderRadius: 999,
               background: "#fff7cc",
-              boxShadow: `0 0 ${14 * light.glow}px rgba(255, 242, 170, 0.75), 0 0 ${28 * light.glow}px rgba(120, 180, 255, 0.28)`,
-              opacity: 0.95,
+              boxShadow: `0 0 ${14 * light.glow}px rgba(255, 242, 170, 0.75)`,
             }}
           />
         ))}
       </div>
 
-      <div
-        style={{
-          position: "relative",
-          maxWidth: 980,
-          margin: "0 auto",
-          padding: "70px 20px 90px",
-          fontFamily: "sans-serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 760,
-            margin: "0 auto 40px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "#9fb8d8",
-              marginBottom: 14,
-            }}
-          >
-            Awakening Regeneration
-          </div>
+      <div style={{ position: "relative", maxWidth: 980, margin: "0 auto", padding: "70px 20px 90px" }}>
+        <h1 style={{ fontSize: "3rem", marginBottom: 12 }}>The Rising Constellation</h1>
 
-          <h1
-            style={{
-              fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
-              lineHeight: 1.05,
-              margin: "0 0 16px",
-              color: "white",
-            }}
-          >
-            The Rising Constellation
-          </h1>
+        <p style={{ marginBottom: 30, color: "#d3e3f7" }}>
+          A world constellation of people, places, and efforts already rising toward more life-affirming ways of being.
+        </p>
 
-          <p
-            style={{
-              margin: 0,
-              fontSize: 18,
-              lineHeight: 1.8,
-              color: "#d3e3f7",
-            }}
-          >
-            A world constellation of people, places, and efforts already rising
-            toward more life-affirming ways of being.
-            <br />
-            <strong>Look outward and remember: this is rising everywhere.</strong>
-          </p>
-        </div>
-
-        <section
-          style={{
-            maxWidth: 860,
-            margin: "0 auto 28px",
-            borderRadius: 24,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: "blur(8px)",
-            padding: 24,
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 12px",
-              fontSize: 28,
-              color: "white",
-            }}
-          >
-            What this is
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 17,
-              lineHeight: 1.8,
-              color: "#d3e3f7",
-            }}
-          >
-            The Rising Constellation is a place to gather signals from around the
-            world that remind us another future is already being built. These are
-            projects, places, movements, and efforts that help reveal what is
-            becoming possible across cultures, countries, and systems.
-          </p>
-        </section>
-
-        <section
-          style={{
-            maxWidth: 860,
-            margin: "0 auto 28px",
-            borderRadius: 24,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: "blur(8px)",
-            padding: 24,
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 12px",
-              fontSize: 28,
-              color: "white",
-            }}
-          >
-            Why it exists
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 17,
-              lineHeight: 1.8,
-              color: "#d3e3f7",
-            }}
-          >
-            This page is here to help people see patterns of life-forward change
-            beyond their immediate surroundings. The local map helps people find
-            where they can participate near them. The constellation helps people
-            remember that this work is rising everywhere.
-          </p>
-        </section>
-
-        <div
-          style={{
-            maxWidth: 860,
-            margin: "0 auto 20px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
+        {/* CATEGORY FILTER */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24 }}>
           {categories.map((category) => {
             const isActive = selectedCategory === category;
 
@@ -282,11 +150,10 @@ export default async function ConstellationPage({
                     : `/constellation?category=${encodeURIComponent(category)}`
                 }
                 style={{
-                  display: "inline-block",
                   padding: "8px 14px",
                   borderRadius: 999,
                   border: isActive
-                    ? "1px solid rgba(255,224,138,0.45)"
+                    ? "1px solid rgba(255,216,107,0.45)"
                     : "1px solid rgba(255,255,255,0.12)",
                   background: isActive
                     ? "rgba(255,216,107,0.16)"
@@ -295,7 +162,6 @@ export default async function ConstellationPage({
                   textDecoration: "none",
                   fontSize: 13,
                   fontWeight: 600,
-                  boxShadow: isActive ? "0 0 18px rgba(255,216,107,0.10)" : "none",
                 }}
               >
                 {category}
@@ -304,118 +170,54 @@ export default async function ConstellationPage({
           })}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: 20,
-            maxWidth: 860,
-            margin: "0 auto",
-          }}
-        >
-          {filteredSignals.length > 0 ? (
-            filteredSignals.map((signal) => (
-              <a
-                key={signal.id}
-                href={signal.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "block",
-                  padding: 20,
-                  borderRadius: 20,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(248,252,255,0.92)",
-                  textDecoration: "none",
-                  color: "#1f2a3a",
-                  boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: "0 0 8px",
-                    fontSize: 22,
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {signal.title}
-                </h3>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 8,
-                    alignItems: "center",
-                    marginBottom: 10,
-                    fontSize: 13,
-                    color: "#6b7c94",
-                  }}
-                >
-                  <span>{signal.region || "Global"}</span>
-                  <span style={{ opacity: 0.5 }}>•</span>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "4px 10px",
-                      borderRadius: 999,
-                      background: "rgba(14,58,102,0.08)",
-                      color: "#0e3a66",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {signal.category || "Uncategorized"}
-                  </span>
-                </div>
-
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#4a5a70",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {signal.description}
-                </p>
-              </a>
-            ))
-          ) : (
-            <div
+        {/* SIGNALS */}
+        <div style={{ display: "grid", gap: 20 }}>
+          {filteredSignals.map((signal) => (
+            <a
+              key={signal.id}
+              href={signal.link}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
-                padding: 24,
+                padding: 20,
                 borderRadius: 20,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.08)",
-                color: "#d3e3f7",
+                background: "white",
+                color: "#1f2a3a",
+                textDecoration: "none",
               }}
             >
-              No constellation signals found for this category yet.
-            </div>
-          )}
+              <h3>{signal.title}</h3>
+
+              <div style={{ fontSize: 13, marginBottom: 8 }}>
+                {signal.region} • {signal.category}
+              </div>
+
+              <p>{signal.description}</p>
+
+              {/* PRACTICES (future-ready) */}
+              {signal.practices?.length ? (
+                <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {signal.practices.map((p) => (
+                    <span
+                      key={p}
+                      style={{
+                        fontSize: 12,
+                        padding: "4px 8px",
+                        borderRadius: 999,
+                        background: "#eef5ff",
+                      }}
+                    >
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </a>
+          ))}
         </div>
 
-        <div
-          style={{
-            maxWidth: 860,
-            margin: "42px auto 0",
-            textAlign: "center",
-          }}
-        >
-          <Link
-            href="/constellation/submit"
-            style={{
-              display: "inline-block",
-              padding: "14px 22px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,216,107,0.14)",
-              color: "#ffe08a",
-              textDecoration: "none",
-              fontWeight: 600,
-              boxShadow: "0 0 20px rgba(255,216,107,0.10)",
-            }}
-          >
-            Submit to the Constellation
-          </Link>
+        <div style={{ marginTop: 40, textAlign: "center" }}>
+          <Link href="/constellation/submit">Submit to the Constellation</Link>
         </div>
       </div>
     </main>

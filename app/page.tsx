@@ -75,8 +75,8 @@ export default function HomePage() {
         minHeight: "100vh",
         overflow: "hidden",
         color: "white",
-       background:
-  "radial-gradient(circle at top, rgba(90,150,255,0.45) 0%, rgba(40,100,200,0.38) 22%, rgba(18,60,150,0.78) 52%, rgba(6,26,70,1) 100%)",
+        background:
+          "radial-gradient(circle at top, rgba(90,150,255,0.45) 0%, rgba(40,100,200,0.38) 22%, rgba(18,60,150,0.78) 52%, rgba(6,26,70,1) 100%)",
       }}
     >
       <ThresholdMap />
@@ -87,7 +87,7 @@ export default function HomePage() {
           inset: 0,
           pointerEvents: "none",
           background:
-  "linear-gradient(to bottom, rgba(20,70,150,0.12) 0%, rgba(20,70,150,0.05) 30%, rgba(12,50,120,0.14) 100%)",
+            "linear-gradient(to bottom, rgba(20,70,150,0.12) 0%, rgba(20,70,150,0.05) 30%, rgba(12,50,120,0.14) 100%)",
         }}
       />
 
@@ -133,9 +133,7 @@ export default function HomePage() {
               textShadow: "0 12px 34px rgba(6,16,40,0.34)",
             }}
           >
-            A billion points of light
-            <br />
-            connected,
+            All lights connected,
             <br />
             <span
               style={{
@@ -146,8 +144,6 @@ export default function HomePage() {
               we dawn brighter.
             </span>
           </h1>
-
-     
         </div>
 
         <div
@@ -159,20 +155,53 @@ export default function HomePage() {
             paddingBottom: "clamp(72px, 12vh, 120px)",
           }}
         >
-        <p
+          <div
             style={{
-  fontSize: "clamp(1.05rem, 1.45vw, 1.22rem)",
-  lineHeight: 1.45,
-  color: "rgba(255,255,255,0.90)",
-  maxWidth: 640,
-  margin: "22px auto 0",
-  textShadow: "0 6px 18px rgba(6,16,40,0.28)",
-}}
+              fontSize: "clamp(1.02rem, 1.35vw, 1.14rem)",
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.90)",
+              maxWidth: 760,
+              margin: "0 auto 18px",
+              textShadow: "0 6px 18px rgba(6,16,40,0.28)",
+            }}
           >
-           Choose a place and see what is becoming visible.
-<br />
-What we give our attention to grows.
+            <p style={{ margin: "0 0 10px" }}>
+              Life moves through a few simple needs:
+              <br />
+              air, water, soil, energy, and relationship.
+            </p>
+
+            <p style={{ margin: "0 0 18px" }}>
+              Canary Commons helps make visible what is already moving in those
+              directions.
+            </p>
+          </div>
+
+          <p
+            style={{
+              fontSize: "clamp(1.05rem, 1.45vw, 1.22rem)",
+              lineHeight: 1.45,
+              color: "rgba(255,255,255,0.90)",
+              maxWidth: 700,
+              margin: "0 auto 22px",
+              textShadow: "0 6px 18px rgba(6,16,40,0.28)",
+            }}
+          >
+            Choose a place and see what is becoming visible where you are or
+            where you are going.
+            <br />
+            <span
+              style={{
+                display: "inline-block",
+                marginTop: 8,
+                fontStyle: "italic",
+                color: "rgba(255,255,255,0.82)",
+              }}
+            >
+              What we give our attention to grows.
+            </span>
           </p>
+
           <div
             style={{
               display: "flex",
@@ -236,46 +265,58 @@ What we give our attention to grows.
           </div>
 
           <div
-  style={{
-  marginTop: 12,
-  fontSize: 15,
-  lineHeight: 1.45,
-  color: "rgba(255,255,255,0.82)",
-  textShadow: "0 6px 18px rgba(6,16,40,0.34)",
-  maxWidth: 760,
-  marginLeft: "auto",
-  marginRight: "auto",
-}}
+            style={{
+              marginTop: 12,
+              fontSize: 15,
+              lineHeight: 1.45,
+              color: "rgba(255,255,255,0.82)",
+              textShadow: "0 6px 18px rgba(6,16,40,0.34)",
+              maxWidth: 760,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
           >
             Once you choose a state, the live map will open there and you can
             narrow further by county.
           </div>
+
           <div
-  style={{
-    marginTop: 18,
-    fontSize: 14,
-    color: "rgba(255,255,255,0.65)",
-  }}
->
-  <a
-    href="/about"
-    style={{
-      textDecoration: "underline",
-      textUnderlineOffset: 3,
-      color: "inherit",
-    }}
-  >
-    About this project
-  </a>
-</div>
-<div className="mt-6 flex justify-center">
-  <Link
-    href="/founders"
-    className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
-  >
-    Become a Founder
-  </Link>
-</div>
+            style={{
+              marginTop: 18,
+              fontSize: 14,
+              color: "rgba(255,255,255,0.65)",
+            }}
+          >
+            <a
+              href="/about"
+              style={{
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+                color: "inherit",
+              }}
+            >
+              About this project
+            </a>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <Link
+              href="/founders"
+              className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+            >
+              Become the Foundation
+            </Link>
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 14,
+              color: "rgba(255,255,255,0.72)",
+            }}
+          >
+            Join the people helping turn on the first lights.
+          </div>
         </div>
       </div>
     </main>

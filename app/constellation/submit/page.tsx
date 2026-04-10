@@ -2,24 +2,36 @@
 
 import Link from "next/link";
 import { useState } from "react";
-const CATEGORY_OPTIONS = [
-  "Regenerative Agriculture",
+
+const PRIMARY_CATEGORIES = [
+  "Land & Food",
+  "Water & Flow",
+  "Energy & Infrastructure",
+  "Air & Atmosphere",
+  "Community & Care",
+];
+
+const PRACTICES = [
+  "Organic",
+  "Regenerative",
+  "Permaculture",
+  "Fair Trade",
+  "Biodegradable",
+  "Compostable",
+  "Recycled Materials",
+  "Upcycled Materials",
+  "Low Waste",
+  "Zero Waste",
+  "Local",
+  "Worker-Owned / Cooperative",
+  "Community Owned",
   "Renewable Energy",
-  "Water & Ecology",
-  "Local Economies & Cooperatives",
-  "Education",
-  "Health & Healing",
-  "Communication & Conflict Transformation",
-  "Community & Culture",
-  "Housing & Land",
-  "Appropriate Technology",
-  "Policy & Governance",
-  "Arts, Story & Media",
-  "Research & Science",
-  "Youth & Future",
-  "Spirituality & Consciousness",
-  "Non-Profit / Movement",
-  "Other",
+  "Educational",
+  "Accessible / Sliding Scale",
+  "Volunteer Run",
+  "Nonprofit / Mission Driven",
+  "Indigenous Led",
+  "Women Led",
 ];
 
 export default function ConstellationSubmitPage() {
@@ -59,39 +71,39 @@ export default function ConstellationSubmitPage() {
   const [description, setDescription] = useState("");
   const [region, setRegion] = useState("");
   const [category, setCategory] = useState("");
+  const [practices, setPractices] = useState<string[]>([]);
   const [link, setLink] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [otherCategory, setOtherCategory] = useState("");
 
-async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setStatus("submitting");
-  setMessage("");
-
-  const finalCategory =
-    category === "Other" ? otherCategory.trim() : category;
-
-  if (!finalCategory) {
-    setStatus("error");
-    setMessage("Please choose or enter a category.");
-    return;
+  function togglePractice(practice: string) {
+    setPractices((prev) =>
+      prev.includes(practice)
+        ? prev.filter((item) => item !== practice)
+        : [...prev, practice]
+    );
   }
 
-  try {
-    const response = await fetch("/api/constellation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        region,
-        category: finalCategory,
-        link,
-      }),
-    });
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("submitting");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/constellation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          region,
+          category,
+          practices,
+          link,
+        }),
+      });
 
       const data = await response.json();
 
@@ -99,14 +111,14 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         throw new Error(data?.error || "Something went wrong.");
       }
 
-     setStatus("success");
-setMessage("Another signal has become visible.");
-setTitle("");
-setDescription("");
-setRegion("");
-setCategory("");
-setOtherCategory("");
-setLink("");
+      setStatus("success");
+      setMessage("Another signal has become visible.");
+      setTitle("");
+      setDescription("");
+      setRegion("");
+      setCategory("");
+      setPractices([]);
+      setLink("");
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Something went wrong.");
@@ -342,7 +354,7 @@ setLink("");
                     color: "white",
                   }}
                 >
-                  Category
+                  Primary Category
                 </label>
                 <select
                   id="category"
@@ -352,7 +364,7 @@ setLink("");
                   style={inputStyle}
                 >
                   <option value="">Select a category</option>
-                  {CATEGORY_OPTIONS.map((option) => (
+                  {PRIMARY_CATEGORIES.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -360,29 +372,66 @@ setLink("");
                 </select>
               </div>
             </div>
-            {category === "Other" ? (
-  <div>
-    <label
-      htmlFor="otherCategory"
-      style={{
-        display: "block",
-        marginBottom: 8,
-        fontWeight: 600,
-        color: "white",
-      }}
-    >
-      What category fits best?
-    </label>
-    <input
-      id="otherCategory"
-      value={otherCategory}
-      onChange={(e) => setOtherCategory(e.target.value)}
-      required
-      placeholder="Enter a category"
-      style={inputStyle}
-    />
-  </div>
-) : null}
+
+            <div>
+              <div
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontWeight: 600,
+                  color: "white",
+                }}
+              >
+                Practices / Values
+              </div>
+
+              <div
+                style={{
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: "#c2d5ec",
+                  marginBottom: 12,
+                  fontStyle: "italic",
+                }}
+              >
+                Mark all that apply.
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 10,
+                }}
+              >
+                {PRACTICES.map((practice) => {
+                  const selected = practices.includes(practice);
+
+                  return (
+                    <button
+                      key={practice}
+                      type="button"
+                      onClick={() => togglePractice(practice)}
+                      style={{
+                        padding: "10px 16px",
+                        borderRadius: 999,
+                        border: selected
+                          ? "1px solid rgba(255,216,107,0.45)"
+                          : "1px solid rgba(255,255,255,0.16)",
+                        background: selected
+                          ? "rgba(255,216,107,0.16)"
+                          : "rgba(255,255,255,0.08)",
+                        color: selected ? "#ffe08a" : "#eef5ff",
+                        fontSize: 15,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {practice}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div>
               <label
