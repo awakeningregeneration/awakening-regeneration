@@ -62,7 +62,7 @@ export async function POST(req: Request) {
           url,
           category,
           practices,
-          status: "pending",
+          status: contributor_id ? (body.status?.trim() || "approved") : "pending",
           ...(contributor_id && { contributor_id }),
           ...(contributor_name && { contributor_name }),
           ...(affiliate_url && { affiliate_url }),

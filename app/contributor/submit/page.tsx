@@ -79,7 +79,8 @@ export default function ContributorSubmitPage() {
           why_it_matters: whyItMatters,
           practices,
           contributor_id: "contributor_001",
-          contributor_name: "Contributor",
+          contributor_name: "Lucia",
+          status: "approved",
         }),
       });
 

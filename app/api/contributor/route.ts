@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 export async function GET() {
   const { data, error } = await supabase
     .from("affiliate_resources")
-    .select("id, name, category, status, created_at")
+    .select("*")
     .eq("contributor_id", "contributor_001")
     .order("created_at", { ascending: false });
 
