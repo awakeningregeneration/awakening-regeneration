@@ -41,6 +41,11 @@ export async function POST(req: Request) {
           .filter(Boolean)
       : [];
 
+    const contributor_id = body.contributor_id?.trim() || null;
+    const contributor_name = body.contributor_name?.trim() || null;
+    const affiliate_url = body.affiliate_url?.trim() || null;
+    const why_it_matters = body.why_it_matters?.trim() || null;
+
     if (!name || !description || !url || !category) {
       return NextResponse.json(
         { error: "Missing required fields." },
@@ -58,6 +63,10 @@ export async function POST(req: Request) {
           category,
           practices,
           status: "pending",
+          ...(contributor_id && { contributor_id }),
+          ...(contributor_name && { contributor_name }),
+          ...(affiliate_url && { affiliate_url }),
+          ...(why_it_matters && { why_it_matters }),
         },
       ])
       .select()
