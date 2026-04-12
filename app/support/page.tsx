@@ -31,6 +31,116 @@ const PRIMARY_CATEGORY_OPTIONS = [
   "Finance & Systems",
 ];
 
+const lightPoints: {
+  left: string;
+  top: string;
+  size: number;
+  glow: number;
+}[] = [
+  { left: "4%", top: "6%", size: 3, glow: 8 },
+  { left: "10%", top: "14%", size: 5, glow: 12 },
+  { left: "18%", top: "4%", size: 2, glow: 6 },
+  { left: "26%", top: "18%", size: 4, glow: 10 },
+  { left: "34%", top: "8%", size: 6, glow: 14 },
+  { left: "42%", top: "16%", size: 3, glow: 8 },
+  { left: "50%", top: "6%", size: 5, glow: 12 },
+  { left: "58%", top: "14%", size: 2, glow: 6 },
+  { left: "66%", top: "10%", size: 4, glow: 10 },
+  { left: "74%", top: "4%", size: 7, glow: 16 },
+  { left: "82%", top: "16%", size: 3, glow: 8 },
+  { left: "90%", top: "8%", size: 5, glow: 12 },
+  { left: "6%", top: "30%", size: 4, glow: 10 },
+  { left: "16%", top: "38%", size: 2, glow: 6 },
+  { left: "28%", top: "32%", size: 6, glow: 14 },
+  { left: "40%", top: "40%", size: 3, glow: 8 },
+  { left: "52%", top: "34%", size: 5, glow: 12 },
+  { left: "64%", top: "42%", size: 4, glow: 10 },
+  { left: "76%", top: "36%", size: 7, glow: 16 },
+  { left: "88%", top: "44%", size: 2, glow: 6 },
+  { left: "8%", top: "56%", size: 5, glow: 12 },
+  { left: "22%", top: "62%", size: 3, glow: 8 },
+  { left: "34%", top: "58%", size: 4, glow: 10 },
+  { left: "46%", top: "66%", size: 6, glow: 14 },
+  { left: "58%", top: "60%", size: 2, glow: 6 },
+  { left: "70%", top: "64%", size: 5, glow: 12 },
+  { left: "82%", top: "58%", size: 3, glow: 8 },
+  { left: "92%", top: "66%", size: 4, glow: 10 },
+  { left: "10%", top: "82%", size: 3, glow: 8 },
+  { left: "24%", top: "88%", size: 5, glow: 12 },
+  { left: "38%", top: "80%", size: 2, glow: 6 },
+  { left: "52%", top: "90%", size: 6, glow: 14 },
+  { left: "66%", top: "84%", size: 4, glow: 10 },
+  { left: "80%", top: "92%", size: 3, glow: 8 },
+  { left: "92%", top: "84%", size: 5, glow: 12 },
+];
+
+function Atmosphere() {
+  return (
+    <>
+      {/* Deep sky base gradient */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(26,72,130,0.32) 0%, rgba(5,16,31,1) 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Side blue glows */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(circle at 20% 40%, rgba(40,90,160,0.18) 0%, transparent 40%), radial-gradient(circle at 78% 55%, rgba(40,90,160,0.14) 0%, transparent 42%)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Luminous center bloom */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 45%, rgba(60,110,200,0.11) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Warm gold light points scattered full page */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        {lightPoints.map((p, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: p.left,
+              top: p.top,
+              width: p.size,
+              height: p.size,
+              borderRadius: "50%",
+              background: "rgba(255,244,200,0.82)",
+              boxShadow: `0 0 ${p.glow}px rgba(255,220,140,0.48), 0 0 ${
+                p.glow * 2
+              }px rgba(255,200,100,0.16)`,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
 function getDomain(url: string | null): string | null {
   if (!url) return null;
   try {
@@ -84,7 +194,7 @@ function ResourceVisual({
         width={size}
         height={size}
         onError={() => setImgError(true)}
-        style={{ borderRadius: 10, objectFit: "contain" }}
+        style={{ borderRadius: 10, objectFit: "contain", background: "rgba(255,255,255,0.9)" }}
       />
     );
   }
@@ -95,8 +205,8 @@ function ResourceVisual({
         width: size,
         height: size,
         borderRadius: 10,
-        background: "rgba(201,148,58,0.14)",
-        color: "#c9943a",
+        background: "rgba(255,216,107,0.14)",
+        color: "#FFD86B",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -116,11 +226,11 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
   return (
     <article
       style={{
-        background: "rgba(255,255,255,0.78)",
+        background: "rgba(255,255,255,0.06)",
         borderRadius: 20,
-        border: "1px solid rgba(31,42,58,0.08)",
+        border: "1px solid rgba(255,255,255,0.09)",
+        backdropFilter: "blur(8px)",
         padding: "28px 28px 24px",
-        boxShadow: "0 2px 12px rgba(31,42,58,0.06)",
         display: "flex",
         flexDirection: "column",
         gap: 14,
@@ -134,7 +244,7 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
               fontSize: "0.8rem",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "#70839a",
+              color: "rgba(159,184,216,0.75)",
               marginBottom: 6,
             }}
           >
@@ -145,7 +255,8 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
               fontSize: "1.12rem",
               lineHeight: 1.3,
               margin: 0,
-              fontWeight: 700,
+              fontWeight: 650,
+              color: "rgba(255,255,255,0.96)",
             }}
           >
             {resource.name}
@@ -158,7 +269,7 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
           style={{
             fontSize: "0.98rem",
             lineHeight: 1.65,
-            color: "#556679",
+            color: "rgba(211,227,247,0.82)",
             margin: 0,
           }}
         >
@@ -171,10 +282,10 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
           style={{
             fontSize: "0.92rem",
             lineHeight: 1.6,
-            color: "#6b7d92",
+            color: "rgba(211,227,247,0.72)",
             margin: 0,
             fontStyle: "italic",
-            borderLeft: "3px solid rgba(201,148,58,0.35)",
+            borderLeft: "3px solid rgba(255,216,107,0.45)",
             paddingLeft: 14,
           }}
         >
@@ -189,11 +300,11 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
               key={practice}
               style={{
                 fontSize: "0.82rem",
-                color: "#70839a",
-                border: "1px solid rgba(31,42,58,0.10)",
+                color: "rgba(211,227,247,0.78)",
+                border: "1px solid rgba(255,255,255,0.12)",
                 borderRadius: 999,
                 padding: "5px 11px",
-                background: "rgba(255,255,255,0.6)",
+                background: "rgba(255,255,255,0.04)",
               }}
             >
               {practice}
@@ -211,13 +322,12 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
             display: "inline-block",
             padding: "11px 20px",
             borderRadius: 999,
-            border: "1px solid rgba(31,42,58,0.14)",
-            color: "#1c4a7d",
-            fontWeight: 700,
+            border: "1px solid rgba(255,216,107,0.45)",
+            color: "#FFD86B",
+            fontWeight: 600,
             fontSize: "0.92rem",
-            textDecoration: "underline",
-            textUnderlineOffset: 3,
-            background: "rgba(255,255,255,0.65)",
+            textDecoration: "none",
+            background: "rgba(255,216,107,0.1)",
           }}
         >
           Visit resource
@@ -309,16 +419,33 @@ export default function SupportPage() {
   const categories = ["All", ...PRIMARY_CATEGORY_OPTIONS];
   const noResults = hasSearched && filteredResources.length === 0;
 
+  const darkInputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "14px 16px",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.11)",
+    background: "rgba(255,255,255,0.06)",
+    color: "white",
+    fontSize: "0.98rem",
+    outline: "none",
+  };
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#d3e4f7",
-        color: "#1f2a3a",
+        background: "#08192d",
+        color: "white",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      <Atmosphere />
+
       <section
         style={{
+          position: "relative",
+          zIndex: 2,
           maxWidth: 1152,
           margin: "0 auto",
           padding: "64px 24px",
@@ -326,13 +453,26 @@ export default function SupportPage() {
       >
         {/* Header */}
         <div style={{ maxWidth: 760 }}>
+          <p
+            style={{
+              fontSize: "0.82rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(159,184,216,0.7)",
+              margin: 0,
+              marginBottom: 14,
+            }}
+          >
+            Canary Commons
+          </p>
           <h1
             style={{
               fontSize: "clamp(2.4rem, 5vw, 4rem)",
               lineHeight: 1.05,
               margin: 0,
               marginBottom: 18,
-              fontWeight: 700,
+              fontWeight: 650,
+              color: "rgba(255,255,255,0.98)",
             }}
           >
             Support what is already life-giving
@@ -341,7 +481,7 @@ export default function SupportPage() {
             style={{
               fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
               lineHeight: 1.7,
-              color: "#506178",
+              color: "rgba(211,227,247,0.82)",
               margin: 0,
               marginBottom: 36,
             }}
@@ -359,7 +499,7 @@ export default function SupportPage() {
               style={{
                 fontSize: "1.1rem",
                 fontWeight: 600,
-                color: "#506178",
+                color: "rgba(159,184,216,0.75)",
                 margin: 0,
                 marginBottom: 18,
                 letterSpacing: "0.04em",
@@ -388,47 +528,32 @@ export default function SupportPage() {
             maxWidth: 760,
             marginBottom: 36,
             padding: 18,
-            border: "1px solid rgba(31,42,58,0.10)",
-            borderRadius: 18,
-            background: "rgba(255,255,255,0.55)",
-            backdropFilter: "blur(6px)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            borderRadius: 20,
+            background: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(8px)",
           }}
         >
-          <form
-            onSubmit={handleSearch}
-            style={{ display: "grid", gap: 14 }}
-          >
+          <form onSubmit={handleSearch} style={{ display: "grid", gap: 14 }}>
             <input
               type="text"
               placeholder="Search by name, description, or practices"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "14px 16px",
-                borderRadius: 12,
-                border: "1px solid rgba(31,42,58,0.14)",
-                fontSize: "0.98rem",
-                background: "white",
-                color: "#1f2a3a",
-              }}
+              style={darkInputStyle}
             />
 
             <select
               value={selectedCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "14px 16px",
-                borderRadius: 12,
-                border: "1px solid rgba(31,42,58,0.14)",
-                fontSize: "0.98rem",
-                background: "white",
-                color: "#1f2a3a",
-              }}
+              style={{ ...darkInputStyle, appearance: "none" }}
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
+                <option
+                  key={cat}
+                  value={cat}
+                  style={{ background: "#08192d", color: "white" }}
+                >
                   {cat === "All" ? "All categories" : cat}
                 </option>
               ))}
@@ -438,13 +563,15 @@ export default function SupportPage() {
               type="submit"
               style={{
                 width: "fit-content",
-                padding: "12px 18px",
+                padding: "13px 22px",
                 borderRadius: 999,
-                border: "1px solid rgba(31,42,58,0.14)",
-                background: "rgba(255,255,255,0.9)",
-                color: "#1c4a7d",
+                border: "none",
+                background: "#FFD86B",
+                color: "#1a2a0e",
                 fontWeight: 700,
                 cursor: "pointer",
+                boxShadow:
+                  "0 0 28px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
               }}
             >
               Search
@@ -458,7 +585,7 @@ export default function SupportPage() {
             <div
               style={{
                 fontSize: "0.95rem",
-                color: "#5f6f84",
+                color: "rgba(159,184,216,0.75)",
                 marginBottom: 18,
               }}
             >
@@ -484,15 +611,16 @@ export default function SupportPage() {
           <div
             style={{
               padding: "28px 24px",
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.72)",
-              border: "1px solid rgba(31,42,58,0.10)",
+              borderRadius: 20,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              backdropFilter: "blur(8px)",
               maxWidth: 760,
             }}
           >
             <p
               style={{
-                color: "#506178",
+                color: "rgba(211,227,247,0.82)",
                 margin: 0,
                 marginBottom: 16,
                 fontSize: "1.02rem",
@@ -507,7 +635,7 @@ export default function SupportPage() {
               <p
                 style={{
                   margin: 0,
-                  color: "#3a7d5c",
+                  color: "#7dcfa0",
                   fontWeight: 600,
                   fontSize: "0.95rem",
                 }}
@@ -522,13 +650,10 @@ export default function SupportPage() {
                   value={unmetNeed}
                   onChange={(e) => setUnmetNeed(e.target.value)}
                   style={{
+                    ...darkInputStyle,
                     flex: 1,
                     minWidth: 200,
-                    padding: "12px 16px",
-                    borderRadius: 12,
-                    border: "1px solid rgba(31,42,58,0.14)",
-                    fontSize: "0.95rem",
-                    background: "white",
+                    width: "auto",
                   }}
                 />
                 <button
@@ -536,17 +661,19 @@ export default function SupportPage() {
                   onClick={submitUnmetNeed}
                   disabled={unmetSubmitting || !unmetNeed.trim()}
                   style={{
-                    padding: "12px 18px",
+                    padding: "12px 22px",
                     borderRadius: 999,
-                    border: "1px solid rgba(31,42,58,0.14)",
-                    background: "rgba(255,255,255,0.9)",
-                    color: "#1c4a7d",
+                    border: "none",
+                    background: "#FFD86B",
+                    color: "#1a2a0e",
                     fontWeight: 700,
                     cursor:
                       unmetSubmitting || !unmetNeed.trim()
                         ? "not-allowed"
                         : "pointer",
                     opacity: !unmetNeed.trim() ? 0.5 : 1,
+                    boxShadow:
+                      "0 0 24px rgba(255,216,107,0.22), 0 4px 14px rgba(255,200,80,0.16)",
                   }}
                 >
                   {unmetSubmitting ? "Sending..." : "Send"}
@@ -561,7 +688,7 @@ export default function SupportPage() {
           style={{
             marginTop: 52,
             textAlign: "center",
-            color: "#5c6d82",
+            color: "rgba(211,227,247,0.82)",
             fontSize: "1.05rem",
             lineHeight: 1.7,
           }}
@@ -574,14 +701,15 @@ export default function SupportPage() {
             href="/support/submit"
             style={{
               display: "inline-block",
-              padding: "14px 22px",
+              padding: "14px 26px",
               borderRadius: 999,
-              border: "1px solid rgba(31,42,58,0.14)",
-              background: "rgba(255,255,255,0.68)",
-              color: "#1c4a7d",
+              border: "none",
+              background: "#FFD86B",
+              color: "#1a2a0e",
               fontWeight: 700,
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
+              textDecoration: "none",
+              boxShadow:
+                "0 0 28px rgba(255,216,107,0.30), 0 4px 14px rgba(255,200,80,0.2)",
             }}
           >
             Add a resource

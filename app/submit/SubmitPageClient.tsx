@@ -41,6 +41,134 @@ const PRACTICE_OPTIONS = [
   "Women Led",
 ];
 
+const orbs: { left: string; top: string; size: number; opacity: number }[] = [
+  { left: "6%", top: "8%", size: 5, opacity: 0.6 },
+  { left: "18%", top: "15%", size: 3, opacity: 0.45 },
+  { left: "32%", top: "6%", size: 6, opacity: 0.65 },
+  { left: "48%", top: "22%", size: 4, opacity: 0.5 },
+  { left: "64%", top: "12%", size: 7, opacity: 0.7 },
+  { left: "82%", top: "18%", size: 4, opacity: 0.55 },
+  { left: "10%", top: "38%", size: 6, opacity: 0.65 },
+  { left: "42%", top: "44%", size: 3, opacity: 0.4 },
+  { left: "72%", top: "40%", size: 8, opacity: 0.7 },
+  { left: "22%", top: "68%", size: 5, opacity: 0.55 },
+  { left: "56%", top: "72%", size: 4, opacity: 0.5 },
+  { left: "88%", top: "85%", size: 6, opacity: 0.6 },
+];
+
+function Atmosphere() {
+  return (
+    <>
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(180,210,255,0.9) 0%, rgba(120,170,230,0.85) 25%, rgba(70,120,200,0.9) 60%, rgba(30,70,150,1) 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.18) 0%, transparent 58%)",
+          pointerEvents: "none",
+        }}
+      />
+      {orbs.map((orb, i) => (
+        <div
+          key={i}
+          style={{
+            position: "fixed",
+            left: orb.left,
+            top: orb.top,
+            width: orb.size,
+            height: orb.size,
+            borderRadius: "50%",
+            background: "rgba(255,244,200,0.65)",
+            opacity: orb.opacity,
+            boxShadow:
+              "0 0 8px 3px rgba(255,220,140,0.18), 0 0 20px 5px rgba(255,200,100,0.08)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "13px 16px",
+  borderRadius: 12,
+  border: "1px solid rgba(100,150,220,0.25)",
+  background: "rgba(255,255,255,0.9)",
+  color: "#0d2a4a",
+  fontSize: "0.98rem",
+  outline: "none",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: 8,
+  fontSize: "0.92rem",
+  fontWeight: 600,
+  color: "#0d2a4a",
+};
+
+const helperStyle: React.CSSProperties = {
+  marginTop: 0,
+  marginBottom: 10,
+  color: "#3a5a7a",
+  lineHeight: 1.55,
+  fontSize: "0.9rem",
+};
+
+const goldButtonStyle: React.CSSProperties = {
+  padding: "15px 24px",
+  borderRadius: 999,
+  border: "none",
+  background: "#FFD86B",
+  color: "#1a2a0e",
+  fontWeight: 700,
+  fontSize: "1rem",
+  cursor: "pointer",
+  boxShadow:
+    "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
+};
+
+const ghostButtonStyle: React.CSSProperties = {
+  padding: "15px 24px",
+  borderRadius: 999,
+  border: "1px solid rgba(13,42,74,0.18)",
+  background: "rgba(255,255,255,0.55)",
+  color: "#0d2a4a",
+  fontWeight: 600,
+  fontSize: "0.98rem",
+  cursor: "pointer",
+  textDecoration: "none",
+  display: "inline-block",
+};
+
+const reviewBoxStyle: React.CSSProperties = {
+  borderRadius: 14,
+  border: "1px solid rgba(100,150,220,0.25)",
+  background: "rgba(255,255,255,0.6)",
+  padding: 16,
+};
+
+const reviewKickerStyle: React.CSSProperties = {
+  fontSize: 12,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "#6b7c94",
+};
+
 export default function SubmitPage() {
   const searchParams = useSearchParams();
 
@@ -186,61 +314,133 @@ export default function SubmitPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#d3e4f7] text-[#1e2a38]">
-      <div className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-        <div className="mb-10">
-          <p className="mb-3 text-sm uppercase tracking-[0.22em] text-[#6b7c94]">
+    <main
+      style={{
+        minHeight: "100vh",
+        color: "#0d2a4a",
+        position: "relative",
+        overflow: "hidden",
+        padding: "clamp(44px, 7vw, 72px) 20px 72px",
+      }}
+    >
+      <Atmosphere />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          maxWidth: 760,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ marginBottom: 32 }}>
+          <p
+            style={{
+              fontSize: "0.82rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.7)",
+              margin: 0,
+              marginBottom: 14,
+            }}
+          >
             Canary Commons
           </p>
 
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1
+            style={{
+              fontSize: "clamp(2rem, 4.5vw, 2.8rem)",
+              lineHeight: 1.08,
+              margin: 0,
+              marginBottom: 16,
+              fontWeight: 650,
+              color: "rgba(255,255,255,0.96)",
+            }}
+          >
             Reveal a point of light
           </h1>
 
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#4a5a70]">
+          <p
+            style={{
+              margin: 0,
+              marginBottom: 14,
+              maxWidth: 600,
+              fontSize: "1.06rem",
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.85)",
+            }}
+          >
             Help make what is already life-giving more visible. Share a place,
             project, offering, or effort that belongs on the map.
           </p>
 
-          <p className="mt-4 text-sm leading-6 text-[#4a5a70]">
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.92rem",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.78)",
+            }}
+          >
             Not sure what belongs here?{" "}
             <Link
               href="/about"
-              className="font-medium text-[#0e3a66] underline underline-offset-4"
+              style={{
+                color: "#FFD86B",
+                fontWeight: 600,
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
             >
               Read about the project and what belongs on the map.
             </Link>
           </p>
 
           {regionLabel ? (
-            <div className="mt-6 inline-flex rounded-full border border-black/10 bg-white/55 px-4 py-2 text-sm text-[#4a5a70]">
+            <div
+              style={{
+                marginTop: 18,
+                display: "inline-flex",
+                padding: "8px 16px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.4)",
+                background: "rgba(255,255,255,0.18)",
+                color: "rgba(255,255,255,0.92)",
+                fontSize: "0.88rem",
+                backdropFilter: "blur(6px)",
+              }}
+            >
               Region prefilled: {regionLabel}
             </div>
           ) : null}
         </div>
 
-        <div className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] sm:p-8">
+        <div
+          style={{
+            borderRadius: 22,
+            border: "1px solid rgba(255,255,255,0.6)",
+            background: "rgba(255,255,255,0.82)",
+            backdropFilter: "blur(12px)",
+            padding: "clamp(24px, 4vw, 36px)",
+          }}
+        >
           {!isReviewing ? (
             <>
-              <div className="grid gap-6">
+              <div style={{ display: "grid", gap: 18 }}>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Name of place or project
-                  </label>
+                  <label style={labelStyle}>Name of place or project</label>
                   <input
                     name="ar-place-title"
                     autoComplete="off"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder=""
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Description
-                  </label>
+                  <label style={labelStyle}>Description</label>
                   <textarea
                     name="ar-description"
                     autoComplete="off"
@@ -248,22 +448,20 @@ export default function SubmitPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Tell people what this is and why it matters."
                     rows={5}
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                    style={{ ...inputStyle, resize: "vertical" }}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Primary Category
-                  </label>
-                  <p className="mb-3 text-sm leading-6 text-[#4a5a70]">
+                  <label style={labelStyle}>Primary Category</label>
+                  <p style={helperStyle}>
                     Choose the main area of life this belongs to.
                   </p>
 
                   <select
                     value={primaryCategory}
                     onChange={(e) => setPrimaryCategory(e.target.value)}
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none focus:border-black/20"
+                    style={{ ...inputStyle, appearance: "none" }}
                   >
                     <option value="">Select a category</option>
                     {PRIMARY_CATEGORY_OPTIONS.map((category) => (
@@ -275,15 +473,19 @@ export default function SubmitPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Practices / Values
-                  </label>
+                  <label style={labelStyle}>Practices / Values</label>
 
-                  <p className="mb-3 text-sm italic leading-6 text-[#4a5a70]">
+                  <p style={{ ...helperStyle, fontStyle: "italic" }}>
                     Mark all that apply.
                   </p>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 10,
+                    }}
+                  >
                     {PRACTICE_OPTIONS.map((practice) => {
                       const isSelected = practices.includes(practice);
 
@@ -292,11 +494,20 @@ export default function SubmitPage() {
                           key={practice}
                           type="button"
                           onClick={() => togglePractice(practice)}
-                          className={`rounded-full border px-4 py-2 text-sm transition ${
-                            isSelected
-                              ? "border-black/20 bg-[#0e3a66] text-white"
-                              : "border-black/10 bg-white/70 text-[#4a5a70] hover:bg-white"
-                          }`}
+                          style={{
+                            borderRadius: 999,
+                            border: isSelected
+                              ? "1px solid rgba(255,200,80,0.45)"
+                              : "1px solid rgba(100,150,220,0.22)",
+                            padding: "10px 14px",
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            background: isSelected
+                              ? "rgba(255,216,107,0.18)"
+                              : "rgba(255,255,255,0.7)",
+                            color: isSelected ? "#7a4f00" : "#3a5a7a",
+                          }}
                         >
                           {practice}
                         </button>
@@ -306,172 +517,226 @@ export default function SubmitPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Website
-                  </label>
+                  <label style={labelStyle}>Website</label>
                   <input
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="https://example.org"
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                    Street address
-                  </label>
+                  <label style={labelStyle}>Street address</label>
                   <input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Optional, but helpful for mapping"
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                    style={inputStyle}
                   />
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-3">
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 16,
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  }}
+                >
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                      City
-                    </label>
+                    <label style={labelStyle}>City</label>
                     <input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder=""
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                      style={inputStyle}
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                      County
-                    </label>
+                    <label style={labelStyle}>County</label>
                     <input
                       value={county}
                       onChange={(e) => setCounty(e.target.value)}
                       placeholder="Jackson"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                      style={inputStyle}
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                      State
-                    </label>
+                    <label style={labelStyle}>State</label>
                     <input
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       placeholder="Oregon"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                      style={inputStyle}
                     />
                   </div>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 16,
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  }}
+                >
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                      Your name
-                    </label>
+                    <label style={labelStyle}>Your name</label>
                     <input
                       value={submittedBy}
                       onChange={(e) => setSubmittedBy(e.target.value)}
                       placeholder="Optional"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                      style={inputStyle}
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#1e2a38]">
-                      Your email
-                    </label>
+                    <label style={labelStyle}>Your email</label>
                     <input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Optional"
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-[#1e2a38] outline-none placeholder:text-[#7c8aa0] focus:border-black/20"
+                      style={inputStyle}
                     />
                   </div>
                 </div>
               </div>
 
               {errorMessage ? (
-                <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div
+                  style={{
+                    marginTop: 22,
+                    padding: "12px 16px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(180,40,40,0.35)",
+                    background: "rgba(255,235,235,0.9)",
+                    color: "#8a1a1a",
+                    fontSize: "0.9rem",
+                  }}
+                >
                   {errorMessage}
                 </div>
               ) : null}
 
               {successMessage ? (
-                <div className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                <div
+                  style={{
+                    marginTop: 22,
+                    padding: "12px 16px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(52,140,88,0.4)",
+                    background: "rgba(225,245,232,0.9)",
+                    color: "#185e35",
+                    fontSize: "0.9rem",
+                  }}
+                >
                   {successMessage}
                 </div>
               ) : null}
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div
+                style={{
+                  marginTop: 28,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
+                }}
+              >
                 <button
                   type="button"
                   onClick={handleReview}
-                  className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0e3a66] transition hover:bg-white/85"
+                  style={goldButtonStyle}
                 >
                   Review listing
                 </button>
 
-                <Link
-                  href="/map"
-                  className="rounded-full border border-black/10 px-5 py-3 text-sm font-medium text-[#0e3a66] transition hover:bg-white/60"
-                >
+                <Link href="/map" style={ghostButtonStyle}>
                   Back to map
                 </Link>
               </div>
             </>
           ) : (
             <>
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold tracking-tight">
+              <div style={{ marginBottom: 24 }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "1.5rem",
+                    fontWeight: 650,
+                    color: "#0d2a4a",
+                    lineHeight: 1.2,
+                  }}
+                >
                   Review before submitting
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-[#4a5a70]">
+                <p
+                  style={{
+                    marginTop: 12,
+                    maxWidth: 600,
+                    fontSize: "0.92rem",
+                    lineHeight: 1.65,
+                    color: "#3a5a7a",
+                  }}
+                >
                   Please make any final changes now. Once submitted, this listing
                   will go live, and future edits will be reviewed before being
                   published.
                 </p>
               </div>
 
-              <div className="grid gap-5">
-                <div className="rounded-2xl border border-black/10 bg-white p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                    Name
+              <div style={{ display: "grid", gap: 14 }}>
+                <div style={reviewBoxStyle}>
+                  <div style={reviewKickerStyle}>Name</div>
+                  <div style={{ marginTop: 6, fontSize: "1rem", color: "#0d2a4a" }}>
+                    {title}
                   </div>
-                  <div className="mt-2 text-base text-[#1e2a38]">{title}</div>
                 </div>
 
-                <div className="rounded-2xl border border-black/10 bg-white p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                    Description
-                  </div>
-                  <div className="mt-2 whitespace-pre-wrap text-base leading-7 text-[#1e2a38]">
+                <div style={reviewBoxStyle}>
+                  <div style={reviewKickerStyle}>Description</div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      whiteSpace: "pre-wrap",
+                      fontSize: "1rem",
+                      lineHeight: 1.65,
+                      color: "#0d2a4a",
+                    }}
+                  >
                     {description}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-black/10 bg-white p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                    Primary Category
-                  </div>
-                  <div className="mt-2 text-base text-[#1e2a38]">
+                <div style={reviewBoxStyle}>
+                  <div style={reviewKickerStyle}>Primary Category</div>
+                  <div style={{ marginTop: 6, fontSize: "1rem", color: "#0d2a4a" }}>
                     {primaryCategory}
                   </div>
                 </div>
 
                 {practices.length > 0 ? (
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                      Practices / Values
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                  <div style={reviewBoxStyle}>
+                    <div style={reviewKickerStyle}>Practices / Values</div>
+                    <div
+                      style={{
+                        marginTop: 10,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 8,
+                      }}
+                    >
                       {practices.map((practice) => (
                         <span
                           key={practice}
-                          className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-sm text-[#4a5a70]"
+                          style={{
+                            borderRadius: 999,
+                            border: "1px solid rgba(100,150,220,0.25)",
+                            background: "rgba(255,255,255,0.7)",
+                            padding: "5px 12px",
+                            fontSize: "0.85rem",
+                            color: "#3a5a7a",
+                          }}
                         >
                           {practice}
                         </span>
@@ -481,22 +746,32 @@ export default function SubmitPage() {
                 ) : null}
 
                 {website ? (
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                      Website
-                    </div>
-                    <div className="mt-2 break-all text-base text-[#1e2a38]">
+                  <div style={reviewBoxStyle}>
+                    <div style={reviewKickerStyle}>Website</div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        wordBreak: "break-all",
+                        fontSize: "1rem",
+                        color: "#0d2a4a",
+                      }}
+                    >
                       {website}
                     </div>
                   </div>
                 ) : null}
 
                 {address || city || county || state ? (
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                      Location
-                    </div>
-                    <div className="mt-2 space-y-1 text-base text-[#1e2a38]">
+                  <div style={reviewBoxStyle}>
+                    <div style={reviewKickerStyle}>Location</div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: "1rem",
+                        color: "#0d2a4a",
+                        lineHeight: 1.55,
+                      }}
+                    >
                       {address ? <div>{address}</div> : null}
                       <div>{[city, county, state].filter(Boolean).join(", ")}</div>
                     </div>
@@ -504,11 +779,16 @@ export default function SubmitPage() {
                 ) : null}
 
                 {submittedBy || email ? (
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-xs uppercase tracking-[0.18em] text-[#6b7c94]">
-                      Submitted by
-                    </div>
-                    <div className="mt-2 space-y-1 text-base text-[#1e2a38]">
+                  <div style={reviewBoxStyle}>
+                    <div style={reviewKickerStyle}>Submitted by</div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: "1rem",
+                        color: "#0d2a4a",
+                        lineHeight: 1.55,
+                      }}
+                    >
                       {submittedBy ? <div>{submittedBy}</div> : null}
                       {email ? <div>{email}</div> : null}
                     </div>
@@ -517,22 +797,49 @@ export default function SubmitPage() {
               </div>
 
               {errorMessage ? (
-                <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div
+                  style={{
+                    marginTop: 22,
+                    padding: "12px 16px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(180,40,40,0.35)",
+                    background: "rgba(255,235,235,0.9)",
+                    color: "#8a1a1a",
+                    fontSize: "0.9rem",
+                  }}
+                >
                   {errorMessage}
                 </div>
               ) : null}
 
               {successMessage ? (
-                <div className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                <div
+                  style={{
+                    marginTop: 22,
+                    padding: "12px 16px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(52,140,88,0.4)",
+                    background: "rgba(225,245,232,0.9)",
+                    color: "#185e35",
+                    fontSize: "0.9rem",
+                  }}
+                >
                   {successMessage}
                 </div>
               ) : null}
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div
+                style={{
+                  marginTop: 28,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setIsReviewing(false)}
-                  className="rounded-full border border-black/10 px-5 py-3 text-sm font-medium text-[#0e3a66] transition hover:bg-white/60"
+                  style={ghostButtonStyle}
                 >
                   Back to edit
                 </button>
@@ -541,7 +848,11 @@ export default function SubmitPage() {
                   type="button"
                   onClick={handleFinalSubmit}
                   disabled={isSubmitting}
-                  className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0e3a66] transition hover:bg-white/85 disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{
+                    ...goldButtonStyle,
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    opacity: isSubmitting ? 0.6 : 1,
+                  }}
                 >
                   {isSubmitting ? "Submitting..." : "Submit listing"}
                 </button>

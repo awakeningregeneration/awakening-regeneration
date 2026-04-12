@@ -6,7 +6,62 @@ import { useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
 import { californiaCounties } from "@/data/californiaCounties";
+import { allCounties } from "@/data/allCounties";
 import type { Listing } from "@/types/listing";
+
+const STATES = [
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
+  "District of Columbia",
+];
 
 type PropsRegion = { state?: string; county?: string };
 
@@ -56,12 +111,8 @@ export default function MapPage() {
   }, [searchParams]);
 
   const states = useMemo(() => {
-    const s = new Set<string>();
-    allListings.forEach((l) => {
-      if (l.state) s.add(l.state);
-    });
-    return ["All", ...Array.from(s).sort()];
-  }, [allListings]);
+    return ["All", ...STATES];
+  }, []);
 
 const counties = useMemo(() => {
   if (selectedState === "All") return ["All"];
@@ -70,16 +121,8 @@ const counties = useMemo(() => {
     return ["All", ...californiaCounties];
   }
 
-  const c = new Set<string>();
-  allListings.forEach((l) => {
-    if (l.state === selectedState && l.county) {
-      const cleanedCounty = l.county.replace(/\s+County$/i, "");
-      c.add(cleanedCounty);
-    }
-  });
-
-  return ["All", ...Array.from(c).sort()];
-}, [allListings, selectedState]);
+  return ["All", ...(allCounties[selectedState] ?? [])];
+}, [selectedState]);
 
   const hasStateSelection = selectedState !== "All";
   const hasCountySelection = selectedCounty !== "All";
