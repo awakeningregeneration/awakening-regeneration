@@ -453,23 +453,6 @@ export default function SupportPage() {
         </div>
 
         {/* Results area */}
-        {!hasSearched && (
-          <div
-            style={{
-              padding: "28px 24px",
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(31,42,58,0.08)",
-              maxWidth: 760,
-              color: "#6b7d92",
-              fontSize: "1.05rem",
-              fontStyle: "italic",
-            }}
-          >
-            Tell us what you&apos;re looking for
-          </div>
-        )}
-
         {hasSearched && !noResults && (
           <>
             <div

@@ -1,6 +1,14 @@
-import Link from "next/link";
+"use client";
 
-export default function FoundersPage() {
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function FoundersContent() {
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref") || "";
+  const joinHref = ref ? `/founders/join?ref=${encodeURIComponent(ref)}` : "/founders/join";
+
   return (
     <main className="min-h-screen bg-[#dbeafe] text-slate-900">
       <div className="mx-auto max-w-4xl px-6 py-16">
@@ -45,14 +53,16 @@ export default function FoundersPage() {
               <li>Founding-role recognition as the commons takes root</li>
             </ul>
           </section>
-<section className="rounded-2xl bg-white/80 p-6 shadow-sm ring-1 ring-slate-200">
-  <h2 className="text-xl font-semibold">Contribution</h2>
-  <p className="mt-3 leading-7 text-slate-700">
-    Founders make a small monthly contribution of $9/month for one year.
-    This supports the early building phase and helps establish the
-    foundation of a visible, life-supporting commons.
-  </p>
-</section>
+
+          <section className="rounded-2xl bg-white/80 p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 className="text-xl font-semibold">Contribution</h2>
+            <p className="mt-3 leading-7 text-slate-700">
+              Founders make a small monthly contribution of $9/month for one year.
+              This supports the early building phase and helps establish the
+              foundation of a visible, life-supporting commons.
+            </p>
+          </section>
+
           <section className="rounded-2xl bg-white/80 p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="text-xl font-semibold">Seed referral pathway</h2>
             <p className="mt-3 leading-7 text-slate-700">
@@ -70,12 +80,12 @@ export default function FoundersPage() {
             Join as an early founder and help strengthen a public-facing map of
             regenerative, life-forward participation.
           </p>
-<p className="mt-3 max-w-2xl leading-7 text-sky-200">
-  This is a simple, meaningful commitment to help bring this into the world.
-</p>
+          <p className="mt-3 max-w-2xl leading-7 text-sky-200">
+            This is a simple, meaningful commitment to help bring this into the world.
+          </p>
           <div className="mt-6 flex flex-wrap gap-4">
             <Link
-              href="/founders/join"
+              href={joinHref}
               className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 transition hover:opacity-90"
             >
               Become a Founder
@@ -91,5 +101,13 @@ export default function FoundersPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function FoundersPage() {
+  return (
+    <Suspense>
+      <FoundersContent />
+    </Suspense>
   );
 }
