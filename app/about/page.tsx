@@ -1,36 +1,58 @@
 export default function AboutPage() {
-  const lights = [
-    { left: "8%", top: "12%", size: 10, glow: 1.2 },
-    { left: "18%", top: "22%", size: 7, glow: 0.9 },
-    { left: "28%", top: "10%", size: 9, glow: 1.1 },
-    { left: "42%", top: "18%", size: 8, glow: 1.05 },
-    { left: "55%", top: "12%", size: 10, glow: 1.25 },
-    { left: "68%", top: "20%", size: 7, glow: 0.95 },
-    { left: "82%", top: "14%", size: 9, glow: 1.15 },
-    { left: "90%", top: "26%", size: 6, glow: 0.85 },
+  const lights: {
+    left: string;
+    top: string;
+    size: number;
+    opacity: number;
+    glow: number;
+    tone: "gold" | "cool";
+  }[] = [
+    // Upper band
+    { left: "4%", top: "6%", size: 2, opacity: 0.35, glow: 4, tone: "gold" },
+    { left: "9%", top: "18%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
+    { left: "14%", top: "9%", size: 2, opacity: 0.4, glow: 5, tone: "gold" },
+    { left: "21%", top: "14%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
+    { left: "17%", top: "28%", size: 2, opacity: 0.3, glow: 4, tone: "cool" },
+    { left: "26%", top: "22%", size: 5, opacity: 0.8, glow: 11, tone: "gold" },
+    { left: "32%", top: "7%", size: 2, opacity: 0.45, glow: 5, tone: "cool" },
+    { left: "38%", top: "17%", size: 6, opacity: 0.85, glow: 13, tone: "gold" },
+    { left: "44%", top: "12%", size: 8, opacity: 0.95, glow: 18, tone: "gold" },
+    { left: "49%", top: "26%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
+    { left: "55%", top: "8%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
+    { left: "61%", top: "20%", size: 2, opacity: 0.4, glow: 4, tone: "cool" },
+    { left: "66%", top: "11%", size: 10, opacity: 1.0, glow: 22, tone: "gold" },
+    { left: "72%", top: "24%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
+    { left: "78%", top: "16%", size: 5, opacity: 0.85, glow: 12, tone: "gold" },
+    { left: "84%", top: "9%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
+    { left: "89%", top: "22%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
+    { left: "94%", top: "13%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
 
-    { left: "12%", top: "36%", size: 8, glow: 1.05 },
-    { left: "24%", top: "30%", size: 6, glow: 0.85 },
-    { left: "36%", top: "40%", size: 9, glow: 1.15 },
-    { left: "49%", top: "34%", size: 7, glow: 0.9 },
-    { left: "63%", top: "38%", size: 10, glow: 1.2 },
-    { left: "76%", top: "32%", size: 8, glow: 1.05 },
-    { left: "88%", top: "42%", size: 7, glow: 0.9 },
+    // Middle belt
+    { left: "6%", top: "36%", size: 3, opacity: 0.5, glow: 6, tone: "gold" },
+    { left: "13%", top: "44%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
+    { left: "22%", top: "40%", size: 4, opacity: 0.75, glow: 10, tone: "gold" },
+    { left: "29%", top: "52%", size: 7, opacity: 0.92, glow: 15, tone: "cool" },
+    { left: "36%", top: "46%", size: 2, opacity: 0.3, glow: 3, tone: "gold" },
+    { left: "45%", top: "54%", size: 9, opacity: 1.0, glow: 20, tone: "gold" },
+    { left: "53%", top: "42%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
+    { left: "60%", top: "50%", size: 2, opacity: 0.4, glow: 4, tone: "gold" },
+    { left: "68%", top: "38%", size: 5, opacity: 0.8, glow: 12, tone: "cool" },
+    { left: "75%", top: "48%", size: 3, opacity: 0.55, glow: 6, tone: "gold" },
+    { left: "83%", top: "44%", size: 4, opacity: 0.75, glow: 10, tone: "gold" },
+    { left: "91%", top: "54%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
 
-    { left: "10%", top: "56%", size: 9, glow: 1.1 },
-    { left: "20%", top: "68%", size: 7, glow: 0.9 },
-    { left: "33%", top: "60%", size: 10, glow: 1.2 },
-    { left: "46%", top: "72%", size: 8, glow: 1.05 },
-    { left: "58%", top: "58%", size: 7, glow: 0.95 },
-    { left: "71%", top: "66%", size: 10, glow: 1.25 },
-    { left: "84%", top: "60%", size: 8, glow: 1.05 },
-
-    { left: "14%", top: "84%", size: 6, glow: 0.8 },
-    { left: "30%", top: "88%", size: 8, glow: 1.0 },
-    { left: "44%", top: "86%", size: 7, glow: 0.9 },
-    { left: "61%", top: "90%", size: 9, glow: 1.15 },
-    { left: "78%", top: "84%", size: 7, glow: 0.9 },
-    { left: "90%", top: "92%", size: 6, glow: 0.8 },
+    // Lower band
+    { left: "7%", top: "66%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
+    { left: "16%", top: "74%", size: 5, opacity: 0.85, glow: 12, tone: "gold" },
+    { left: "24%", top: "68%", size: 2, opacity: 0.4, glow: 4, tone: "gold" },
+    { left: "34%", top: "80%", size: 8, opacity: 0.96, glow: 18, tone: "gold" },
+    { left: "43%", top: "72%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
+    { left: "52%", top: "84%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
+    { left: "59%", top: "68%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
+    { left: "67%", top: "76%", size: 10, opacity: 1.0, glow: 22, tone: "gold" },
+    { left: "76%", top: "82%", size: 3, opacity: 0.5, glow: 6, tone: "gold" },
+    { left: "85%", top: "70%", size: 5, opacity: 0.8, glow: 11, tone: "cool" },
+    { left: "93%", top: "88%", size: 2, opacity: 0.3, glow: 3, tone: "gold" },
   ];
 
   return (
@@ -39,20 +61,23 @@ export default function AboutPage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(88,156,255,0.12)_0%,_transparent_32%),radial-gradient(circle_at_80%_30%,_rgba(88,156,255,0.1)_0%,_transparent_28%),radial-gradient(circle_at_50%_80%,_rgba(88,156,255,0.08)_0%,_transparent_34%)]" />
 
       <div className="pointer-events-none absolute inset-0">
-        {lights.map((light, index) => (
-          <div
-            key={index}
-            className="absolute rounded-full bg-[#fff7cc]"
-            style={{
-              left: light.left,
-              top: light.top,
-              width: `${light.size}px`,
-              height: `${light.size}px`,
-              boxShadow: `0 0 ${14 * light.glow}px rgba(255, 242, 170, 0.75), 0 0 ${28 * light.glow}px rgba(120, 180, 255, 0.28)`,
-              opacity: 0.95,
-            }}
-          />
-        ))}
+        {lights.map((light, index) => {
+          const base = light.tone === "cool" ? "220,235,255" : "255,244,200";
+          return (
+            <div
+              key={index}
+              className="absolute rounded-full"
+              style={{
+                left: light.left,
+                top: light.top,
+                width: `${light.size}px`,
+                height: `${light.size}px`,
+                background: `rgba(${base},${light.opacity})`,
+                boxShadow: `0 0 ${light.glow}px rgba(${base},${light.opacity * 0.7}), 0 0 ${light.glow * 2}px rgba(120,180,255,${light.opacity * 0.22})`,
+              }}
+            />
+          );
+        })}
       </div>
 
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">

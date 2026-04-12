@@ -67,14 +67,16 @@ export default function ThresholdMap() {
 
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-      <div
-        ref={mapRef}
-        style={{
-          width: "100%",
-          height: "100%",
-          filter: "brightness(1.03) saturate(1.1)",
-        }}
-      />
+      <div style={{ position: "absolute", inset: 0, opacity: 0.72 }}>
+        <div
+          ref={mapRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            filter: "brightness(1.03) saturate(1.1)",
+          }}
+        />
+      </div>
 
       {/* Blue atmosphere / headline readability */}
       <div
@@ -144,8 +146,8 @@ export default function ThresholdMap() {
                 inset: 0,
                 borderRadius: "50%",
                 background:
-                  "radial-gradient(circle, rgba(255,245,210,0.95) 0%, rgba(255,220,140,0.78) 28%, rgba(255,200,110,0.32) 55%, rgba(255,200,110,0.08) 72%, transparent 100%)",
-                boxShadow: `0 0 ${p.size * 2.2 * p.glow}px rgba(255,210,120,0.28)`,
+                  "radial-gradient(circle, rgba(255,245,210,1.0) 0%, rgba(255,220,140,0.78) 28%, rgba(255,200,110,0.32) 55%, rgba(255,200,110,0.08) 72%, transparent 100%)",
+                boxShadow: `0 0 ${p.size * 2.2 * p.glow}px rgba(255,210,120,0.42)`,
                 opacity: 0.82,
               }}
             />
@@ -160,7 +162,7 @@ export default function ThresholdMap() {
                 transform: "translate(-50%, -50%)",
                 borderRadius: "50%",
                 background: "rgba(255,246,220,0.92)",
-                boxShadow: `0 0 ${p.size * 1.0}px rgba(255,235,170,0.42)`,
+                boxShadow: `0 0 ${p.size * 1.0}px rgba(255,235,170,0.62)`,
               }}
             />
           </div>
@@ -168,7 +170,7 @@ export default function ThresholdMap() {
       </div>
 
       {/* Faint background lights */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.62 }}>
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.82 }}>
         {[
           { left: 18, top: 42 },
           { left: 21, top: 34 },

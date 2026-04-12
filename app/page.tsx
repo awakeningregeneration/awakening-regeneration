@@ -87,7 +87,18 @@ export default function HomePage() {
           inset: 0,
           pointerEvents: "none",
           background:
-            "linear-gradient(to bottom, rgba(20,70,150,0.12) 0%, rgba(20,70,150,0.05) 30%, rgba(12,50,120,0.14) 100%)",
+            "linear-gradient(to bottom, rgba(20,70,150,0.22) 0%, rgba(20,70,150,0.05) 30%, rgba(12,50,120,0.26) 100%)",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 1,
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(60,110,200,0.13) 0%, transparent 62%)",
         }}
       />
 
@@ -133,16 +144,32 @@ export default function HomePage() {
               textShadow: "0 12px 34px rgba(6,16,40,0.34)",
             }}
           >
-            All lights connected,
+            Connected,
             <br />
             <span
               style={{
                 color: "#FFD86B",
-                textShadow: "0 0 20px rgba(255,216,107,0.10)",
+                textShadow:
+                  "0 0 32px rgba(255,216,107,0.38), 0 0 64px rgba(255,200,80,0.18)",
               }}
             >
-              we dawn brighter.
+              We Dawn Brighter
             </span>
+            <span
+              style={{
+                display: "inline-block",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                background: "rgba(255,244,200,0.95)",
+                boxShadow:
+                  "0 0 10px 4px rgba(255,220,140,0.45), 0 0 22px 6px rgba(255,200,100,0.18)",
+                marginLeft: "4px",
+                verticalAlign: "baseline",
+                position: "relative",
+                top: "2px",
+              }}
+            />
           </h1>
         </div>
 
@@ -159,19 +186,29 @@ export default function HomePage() {
             style={{
               fontSize: "clamp(1.02rem, 1.35vw, 1.14rem)",
               lineHeight: 1.55,
-              color: "rgba(255,255,255,0.90)",
+              color: "rgba(255,255,255,0.97)",
               maxWidth: 760,
               margin: "0 auto 18px",
-              textShadow: "0 6px 18px rgba(6,16,40,0.28)",
+              textShadow: "0 4px 18px rgba(4,12,35,0.65)",
             }}
           >
-            <p style={{ margin: "0 0 10px" }}>
+            <p
+              style={{
+                margin: "0 0 10px",
+                textShadow: "0 2px 12px rgba(4,12,35,0.72)",
+              }}
+            >
               Life moves through a few simple needs:
               <br />
               air, water, soil, energy, and relationship.
             </p>
 
-            <p style={{ margin: "0 0 18px" }}>
+            <p
+              style={{
+                margin: "0 0 18px",
+                textShadow: "0 2px 12px rgba(4,12,35,0.72)",
+              }}
+            >
               Canary Commons helps make visible what is already moving in those
               directions.
             </p>
@@ -181,10 +218,10 @@ export default function HomePage() {
             style={{
               fontSize: "clamp(1.05rem, 1.45vw, 1.22rem)",
               lineHeight: 1.45,
-              color: "rgba(255,255,255,0.90)",
+              color: "rgba(255,255,255,0.97)",
               maxWidth: 700,
               margin: "0 auto 22px",
-              textShadow: "0 6px 18px rgba(6,16,40,0.28)",
+              textShadow: "0 4px 18px rgba(4,12,35,0.65)",
             }}
           >
             Choose a place and see what is becoming visible where you are or
@@ -270,7 +307,7 @@ export default function HomePage() {
               fontSize: 15,
               lineHeight: 1.45,
               color: "rgba(255,255,255,0.82)",
-              textShadow: "0 6px 18px rgba(6,16,40,0.34)",
+              textShadow: "0 4px 18px rgba(4,12,35,0.65)",
               maxWidth: 760,
               marginLeft: "auto",
               marginRight: "auto",
@@ -284,7 +321,8 @@ export default function HomePage() {
             style={{
               marginTop: 18,
               fontSize: 14,
-              color: "rgba(255,255,255,0.65)",
+              color: "rgba(255,255,255,0.95)",
+              textShadow: "0 4px 18px rgba(4,12,35,0.65)",
             }}
           >
             <a

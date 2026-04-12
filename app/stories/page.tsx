@@ -17,6 +17,17 @@ type Story = {
   link?: string | null;
 };
 
+const lightPoints: { left: string; top: string; size: number; glow: number }[] = [
+  { left: "6%", top: "8%", size: 4, glow: 10 },
+  { left: "18%", top: "22%", size: 3, glow: 8 },
+  { left: "32%", top: "12%", size: 6, glow: 14 },
+  { left: "48%", top: "28%", size: 3, glow: 8 },
+  { left: "62%", top: "16%", size: 5, glow: 12 },
+  { left: "78%", top: "30%", size: 7, glow: 16 },
+  { left: "88%", top: "10%", size: 4, glow: 10 },
+  { left: "12%", top: "44%", size: 5, glow: 12 },
+];
+
 export default async function StoriesPage({
   searchParams,
 }: StoriesPageProps) {
@@ -62,17 +73,108 @@ export default async function StoriesPage({
 
   const hasStories = stories.length > 0;
 
+  const cardStyle: React.CSSProperties = {
+    borderRadius: 20,
+    border: "1px solid rgba(255,255,255,0.09)",
+    background: "rgba(255,255,255,0.06)",
+    backdropFilter: "blur(8px)",
+    padding: "22px 22px",
+    marginBottom: 18,
+  };
+
+  const headingStyle: React.CSSProperties = {
+    color: "rgba(255,255,255,0.96)",
+    fontWeight: 600,
+    margin: 0,
+  };
+
+  const bodyTextStyle: React.CSSProperties = {
+    color: "rgba(211,227,247,0.82)",
+    lineHeight: 1.65,
+  };
+
+  const smallLabelStyle: React.CSSProperties = {
+    fontSize: 12,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "rgba(159,184,216,0.65)",
+    marginBottom: 10,
+  };
+
+  const goldLinkStyle: React.CSSProperties = {
+    color: "#FFD86B",
+    fontWeight: 600,
+    textDecoration: "none",
+    fontSize: 14,
+  };
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#d3e4f7",
-        color: "#1f1f1c",
+        background: "#08192d",
+        color: "white",
+        position: "relative",
+        overflow: "hidden",
         padding: "32px 20px 48px",
       }}
     >
+      {/* Atmosphere layer 1 — top glow */}
       <div
         style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(26,72,130,0.32) 0%, rgba(5,16,31,1) 70%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Atmosphere layer 2 — soft center bloom */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 45%, rgba(60,110,200,0.11) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Gold light points */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        {lightPoints.map((p, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: p.left,
+              top: p.top,
+              width: p.size,
+              height: p.size,
+              borderRadius: "50%",
+              background: "rgba(255,244,200,0.75)",
+              boxShadow: `0 0 ${p.glow}px rgba(255,220,140,0.42), 0 0 ${
+                p.glow * 2
+              }px rgba(255,200,100,0.14)`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
           maxWidth: 760,
           margin: "0 auto",
         }}
@@ -84,7 +186,7 @@ export default async function StoriesPage({
             style={{
               textDecoration: "underline",
               textUnderlineOffset: 3,
-              color: "inherit",
+              color: "rgba(159,184,216,0.65)",
               fontSize: 14,
             }}
           >
@@ -93,33 +195,14 @@ export default async function StoriesPage({
         </div>
 
         {/* Header + Rose/Thorn */}
-        <section
-          style={{
-            padding: "20px 20px 18px",
-            border: "1px solid rgba(0,0,0,0.10)",
-            borderRadius: 16,
-            background: "rgba(255,255,255,0.78)",
-            marginBottom: 18,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              opacity: 0.65,
-              marginBottom: 8,
-            }}
-          >
-            Story of place
-          </div>
+        <section style={cardStyle}>
+          <div style={smallLabelStyle}>Story of place</div>
 
           <h1
             style={{
+              ...headingStyle,
               fontSize: 30,
               lineHeight: 1.15,
-              fontWeight: 600,
-              margin: 0,
               marginBottom: 12,
             }}
           >
@@ -128,14 +211,11 @@ export default async function StoriesPage({
 
           <div
             style={{
+              ...bodyTextStyle,
               fontSize: 16,
-              lineHeight: 1.6,
-              opacity: 0.85,
               maxWidth: 640,
             }}
           >
-           
-
             <p style={{ marginBottom: 10 }}>
               The world has become practiced in reporting the thorn — what is
               broken, extractive, alarming, and in need of repair.
@@ -157,19 +237,11 @@ export default async function StoriesPage({
 
         {/* STORIES LIST */}
         {hasStories ? (
-          <section
-            style={{
-              padding: "20px",
-              border: "1px solid rgba(0,0,0,0.10)",
-              borderRadius: 16,
-              background: "white",
-              marginBottom: 18,
-            }}
-          >
+          <section style={cardStyle}>
             <div
               style={{
+                ...headingStyle,
                 fontSize: 18,
-                fontWeight: 600,
                 marginBottom: 14,
               }}
             >
@@ -183,15 +255,15 @@ export default async function StoriesPage({
                   style={{
                     padding: "16px",
                     borderRadius: 14,
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    background: "rgba(0,0,0,0.02)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.04)",
                   }}
                 >
                   {story.title && (
                     <div
                       style={{
+                        ...headingStyle,
                         fontSize: 18,
-                        fontWeight: 600,
                         marginBottom: 8,
                       }}
                     >
@@ -201,10 +273,9 @@ export default async function StoriesPage({
 
                   <div
                     style={{
+                      ...bodyTextStyle,
                       fontSize: 15,
-                      lineHeight: 1.65,
                       whiteSpace: "pre-wrap",
-                      opacity: 0.88,
                     }}
                   >
                     {story.body}
@@ -214,7 +285,7 @@ export default async function StoriesPage({
                     style={{
                       marginTop: 12,
                       fontSize: 12,
-                      opacity: 0.6,
+                      color: "rgba(159,184,216,0.65)",
                     }}
                   >
                     {story.county}, {story.state}
@@ -229,7 +300,7 @@ export default async function StoriesPage({
                         style={{
                           textDecoration: "underline",
                           textUnderlineOffset: 3,
-                          color: "inherit",
+                          color: "rgba(211,227,247,0.82)",
                           fontSize: 14,
                         }}
                       >
@@ -242,19 +313,11 @@ export default async function StoriesPage({
             </div>
           </section>
         ) : (
-          <section
-            style={{
-              padding: "20px",
-              border: "1px solid rgba(0,0,0,0.10)",
-              borderRadius: 16,
-              background: "white",
-              marginBottom: 18,
-            }}
-          >
+          <section style={cardStyle}>
             <div
               style={{
+                ...headingStyle,
                 fontSize: 20,
-                fontWeight: 600,
                 marginBottom: 12,
               }}
             >
@@ -263,9 +326,8 @@ export default async function StoriesPage({
 
             <div
               style={{
+                ...bodyTextStyle,
                 fontSize: 15,
-                lineHeight: 1.65,
-                opacity: 0.82,
                 marginBottom: 14,
               }}
             >
@@ -275,9 +337,8 @@ export default async function StoriesPage({
 
             <div
               style={{
+                ...bodyTextStyle,
                 fontSize: 15,
-                lineHeight: 1.65,
-                opacity: 0.82,
               }}
             >
               What is growing here? What is helping life take root? What rose
@@ -287,19 +348,11 @@ export default async function StoriesPage({
         )}
 
         {/* CTA */}
-        <section
-          style={{
-            padding: "20px",
-            border: "1px solid rgba(0,0,0,0.10)",
-            borderRadius: 16,
-            background: "rgba(0,0,0,0.03)",
-            marginBottom: 18,
-          }}
-        >
+        <section style={cardStyle}>
           <div
             style={{
+              ...headingStyle,
               fontSize: 16,
-              fontWeight: 600,
               marginBottom: 8,
             }}
           >
@@ -308,9 +361,8 @@ export default async function StoriesPage({
 
           <div
             style={{
+              ...bodyTextStyle,
               fontSize: 14,
-              lineHeight: 1.6,
-              opacity: 0.8,
               marginBottom: 12,
             }}
           >
@@ -318,33 +370,17 @@ export default async function StoriesPage({
             possible here.
           </div>
 
-          <Link
-            href={addStoryHref}
-            style={{
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-              fontWeight: 600,
-              color: "inherit",
-              fontSize: 14,
-            }}
-          >
+          <Link href={addStoryHref} style={goldLinkStyle}>
             Share a rose
           </Link>
         </section>
 
         {/* Constellation */}
-        <section
-          style={{
-            padding: "20px",
-            border: "1px solid rgba(0,0,0,0.10)",
-            borderRadius: 16,
-            background: "rgba(255,255,255,0.72)",
-          }}
-        >
+        <section style={{ ...cardStyle, marginBottom: 0 }}>
           <div
             style={{
+              ...headingStyle,
               fontSize: 16,
-              fontWeight: 600,
               marginBottom: 8,
             }}
           >
@@ -353,9 +389,8 @@ export default async function StoriesPage({
 
           <div
             style={{
+              ...bodyTextStyle,
               fontSize: 14,
-              lineHeight: 1.6,
-              opacity: 0.8,
               marginBottom: 12,
             }}
           >
@@ -363,16 +398,7 @@ export default async function StoriesPage({
             root in different ways.
           </div>
 
-          <Link
-            href="/constellation"
-            style={{
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-              fontWeight: 600,
-              color: "inherit",
-              fontSize: 14,
-            }}
-          >
+          <Link href="/constellation" style={goldLinkStyle}>
             Explore the constellation of stories
           </Link>
         </section>
