@@ -34,39 +34,68 @@ const PRACTICES = [
   "Women Led",
 ];
 
+const orbs: { left: string; top: string; size: number; opacity: number }[] = [
+  { left: "6%", top: "8%", size: 5, opacity: 0.6 },
+  { left: "18%", top: "15%", size: 3, opacity: 0.45 },
+  { left: "32%", top: "6%", size: 6, opacity: 0.65 },
+  { left: "48%", top: "22%", size: 4, opacity: 0.5 },
+  { left: "64%", top: "12%", size: 7, opacity: 0.7 },
+  { left: "82%", top: "18%", size: 4, opacity: 0.55 },
+  { left: "10%", top: "38%", size: 6, opacity: 0.65 },
+  { left: "42%", top: "44%", size: 3, opacity: 0.4 },
+  { left: "72%", top: "40%", size: 8, opacity: 0.7 },
+  { left: "22%", top: "68%", size: 5, opacity: 0.55 },
+  { left: "56%", top: "72%", size: 4, opacity: 0.5 },
+  { left: "88%", top: "85%", size: 6, opacity: 0.6 },
+];
+
+function Atmosphere() {
+  return (
+    <>
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(180,210,255,0.9) 0%, rgba(120,170,230,0.85) 25%, rgba(70,120,200,0.9) 60%, rgba(30,70,150,1) 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.18) 0%, transparent 58%)",
+          pointerEvents: "none",
+        }}
+      />
+      {orbs.map((orb, i) => (
+        <div
+          key={i}
+          style={{
+            position: "fixed",
+            left: orb.left,
+            top: orb.top,
+            width: orb.size,
+            height: orb.size,
+            borderRadius: "50%",
+            background: "rgba(255,244,200,0.65)",
+            opacity: orb.opacity,
+            boxShadow:
+              "0 0 8px 3px rgba(255,220,140,0.18), 0 0 20px 5px rgba(255,200,100,0.08)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 export default function ConstellationSubmitPage() {
-  const lights = [
-    { left: "8%", top: "10%", size: 10, glow: 1.2 },
-    { left: "18%", top: "18%", size: 7, glow: 0.9 },
-    { left: "30%", top: "12%", size: 9, glow: 1.1 },
-    { left: "44%", top: "16%", size: 8, glow: 1.05 },
-    { left: "58%", top: "10%", size: 10, glow: 1.25 },
-    { left: "72%", top: "18%", size: 7, glow: 0.95 },
-    { left: "86%", top: "12%", size: 9, glow: 1.15 },
-
-    { left: "12%", top: "34%", size: 8, glow: 1.05 },
-    { left: "24%", top: "28%", size: 6, glow: 0.85 },
-    { left: "38%", top: "38%", size: 9, glow: 1.15 },
-    { left: "52%", top: "30%", size: 7, glow: 0.9 },
-    { left: "66%", top: "36%", size: 10, glow: 1.2 },
-    { left: "80%", top: "30%", size: 8, glow: 1.05 },
-    { left: "90%", top: "40%", size: 7, glow: 0.9 },
-
-    { left: "10%", top: "58%", size: 9, glow: 1.1 },
-    { left: "22%", top: "70%", size: 7, glow: 0.9 },
-    { left: "36%", top: "62%", size: 10, glow: 1.2 },
-    { left: "50%", top: "74%", size: 8, glow: 1.05 },
-    { left: "64%", top: "60%", size: 7, glow: 0.95 },
-    { left: "78%", top: "68%", size: 10, glow: 1.25 },
-    { left: "90%", top: "62%", size: 8, glow: 1.05 },
-
-    { left: "14%", top: "86%", size: 6, glow: 0.8 },
-    { left: "30%", top: "90%", size: 8, glow: 1.0 },
-    { left: "46%", top: "88%", size: 7, glow: 0.9 },
-    { left: "62%", top: "92%", size: 9, glow: 1.15 },
-    { left: "80%", top: "86%", size: 7, glow: 0.9 },
-  ];
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [region, setRegion] = useState("");
@@ -125,65 +154,32 @@ export default function ConstellationSubmitPage() {
     }
   }
 
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    marginBottom: 8,
+    fontWeight: 600,
+    color: "#0d2a4a",
+    fontSize: "0.92rem",
+  };
+
   return (
     <main
       style={{
         position: "relative",
         minHeight: "100vh",
         overflow: "hidden",
-        background: "#08192d",
-        color: "white",
+        color: "#0d2a4a",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(circle at top, rgba(26,72,130,0.28) 0%, rgba(7,24,45,0.9) 38%, rgba(5,16,31,1) 100%)",
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(circle at 20% 20%, rgba(88,156,255,0.12) 0%, transparent 32%), radial-gradient(circle at 80% 30%, rgba(88,156,255,0.10) 0%, transparent 28%), radial-gradient(circle at 50% 80%, rgba(88,156,255,0.08) 0%, transparent 34%)",
-        }}
-      />
-
-      <div
-        style={{
-          pointerEvents: "none",
-          position: "absolute",
-          inset: 0,
-        }}
-      >
-        {lights.map((light, index) => (
-          <div
-            key={index}
-            style={{
-              position: "absolute",
-              left: light.left,
-              top: light.top,
-              width: light.size,
-              height: light.size,
-              borderRadius: 999,
-              background: "#fff7cc",
-              boxShadow: `0 0 ${14 * light.glow}px rgba(255, 242, 170, 0.75), 0 0 ${28 * light.glow}px rgba(120, 180, 255, 0.28)`,
-              opacity: 0.95,
-            }}
-          />
-        ))}
-      </div>
+      <Atmosphere />
 
       <div
         style={{
           position: "relative",
+          zIndex: 2,
           maxWidth: 980,
           margin: "0 auto",
-          padding: "70px 20px 90px",
+          padding: "clamp(44px, 7vw, 72px) 20px 90px",
           fontFamily: "sans-serif",
         }}
       >
@@ -195,14 +191,14 @@ export default function ConstellationSubmitPage() {
         >
           <div
             style={{
-              fontSize: 12,
+              fontSize: "0.82rem",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "#9fb8d8",
+              color: "rgba(255,255,255,0.7)",
               marginBottom: 14,
             }}
           >
-            Awakening Regeneration
+            Canary Commons
           </div>
 
           <h1
@@ -210,7 +206,8 @@ export default function ConstellationSubmitPage() {
               fontSize: "clamp(2.2rem, 5vw, 3.4rem)",
               lineHeight: 1.05,
               margin: "0 0 16px",
-              color: "white",
+              color: "rgba(255,255,255,0.96)",
+              fontWeight: 650,
             }}
           >
             Submit to the Constellation
@@ -220,8 +217,8 @@ export default function ConstellationSubmitPage() {
             style={{
               margin: 0,
               fontSize: 18,
-              lineHeight: 1.8,
-              color: "#d3e3f7",
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.85)",
             }}
           >
             Share a signal from the larger world — a project, place, effort, or
@@ -233,23 +230,20 @@ export default function ConstellationSubmitPage() {
           style={{
             maxWidth: 860,
             margin: "0 auto",
-            borderRadius: 24,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: "blur(8px)",
-            padding: 24,
+            borderRadius: 22,
+            border: "1px solid rgba(255,255,255,0.6)",
+            background: "rgba(255,255,255,0.82)",
+            backdropFilter: "blur(12px)",
+            padding: "clamp(24px, 4vw, 36px)",
           }}
         >
-          <div
-            style={{
-              marginBottom: 22,
-            }}
-          >
+          <div style={{ marginBottom: 22 }}>
             <h2
               style={{
                 margin: "0 0 10px",
-                fontSize: 28,
-                color: "white",
+                fontSize: 26,
+                color: "#0d2a4a",
+                fontWeight: 650,
               }}
             >
               What belongs here
@@ -259,8 +253,8 @@ export default function ConstellationSubmitPage() {
               style={{
                 margin: 0,
                 fontSize: 16,
-                lineHeight: 1.8,
-                color: "#d3e3f7",
+                lineHeight: 1.7,
+                color: "#3a5a7a",
               }}
             >
               The Constellation gathers non-local signals of life-forward change from
@@ -271,15 +265,7 @@ export default function ConstellationSubmitPage() {
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
             <div>
-              <label
-                htmlFor="title"
-                style={{
-                  display: "block",
-                  marginBottom: 8,
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
+              <label htmlFor="title" style={labelStyle}>
                 Title
               </label>
               <input
@@ -293,15 +279,7 @@ export default function ConstellationSubmitPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="description"
-                style={{
-                  display: "block",
-                  marginBottom: 8,
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
+              <label htmlFor="description" style={labelStyle}>
                 Description
               </label>
               <textarea
@@ -323,15 +301,7 @@ export default function ConstellationSubmitPage() {
               }}
             >
               <div>
-                <label
-                  htmlFor="region"
-                  style={{
-                    display: "block",
-                    marginBottom: 8,
-                    fontWeight: 600,
-                    color: "white",
-                  }}
-                >
+                <label htmlFor="region" style={labelStyle}>
                   Region
                 </label>
                 <input
@@ -345,15 +315,7 @@ export default function ConstellationSubmitPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="category"
-                  style={{
-                    display: "block",
-                    marginBottom: 8,
-                    fontWeight: 600,
-                    color: "white",
-                  }}
-                >
+                <label htmlFor="category" style={labelStyle}>
                   Primary Category
                 </label>
                 <select
@@ -361,7 +323,7 @@ export default function ConstellationSubmitPage() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   required
-                  style={inputStyle}
+                  style={{ ...inputStyle, appearance: "none" }}
                 >
                   <option value="">Select a category</option>
                   {PRIMARY_CATEGORIES.map((option) => (
@@ -374,22 +336,13 @@ export default function ConstellationSubmitPage() {
             </div>
 
             <div>
-              <div
-                style={{
-                  display: "block",
-                  marginBottom: 8,
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
-                Practices / Values
-              </div>
+              <div style={labelStyle}>Practices / Values</div>
 
               <div
                 style={{
                   fontSize: 14,
-                  lineHeight: 1.6,
-                  color: "#c2d5ec",
+                  lineHeight: 1.55,
+                  color: "#3a5a7a",
                   marginBottom: 12,
                   fontStyle: "italic",
                 }}
@@ -416,14 +369,15 @@ export default function ConstellationSubmitPage() {
                         padding: "10px 16px",
                         borderRadius: 999,
                         border: selected
-                          ? "1px solid rgba(255,216,107,0.45)"
-                          : "1px solid rgba(255,255,255,0.16)",
+                          ? "1px solid rgba(255,200,80,0.45)"
+                          : "1px solid rgba(100,150,220,0.22)",
                         background: selected
-                          ? "rgba(255,216,107,0.16)"
-                          : "rgba(255,255,255,0.08)",
-                        color: selected ? "#ffe08a" : "#eef5ff",
+                          ? "rgba(255,216,107,0.18)"
+                          : "rgba(255,255,255,0.7)",
+                        color: selected ? "#7a4f00" : "#3a5a7a",
                         fontSize: 15,
                         cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       {practice}
@@ -434,15 +388,7 @@ export default function ConstellationSubmitPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="link"
-                style={{
-                  display: "block",
-                  marginBottom: 8,
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
+              <label htmlFor="link" style={labelStyle}>
                 Link
               </label>
               <input
@@ -470,15 +416,17 @@ export default function ConstellationSubmitPage() {
                 disabled={status === "submitting"}
                 style={{
                   display: "inline-block",
-                  padding: "14px 22px",
+                  padding: "15px 24px",
                   borderRadius: 999,
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  background: "rgba(255,216,107,0.14)",
-                  color: "#ffe08a",
-                  textDecoration: "none",
-                  fontWeight: 600,
-                  boxShadow: "0 0 20px rgba(255,216,107,0.10)",
+                  border: "none",
+                  background: "#FFD86B",
+                  color: "#1a2a0e",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  boxShadow:
+                    "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
                   cursor: status === "submitting" ? "default" : "pointer",
+                  opacity: status === "submitting" ? 0.8 : 1,
                 }}
               >
                 {status === "submitting" ? "Submitting..." : "Submit to the Constellation"}
@@ -487,9 +435,11 @@ export default function ConstellationSubmitPage() {
               <Link
                 href="/constellation"
                 style={{
-                  color: "#d3e3f7",
-                  textDecoration: "none",
+                  color: "#0d2a4a",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
                   fontWeight: 500,
+                  fontSize: "0.95rem",
                 }}
               >
                 Back to constellation
@@ -502,7 +452,7 @@ export default function ConstellationSubmitPage() {
                   margin: 0,
                   fontSize: 15,
                   lineHeight: 1.7,
-                  color: status === "error" ? "#ffb4b4" : "#cfe7b0",
+                  color: status === "error" ? "#9b2222" : "#2a6b3c",
                 }}
               >
                 {message}
@@ -517,11 +467,11 @@ export default function ConstellationSubmitPage() {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "14px 16px",
-  borderRadius: 16,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(248,252,255,0.94)",
-  color: "#1f2a3a",
+  padding: "13px 16px",
+  borderRadius: 12,
+  border: "1px solid rgba(100,150,220,0.25)",
+  background: "rgba(255,255,255,0.9)",
+  color: "#0d2a4a",
   fontSize: 16,
   outline: "none",
   boxSizing: "border-box",
