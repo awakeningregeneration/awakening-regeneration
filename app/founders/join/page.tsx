@@ -107,20 +107,35 @@ function Atmosphere() {
             key={i}
             style={{
               position: "absolute",
-              left: orb.left,
-              top: orb.top,
-              width: orb.size,
-              height: orb.size,
+              left: `calc(${orb.left} - ${orb.size}px)`,
+              top: `calc(${orb.top} - ${orb.size}px)`,
+              width: orb.size * 3,
+              height: orb.size * 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: "50%",
-              background: "rgba(255,240,190,0.72)",
-              opacity: orb.opacity,
-              boxShadow: `0 0 ${orb.size * 2}px ${
-                orb.size * 0.6
-              }px rgba(255,220,140,0.22), 0 0 ${orb.size * 5}px ${
-                orb.size * 1.2
-              }px rgba(255,200,100,0.08)`,
+              background: `radial-gradient(circle, rgba(255,220,140,${
+                orb.opacity * 0.12
+              }) 0%, transparent 70%)`,
             }}
-          />
+          >
+            <div
+              style={{
+                width: orb.size,
+                height: orb.size,
+                borderRadius: "50%",
+                background: "rgba(255,240,190,0.72)",
+                opacity: orb.opacity,
+                boxShadow: `0 0 ${orb.size * 1.7}px ${
+                  orb.size * 0.4
+                }px rgba(255,220,140,0.18), 0 0 ${orb.size * 4.2}px ${
+                  orb.size * 0.9
+                }px rgba(255,200,100,0.06)`,
+                filter: `blur(${orb.size * 0.15}px)`,
+              }}
+            />
+          </div>
         ))}
       </div>
     </>

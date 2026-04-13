@@ -110,7 +110,7 @@ function Atmosphere() {
           pointerEvents: "none",
         }}
       />
-      {/* Warm gold light points scattered full page */}
+      {/* Warm gold light points scattered full page — emission halo pattern */}
       <div
         style={{
           position: "absolute",
@@ -124,17 +124,31 @@ function Atmosphere() {
             key={i}
             style={{
               position: "absolute",
-              left: p.left,
-              top: p.top,
-              width: p.size,
-              height: p.size,
+              left: `calc(${p.left} - ${p.size}px)`,
+              top: `calc(${p.top} - ${p.size}px)`,
+              width: p.size * 3,
+              height: p.size * 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: "50%",
-              background: "rgba(255,244,200,0.82)",
-              boxShadow: `0 0 ${p.glow}px rgba(255,220,140,0.48), 0 0 ${
-                p.glow * 2
-              }px rgba(255,200,100,0.16)`,
+              background:
+                "radial-gradient(circle, rgba(255,220,140,0.10) 0%, transparent 70%)",
             }}
-          />
+          >
+            <div
+              style={{
+                width: p.size,
+                height: p.size,
+                borderRadius: "50%",
+                background: "rgba(255,244,200,0.82)",
+                boxShadow: `0 0 ${p.glow * 0.85}px rgba(255,220,140,0.38), 0 0 ${
+                  p.glow * 1.7
+                }px rgba(255,200,100,0.12)`,
+                filter: `blur(${p.size * 0.15}px)`,
+              }}
+            />
+          </div>
         ))}
       </div>
     </>

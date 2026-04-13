@@ -17,15 +17,58 @@ type Story = {
   link?: string | null;
 };
 
-const lightPoints: { left: string; top: string; size: number; glow: number }[] = [
-  { left: "6%", top: "8%", size: 4, glow: 10 },
-  { left: "18%", top: "22%", size: 3, glow: 8 },
-  { left: "32%", top: "12%", size: 6, glow: 14 },
-  { left: "48%", top: "28%", size: 3, glow: 8 },
-  { left: "62%", top: "16%", size: 5, glow: 12 },
-  { left: "78%", top: "30%", size: 7, glow: 16 },
-  { left: "88%", top: "10%", size: 4, glow: 10 },
-  { left: "12%", top: "44%", size: 5, glow: 12 },
+const lightPoints: {
+  left: string;
+  top: string;
+  size: number;
+  opacity: number;
+  tier: 1 | 2 | 3;
+}[] = [
+  // Tier 1 — 15 tiny (2–4px, opacity 0.5–0.7)
+  { left: "3%", top: "5%", size: 3, opacity: 0.6, tier: 1 },
+  { left: "8%", top: "18%", size: 2, opacity: 0.5, tier: 1 },
+  { left: "15%", top: "8%", size: 4, opacity: 0.7, tier: 1 },
+  { left: "12%", top: "32%", size: 2, opacity: 0.55, tier: 1 },
+  { left: "5%", top: "50%", size: 3, opacity: 0.6, tier: 1 },
+  { left: "18%", top: "68%", size: 2, opacity: 0.5, tier: 1 },
+  { left: "8%", top: "82%", size: 4, opacity: 0.7, tier: 1 },
+  { left: "82%", top: "6%", size: 3, opacity: 0.65, tier: 1 },
+  { left: "90%", top: "20%", size: 2, opacity: 0.55, tier: 1 },
+  { left: "78%", top: "38%", size: 4, opacity: 0.7, tier: 1 },
+  { left: "95%", top: "54%", size: 2, opacity: 0.5, tier: 1 },
+  { left: "85%", top: "70%", size: 3, opacity: 0.6, tier: 1 },
+  { left: "92%", top: "85%", size: 4, opacity: 0.7, tier: 1 },
+  { left: "40%", top: "4%", size: 2, opacity: 0.55, tier: 1 },
+  { left: "55%", top: "92%", size: 3, opacity: 0.6, tier: 1 },
+
+  // Tier 2 — 15 medium (5–8px, opacity 0.65–0.85)
+  { left: "6%", top: "12%", size: 7, opacity: 0.8, tier: 2 },
+  { left: "14%", top: "22%", size: 5, opacity: 0.7, tier: 2 },
+  { left: "3%", top: "36%", size: 8, opacity: 0.85, tier: 2 },
+  { left: "10%", top: "58%", size: 6, opacity: 0.75, tier: 2 },
+  { left: "16%", top: "76%", size: 7, opacity: 0.8, tier: 2 },
+  { left: "4%", top: "88%", size: 5, opacity: 0.7, tier: 2 },
+  { left: "86%", top: "14%", size: 8, opacity: 0.85, tier: 2 },
+  { left: "94%", top: "32%", size: 6, opacity: 0.75, tier: 2 },
+  { left: "80%", top: "48%", size: 7, opacity: 0.8, tier: 2 },
+  { left: "88%", top: "62%", size: 5, opacity: 0.7, tier: 2 },
+  { left: "94%", top: "78%", size: 8, opacity: 0.85, tier: 2 },
+  { left: "82%", top: "90%", size: 6, opacity: 0.75, tier: 2 },
+  { left: "28%", top: "8%", size: 5, opacity: 0.7, tier: 2 },
+  { left: "68%", top: "12%", size: 7, opacity: 0.78, tier: 2 },
+  { left: "45%", top: "86%", size: 6, opacity: 0.72, tier: 2 },
+
+  // Tier 3 — 10 bright (9–14px, opacity 0.75–0.95)
+  { left: "5%", top: "8%", size: 12, opacity: 0.88, tier: 3 },
+  { left: "12%", top: "45%", size: 10, opacity: 0.82, tier: 3 },
+  { left: "8%", top: "72%", size: 14, opacity: 0.95, tier: 3 },
+  { left: "90%", top: "8%", size: 11, opacity: 0.85, tier: 3 },
+  { left: "94%", top: "42%", size: 14, opacity: 0.92, tier: 3 },
+  { left: "88%", top: "76%", size: 9, opacity: 0.78, tier: 3 },
+  { left: "20%", top: "28%", size: 10, opacity: 0.8, tier: 3 },
+  { left: "78%", top: "22%", size: 14, opacity: 0.95, tier: 3 },
+  { left: "30%", top: "84%", size: 11, opacity: 0.85, tier: 3 },
+  { left: "72%", top: "88%", size: 9, opacity: 0.75, tier: 3 },
 ];
 
 export default async function StoriesPage({
@@ -75,8 +118,8 @@ export default async function StoriesPage({
 
   const cardStyle: React.CSSProperties = {
     borderRadius: 20,
-    border: "1px solid rgba(255,255,255,0.09)",
-    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.18)",
+    background: "rgba(255,255,255,0.13)",
     backdropFilter: "blur(8px)",
     padding: "22px 22px",
     marginBottom: 18,
@@ -89,7 +132,7 @@ export default async function StoriesPage({
   };
 
   const bodyTextStyle: React.CSSProperties = {
-    color: "rgba(211,227,247,0.82)",
+    color: "rgba(235,245,255,0.95)",
     lineHeight: 1.65,
   };
 
@@ -112,7 +155,7 @@ export default async function StoriesPage({
     <main
       style={{
         minHeight: "100vh",
-        background: "#08192d",
+        background: "#112952",
         color: "white",
         position: "relative",
         overflow: "hidden",
@@ -126,7 +169,7 @@ export default async function StoriesPage({
           inset: 0,
           zIndex: 0,
           background:
-            "radial-gradient(ellipse at 50% 0%, rgba(26,72,130,0.32) 0%, rgba(5,16,31,1) 70%)",
+            "radial-gradient(ellipse at 50% 0%, rgba(60,130,220,0.45) 0%, rgba(5,16,31,1) 70%)",
           pointerEvents: "none",
         }}
       />
@@ -138,38 +181,86 @@ export default async function StoriesPage({
           inset: 0,
           zIndex: 0,
           background:
-            "radial-gradient(ellipse at 50% 45%, rgba(60,110,200,0.11) 0%, transparent 65%)",
+            "radial-gradient(ellipse at 50% 45%, rgba(80,140,230,0.28) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Atmosphere layer 3 — faint white luminosity */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0.06) 0%, transparent 50%)",
           pointerEvents: "none",
         }}
       />
 
       {/* Gold light points */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      >
-        {lightPoints.map((p, i) => (
+      {lightPoints.map((p, i) => {
+        let boxShadow = "";
+        if (p.tier === 1) {
+          boxShadow = "0 0 6px 1px rgba(255,220,140,0.20)";
+        } else if (p.tier === 2) {
+          boxShadow =
+            "0 0 12px 2px rgba(255,220,140,0.30), 0 0 24px 4px rgba(255,200,100,0.12)";
+        } else {
+          boxShadow =
+            "0 0 18px 3px rgba(255,220,140,0.40), 0 0 36px 6px rgba(255,200,100,0.16), 0 0 60px 10px rgba(255,180,80,0.06)";
+        }
+        const hasCore = p.tier === 3 && p.size >= 14;
+        return (
           <div
             key={i}
             style={{
-              position: "absolute",
-              left: p.left,
-              top: p.top,
-              width: p.size,
-              height: p.size,
+              position: "fixed",
+              left: `calc(${p.left} - ${p.size}px)`,
+              top: `calc(${p.top} - ${p.size}px)`,
+              width: p.size * 3,
+              height: p.size * 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: `radial-gradient(circle, rgba(255,220,140,${
+                p.opacity * 0.12
+              }) 0%, transparent 70%)`,
               borderRadius: "50%",
-              background: "rgba(255,244,200,0.75)",
-              boxShadow: `0 0 ${p.glow}px rgba(255,220,140,0.42), 0 0 ${
-                p.glow * 2
-              }px rgba(255,200,100,0.14)`,
+              pointerEvents: "none",
+              zIndex: 3,
             }}
-          />
-        ))}
-      </div>
+          >
+            <div
+              style={{
+                position: "relative",
+                width: p.size,
+                height: p.size,
+                borderRadius: "50%",
+                background: "rgba(255,244,200,1)",
+                opacity: p.opacity,
+                boxShadow,
+                filter: `blur(${p.size * 0.15}px)`,
+              }}
+            >
+              {hasCore && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: p.size * 0.4,
+                    height: p.size * 0.4,
+                    borderRadius: "50%",
+                    background: "rgba(255,250,230,0.9)",
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
 
       <div
         style={{
@@ -300,7 +391,7 @@ export default async function StoriesPage({
                         style={{
                           textDecoration: "underline",
                           textUnderlineOffset: 3,
-                          color: "rgba(211,227,247,0.82)",
+                          color: "rgba(235,245,255,0.95)",
                           fontSize: 14,
                         }}
                       >

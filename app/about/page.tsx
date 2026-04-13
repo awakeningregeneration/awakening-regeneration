@@ -63,19 +63,37 @@ export default function AboutPage() {
       <div className="pointer-events-none absolute inset-0">
         {lights.map((light, index) => {
           const base = light.tone === "cool" ? "220,235,255" : "255,244,200";
+          const haloBase =
+            light.tone === "cool" ? "180,210,255" : "255,220,140";
           return (
             <div
               key={index}
-              className="absolute rounded-full"
+              className="absolute flex items-center justify-center rounded-full"
               style={{
-                left: light.left,
-                top: light.top,
-                width: `${light.size}px`,
-                height: `${light.size}px`,
-                background: `rgba(${base},${light.opacity})`,
-                boxShadow: `0 0 ${light.glow}px rgba(${base},${light.opacity * 0.7}), 0 0 ${light.glow * 2}px rgba(120,180,255,${light.opacity * 0.22})`,
+                left: `calc(${light.left} - ${light.size}px)`,
+                top: `calc(${light.top} - ${light.size}px)`,
+                width: `${light.size * 3}px`,
+                height: `${light.size * 3}px`,
+                background: `radial-gradient(circle, rgba(${haloBase},${
+                  light.opacity * 0.12
+                }) 0%, transparent 70%)`,
               }}
-            />
+            >
+              <div
+                className="rounded-full"
+                style={{
+                  width: `${light.size}px`,
+                  height: `${light.size}px`,
+                  background: `rgba(${base},${light.opacity})`,
+                  boxShadow: `0 0 ${light.glow * 0.85}px rgba(${base},${
+                    light.opacity * 0.55
+                  }), 0 0 ${light.glow * 1.7}px rgba(120,180,255,${
+                    light.opacity * 0.18
+                  })`,
+                  filter: `blur(${light.size * 0.15}px)`,
+                }}
+              />
+            </div>
           );
         })}
       </div>
