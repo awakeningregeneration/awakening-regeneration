@@ -110,6 +110,7 @@ export default function SubmitSupportPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [practices, setPractices] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -136,6 +137,7 @@ export default function SubmitSupportPage() {
           name,
           category,
           url,
+          image_url: imageUrl,
           description,
           practices,
         }),
@@ -288,6 +290,19 @@ export default function SubmitSupportPage() {
               required
               style={inputStyle}
             />
+
+            <div>
+              <label style={labelStyle}>Image or logo URL (optional)</label>
+              <p style={helperStyle}>
+                Right-click any image on their website → Copy Image Address
+              </p>
+              <input
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
 
             <textarea
               placeholder="Short description"

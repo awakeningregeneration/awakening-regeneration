@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ListingImageTile from "../components/ListingImageTile";
+import { getListingImage } from "../../lib/getListingImage";
 
 type ConstellationSignal = {
   id: string;
@@ -11,6 +13,7 @@ type ConstellationSignal = {
   category: string | null;
   link: string;
   practices?: string[] | null;
+  image_url?: string;
   created_at?: string;
 };
 
@@ -537,6 +540,17 @@ export default function ConstellationPage() {
               color: "white",
             }}
           >
+            <div style={{ marginBottom: 20 }}>
+              <ListingImageTile
+                imageUrl={getListingImage(
+                  selectedSignal.image_url,
+                  selectedSignal.link
+                )}
+                name={selectedSignal.title}
+                size="lg"
+              />
+            </div>
+
             {selectedSignal.category && (
               <div
                 style={{

@@ -45,6 +45,7 @@ export async function POST(req: Request) {
     const contributor_name = body.contributor_name?.trim() || null;
     const affiliate_url = body.affiliate_url?.trim() || null;
     const why_it_matters = body.why_it_matters?.trim() || null;
+    const image_url = body.image_url?.trim() || null;
 
     if (!name || !description || !url || !category) {
       return NextResponse.json(
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
           ...(contributor_name && { contributor_name }),
           ...(affiliate_url && { affiliate_url }),
           ...(why_it_matters && { why_it_matters }),
+          ...(image_url && { image_url }),
         },
       ])
       .select()

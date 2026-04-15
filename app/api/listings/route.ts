@@ -171,6 +171,7 @@ export async function POST(req: Request) {
       county,
       categories,
       practices,
+      image_url,
     } = body;
 
     const normalizedCity = normalizeCity(city);
@@ -213,6 +214,7 @@ export async function POST(req: Request) {
           lng,
           lat,
           status: "active",
+          ...(image_url?.trim() && { image_url: image_url.trim() }),
         },
       ])
       .select()

@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Listing } from "@/types/listing";
+import ListingImageTile from "./ListingImageTile";
+import { getListingImage } from "../../lib/getListingImage";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
@@ -45,6 +48,7 @@ export default function MapClient({
   const geocodeTimerRef = useRef<number | null>(null);
   const geocodeCacheRef = useRef<Map<string, Region>>(new Map());
   const popupRef = useRef<mapboxgl.Popup | null>(null);
+  const popupImageRootRef = useRef<Root | null>(null);
 
   const [flagListingId, setFlagListingId] = useState<string | null>(null);
   const [flagReason, setFlagReason] = useState("");
@@ -364,6 +368,11 @@ export default function MapClient({
     return () => {
       map.off("moveend", handleMoveEnd);
       popupRef.current?.remove();
+      if (popupImageRootRef.current) {
+        const r = popupImageRootRef.current;
+        popupImageRootRef.current = null;
+        queueMicrotask(() => r.unmount());
+      }
       map.remove();
       mapRef.current = null;
     };
@@ -455,6 +464,11 @@ export default function MapClient({
     if (!selectedId) {
       popupRef.current?.remove();
       popupRef.current = null;
+      if (popupImageRootRef.current) {
+        const r = popupImageRootRef.current;
+        popupImageRootRef.current = null;
+        queueMicrotask(() => r.unmount());
+      }
       return;
     }
 
@@ -472,8 +486,31 @@ export default function MapClient({
 
     popupRef.current?.remove();
 
+    // Unmount any existing image tile root before building a new popup
+    if (popupImageRootRef.current) {
+      const prevRoot = popupImageRootRef.current;
+      popupImageRootRef.current = null;
+      queueMicrotask(() => prevRoot.unmount());
+    }
+
     const popupNode = document.createElement("div");
     popupNode.className = "ar-popup";
+
+    // Image tile — mounted as a React root inside the popup DOM
+    const imageContainer = document.createElement("div");
+    imageContainer.style.marginBottom = "10px";
+    popupNode.appendChild(imageContainer);
+
+    const resolvedImage = getListingImage(listing.image_url, listing.website);
+    const imageRoot = createRoot(imageContainer);
+    imageRoot.render(
+      <ListingImageTile
+        imageUrl={resolvedImage}
+        name={listing.title ?? listing.name ?? ""}
+        size="md"
+      />
+    );
+    popupImageRootRef.current = imageRoot;
 
     const title = document.createElement("h3");
     title.className = "ar-popup-title";

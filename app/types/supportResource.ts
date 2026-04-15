@@ -7,4 +7,5 @@ export type SupportResource = {
   websiteUrl: string;
   affiliateUrl?: string;
   tags?: string[];
+  image_url?: string;
 };

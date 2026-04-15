@@ -107,6 +107,7 @@ export default function ContributorSubmitPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [affiliateUrl, setAffiliateUrl] = useState("");
   const [description, setDescription] = useState("");
   const [whyItMatters, setWhyItMatters] = useState("");
@@ -135,6 +136,7 @@ export default function ContributorSubmitPage() {
           name,
           category,
           url,
+          image_url: imageUrl,
           affiliate_url: affiliateUrl,
           description,
           why_it_matters: whyItMatters,
@@ -291,6 +293,19 @@ export default function ContributorSubmitPage() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Image or logo URL (optional)</label>
+              <p style={helperStyle}>
+                Right-click any image on their website → Copy Image Address
+              </p>
+              <input
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
                 style={inputStyle}
               />
             </div>

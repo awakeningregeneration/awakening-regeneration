@@ -31,5 +31,7 @@ export type Listing = {
   status?: "active" | "hidden";
   flag_count?: number;
 
+  image_url?: string;
+
   createdAt?: string;
 };

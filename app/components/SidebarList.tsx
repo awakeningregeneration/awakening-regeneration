@@ -2,6 +2,8 @@
 
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import type { Listing } from "../../types/listing";
+import ListingImageTile from "./ListingImageTile";
+import { getListingImage } from "../../lib/getListingImage";
 
 type Props = {
   listings: Listing[];
@@ -86,6 +88,7 @@ return (
 
     {listings.map((listing) => {
         const isSelected = listing.id === selectedId;
+        const imageUrl = getListingImage(listing.image_url, listing.website);
 
         return (
           <div
@@ -101,31 +104,42 @@ return (
               marginBottom: 8,
               cursor: "pointer",
               background: isSelected ? "#fff7ed" : "white",
+              display: "flex",
+              gap: 12,
+              alignItems: "flex-start",
             }}
           >
-            {/* Title */}
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              {listing.name}
-            </div>
+            <ListingImageTile
+              imageUrl={imageUrl}
+              name={listing.name}
+              size="sm"
+            />
 
-            {/* Meta */}
-            <div style={{ fontSize: 13, color: "#6b7280" }}>
-              {listing.category} • {listing.city}, {listing.state}
-            </div>
-
-            {/* Preview ONLY when not selected */}
-            {!isSelected && (
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 13,
-                  color: "#374151",
-                  lineHeight: 1.35,
-                }}
-              >
-                {preview(listing.description ?? "", 110)}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Title */}
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                {listing.name}
               </div>
-            )}
+
+              {/* Meta */}
+              <div style={{ fontSize: 13, color: "#6b7280" }}>
+                {listing.category} • {listing.city}, {listing.state}
+              </div>
+
+              {/* Preview ONLY when not selected */}
+              {!isSelected && (
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 13,
+                    color: "#374151",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {preview(listing.description ?? "", 110)}
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

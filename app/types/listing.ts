@@ -10,4 +10,5 @@ export type Listing = {
   county?: string
   lat: number
   lng: number
+  image_url?: string
 }
