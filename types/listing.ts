@@ -32,6 +32,7 @@ export type Listing = {
   flag_count?: number;
 
   image_url?: string;
+  practices?: string[];
 
   createdAt?: string;
 };

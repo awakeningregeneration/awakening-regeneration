@@ -5,9 +5,24 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
+import ListingImageTile from "../components/ListingImageTile";
+import { getListingImage } from "../../lib/getListingImage";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
 import type { Listing } from "@/types/listing";
+
+const sidebarLights = [
+  { left: "8%", top: "4%", size: 7, opacity: 0.55 },
+  { left: "88%", top: "7%", size: 9, opacity: 0.6 },
+  { left: "15%", top: "18%", size: 5, opacity: 0.45 },
+  { left: "80%", top: "22%", size: 7, opacity: 0.5 },
+  { left: "5%", top: "42%", size: 9, opacity: 0.6 },
+  { left: "92%", top: "48%", size: 5, opacity: 0.45 },
+  { left: "20%", top: "65%", size: 7, opacity: 0.5 },
+  { left: "75%", top: "72%", size: 9, opacity: 0.55 },
+  { left: "10%", top: "85%", size: 5, opacity: 0.48 },
+  { left: "85%", top: "90%", size: 7, opacity: 0.52 },
+];
 
 const STATES = [
   "Alabama",
@@ -172,9 +187,6 @@ const countyListings = useMemo(() => {
     hasStateSelection,
     hasCountySelection,
   ]);
-const selectedListing = useMemo(() => {
-  return allListings.find((l) => l.id === selectedId) || null;
-}, [allListings, selectedId]);
   useEffect(() => {
     if (!selectedId) return;
 
@@ -248,23 +260,74 @@ const selectedListing = useMemo(() => {
     <main style={{ display: "flex", height: "100vh", width: "100%" }}>
       <div
         style={{
-          width: 380,
+          width: "380px",
           padding: 16,
           overflowY: "auto",
-          borderRight: "1px solid rgba(0,0,0,0.12)",
-          background: "#dce9f8",
+          position: "relative",
+          color: "rgba(211,227,247,0.85)",
+          background:
+            "linear-gradient(160deg, rgba(12,52,110,0.78) 0%, rgba(17,65,130,0.82) 50%, rgba(12,52,110,0.78) 100%)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "2px 0 24px rgba(8,25,45,0.13)",
+          borderTop: "3px solid rgba(255,216,107,0.6)",
         }}
       >
-        <section
+        {/* Sidebar emission light field */}
+        <div
           style={{
-            marginBottom: 16,
-            padding: 12,
-            border: "1px solid rgba(0,0,0,0.10)",
-            borderRadius: 12,
-            background: "rgba(255,255,255,0.72)",
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 0,
+            overflow: "hidden",
           }}
         >
-          <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>
+          {sidebarLights.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: p.left,
+                top: p.top,
+                width: p.size,
+                height: p.size,
+                borderRadius: "50%",
+                background: "rgba(255,210,80,0.82)",
+                opacity: p.opacity,
+                boxShadow: `0 0 ${p.size * 3}px ${
+                  p.size
+                }px rgba(255,200,60,0.45), 0 0 ${p.size * 6}px ${
+                  p.size * 2
+                }px rgba(255,170,40,0.2)`,
+                pointerEvents: "none",
+              }}
+            />
+          ))}
+        </div>
+
+        <section
+          style={{
+            position: "relative",
+            zIndex: 1,
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 14,
+            border: "1px solid rgba(255,216,107,0.2)",
+            borderLeft: "3px solid rgba(255,216,107,0.5)",
+            padding: 16,
+            marginBottom: 12,
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(211,227,247,0.7)",
+              marginBottom: 10,
+            }}
+          >
             Region
           </div>
 
@@ -273,6 +336,7 @@ const selectedListing = useMemo(() => {
               display: "block",
               fontSize: 12,
               marginBottom: 6,
+              color: "rgba(211,227,247,0.8)",
               opacity: hasStateSelection ? 0.85 : 0.45,
             }}
           >
@@ -288,10 +352,14 @@ const selectedListing = useMemo(() => {
             }}
             style={{
               width: "100%",
-              padding: "8px 10px",
-              borderRadius: 10,
-              border: "1px solid rgba(0,0,0,0.15)",
-              background: "white",
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid rgba(148,196,236,0.3)",
+              background: "rgba(255,255,255,0.1)",
+              color: "#e8f4ff",
+              fontSize: 14,
+              outlineColor: "rgba(255,216,107,0.6)",
+              cursor: "pointer",
               opacity: hasStateSelection ? 1 : 0.65,
               marginBottom: 10,
             }}
@@ -308,6 +376,7 @@ const selectedListing = useMemo(() => {
               display: "block",
               fontSize: 12,
               marginBottom: 6,
+              color: "rgba(211,227,247,0.8)",
               opacity: 0.85,
             }}
           >
@@ -323,10 +392,14 @@ const selectedListing = useMemo(() => {
             }}
             style={{
               width: "100%",
-              padding: "8px 10px",
-              borderRadius: 10,
-              border: "1px solid rgba(0,0,0,0.15)",
-              background: "white",
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid rgba(148,196,236,0.3)",
+              background: "rgba(255,255,255,0.1)",
+              color: "#e8f4ff",
+              fontSize: 14,
+              outlineColor: "rgba(255,216,107,0.6)",
+              cursor: "pointer",
             }}
           >
             {states.map((s) => (
@@ -337,62 +410,13 @@ const selectedListing = useMemo(() => {
           </select>
         </section>
 
-        <section
+        <div
           style={{
-            marginBottom: 16,
-            padding: "14px 14px 12px",
-            border: "1px solid rgba(0,0,0,0.12)",
-            borderRadius: 12,
-            background: "rgba(255,255,255,0.78)",
-            backdropFilter: "blur(6px)",
+            position: "relative",
+            zIndex: 1,
+            background: "transparent",
           }}
-        >{selectedListing && (
-  <div
-    style={{
-      marginBottom: 14,
-      padding: 12,
-      border: "1px solid rgba(0,0,0,0.12)",
-      borderRadius: 12,
-      background: "rgba(255,255,255,0.85)",
-    }}
-  >
-    <div style={{ fontWeight: 700, fontSize: 15 }}>
-      {selectedListing.name}
-    </div>
-
-    <div
-      style={{
-        fontSize: 12,
-        opacity: 0.7,
-        marginTop: 2,
-        marginBottom: 6,
-      }}
-    >
-      {selectedListing.category} • {selectedListing.city},{" "}
-      {selectedListing.state}
-    </div>
-
-    <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9 }}>
-      {selectedListing.description}
-    </div>
-
-    {selectedListing.website && (
-      <a
-        href={selectedListing.website}
-        target="_blank"
-        style={{
-          display: "inline-block",
-          marginTop: 8,
-          textDecoration: "underline",
-          fontSize: 13,
-          fontWeight: 600,
-        }}
-      >
-        Visit website
-      </a>
-    )}
-  </div>
-)}
+        >
           {!hasStateSelection ? (
             <>
               <div
@@ -621,13 +645,20 @@ const selectedListing = useMemo(() => {
                   lineHeight: 1.35,
                   fontWeight: 600,
                   marginBottom: 10,
+                  color: "rgba(211,227,247,0.9)",
                 }}
               >
                 {countyLabel}
                 {effectiveState ? `, ${effectiveState}` : ""}
               </div>
 
-              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 10 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  marginBottom: 10,
+                  color: "rgba(211,227,247,0.6)",
+                }}
+              >
                 Visible here
               </div>
 
@@ -644,31 +675,59 @@ const selectedListing = useMemo(() => {
                       const locationParts = [listing.city, listing.state].filter(
                         Boolean
                       ) as string[];
+                      const imageUrl = getListingImage(
+                        listing.image_url,
+                        listing.website
+                      );
 
                       return (
                         <div
                           key={listing.id}
                           onClick={() => setSelectedId(listing.id)}
                           style={{
-                            padding: "10px 12px",
+                            padding: 12,
                             marginBottom: 8,
                             borderRadius: 10,
                             cursor: "pointer",
-                            border: "1px solid rgba(0,0,0,0.08)",
+                            border: isSelected
+                              ? "2px solid rgba(255,216,107,0.6)"
+                              : "1px solid rgba(255,255,255,0.12)",
                             background: isSelected
-                              ? "rgba(0,0,0,0.08)"
-                              : "rgba(0,0,0,0.02)",
+                              ? "rgba(255,216,107,0.2)"
+                              : "rgba(224,240,255,0.14)",
+                            display: "flex",
+                            gap: 10,
+                            alignItems: "flex-start",
+                            transition: "all 0.15s ease",
+                            boxShadow: isSelected
+                              ? "0 2px 12px rgba(255,216,107,0.2)"
+                              : "0 1px 4px rgba(8,25,45,0.06)",
                           }}
                         >
-                          <div style={{ fontWeight: 600 }}>{listing.name}</div>
-                          <div
-                            style={{
-                              fontSize: 12,
-                              opacity: 0.72,
-                              marginTop: 2,
-                            }}
-                          >
-                            {locationParts.join(", ") || effectiveState}
+                          <ListingImageTile
+                            imageUrl={imageUrl}
+                            name={listing.name}
+                            size="sm"
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: "#e8f4ff",
+                                fontSize: 15,
+                              }}
+                            >
+                              {listing.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "rgba(148,196,236,0.8)",
+                                marginTop: 2,
+                              }}
+                            >
+                              {locationParts.join(", ") || effectiveState}
+                            </div>
                           </div>
                         </div>
                       );
@@ -683,71 +742,83 @@ const selectedListing = useMemo(() => {
 
               <div
                 style={{
-                  marginTop: 14,
-                  padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  borderRadius: 10,
-                  background: "rgba(0,0,0,0.03)",
+                  marginTop: 12,
+                  padding: 16,
+                  borderRadius: 14,
+                  border: "1px solid rgba(148,196,236,0.25)",
+                  background: "rgba(255,255,255,0.06)",
+                  transition: "box-shadow 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(255,216,107,0.08)",
                 }}
               >
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Not seeing it here?
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#e8f4ff",
+                    marginBottom: 4,
+                  }}
+                >
+                  Can&apos;t find it nearby?
                 </div>
-
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82 }}>
-                  Help make this place more visible, or look beyond this area for
-                  aligned options.
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "rgba(148,196,236,0.8)",
+                    lineHeight: 1.45,
+                    marginBottom: 10,
+                  }}
+                >
+                  We&apos;ve gathered aligned options that ship to you — same
+                  values, wider reach.
                 </div>
-
-                <div style={{ marginTop: 8 }}>
-                  <Link
-                    href={submitListingHref}
-                    style={{
-                      display: "block",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      fontWeight: 600,
-                      color: "inherit",
-                      fontSize: 13,
-                      marginBottom: 6,
-                    }}
-                  >
-                    Place it on the Map
-                  </Link>
-
-                  <Link
-                    href="/support"
-                    style={{
-                      display: "block",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      fontWeight: 600,
-                      color: "inherit",
-                      fontSize: 13,
-                    }}
-                  >
-                    See Additional Options
-                  </Link>
-                </div>
+                <Link
+                  href="/support"
+                  style={{
+                    display: "inline-block",
+                    background: "rgba(255,216,107,0.15)",
+                    border: "1px solid rgba(255,216,107,0.5)",
+                    borderRadius: 20,
+                    padding: "6px 14px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#7a5c00",
+                    textDecoration: "none",
+                  }}
+                >
+                  Explore aligned options →
+                </Link>
               </div>
 <div
   style={{
-    marginTop: 14,
-    padding: 10,
-    border: "1px solid rgba(0,0,0,0.10)",
-    borderRadius: 10,
-    background: "rgba(0,0,0,0.03)",
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 14,
+    border: "1px solid rgba(255,216,107,0.4)",
+    background:
+      "linear-gradient(135deg, rgba(255,248,230,0.8) 0%, rgba(255,237,200,0.6) 100%)",
+    transition: "box-shadow 0.2s ease",
+    boxShadow: "0 2px 8px rgba(255,216,107,0.08)",
   }}
 >
-  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+  <div
+    style={{
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#b07d2a",
+      textTransform: "uppercase",
+      marginBottom: 6,
+    }}
+  >
     Story of Place
   </div>
 
   <div
     style={{
       fontSize: 13,
+      color: "#5a3e1b",
       lineHeight: 1.5,
-      opacity: 0.82,
       marginBottom: 8,
     }}
   >
@@ -758,57 +829,19 @@ const selectedListing = useMemo(() => {
   <Link
     href={storiesViewHref}
     style={{
-      textDecoration: "underline",
-      textUnderlineOffset: 3,
+      color: "#b07d2a",
       fontWeight: 600,
-      color: "inherit",
       fontSize: 13,
+      textDecoration: "none",
     }}
   >
     See and Share Local Stories
   </Link>
 </div>
 
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  borderRadius: 10,
-                  background: "rgba(0,0,0,0.03)",
-                }}
-              >
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Looking Beyond this Place?
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                    opacity: 0.82,
-                    marginBottom: 8,
-                  }}
-                >
-                  Explore stories of inspiration from around the world.
-                </div>
-
-                <Link
-                  href="/constellation"
-                  style={{
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                    fontWeight: 600,
-                    color: "inherit",
-                    fontSize: 13,
-                  }}
-                >
-                  Explore the Constellation
-                </Link>
-              </div>
             </>
           )}
-        </section>
+        </div>
       </div>
 
       <div style={{ flex: 1, position: "relative" }}>
@@ -821,65 +854,94 @@ const selectedListing = useMemo(() => {
           highlightState={hasStateSelection ? effectiveState : ""}
         />
 
-        <div
+        <Link
+          href="/constellation"
           style={{
             position: "absolute",
-            top: 12,
-            left: 12,
-            padding: "12px 14px",
-            borderRadius: 12,
-            background: "rgba(0,0,0,0.58)",
-            color: "rgba(255,255,255,0.93)",
-            fontSize: 13,
-            lineHeight: 1.35,
-            maxWidth: 420,
+            bottom: 80,
+            right: 16,
+            zIndex: 10,
+            display: "inline-block",
+            minWidth: 180,
+            padding: "12px 18px",
+            borderRadius: 20,
+            background:
+              "radial-gradient(circle at 40% 40%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%)",
+            border: "1px solid rgba(255,216,107,0.35)",
+            boxShadow:
+              "0 0 18px rgba(255,216,107,0.15), 0 4px 24px rgba(0,0,0,0.35)",
+            backdropFilter: "blur(8px)",
+            textDecoration: "none",
+            overflow: "hidden",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow =
+              "0 0 28px rgba(255,216,107,0.28), 0 4px 24px rgba(0,0,0,0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow =
+              "0 0 18px rgba(255,216,107,0.15), 0 4px 24px rgba(0,0,0,0.35)";
           }}
         >
-          {!hasStateSelection ? (
-            <>
-              <div style={{ fontWeight: 700 }}>A living map</div>
-              <div style={{ marginTop: 4, opacity: 0.88 }}>
-                Lights are visible across the country. Choose a state to focus
-                what’s present there.
-              </div>
-            </>
-          ) : hasStateSelection && !hasCountySelection ? (
-            <>
-              <div style={{ fontWeight: 700 }}>{effectiveState}</div>
-              <div style={{ marginTop: 4, opacity: 0.88 }}>
-                A state view of places where life-affirming options are visible.
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={{ fontWeight: 700 }}>
-                {countyLabel}
-                {effectiveState ? `, ${effectiveState}` : ""}
-              </div>
-              <div style={{ marginTop: 4, opacity: 0.88 }}>
-                A living map of places where life-affirming options are visible.
-              </div>
-            </>
-          )}
-        </div>
+          {/* Background star field */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 0,
+              overflow: "hidden",
+            }}
+          >
+            {[
+              { left: "8%", top: "20%", size: 2 },
+              { left: "18%", top: "70%", size: 1.5 },
+              { left: "30%", top: "15%", size: 3 },
+              { left: "45%", top: "80%", size: 1.5 },
+              { left: "55%", top: "25%", size: 2 },
+              { left: "65%", top: "65%", size: 3 },
+              { left: "72%", top: "10%", size: 1.5 },
+              { left: "80%", top: "75%", size: 2 },
+              { left: "88%", top: "35%", size: 2.5 },
+              { left: "25%", top: "45%", size: 1.5 },
+              { left: "50%", top: "50%", size: 2 },
+              { left: "92%", top: "60%", size: 1.5 },
+            ].map((star, i) => (
+              <span
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: star.left,
+                  top: star.top,
+                  width: star.size,
+                  height: star.size,
+                  borderRadius: "50%",
+                  background: "rgba(255,244,200,0.9)",
+                  boxShadow: `0 0 ${star.size * 3}px rgba(255,216,107,0.6)`,
+                }}
+              />
+            ))}
+          </div>
 
-        <div
-          style={{
-            position: "absolute",
-            bottom: 12,
-            left: "50%",
-            transform: "translateX(-50%)",
-            padding: "8px 14px",
-            borderRadius: 12,
-            background: "rgba(0,0,0,0.50)",
-            color: "rgba(255,255,255,0.92)",
-            fontSize: 13,
-            textAlign: "center",
-            pointerEvents: "none",
-          }}
-        >
-          Take part
-        </div>
+          {/* Foreground text */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                color: "rgba(211,227,247,0.95)",
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            >
+              A world of inspiration
+            </div>
+          </div>
+        </Link>
       </div>
     </main>
   );

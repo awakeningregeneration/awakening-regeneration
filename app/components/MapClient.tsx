@@ -250,40 +250,103 @@ export default function MapClient({
         background: rgba(255, 235, 175, 0.7);
       }
 
+      .mapboxgl-popup-content {
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 20px !important;
+      }
+
+      .mapboxgl-popup-tip {
+        display: none !important;
+      }
+
       .ar-popup {
-        color: #172033;
-        max-width: 280px;
+        background: radial-gradient(circle at 30% 20%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%);
+        border: 1px solid rgba(255,216,107,0.35);
+        border-radius: 20px;
+        box-shadow: 0 0 24px rgba(255,216,107,0.12), 0 8px 32px rgba(0,0,0,0.4);
+        padding: 16px;
+        min-width: 220px;
+        max-width: 300px;
+        color: rgba(211,227,247,0.95);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .ar-popup-stars {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .ar-popup-content {
+        position: relative;
+        z-index: 1;
       }
 
       .ar-popup-title {
+        color: rgba(224,242,255,0.98);
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 700;
         margin: 0 0 6px 0;
       }
 
       .ar-popup-description {
-        font-size: 14px;
+        color: rgba(148,196,236,0.85);
+        font-size: 13px;
         line-height: 1.45;
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
+      }
+
+      .ar-popup-meta {
+        font-size: 12px;
+        color: rgba(148,196,236,0.7);
+        margin: 0 0 8px 0;
+        font-weight: 500;
+      }
+
+      .ar-popup-practices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .ar-popup-practice-tag {
+        font-size: 11px;
+        color: #FFD86B;
+        background: rgba(255,216,107,0.12);
+        border: 1px solid rgba(255,216,107,0.3);
+        border-radius: 10px;
+        padding: 2px 8px;
+        font-weight: 500;
       }
 
       .ar-popup-link {
         display: inline-block;
         margin-bottom: 10px;
+        color: #FFD86B;
+        font-weight: 600;
         font-size: 14px;
+        text-decoration: none;
+      }
+
+      .ar-popup-link:hover {
         text-decoration: underline;
       }
 
-      .ar-popup-flag {
-        display: block;
-        margin-top: 10px;
-        background: transparent;
+      .ar-popup-action {
+        background: none;
         border: none;
         padding: 0;
         font-size: 13px;
-        color: #5b6475;
+        color: rgba(148,196,236,0.7);
         text-decoration: underline;
         cursor: pointer;
+        display: block;
+        margin-bottom: 6px;
       }
     `;
     document.head.appendChild(style);
@@ -496,10 +559,37 @@ export default function MapClient({
     const popupNode = document.createElement("div");
     popupNode.className = "ar-popup";
 
+    // Background star field
+    const starsDiv = document.createElement("div");
+    starsDiv.className = "ar-popup-stars";
+    const starPositions = [
+      { left: "10%", top: "15%", size: 2 },
+      { left: "25%", top: "70%", size: 1.5 },
+      { left: "40%", top: "10%", size: 2.5 },
+      { left: "60%", top: "80%", size: 1.5 },
+      { left: "70%", top: "20%", size: 2 },
+      { left: "85%", top: "60%", size: 2 },
+      { left: "15%", top: "45%", size: 1.5 },
+      { left: "50%", top: "40%", size: 1.5 },
+      { left: "90%", top: "30%", size: 2.5 },
+      { left: "35%", top: "55%", size: 1.5 },
+    ];
+    starPositions.forEach((s) => {
+      const star = document.createElement("span");
+      star.style.cssText = `position:absolute;left:${s.left};top:${s.top};width:${s.size}px;height:${s.size}px;border-radius:50%;background:rgba(255,244,200,0.85);box-shadow:0 0 ${s.size * 2}px rgba(255,216,107,0.5);pointer-events:none;`;
+      starsDiv.appendChild(star);
+    });
+    popupNode.appendChild(starsDiv);
+
+    // Content wrapper (sits above the stars via z-index)
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "ar-popup-content";
+    popupNode.appendChild(contentDiv);
+
     // Image tile — mounted as a React root inside the popup DOM
     const imageContainer = document.createElement("div");
     imageContainer.style.marginBottom = "10px";
-    popupNode.appendChild(imageContainer);
+    contentDiv.appendChild(imageContainer);
 
     const resolvedImage = getListingImage(listing.image_url, listing.website);
     const imageRoot = createRoot(imageContainer);
@@ -520,10 +610,31 @@ export default function MapClient({
     description.className = "ar-popup-description";
     description.textContent = listing.description || "";
 
-    popupNode.appendChild(title);
+    contentDiv.appendChild(title);
 
     if (listing.description) {
-      popupNode.appendChild(description);
+      contentDiv.appendChild(description);
+    }
+
+    // Category + location meta line
+    const meta = document.createElement("div");
+    meta.className = "ar-popup-meta";
+    meta.textContent = `${listing.category || ""} · ${listing.city || ""}${
+      listing.state ? ", " + listing.state : ""
+    }`;
+    contentDiv.appendChild(meta);
+
+    // Practices tags
+    if (listing.practices && listing.practices.length > 0) {
+      const practicesContainer = document.createElement("div");
+      practicesContainer.className = "ar-popup-practices";
+      listing.practices.forEach((practice) => {
+        const tag = document.createElement("span");
+        tag.className = "ar-popup-practice-tag";
+        tag.textContent = practice;
+        practicesContainer.appendChild(tag);
+      });
+      contentDiv.appendChild(practicesContainer);
     }
 
     if (listing.website) {
@@ -535,26 +646,26 @@ export default function MapClient({
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       link.textContent = "Visit website";
-      popupNode.appendChild(link);
+      contentDiv.appendChild(link);
     }
 
     const editButton = document.createElement("button");
     editButton.type = "button";
-    editButton.className = "ar-popup-flag";
+    editButton.className = "ar-popup-action";
     editButton.textContent = "Suggest an edit";
     editButton.addEventListener("click", () => {
       window.open(`/edit/${listing.id}`, "_blank");
     });
-    popupNode.appendChild(editButton);
+    contentDiv.appendChild(editButton);
 
     const flagButton = document.createElement("button");
     flagButton.type = "button";
-    flagButton.className = "ar-popup-flag";
+    flagButton.className = "ar-popup-action";
     flagButton.textContent = "Flag this listing";
     flagButton.addEventListener("click", () => {
       openFlagModal(listing.id);
     });
-    popupNode.appendChild(flagButton);
+    contentDiv.appendChild(flagButton);
 
     popupRef.current = new mapboxgl.Popup({
       offset: 18,
