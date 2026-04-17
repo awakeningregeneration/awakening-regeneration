@@ -2,7 +2,6 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 const orbs: {
   left: string;
@@ -147,6 +146,8 @@ function JoinContent() {
   const ref = searchParams.get("ref") || "";
   const [selectedTier, setSelectedTier] = useState("$9");
   const [oneTime, setOneTime] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (ref) {
@@ -155,9 +156,9 @@ function JoinContent() {
   }, [ref]);
 
   const tiers = [
-    { value: "$9", label: "$9/month", title: "Foundation Builder" },
-    { value: "$18", label: "$18/month", title: "Supporting Foundation Builder" },
-    { value: "$27", label: "$27/month", title: "Sustaining Foundation Builder" },
+    { value: "$9", tier: "tier_1", label: "$9/month", title: "Foundation Builder" },
+    { value: "$18", tier: "tier_2", label: "$18/month", title: "Supporting Foundation Builder" },
+    { value: "$27", tier: "tier_3", label: "$27/month", title: "Sustaining Foundation Builder" },
   ];
 
   const glassCard: React.CSSProperties = {
@@ -397,8 +398,45 @@ function JoinContent() {
         </div>
 
         {/* CTA */}
-        <Link
-          href="/founders/confirmation"
+        <button
+          type="button"
+          disabled={isRedirecting}
+          onClick={async () => {
+            setErrorMessage("");
+            setIsRedirecting(true);
+
+            const tierObj = tiers.find((t) => t.value === selectedTier);
+            if (!tierObj) return;
+
+            try {
+              const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  tier: tierObj.tier,
+                  oneTimeAmount: oneTime ? parseFloat(oneTime) : undefined,
+                  referralCode: ref || undefined,
+                }),
+              });
+
+              const data = await res.json();
+
+              if (!res.ok || !data.url) {
+                throw new Error(
+                  data.error || "Failed to start checkout."
+                );
+              }
+
+              window.location.href = data.url;
+            } catch (err) {
+              setIsRedirecting(false);
+              setErrorMessage(
+                err instanceof Error
+                  ? err.message
+                  : "Something went wrong. Please try again or email founder@canarycommons.org"
+              );
+            }
+          }}
           style={{
             display: "block",
             textAlign: "center",
@@ -409,12 +447,31 @@ function JoinContent() {
             color: "#1a2a0e",
             fontWeight: 700,
             fontSize: "1.05rem",
-            textDecoration: "none",
+            border: "none",
+            cursor: isRedirecting ? "not-allowed" : "pointer",
             boxShadow: "0 0 32px rgba(255,216,107,0.20)",
+            opacity: isRedirecting ? 0.8 : 1,
+            transition: "opacity 0.15s ease",
           }}
         >
-          Join the Foundation
-        </Link>
+          {isRedirecting
+            ? "Redirecting to secure checkout..."
+            : "Join the Foundation"}
+        </button>
+
+        {errorMessage && (
+          <p
+            style={{
+              marginTop: 14,
+              fontSize: "0.88rem",
+              lineHeight: 1.55,
+              color: "rgba(255,160,140,0.9)",
+              textAlign: "center",
+            }}
+          >
+            {errorMessage}
+          </p>
+        )}
 
         {/* Footer note */}
         <p

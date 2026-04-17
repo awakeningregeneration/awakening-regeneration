@@ -137,18 +137,36 @@ export default function FounderConfirmationPage() {
               lineHeight: 1.72,
               color: "#3a5a7a",
               margin: 0,
+              marginBottom: 16,
+              maxWidth: 480,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            This map is being built from the ground — not by one person
+            collecting, but by people noticing and adding what&apos;s alive
+            around them.
+          </p>
+
+          <p
+            style={{
+              fontSize: "1.08rem",
+              lineHeight: 1.72,
+              color: "#3a5a7a",
+              margin: 0,
               marginBottom: 36,
               maxWidth: 480,
               marginLeft: "auto",
               marginRight: "auto",
             }}
           >
-            Thank you for stepping in. Your first invitation is simple — add three
-            lights. Place three meaningful things on the map that you know.
+            Head to the map and look around. If a place, a person, or something
+            that matters where you are comes to mind, you&apos;ll see the option
+            to add it.
           </p>
 
           <Link
-            href="/submit"
+            href="/map"
             style={{
               display: "inline-block",
               padding: "16px 28px",
@@ -162,8 +180,25 @@ export default function FounderConfirmationPage() {
                 "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
             }}
           >
-            Add your first lights
+            Go to the map
           </Link>
+
+          <p
+            style={{
+              fontSize: "0.88rem",
+              lineHeight: 1.65,
+              color: "#6b8aaa",
+              margin: 0,
+              marginTop: 24,
+              maxWidth: 420,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            You&apos;ll also receive a first email soon, gently walking you into
+            placing your first three lights. No rush — take the rhythm that
+            fits.
+          </p>
         </div>
       </div>
     </main>
