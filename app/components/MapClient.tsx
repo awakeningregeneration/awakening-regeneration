@@ -50,6 +50,8 @@ export default function MapClient({
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const popupImageRootRef = useRef<Root | null>(null);
 
+  const isFiltered = !!(highlightState || highlightCounty);
+
   const [flagListingId, setFlagListingId] = useState<string | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [flagDetails, setFlagDetails] = useState("");
@@ -261,6 +263,28 @@ export default function MapClient({
         display: none !important;
       }
 
+      .mapboxgl-popup-close-button {
+        color: rgba(255,216,107,0.7) !important;
+        font-size: 22px !important;
+        line-height: 1 !important;
+        width: 44px !important;
+        height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        top: 4px !important;
+        right: 4px !important;
+        border-radius: 50% !important;
+        background: transparent !important;
+        z-index: 2 !important;
+      }
+
+      .mapboxgl-popup-close-button:hover {
+        color: #FFD86B !important;
+        background: rgba(255,216,107,0.1) !important;
+      }
+
       .ar-popup {
         background: radial-gradient(circle at 30% 20%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%);
         border: 1px solid rgba(255,216,107,0.35);
@@ -300,6 +324,13 @@ export default function MapClient({
         margin: 0 0 8px 0;
       }
 
+      .ar-popup-address {
+        font-size: 13px;
+        color: rgba(148,196,236,0.75);
+        line-height: 1.4;
+        margin: 0 0 6px 0;
+      }
+
       .ar-popup-meta {
         font-size: 12px;
         color: rgba(148,196,236,0.7);
@@ -325,8 +356,9 @@ export default function MapClient({
       }
 
       .ar-popup-link {
-        display: inline-block;
-        margin-bottom: 10px;
+        display: block;
+        margin-top: 8px;
+        margin-bottom: 0;
         color: #FFD86B;
         font-weight: 600;
         font-size: 14px;
@@ -496,12 +528,12 @@ export default function MapClient({
         .addTo(map);
     });
 
-    if (!selectedId && listings.length > 0) {
+    if (!selectedId && listings.length > 0 && isFiltered) {
       const bounds = new mapboxgl.LngLatBounds();
       listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
       map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
     }
-  }, [listings, onSelect, selectedId, highlightCounty, highlightState]);
+  }, [listings, onSelect, selectedId, highlightCounty, highlightState, isFiltered]);
 
   useEffect(() => {
     markersRef.current.forEach((marker, idx) => {
@@ -522,6 +554,17 @@ export default function MapClient({
       else el.classList.remove("ar-marker--in-county");
     });
   }, [selectedId, listings, highlightCounty, highlightState]);
+
+  // Return to national view when filters clear back to "All"
+  useEffect(() => {
+    if (!isFiltered && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [-98.5795, 39.8283],
+        zoom: 4,
+        duration: 900,
+      });
+    }
+  }, [isFiltered]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -616,6 +659,14 @@ export default function MapClient({
       contentDiv.appendChild(description);
     }
 
+    // Street address (when present)
+    if (listing.address && listing.address.trim()) {
+      const addressEl = document.createElement("div");
+      addressEl.className = "ar-popup-address";
+      addressEl.textContent = listing.address.trim();
+      contentDiv.appendChild(addressEl);
+    }
+
     // Category + location meta line
     const meta = document.createElement("div");
     meta.className = "ar-popup-meta";
@@ -649,6 +700,29 @@ export default function MapClient({
       contentDiv.appendChild(link);
     }
 
+    // Get directions link
+    let destination = "";
+    if (listing.address && listing.address.trim()) {
+      const parts = [listing.address.trim(), listing.city, listing.state]
+        .filter(Boolean)
+        .join(", ");
+      destination = encodeURIComponent(parts);
+    } else if (listing.city && listing.state) {
+      destination = encodeURIComponent(
+        `${listing.city}, ${listing.state}`
+      );
+    } else {
+      destination = `${listing.lat},${listing.lng}`;
+    }
+
+    const directionsLink = document.createElement("a");
+    directionsLink.className = "ar-popup-link";
+    directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+    directionsLink.target = "_blank";
+    directionsLink.rel = "noopener noreferrer";
+    directionsLink.textContent = "Get directions →";
+    contentDiv.appendChild(directionsLink);
+
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "ar-popup-action";
@@ -670,7 +744,7 @@ export default function MapClient({
     popupRef.current = new mapboxgl.Popup({
       offset: 18,
       closeButton: true,
-      closeOnClick: false,
+      closeOnClick: true,
     })
       .setLngLat([listing.lng, listing.lat])
       .setDOMContent(popupNode)

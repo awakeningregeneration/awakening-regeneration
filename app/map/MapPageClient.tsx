@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
 import ListingImageTile from "../components/ListingImageTile";
 import { getListingImage } from "../../lib/getListingImage";
+import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
 import type { Listing } from "@/types/listing";
@@ -87,6 +88,24 @@ export default function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapRegion, setMapRegion] = useState<PropsRegion>({});
   const [storyCount, setStoryCount] = useState<number>(0);
+
+  const isMobile = useIsMobile();
+  const [mobileView, setMobileView] = useState<"browse" | "map">("browse");
+  const swipeStartY = useRef<number>(0);
+
+  // Auto-switch to map view when a listing is tapped on mobile
+  useEffect(() => {
+    if (isMobile && selectedId) {
+      setMobileView("map");
+    }
+  }, [selectedId, isMobile]);
+
+  // Reset to browse view when switching from mobile to desktop
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileView("browse");
+    }
+  }, [isMobile]);
 
   const searchParams = useSearchParams();
 
@@ -257,19 +276,43 @@ const countyListings = useMemo(() => {
       : mapRegion.state || "";
 
   return (
-    <main style={{ display: "flex", height: "100vh", width: "100%" }}>
+    <main
+      style={{
+        display: isMobile ? undefined : "flex",
+        height: "100vh",
+        width: "100%",
+        position: isMobile ? "relative" : undefined,
+        overflow: isMobile ? "hidden" : undefined,
+      }}
+    >
+      {/* Sidebar / Browse view */}
       <div
         style={{
-          width: "380px",
           padding: 16,
           overflowY: "auto",
-          position: "relative",
           color: "rgba(211,227,247,0.85)",
           background:
             "linear-gradient(160deg, rgba(12,52,110,0.78) 0%, rgba(17,65,130,0.82) 50%, rgba(12,52,110,0.78) 100%)",
           backdropFilter: "blur(12px)",
-          boxShadow: "2px 0 24px rgba(8,25,45,0.13)",
-          borderTop: "3px solid rgba(255,216,107,0.6)",
+          ...(isMobile
+            ? {
+                position: "absolute" as const,
+                inset: 0,
+                zIndex: mobileView === "browse" ? 2 : 0,
+                transform:
+                  mobileView === "browse"
+                    ? "translateX(0)"
+                    : "translateX(-100%)",
+                opacity: mobileView === "browse" ? 1 : 0,
+                transition:
+                  "transform 300ms ease, opacity 300ms ease",
+              }
+            : {
+                width: "380px",
+                position: "relative" as const,
+                boxShadow: "2px 0 24px rgba(8,25,45,0.13)",
+                borderTop: "3px solid rgba(255,216,107,0.6)",
+              }),
         }}
       >
         {/* Sidebar emission light field */}
@@ -430,7 +473,7 @@ const countyListings = useMemo(() => {
                 A field of visible lights
               </div>
 
-              <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.84 }}>
+              <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.95 }}>
                 You’re viewing the broader map. Choose a state to focus what’s
                 visible there, then narrow further by county if you want to land
                 in a specific place.
@@ -441,7 +484,7 @@ const countyListings = useMemo(() => {
                   marginTop: 12,
                   fontSize: 13,
                   lineHeight: 1.5,
-                  opacity: 0.8,
+                  opacity: 0.92,
                 }}
               >
                 {allListings.length} light
@@ -453,12 +496,12 @@ const countyListings = useMemo(() => {
                   style={{
                     marginTop: 12,
                     padding: 10,
-                    border: "1px solid rgba(0,0,0,0.10)",
+                    border: "1px solid rgba(255,216,107,0.15)",
                     borderRadius: 10,
-                    background: "rgba(0,0,0,0.03)",
+                    background: "rgba(255,255,255,0.04)",
                     fontSize: 13,
                     lineHeight: 1.5,
-                    opacity: 0.84,
+                    opacity: 0.95,
                   }}
                 >
                   Map center is currently over <strong>{liveRegionLabel}</strong>.
@@ -469,16 +512,16 @@ const countyListings = useMemo(() => {
                 style={{
                   marginTop: 14,
                   padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
+                  border: "1px solid rgba(255,216,107,0.15)",
                   borderRadius: 10,
-                  background: "rgba(0,0,0,0.03)",
+                  background: "rgba(255,255,255,0.04)",
                 }}
               >
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
                   Want to add something?
                 </div>
 
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82 }}>
+                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
                   Choose a place first to ground the listing in a specific
                   region, or add a light directly and let the map place it.
                 </div>
@@ -486,12 +529,12 @@ const countyListings = useMemo(() => {
   style={{
     marginTop: 10,
     padding: 10,
-    border: "1px solid rgba(0,0,0,0.10)",
+    border: "1px solid rgba(255,216,107,0.15)",
     borderRadius: 10,
-    background: "rgba(0,0,0,0.03)",
+    background: "rgba(255,255,255,0.04)",
     fontSize: 13,
     lineHeight: 1.5,
-    opacity: 0.85,
+    opacity: 0.95,
   }}
 >
   <div style={{ fontWeight: 600, marginBottom: 6 }}>
@@ -504,7 +547,7 @@ const countyListings = useMemo(() => {
       textDecoration: "underline",
       textUnderlineOffset: 3,
       fontWeight: 600,
-      color: "inherit",
+      color: "#FFD86B",
     }}
   >
     About Awakening Regeneration
@@ -518,7 +561,7 @@ const countyListings = useMemo(() => {
                       textDecoration: "underline",
                       textUnderlineOffset: 3,
                       fontWeight: 600,
-                      color: "inherit",
+                      color: "#FFD86B",
                       fontSize: 13,
                     }}
                   >
@@ -540,11 +583,11 @@ const countyListings = useMemo(() => {
                 {effectiveState}
               </div>
 
-              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 10 }}>
+              <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 10 }}>
                 Visible in this state
               </div>
 
-              <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.85 }}>
+              <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.92 }}>
                 {stateLightCount} light{stateLightCount === 1 ? "" : "s"} visible
                 in {effectiveState}.
               </div>
@@ -554,7 +597,7 @@ const countyListings = useMemo(() => {
                   marginTop: 12,
                   fontSize: 13,
                   lineHeight: 1.55,
-                  opacity: 0.82,
+                  opacity: 0.95,
                 }}
               >
                 Pan around the state, or choose a county to focus more closely.
@@ -564,9 +607,9 @@ const countyListings = useMemo(() => {
                 style={{
                   marginTop: 14,
                   padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
+                  border: "1px solid rgba(255,216,107,0.15)",
                   borderRadius: 10,
-                  background: "rgba(0,0,0,0.03)",
+                  background: "rgba(255,255,255,0.04)",
                 }}
               >
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
@@ -576,12 +619,12 @@ const countyListings = useMemo(() => {
   style={{
     marginTop: 10,
     padding: 10,
-    border: "1px solid rgba(0,0,0,0.10)",
+    border: "1px solid rgba(255,216,107,0.15)",
     borderRadius: 10,
-    background: "rgba(0,0,0,0.03)",
+    background: "rgba(255,255,255,0.04)",
     fontSize: 13,
     lineHeight: 1.5,
-    opacity: 0.85,
+    opacity: 0.95,
   }}
 >
   <div style={{ fontWeight: 600, marginBottom: 6 }}>
@@ -594,13 +637,13 @@ const countyListings = useMemo(() => {
       textDecoration: "underline",
       textUnderlineOffset: 3,
       fontWeight: 600,
-      color: "inherit",
+      color: "#FFD86B",
     }}
   >
     About Awakening Regeneration
   </Link>
 </div>
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.82 }}>
+                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
                   Choose a county to focus the map more precisely, or add a new
                   point of light in {effectiveState}.
                 </div>
@@ -613,7 +656,7 @@ const countyListings = useMemo(() => {
                       textDecoration: "underline",
                       textUnderlineOffset: 3,
                       fontWeight: 600,
-                      color: "inherit",
+                      color: "#FFD86B",
                       fontSize: 13,
                       marginBottom: 6,
                     }}
@@ -628,7 +671,7 @@ const countyListings = useMemo(() => {
                       textDecoration: "underline",
                       textUnderlineOffset: 3,
                       fontWeight: 600,
-                      color: "inherit",
+                      color: "#FFD86B",
                       fontSize: 13,
                     }}
                   >
@@ -656,7 +699,7 @@ const countyListings = useMemo(() => {
                 style={{
                   fontSize: 12,
                   marginBottom: 10,
-                  color: "rgba(211,227,247,0.6)",
+                  color: "rgba(211,227,247,0.85)",
                 }}
               >
                 Visible here
@@ -664,7 +707,7 @@ const countyListings = useMemo(() => {
 
               {countyLightCount > 0 ? (
                 <>
-                  <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.85 }}>
+                  <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.92 }}>
                     {countyLightCount} light
                     {countyLightCount === 1 ? "" : "s"} visible in this place.
                   </div>
@@ -776,13 +819,13 @@ const countyListings = useMemo(() => {
                   href="/support"
                   style={{
                     display: "inline-block",
-                    background: "rgba(255,216,107,0.15)",
-                    border: "1px solid rgba(255,216,107,0.5)",
+                    background: "#FFD86B",
+                    border: "1px solid #FFD86B",
                     borderRadius: 20,
                     padding: "6px 14px",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "#7a5c00",
+                    color: "#08192d",
                     textDecoration: "none",
                   }}
                 >
@@ -839,12 +882,98 @@ const countyListings = useMemo(() => {
   </Link>
 </div>
 
+              {isMobile && countyLightCount > 0 && (
+                <div style={{ marginTop: 16, textAlign: "center" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedId(null);
+                      setMobileView("map");
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      color: "#FFD86B",
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                    }}
+                  >
+                    view on map →
+                  </button>
+                </div>
+              )}
+
             </>
           )}
         </div>
       </div>
 
-      <div style={{ flex: 1, position: "relative" }}>
+      {/* Map area */}
+      <div
+        style={{
+          ...(isMobile
+            ? {
+                position: "absolute" as const,
+                inset: 0,
+                zIndex: mobileView === "map" ? 2 : 0,
+                transform:
+                  mobileView === "map"
+                    ? "translateX(0)"
+                    : "translateX(100%)",
+                opacity: mobileView === "map" ? 1 : 0,
+                transition:
+                  "transform 300ms ease, opacity 300ms ease",
+              }
+            : {
+                flex: 1,
+                position: "relative" as const,
+              }),
+        }}
+        onTouchStart={(e) => {
+          if (isMobile && e.touches[0].clientY < 80) {
+            swipeStartY.current = e.touches[0].clientY;
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (
+            isMobile &&
+            swipeStartY.current > 0 &&
+            e.changedTouches[0].clientY - swipeStartY.current >= 60
+          ) {
+            setMobileView("browse");
+          }
+          swipeStartY.current = 0;
+        }}
+      >
+        {/* ← browse tab (mobile map view only) */}
+        {isMobile && mobileView === "map" && (
+          <button
+            type="button"
+            onClick={() => setMobileView("browse")}
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              zIndex: 10,
+              background: "rgba(8, 25, 45, 0.85)",
+              border: "1px solid rgba(255, 216, 107, 0.35)",
+              color: "#FFD86B",
+              padding: "8px 14px",
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 600,
+              backdropFilter: "blur(8px)",
+              cursor: "pointer",
+            }}
+          >
+            ← browse
+          </button>
+        )}
+
         <MapClient
           listings={mapListings}
           selectedId={selectedId}

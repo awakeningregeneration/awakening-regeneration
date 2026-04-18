@@ -18,6 +18,7 @@ export type Listing = {
   description?: string;
   website?: string;
 
+  address?: string;
   city: string;
   state: string;
   county?: string;
