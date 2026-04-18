@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
 import ListingImageTile from "../components/ListingImageTile";
@@ -108,6 +108,16 @@ export default function MapPage() {
   }, [isMobile]);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+
+  /** Push current region selection into the URL (without adding history) */
+  function updateMapUrl(state: string, county: string) {
+    const params = new URLSearchParams();
+    if (state && state !== "All") params.set("state", state);
+    if (county && county !== "All") params.set("county", county);
+    const qs = params.toString();
+    router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
+  }
 
   useEffect(() => {
     async function loadListings() {
@@ -390,8 +400,10 @@ const countyListings = useMemo(() => {
             value={selectedCounty}
             disabled={!hasStateSelection}
             onChange={(e) => {
-              setSelectedCounty(e.target.value);
+              const newCounty = e.target.value;
+              setSelectedCounty(newCounty);
               setSelectedId(null);
+              updateMapUrl(selectedState, newCounty);
             }}
             style={{
               width: "100%",
@@ -429,9 +441,11 @@ const countyListings = useMemo(() => {
           <select
             value={selectedState}
             onChange={(e) => {
-              setSelectedState(e.target.value);
+              const newState = e.target.value;
+              setSelectedState(newState);
               setSelectedCounty("All");
               setSelectedId(null);
+              updateMapUrl(newState, "All");
             }}
             style={{
               width: "100%",
