@@ -321,7 +321,7 @@ export default function ConstellationPage() {
         })}
       </div>
 
-      {/* Canary Commons kicker + return link */}
+      {/* Logo + return link */}
       <div
         style={{
           position: "fixed",
@@ -330,23 +330,23 @@ export default function ConstellationPage() {
           zIndex: 10,
         }}
       >
-        <div
+        <img
+          src="/canary-commons-logo.png"
+          alt="Canary Commons"
           style={{
-            fontSize: "0.72rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.3)",
+            width: "clamp(140px, 18vw, 200px)",
+            height: "auto",
+            display: "block",
+            marginBottom: 6,
+            filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))",
           }}
-        >
-          Canary Commons
-        </div>
+        />
         <Link
           href="/map"
           style={{
             display: "block",
-            marginTop: 6,
             color: "#FFD86B",
-            fontSize: 14,
+            fontSize: 13,
             textDecoration: "none",
           }}
         >

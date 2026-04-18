@@ -270,18 +270,28 @@ export default async function StoriesPage({
           margin: "0 auto",
         }}
       >
-        {/* Back */}
-        <div style={{ marginBottom: 18 }}>
+        {/* Logo + back link */}
+        <div style={{ marginBottom: 24, textAlign: "center" }}>
+          <img
+            src="/canary-commons-logo.png"
+            alt="Canary Commons"
+            style={{
+              width: "clamp(200px, 30vw, 320px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto 12px",
+              filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.3))",
+            }}
+          />
           <Link
             href={mapHref}
             style={{
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-              color: "rgba(159,184,216,0.65)",
+              color: "#FFD86B",
               fontSize: 14,
+              textDecoration: "none",
             }}
           >
-            Back to map
+            ← Return to the map
           </Link>
         </div>
 

@@ -24,3 +24,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Gentle float for the constellation bubble on /map */
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.constellation-float {
+  animation: gentleFloat 5s ease-in-out infinite;
+}
+
+/* Soft breathing glow behind the canary on /about */
+@keyframes canaryBreathe {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; }
+}
+
+.canary-glow {
+  animation: canaryBreathe 7s ease-in-out infinite;
+}

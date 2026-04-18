@@ -106,11 +106,7 @@ export default function HomePage() {
         style={{
           position: "relative",
           zIndex: 2,
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "34px 28px 28px",
+          padding: "clamp(8px, 1.5vw, 20px) 28px 32px",
         }}
       >
         <div
@@ -119,20 +115,19 @@ export default function HomePage() {
             maxWidth: 900,
             margin: "0 auto",
             textAlign: "center",
-            paddingTop: "clamp(10px, 2vw, 24px)",
           }}
         >
-          <div
+          <img
+            src="/canary-commons-logo.png"
+            alt="Canary Commons"
             style={{
-              fontSize: 12,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.46)",
-              marginBottom: 14,
+              width: "clamp(280px, 40vw, 460px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto -2px",
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.3))",
             }}
-          >
-            Canary Commons
-          </div>
+          />
 
           <h1
             style={{
@@ -140,7 +135,7 @@ export default function HomePage() {
               lineHeight: 0.98,
               fontWeight: 650,
               margin: 0,
-              marginBottom: 18,
+              marginBottom: 12,
               textShadow: "0 12px 34px rgba(6,16,40,0.34)",
             }}
           >
@@ -179,7 +174,7 @@ export default function HomePage() {
             maxWidth: 760,
             margin: "0 auto",
             textAlign: "center",
-            paddingBottom: "clamp(72px, 12vh, 120px)",
+            paddingBottom: "clamp(20px, 3vh, 36px)",
           }}
         >
           <div
@@ -188,13 +183,13 @@ export default function HomePage() {
               lineHeight: 1.55,
               color: "rgba(255,255,255,0.97)",
               maxWidth: 760,
-              margin: "0 auto 18px",
+              margin: "0 auto 10px",
               textShadow: "0 4px 18px rgba(4,12,35,0.65)",
             }}
           >
             <p
               style={{
-                margin: "0 0 10px",
+                margin: "0 0 6px",
                 textShadow: "0 2px 12px rgba(4,12,35,0.72)",
               }}
             >
@@ -205,7 +200,7 @@ export default function HomePage() {
 
             <p
               style={{
-                margin: "0 0 18px",
+                margin: "0 0 8px",
                 textShadow: "0 2px 12px rgba(4,12,35,0.72)",
               }}
             >
@@ -220,7 +215,7 @@ export default function HomePage() {
               lineHeight: 1.45,
               color: "rgba(255,255,255,0.97)",
               maxWidth: 700,
-              margin: "0 auto 22px",
+              margin: "0 auto 14px",
               textShadow: "0 4px 18px rgba(4,12,35,0.65)",
             }}
           >
@@ -303,7 +298,7 @@ export default function HomePage() {
 
           <div
             style={{
-              marginTop: 12,
+              marginTop: 8,
               fontSize: 15,
               lineHeight: 1.45,
               color: "rgba(255,255,255,0.82)",
@@ -354,6 +349,19 @@ export default function HomePage() {
             }}
           >
             Join the people helping turn on the first lights.
+          </div>
+
+          <div
+            style={{
+              marginTop: 24,
+              fontSize: 11,
+              letterSpacing: "0.18em",
+              color: "rgba(255,216,107,0.70)",
+              textAlign: "center",
+              fontStyle: "italic",
+            }}
+          >
+            A young commons, still forming
           </div>
         </div>
       </div>

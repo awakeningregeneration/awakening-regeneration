@@ -1001,6 +1001,7 @@ const countyListings = useMemo(() => {
 
         <Link
           href="/constellation"
+          className="constellation-float"
           style={{
             position: "absolute",
             bottom: 80,

@@ -9,52 +9,114 @@ export default function AboutPage() {
     glow: number;
     tone: "gold" | "cool";
   }[] = [
-    // Upper band
-    { left: "4%", top: "6%", size: 2, opacity: 0.35, glow: 4, tone: "gold" },
-    { left: "9%", top: "18%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
-    { left: "14%", top: "9%", size: 2, opacity: 0.4, glow: 5, tone: "gold" },
-    { left: "21%", top: "14%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
-    { left: "17%", top: "28%", size: 2, opacity: 0.3, glow: 4, tone: "cool" },
-    { left: "26%", top: "22%", size: 5, opacity: 0.8, glow: 11, tone: "gold" },
-    { left: "32%", top: "7%", size: 2, opacity: 0.45, glow: 5, tone: "cool" },
-    { left: "38%", top: "17%", size: 6, opacity: 0.85, glow: 13, tone: "gold" },
-    { left: "44%", top: "12%", size: 8, opacity: 0.95, glow: 18, tone: "gold" },
-    { left: "49%", top: "26%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
-    { left: "55%", top: "8%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
-    { left: "61%", top: "20%", size: 2, opacity: 0.4, glow: 4, tone: "cool" },
-    { left: "66%", top: "11%", size: 10, opacity: 1.0, glow: 22, tone: "gold" },
-    { left: "72%", top: "24%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
-    { left: "78%", top: "16%", size: 5, opacity: 0.85, glow: 12, tone: "gold" },
-    { left: "84%", top: "9%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
-    { left: "89%", top: "22%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
-    { left: "94%", top: "13%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
+    // ── Upper band — edges ──
+    { left: "3%", top: "3%", size: 4, opacity: 0.7, glow: 10, tone: "gold" },
+    { left: "8%", top: "14%", size: 3, opacity: 0.65, glow: 8, tone: "cool" },
+    { left: "14%", top: "7%", size: 3, opacity: 0.6, glow: 7, tone: "gold" },
+    { left: "18%", top: "22%", size: 3, opacity: 0.55, glow: 7, tone: "cool" },
+    { left: "21%", top: "11%", size: 6, opacity: 0.92, glow: 16, tone: "gold" },
+    { left: "26%", top: "18%", size: 5, opacity: 0.85, glow: 12, tone: "gold" },
+    { left: "32%", top: "5%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
+    { left: "15%", top: "4%", size: 2, opacity: 0.55, glow: 6, tone: "gold" },
+    { left: "28%", top: "12%", size: 3, opacity: 0.65, glow: 8, tone: "gold" },
 
-    // Middle belt
-    { left: "6%", top: "36%", size: 3, opacity: 0.5, glow: 6, tone: "gold" },
-    { left: "13%", top: "44%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
-    { left: "22%", top: "40%", size: 4, opacity: 0.75, glow: 10, tone: "gold" },
-    { left: "29%", top: "52%", size: 7, opacity: 0.92, glow: 15, tone: "cool" },
-    { left: "36%", top: "46%", size: 2, opacity: 0.3, glow: 3, tone: "gold" },
-    { left: "45%", top: "54%", size: 9, opacity: 1.0, glow: 20, tone: "gold" },
-    { left: "53%", top: "42%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
-    { left: "60%", top: "50%", size: 2, opacity: 0.4, glow: 4, tone: "gold" },
-    { left: "68%", top: "38%", size: 5, opacity: 0.8, glow: 12, tone: "cool" },
-    { left: "75%", top: "48%", size: 3, opacity: 0.55, glow: 6, tone: "gold" },
-    { left: "83%", top: "44%", size: 4, opacity: 0.75, glow: 10, tone: "gold" },
-    { left: "91%", top: "54%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
+    // ── CANARY ZONE — bright cluster inside the silhouette (44-60% left, 18-32% top) ──
+    { left: "46%", top: "20%", size: 7, opacity: 1.0, glow: 24, tone: "gold" },
+    { left: "49%", top: "26%", size: 5, opacity: 0.95, glow: 20, tone: "gold" },
+    { left: "52%", top: "22%", size: 9, opacity: 1.0, glow: 28, tone: "gold" },
+    { left: "48%", top: "28%", size: 4, opacity: 0.9, glow: 18, tone: "gold" },
+    { left: "54%", top: "24%", size: 6, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "50%", top: "19%", size: 5, opacity: 0.92, glow: 20, tone: "gold" },
+    { left: "45%", top: "30%", size: 3, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "56%", top: "26%", size: 4, opacity: 0.88, glow: 16, tone: "gold" },
+    // Extended canary surround
+    { left: "44%", top: "18%", size: 4, opacity: 0.82, glow: 14, tone: "gold" },
+    { left: "47%", top: "32%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "58%", top: "20%", size: 5, opacity: 0.9, glow: 18, tone: "gold" },
+    { left: "55%", top: "30%", size: 3, opacity: 0.78, glow: 12, tone: "gold" },
+    { left: "42%", top: "24%", size: 3, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "60%", top: "22%", size: 4, opacity: 0.8, glow: 14, tone: "gold" },
 
-    // Lower band
-    { left: "7%", top: "66%", size: 3, opacity: 0.55, glow: 6, tone: "cool" },
-    { left: "16%", top: "74%", size: 5, opacity: 0.85, glow: 12, tone: "gold" },
-    { left: "24%", top: "68%", size: 2, opacity: 0.4, glow: 4, tone: "gold" },
-    { left: "34%", top: "80%", size: 8, opacity: 0.96, glow: 18, tone: "gold" },
-    { left: "43%", top: "72%", size: 3, opacity: 0.6, glow: 7, tone: "cool" },
-    { left: "52%", top: "84%", size: 4, opacity: 0.7, glow: 9, tone: "gold" },
-    { left: "59%", top: "68%", size: 2, opacity: 0.35, glow: 4, tone: "cool" },
-    { left: "67%", top: "76%", size: 10, opacity: 1.0, glow: 22, tone: "gold" },
-    { left: "76%", top: "82%", size: 3, opacity: 0.5, glow: 6, tone: "gold" },
-    { left: "85%", top: "70%", size: 5, opacity: 0.8, glow: 11, tone: "cool" },
-    { left: "93%", top: "88%", size: 2, opacity: 0.3, glow: 3, tone: "gold" },
+    // ── Upper band — right side ──
+    { left: "66%", top: "9%", size: 10, opacity: 1.0, glow: 28, tone: "gold" },
+    { left: "72%", top: "22%", size: 4, opacity: 0.75, glow: 10, tone: "cool" },
+    { left: "78%", top: "14%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "84%", top: "7%", size: 3, opacity: 0.55, glow: 7, tone: "cool" },
+    { left: "89%", top: "20%", size: 5, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "94%", top: "11%", size: 4, opacity: 0.7, glow: 10, tone: "cool" },
+    { left: "97%", top: "4%", size: 3, opacity: 0.6, glow: 8, tone: "gold" },
+    { left: "70%", top: "6%", size: 3, opacity: 0.65, glow: 9, tone: "gold" },
+    { left: "82%", top: "18%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "49%", top: "24%", size: 4, opacity: 0.7, glow: 10, tone: "cool" },
+    { left: "55%", top: "20%", size: 3, opacity: 0.6, glow: 8, tone: "cool" },
+
+    // ── Upper-middle band ──
+    { left: "3%", top: "30%", size: 5, opacity: 0.82, glow: 14, tone: "gold" },
+    { left: "10%", top: "34%", size: 3, opacity: 0.6, glow: 8, tone: "cool" },
+    { left: "18%", top: "28%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "25%", top: "35%", size: 6, opacity: 0.9, glow: 18, tone: "gold" },
+    { left: "33%", top: "30%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "40%", top: "32%", size: 4, opacity: 0.7, glow: 10, tone: "gold" },
+    { left: "48%", top: "28%", size: 8, opacity: 1.0, glow: 24, tone: "gold" },
+    { left: "56%", top: "34%", size: 3, opacity: 0.6, glow: 8, tone: "cool" },
+    { left: "63%", top: "30%", size: 5, opacity: 0.82, glow: 14, tone: "gold" },
+    { left: "70%", top: "35%", size: 4, opacity: 0.68, glow: 10, tone: "cool" },
+    { left: "78%", top: "28%", size: 6, opacity: 0.92, glow: 18, tone: "gold" },
+    { left: "86%", top: "33%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "93%", top: "30%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "15%", top: "32%", size: 3, opacity: 0.62, glow: 8, tone: "gold" },
+    { left: "52%", top: "36%", size: 3, opacity: 0.65, glow: 9, tone: "gold" },
+
+    // ── Middle belt ──
+    { left: "6%", top: "42%", size: 4, opacity: 0.7, glow: 10, tone: "gold" },
+    { left: "13%", top: "48%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "22%", top: "44%", size: 6, opacity: 0.9, glow: 18, tone: "gold" },
+    { left: "29%", top: "52%", size: 8, opacity: 1.0, glow: 24, tone: "gold" },
+    { left: "36%", top: "46%", size: 3, opacity: 0.55, glow: 7, tone: "cool" },
+    { left: "42%", top: "50%", size: 5, opacity: 0.82, glow: 14, tone: "gold" },
+    { left: "45%", top: "55%", size: 10, opacity: 1.0, glow: 28, tone: "gold" },
+    { left: "53%", top: "42%", size: 4, opacity: 0.75, glow: 10, tone: "cool" },
+    { left: "58%", top: "48%", size: 3, opacity: 0.62, glow: 8, tone: "gold" },
+    { left: "60%", top: "54%", size: 5, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "68%", top: "44%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "75%", top: "50%", size: 4, opacity: 0.72, glow: 10, tone: "cool" },
+    { left: "83%", top: "46%", size: 5, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "91%", top: "52%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "17%", top: "50%", size: 3, opacity: 0.62, glow: 8, tone: "gold" },
+    { left: "48%", top: "58%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+
+    // ── Lower belt ──
+    { left: "5%", top: "62%", size: 5, opacity: 0.8, glow: 14, tone: "gold" },
+    { left: "12%", top: "68%", size: 3, opacity: 0.6, glow: 8, tone: "cool" },
+    { left: "20%", top: "64%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "28%", top: "72%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "35%", top: "66%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "43%", top: "74%", size: 4, opacity: 0.75, glow: 10, tone: "gold" },
+    { left: "50%", top: "68%", size: 9, opacity: 1.0, glow: 26, tone: "gold" },
+    { left: "57%", top: "72%", size: 3, opacity: 0.62, glow: 8, tone: "cool" },
+    { left: "64%", top: "66%", size: 5, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "72%", top: "74%", size: 4, opacity: 0.7, glow: 10, tone: "cool" },
+    { left: "80%", top: "68%", size: 6, opacity: 0.92, glow: 18, tone: "gold" },
+    { left: "88%", top: "72%", size: 3, opacity: 0.58, glow: 7, tone: "cool" },
+    { left: "95%", top: "66%", size: 4, opacity: 0.72, glow: 10, tone: "gold" },
+    { left: "38%", top: "70%", size: 3, opacity: 0.65, glow: 9, tone: "gold" },
+    { left: "55%", top: "62%", size: 3, opacity: 0.68, glow: 9, tone: "gold" },
+
+    // ── Deep band ──
+    { left: "4%", top: "80%", size: 4, opacity: 0.68, glow: 10, tone: "gold" },
+    { left: "11%", top: "86%", size: 6, opacity: 0.9, glow: 18, tone: "gold" },
+    { left: "19%", top: "82%", size: 3, opacity: 0.6, glow: 8, tone: "cool" },
+    { left: "27%", top: "90%", size: 5, opacity: 0.82, glow: 14, tone: "gold" },
+    { left: "34%", top: "84%", size: 9, opacity: 1.0, glow: 26, tone: "gold" },
+    { left: "42%", top: "92%", size: 4, opacity: 0.68, glow: 10, tone: "cool" },
+    { left: "50%", top: "86%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
+    { left: "58%", top: "80%", size: 3, opacity: 0.62, glow: 8, tone: "gold" },
+    { left: "65%", top: "88%", size: 5, opacity: 0.85, glow: 14, tone: "gold" },
+    { left: "73%", top: "82%", size: 4, opacity: 0.72, glow: 10, tone: "cool" },
+    { left: "80%", top: "94%", size: 10, opacity: 1.0, glow: 30, tone: "gold" },
+    { left: "87%", top: "86%", size: 2, opacity: 0.4, glow: 5, tone: "cool" },
+    { left: "93%", top: "90%", size: 5, opacity: 0.78, glow: 12, tone: "gold" },
+    { left: "97%", top: "82%", size: 3, opacity: 0.5, glow: 6, tone: "gold" },
   ];
 
   return (
@@ -100,6 +162,21 @@ export default function AboutPage() {
         })}
       </div>
 
+      {/* Warm diffuse glow behind the canary — she is made of light */}
+      <div
+        className="canary-glow"
+        style={{
+          position: "absolute",
+          left: "24%",
+          top: "8%",
+          width: "52%",
+          height: "25%",
+          background:
+            "radial-gradient(ellipse at 50% 50%, rgba(255,216,107,0.20) 0%, rgba(255,216,107,0.12) 25%, rgba(255,216,107,0.05) 55%, transparent 85%)",
+          pointerEvents: "none",
+        }}
+      />
+
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
         <div style={{ marginBottom: 18 }}>
           <Link
@@ -115,9 +192,17 @@ export default function AboutPage() {
         </div>
 
         <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-3 text-sm uppercase tracking-[0.22em] text-[#9fb8d8]">
-            Canary Commons
-          </p>
+          <img
+            src="/canary-commons-logo.png"
+            alt="Canary Commons"
+            style={{
+              width: "clamp(240px, 35vw, 380px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto 20px",
+              filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.3))",
+            }}
+          />
 
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             About this project
