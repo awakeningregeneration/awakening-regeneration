@@ -550,7 +550,7 @@ const countyListings = useMemo(() => {
       color: "#FFD86B",
     }}
   >
-    About Awakening Regeneration
+    About Canary Commons
   </Link>
 </div>
                 <div style={{ marginTop: 8 }}>
@@ -640,7 +640,7 @@ const countyListings = useMemo(() => {
       color: "#FFD86B",
     }}
   >
-    About Awakening Regeneration
+    About Canary Commons
   </Link>
 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
