@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
 import ListingImageTile from "../components/ListingImageTile";
+import ElementalSeat from "../components/ElementalSeat";
 import { getListingImage } from "../../lib/getListingImage";
 import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
@@ -754,7 +755,7 @@ const countyListings = useMemo(() => {
                               : "rgba(224,240,255,0.14)",
                             display: "flex",
                             gap: 10,
-                            alignItems: "flex-start",
+                            alignItems: "center",
                             transition: "all 0.15s ease",
                             boxShadow: isSelected
                               ? "0 2px 12px rgba(255,216,107,0.2)"
@@ -786,6 +787,7 @@ const countyListings = useMemo(() => {
                               {locationParts.join(", ") || effectiveState}
                             </div>
                           </div>
+                          <ElementalSeat element="spirit" size="sm" />
                         </div>
                       );
                     })}

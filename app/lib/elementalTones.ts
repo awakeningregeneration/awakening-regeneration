@@ -1,58 +1,72 @@
 /**
- * Elemental atmosphere tones for listing tiles.
+ * Elemental signature system for Canary Commons.
  *
  * Five qualities — Earth, Water, Fire, Air, Spirit — expressed as
- * very subtle overlay washes and textures on the deep-sky base (#08192d).
- * Spirit is the default / bridge element (no color overlay, just
- * a few small gold light points).
+ * visual signatures inside a small "seat" component beside listing tiles.
+ *
+ * Spirit is universal: every listing carries it. Other elements layer
+ * on top when a listing has a specific domain emphasis assigned.
  */
 
 export type ElementName = "earth" | "water" | "fire" | "air" | "spirit";
 
-type SpiritDot = { left: string; top: string; size: number; opacity: number };
-
-export interface ElementalTone {
-  /** Semi-transparent overlay color (or "transparent" for spirit) */
-  overlayColor: string;
-  /** CSS background-image value for texture/pattern */
-  backgroundImage: string;
-  /** Gold light points (spirit only) */
-  spiritDots?: SpiritDot[];
+/**
+ * Spirit signature: gold points in a gestural configuration.
+ * Arranged as a loose triangle-with-center — three corners plus
+ * one near-center point that pulls them into relationship.
+ * Not random scatter, but held: "little gold specs that dance together."
+ */
+export interface SpiritPoint {
+  /** Percent from left edge */
+  left: number;
+  /** Percent from top edge */
+  top: number;
+  /** Point diameter in px */
+  size: number;
+  /** 0–1 */
+  opacity: number;
 }
 
-export const elementalTones: Record<ElementName, ElementalTone> = {
+export interface ElementalSignature {
+  /** CSS background value for the seat interior (gradient, color, etc.) */
+  background: string;
+  /** Optional CSS backgroundImage layered on top of background */
+  backgroundImage?: string;
+  /** Spirit-only: gold points in relational configuration */
+  spiritPoints?: SpiritPoint[];
+}
+
+export const elementalSignatures: Record<ElementName, ElementalSignature> = {
+  spirit: {
+    background: "transparent",
+    spiritPoints: [
+      // Loose held triangle with a center anchor
+      { left: 28, top: 22, size: 2.5, opacity: 0.82 }, // upper-left
+      { left: 72, top: 28, size: 2, opacity: 0.7 },    // upper-right
+      { left: 50, top: 48, size: 2, opacity: 0.65 },   // center (the one that holds)
+      { left: 42, top: 74, size: 2.5, opacity: 0.78 }, // lower
+    ],
+  },
+
   earth: {
-    overlayColor: "rgba(90, 110, 75, 0.15)",
+    background:
+      "radial-gradient(circle at 40% 58%, rgba(90,110,75,0.35) 0%, rgba(60,80,50,0.15) 55%, transparent 85%)",
     backgroundImage:
-      "radial-gradient(circle at 25% 35%, rgba(90,110,75,0.08) 0%, transparent 50%), radial-gradient(circle at 70% 65%, rgba(90,110,75,0.06) 0%, transparent 40%)",
+      "radial-gradient(circle at 65% 35%, rgba(110,95,65,0.18) 0%, transparent 40%)",
   },
 
   water: {
-    overlayColor: "rgba(60, 110, 140, 0.12)",
-    backgroundImage:
-      "linear-gradient(0deg, rgba(120,180,220,0.04) 0%, transparent 18%, transparent 36%, rgba(120,180,220,0.03) 36%, transparent 54%, transparent 72%, rgba(120,180,220,0.04) 72%, transparent 90%)",
+    background:
+      "linear-gradient(0deg, rgba(60,110,140,0.06) 0%, rgba(80,140,170,0.18) 20%, transparent 20%, transparent 40%, rgba(60,110,140,0.12) 40%, transparent 60%, transparent 75%, rgba(80,140,170,0.15) 75%, transparent 95%)",
   },
 
   fire: {
-    overlayColor: "rgba(140, 95, 70, 0.12)",
-    backgroundImage:
-      "radial-gradient(ellipse at 50% 90%, rgba(217,165,102,0.09) 0%, transparent 60%)",
+    background:
+      "radial-gradient(ellipse at 50% 85%, rgba(217,165,102,0.4) 0%, rgba(180,120,70,0.2) 40%, transparent 70%)",
   },
 
   air: {
-    overlayColor: "rgba(180, 195, 210, 0.10)",
-    backgroundImage:
-      "radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(180,195,210,0.06) 65%, transparent 100%)",
-  },
-
-  spirit: {
-    overlayColor: "transparent",
-    backgroundImage: "none",
-    spiritDots: [
-      { left: "20%", top: "25%", size: 2, opacity: 0.18 },
-      { left: "70%", top: "30%", size: 1.5, opacity: 0.15 },
-      { left: "40%", top: "68%", size: 2, opacity: 0.2 },
-      { left: "80%", top: "72%", size: 1.5, opacity: 0.15 },
-    ],
+    background:
+      "radial-gradient(circle at 50% 50%, rgba(180,195,210,0.22) 0%, rgba(200,215,230,0.08) 50%, transparent 80%)",
   },
 };
