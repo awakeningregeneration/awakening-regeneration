@@ -321,20 +321,37 @@ export default function ConstellationPage() {
         })}
       </div>
 
-      {/* Canary Commons kicker */}
+      {/* Canary Commons kicker + return link */}
       <div
         style={{
           position: "fixed",
           top: 18,
           left: 24,
-          fontSize: "0.72rem",
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.3)",
           zIndex: 10,
         }}
       >
-        Canary Commons
+        <div
+          style={{
+            fontSize: "0.72rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.3)",
+          }}
+        >
+          Canary Commons
+        </div>
+        <Link
+          href="/map"
+          style={{
+            display: "block",
+            marginTop: 6,
+            color: "#FFD86B",
+            fontSize: 14,
+            textDecoration: "none",
+          }}
+        >
+          ← Return to the map
+        </Link>
       </div>
 
       {/* Search + category filter (fixed, centered top) */}

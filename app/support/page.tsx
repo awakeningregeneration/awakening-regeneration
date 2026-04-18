@@ -465,6 +465,20 @@ export default function SupportPage() {
           padding: "64px 24px",
         }}
       >
+        {/* Return link */}
+        <div style={{ marginBottom: 18 }}>
+          <Link
+            href="/map"
+            style={{
+              color: "#FFD86B",
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            ← Return to the map
+          </Link>
+        </div>
+
         {/* Header */}
         <div style={{ maxWidth: 760 }}>
           <p

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AboutPage() {
   const lights: {
     left: string;
@@ -99,6 +101,19 @@ export default function AboutPage() {
       </div>
 
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
+        <div style={{ marginBottom: 18 }}>
+          <Link
+            href="/map"
+            style={{
+              color: "#FFD86B",
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            ← Return to the map
+          </Link>
+        </div>
+
         <div className="mx-auto max-w-3xl text-center">
           <p className="mb-3 text-sm uppercase tracking-[0.22em] text-[#9fb8d8]">
             Canary Commons

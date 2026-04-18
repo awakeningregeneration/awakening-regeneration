@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type Listing = {
   id: string;
@@ -182,6 +183,18 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
+          <div style={{ marginBottom: 14 }}>
+            <Link
+              href="/map"
+              style={{
+                color: "#FFD86B",
+                fontSize: 14,
+                textDecoration: "none",
+              }}
+            >
+              ← Return to the map
+            </Link>
+          </div>
           <div style={cardStyle}>
             <p style={textStyle}>Loading listing…</p>
           </div>
@@ -196,6 +209,18 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
+          <div style={{ marginBottom: 14 }}>
+            <Link
+              href="/map"
+              style={{
+                color: "#FFD86B",
+                fontSize: 14,
+                textDecoration: "none",
+              }}
+            >
+              ← Return to the map
+            </Link>
+          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>Suggest an edit</h1>
             <p style={errorStyle}>{error}</p>
@@ -211,6 +236,18 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
+          <div style={{ marginBottom: 14 }}>
+            <Link
+              href="/map"
+              style={{
+                color: "#FFD86B",
+                fontSize: 14,
+                textDecoration: "none",
+              }}
+            >
+              ← Return to the map
+            </Link>
+          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>Thank you</h1>
             <p style={textStyle}>
@@ -227,6 +264,18 @@ export default function EditListingPage({ params }: Props) {
       <Atmosphere />
       <div style={contentWrapStyle}>
         <p style={kickerStyle}>Canary Commons</p>
+        <div style={{ marginBottom: 14 }}>
+          <Link
+            href="/map"
+            style={{
+              color: "#FFD86B",
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            ← Return to the map
+          </Link>
+        </div>
         <div style={cardStyle}>
           <h1 style={headingStyle}>Suggest an edit</h1>
 
