@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import { isDomainMatch } from "@/app/lib/domainMatch";
+import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
+import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -161,6 +165,13 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    console.log("POST /api/listings body:", JSON.stringify({
+      claim_stewardship: body.claim_stewardship,
+      steward_email: body.steward_email,
+      steward_display_name: body.steward_display_name,
+      listing_title: body.title,
+    }));
+
     const {
       title,
       description,
@@ -224,7 +235,80 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    // ── Stewardship claim (optional, non-blocking) ──────────
+    let stewardshipClaimPending = false;
+
+    const claimStewardship = body.claim_stewardship === true;
+    const stewardEmail = body.steward_email?.trim();
+
+    if (claimStewardship && stewardEmail && data?.id) {
+      try {
+        const listingWebsite = website?.trim() || null;
+        const verificationPath = isDomainMatch(stewardEmail, listingWebsite)
+          ? "domain_match"
+          : "declaration";
+
+        // Insert steward record (admin client — bypasses RLS)
+        const { data: steward, error: stewardError } = await supabaseAdmin
+          .from("stewards")
+          .insert([
+            {
+              listing_id: data.id,
+              email: stewardEmail,
+              display_name: body.steward_display_name?.trim() || null,
+              verification_path: verificationPath,
+              status: "pending",
+            },
+          ])
+          .select()
+          .single();
+
+        if (stewardError) throw stewardError;
+
+        // Generate token and create claim (admin client — bypasses RLS)
+        const token = generateVerificationToken();
+        const tokenExpiresAt = new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        ).toISOString();
+
+        const { error: claimError } = await supabaseAdmin
+          .from("stewardship_claims")
+          .insert([
+            {
+              steward_id: steward.id,
+              verification_token: token,
+              token_expires_at: tokenExpiresAt,
+            },
+          ]);
+
+        if (claimError) throw claimError;
+
+        // Send verification email
+        await sendStewardVerificationEmail({
+          toEmail: stewardEmail,
+          displayName: body.steward_display_name?.trim() || null,
+          listingName: title?.trim() || "your listing",
+          token,
+          verificationPath,
+        });
+
+        stewardshipClaimPending = true;
+        console.log(
+          `Stewardship claim initiated: ${stewardEmail} → listing ${data.id} (${verificationPath})`
+        );
+      } catch (stewardErr) {
+        // Log but do NOT fail the listing creation
+        console.error(
+          "Stewardship setup failed (listing still created):",
+          stewardErr
+        );
+      }
+    }
+
+    return NextResponse.json({
+      ...data,
+      stewardship_claim_pending: stewardshipClaimPending,
+    });
   } catch (error) {
     return NextResponse.json(
       {

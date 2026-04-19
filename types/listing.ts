@@ -35,5 +35,8 @@ export type Listing = {
   image_url?: string;
   practices?: string[];
 
+  steward_id?: string | null;
+  steward_email?: string | null;
+
   createdAt?: string;
 };

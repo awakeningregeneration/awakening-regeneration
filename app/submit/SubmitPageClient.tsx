@@ -187,10 +187,15 @@ export default function SubmitPage() {
   const [submittedBy, setSubmittedBy] = useState("");
   const [email, setEmail] = useState("");
 
+  const [claimStewardship, setClaimStewardship] = useState(false);
+  const [stewardEmail, setStewardEmail] = useState("");
+  const [stewardName, setStewardName] = useState("");
+
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [stewardshipPending, setStewardshipPending] = useState(false);
 
   const regionLabel = useMemo(() => {
     if (county && state) return `${county} County, ${state}`;
@@ -233,6 +238,13 @@ export default function SubmitPage() {
       return false;
     }
 
+    if (claimStewardship && !stewardEmail.trim()) {
+      setErrorMessage(
+        "Please enter your email so we can verify your stewardship."
+      );
+      return false;
+    }
+
     return true;
   }
 
@@ -270,7 +282,18 @@ export default function SubmitPage() {
         practices,
         submittedBy: submittedBy.trim(),
         email: email.trim(),
+        claim_stewardship: claimStewardship,
+        steward_email: claimStewardship ? stewardEmail.trim() : null,
+        steward_display_name: claimStewardship
+          ? stewardName.trim() || null
+          : null,
       };
+
+      console.log("Submitting listing with:", {
+        claim_stewardship: claimStewardship,
+        steward_email: stewardEmail,
+        steward_display_name: stewardName,
+      });
 
       const response = await fetch("/api/listings", {
         method: "POST",
@@ -289,7 +312,15 @@ export default function SubmitPage() {
         );
       }
 
-      setSuccessMessage("Another point of light has become visible.");
+      const didClaimStewardship =
+        claimStewardship && data?.stewardship_claim_pending;
+
+      setStewardshipPending(!!didClaimStewardship);
+      setSuccessMessage(
+        didClaimStewardship
+          ? `Your listing is live on the map. We've sent a verification link to ${stewardEmail.trim()} to confirm your stewardship — please check your inbox (and spam folder, just in case) within the next 24 hours.`
+          : "Another point of light has become visible."
+      );
       setTitle("");
       setDescription("");
       setWebsite("");
@@ -301,6 +332,9 @@ export default function SubmitPage() {
       setPractices([]);
       setSubmittedBy("");
       setEmail("");
+      setClaimStewardship(false);
+      setStewardEmail("");
+      setStewardName("");
       setIsReviewing(false);
     } catch (error) {
       const message =
@@ -600,6 +634,105 @@ export default function SubmitPage() {
                       style={inputStyle}
                     />
                   </div>
+                </div>
+
+                {/* ── Stewardship section ── */}
+                <div
+                  style={{
+                    marginTop: 8,
+                    paddingTop: 20,
+                    borderTop: "1px solid rgba(100,150,220,0.18)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "0.88rem",
+                      fontWeight: 600,
+                      color: "#0d2a4a",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Are you the person who runs this project?
+                  </div>
+                  <p
+                    style={{
+                      ...helperStyle,
+                      marginBottom: 14,
+                    }}
+                  >
+                    If you&apos;re the one tending this work — the farmer,
+                    the practitioner, the founder, the coordinator — you can
+                    become its steward right now. Stewardship means you can
+                    update this listing directly as your work evolves.
+                    We&apos;ll send you a verification link after you submit.
+                  </p>
+
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      cursor: "pointer",
+                      fontSize: "0.92rem",
+                      color: "#0d2a4a",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={claimStewardship}
+                      onChange={(e) =>
+                        setClaimStewardship(e.target.checked)
+                      }
+                      style={{
+                        width: 18,
+                        height: 18,
+                        accentColor: "#FFD86B",
+                        cursor: "pointer",
+                      }}
+                    />
+                    Yes, I run this project and want to be its steward.
+                  </label>
+
+                  {claimStewardship && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                        display: "grid",
+                        gap: 14,
+                      }}
+                    >
+                      <div>
+                        <label style={labelStyle}>
+                          Your email (for verification)
+                        </label>
+                        <input
+                          type="email"
+                          value={stewardEmail}
+                          onChange={(e) =>
+                            setStewardEmail(e.target.value)
+                          }
+                          placeholder="you@yourproject.org"
+                          required
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>
+                          Your name (optional — how you&apos;d like to be
+                          addressed)
+                        </label>
+                        <input
+                          value={stewardName}
+                          onChange={(e) =>
+                            setStewardName(e.target.value)
+                          }
+                          placeholder="Optional"
+                          style={inputStyle}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
