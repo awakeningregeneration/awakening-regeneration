@@ -14,6 +14,8 @@ type LightPoint = {
 };
 
 const points: LightPoint[] = [
+  // Points positioned relative to the Mapbox viewport (100vh),
+  // NOT the full page height. Rendered inside a 100vh-clamped container.
   { left: 33, top: 63, size: 8, glow: 0.9 },
   { left: 24, top: 52, size: 7, glow: 0.8 },
   { left: 27, top: 33, size: 7, glow: 0.82 },
@@ -66,7 +68,7 @@ export default function ThresholdMap() {
   }, []);
 
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, opacity: 0.72 }}>
         <div
           ref={mapRef}

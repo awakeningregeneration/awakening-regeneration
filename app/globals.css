@@ -44,3 +44,15 @@ body {
 .canary-glow {
   animation: canaryBreathe 7s ease-in-out infinite;
 }
+
+/* Gold inline link on About page */
+.foundation-link {
+  color: #FFD86B;
+  text-decoration: none;
+  border-bottom: 1.5px solid rgba(255,216,107,0.5);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.foundation-link:hover {
+  color: #ffe89d;
+  border-color: #FFD86B;
+}

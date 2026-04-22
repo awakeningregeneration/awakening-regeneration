@@ -1,5 +1,22 @@
 import Link from "next/link";
 
+const GOLD = "#FFD86B";
+const BODY_COLOR = "#fff8e0";
+
+const sectionHeadingStyle: React.CSSProperties = {
+  fontSize: "clamp(1.5rem, 2.5vw, 1.75rem)",
+  fontWeight: 600,
+  color: BODY_COLOR,
+  margin: "0 0 20px",
+};
+
+const bodyStyle: React.CSSProperties = {
+  fontSize: "clamp(1.05rem, 1.2vw, 1.15rem)",
+  lineHeight: 1.68,
+  color: BODY_COLOR,
+  margin: "0 0 1.15em",
+};
+
 export default function AboutPage() {
   const lights: {
     left: string;
@@ -20,7 +37,7 @@ export default function AboutPage() {
     { left: "15%", top: "4%", size: 2, opacity: 0.55, glow: 6, tone: "gold" },
     { left: "28%", top: "12%", size: 3, opacity: 0.65, glow: 8, tone: "gold" },
 
-    // ── CANARY ZONE — bright cluster inside the silhouette (44-60% left, 18-32% top) ──
+    // ── CANARY ZONE ──
     { left: "46%", top: "20%", size: 7, opacity: 1.0, glow: 24, tone: "gold" },
     { left: "49%", top: "26%", size: 5, opacity: 0.95, glow: 20, tone: "gold" },
     { left: "52%", top: "22%", size: 9, opacity: 1.0, glow: 28, tone: "gold" },
@@ -29,7 +46,6 @@ export default function AboutPage() {
     { left: "50%", top: "19%", size: 5, opacity: 0.92, glow: 20, tone: "gold" },
     { left: "45%", top: "30%", size: 3, opacity: 0.85, glow: 14, tone: "gold" },
     { left: "56%", top: "26%", size: 4, opacity: 0.88, glow: 16, tone: "gold" },
-    // Extended canary surround
     { left: "44%", top: "18%", size: 4, opacity: 0.82, glow: 14, tone: "gold" },
     { left: "47%", top: "32%", size: 7, opacity: 0.95, glow: 22, tone: "gold" },
     { left: "58%", top: "20%", size: 5, opacity: 0.9, glow: 18, tone: "gold" },
@@ -121,6 +137,7 @@ export default function AboutPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#08192d] text-white">
+      {/* ── Original atmospheric background ── */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(26,72,130,0.28)_0%,_rgba(7,24,45,0.9)_38%,_rgba(5,16,31,1)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(88,156,255,0.12)_0%,_transparent_32%),radial-gradient(circle_at_80%_30%,_rgba(88,156,255,0.1)_0%,_transparent_28%),radial-gradient(circle_at_50%_80%,_rgba(88,156,255,0.08)_0%,_transparent_34%)]" />
 
@@ -162,7 +179,7 @@ export default function AboutPage() {
         })}
       </div>
 
-      {/* Warm diffuse glow behind the canary — she is made of light */}
+      {/* Warm diffuse glow behind the canary */}
       <div
         className="canary-glow"
         style={{
@@ -177,20 +194,19 @@ export default function AboutPage() {
         }}
       />
 
+      {/* ── Content ── */}
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
+        {/* Return link */}
         <div style={{ marginBottom: 18 }}>
           <Link
             href="/map"
-            style={{
-              color: "#FFD86B",
-              fontSize: 14,
-              textDecoration: "none",
-            }}
+            style={{ color: GOLD, fontSize: 14, textDecoration: "none" }}
           >
             ← Return to the map
           </Link>
         </div>
 
+        {/* Canary logo */}
         <div className="mx-auto max-w-3xl text-center">
           <img
             src="/canary-commons-logo.png"
@@ -203,150 +219,300 @@ export default function AboutPage() {
               filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.3))",
             }}
           />
-
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            About this project
-          </h1>
-
-          <p className="mt-5 text-lg leading-8 text-[#d3e3f7]">
-            A living orientation to what this platform is, why it exists, and
-            what kinds of lights belong here.
-          </p>
-
-          <div className="mt-8 space-y-4 text-[17px] leading-8 text-[#d3e3f7]">
-            <p>Life moves through a few simple needs:</p>
-
-            <p className="font-medium text-[#f4f8ff]">
-              air, water, soil, energy, and relationship.
-            </p>
-
-            <p>
-              Canary Commons helps make visible what is already moving in those
-              directions — in many different forms, across many different
-              places.
-            </p>
-          </div>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6">
-          <section className="rounded-3xl border border-white/10 bg-white/8 p-6 backdrop-blur-sm sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
-              What this is
-            </h2>
+        {/* Content column */}
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
 
-            <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>
-                Canary Commons is a living platform that helps make visible what
-                is already life-supporting.
-              </p>
+          {/* ═══ TOP BLESSING ═══ */}
+          <div
+            style={{
+              textAlign: "center",
+              padding: "clamp(40px, 6vh, 80px) 0 clamp(80px, 10vh, 120px)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)",
+                fontWeight: 650,
+                fontStyle: "italic",
+                color: GOLD,
+                margin: 0,
+                lineHeight: 1.2,
+                textShadow:
+                  "0 0 18px rgba(255,216,107,0.3), 0 0 40px rgba(255,216,107,0.12)",
+              }}
+            >
+              All lights connected, we dawn brighter.
+            </p>
+          </div>
 
-              <p>
-                It exists to help people find, support, and participate in the
-                places, projects, and people that are working toward a more
-                life-giving way of living — locally and everywhere.
-              </p>
+          {/* ═══ WHAT THIS IS ═══ */}
+          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+            <h2 style={sectionHeadingStyle}>What this is</h2>
 
-              <p>
-                Most maps show us where to extract, consume, or pass through.
-                This is different. It helps us see where we can participate,
-                support, learn, build, and belong.
-              </p>
-            </div>
+            <p style={bodyStyle}>
+              Canary Commons is a living platform that helps make visible what is
+              already life-supporting — and a way for the people tending that work
+              to find each other.
+            </p>
+
+            <p style={bodyStyle}>It has four layers.</p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The map
+              </span>{" "}
+              shows what is happening in specific places — farms, healing
+              practices, repair shops, tool libraries, community spaces, land
+              restoration, mutual aid, arts, housing, energy, education, and more.
+              The yellow lights are the lights already on. Each one is a place.
+            </p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The stories
+              </span>{" "}
+              let people share what is being tended, restored, planted, and
+              brought to life where they are. A rose rooted here, not a perfect
+              report.
+            </p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The support layer
+              </span>{" "}
+              gathers aligned options for when the local light isn&apos;t visible yet —
+              businesses, practitioners, and resources you can reach from anywhere.
+            </p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The constellation
+              </span>{" "}
+              drifts wider — signals of life-forward work rising around the world,
+              reminding us that this is not one place&apos;s effort. It is rising
+              everywhere.
+            </p>
+
+            <p style={bodyStyle}>
+              Together, these layers hold a simple proposition: most maps show us
+              where to extract, consume, or pass through. This one shows us where
+              to participate, support, learn, build, and belong.
+            </p>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-white/8 p-6 backdrop-blur-sm sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
-              Why it exists
-            </h2>
+          {/* ═══ CENTERED ELEMENTAL PARAGRAPH ═══ */}
+          <div
+            style={{
+              textAlign: "center",
+              maxWidth: 620,
+              margin: "0 auto",
+              padding: "clamp(100px, 12vh, 120px) 0",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "clamp(1.1rem, 1.3vw, 1.22rem)",
+                lineHeight: 1.72,
+                color: BODY_COLOR,
+                margin: 0,
+              }}
+            >
+              Life-forward is life in relationship with, not power over and
+              extraction from — the ground on which we stand, the energy that
+              warms and moves, the breath of fresh restorative air, and the vital
+              water sustaining and cleansing. The elements in relationship, as what
+              connects and holds us all.
+            </p>
+          </div>
 
-            <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>This is not a map of perfection. It is a map of direction.</p>
+          {/* ═══ A MAP OF DIRECTION ═══ */}
+          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+            <h2 style={sectionHeadingStyle}>A map of direction</h2>
 
-              <p>
-                We are not here to decide who is doing everything “right.” We
-                are here to make visible what is moving toward regeneration,
-                care, resilience, and community.
-              </p>
+            <p style={bodyStyle}>
+              This is not a map of perfection. It is a map of direction.
+            </p>
 
-              <p>
-                What we give our attention to grows. Where we direct our time,
-                money, energy, and care — that is what shapes the future.
-              </p>
+            <p style={bodyStyle}>
+              We are not here to decide who is doing everything right. We are here
+              to make visible what is moving toward regeneration, care, resilience,
+              and community — and to help each point of light find the others.
+            </p>
 
-              <p>
-                Every listing in this field is a point of light — something that
-                is contributing, in its own way, to a more life-supporting
-                future. Individually, these places may seem small. Together,
-                they form a constellation.
-              </p>
-            </div>
+            <p style={bodyStyle}>
+              It is up to your community to decide what life-forward means where
+              you are. Diversity sustains. The ways forward are many-faceted.
+            </p>
+
+            <p style={bodyStyle}>
+              Every listing is a point of light. Individually, these places may
+              seem small. Together, they form a constellation.
+            </p>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-white/8 p-6 backdrop-blur-sm sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
-              What belongs here
-            </h2>
+          {/* ═══ THE INVITATION ═══ */}
+          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+            <h2 style={sectionHeadingStyle}>The invitation</h2>
 
-            <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>
-                This project can hold farms, food projects, repair shops, tool
-                libraries, community spaces, education projects, land
-                restoration efforts, healing practices, mutual aid networks,
-                local businesses, arts spaces, housing projects, regenerative
-                building efforts, energy projects, and other life-forward work.
-              </p>
+            <p style={bodyStyle}>
+              If you are tending somewhere — add what you know, or invite the
+              people doing the work to add themselves.
+            </p>
 
-              <p>
-                It is not about fitting everything into a perfect box. It is
-                about helping people find what is already making life more
-                possible, more connected, more resilient, and more alive.
-              </p>
+            <p style={bodyStyle}>
+              If you are looking for a practitioner, a business, or a resource
+              aligned with how you want to live — search the support layer.
+            </p>
 
-              <p>
-                These expressions often support the basic conditions of life —
-                breathable air, drinkable water, living soil, clean energy, and
-                relationships rooted in care and reciprocity.
-              </p>
+            <p style={bodyStyle}>
+              If you are looking for inspiration from the wider weaving — the
+              constellation is drifting there.
+            </p>
 
-              <p>If you are unsure whether something belongs, ask:</p>
+            <p style={bodyStyle}>
+              If you want to help hold the foundation of this while the grassroots
+              field fills in — you can{" "}
+              <Link
+                href="/founders"
+                className="foundation-link"
+              >
+                become the Foundation
+              </Link>
+              .
+            </p>
 
-              <p className="rounded-2xl border border-white/10 bg-black/15 px-5 py-4 font-medium text-[#f4f8ff]">
-                Does this help people, land, community, or future generations
-                in a life-supporting way?
-              </p>
-
-              <p>If yes, it likely belongs here.</p>
-            </div>
+            <p
+              style={{
+                ...bodyStyle,
+                fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)",
+                color: "rgba(255,248,224,0.72)",
+                marginTop: 8,
+              }}
+            >
+              No meetings. No obligations. Participation at the pace of your life.
+            </p>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-white/8 p-6 backdrop-blur-sm sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
-              How to participate
+          {/* ═══ WHAT BELONGS HERE ═══ */}
+          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+            <h2 style={sectionHeadingStyle}>What belongs here</h2>
+
+            <p style={bodyStyle}>
+              If you are tending something life-forward, or you know of something
+              that deserves to be seen, ask this:
+            </p>
+
+            <p
+              style={{
+                textAlign: "center",
+                fontStyle: "italic",
+                fontSize: "clamp(1.15rem, 1.4vw, 1.28rem)",
+                lineHeight: 1.6,
+                color: GOLD,
+                margin: "28px 0",
+              }}
+            >
+              Does this help people, land, community, or future generations in a
+              life-supporting way?
+            </p>
+
+            <p style={bodyStyle}>If yes, it likely belongs here.</p>
+
+            <p style={bodyStyle}>
+              A few examples of what fits: farms and food projects, healing
+              practices, repair shops, tool libraries, mutual aid networks, land
+              restoration, community spaces, regenerative building, worker-owned
+              businesses, education projects, arts and gathering places. The list
+              is not the point. The direction is.
+            </p>
+          </section>
+
+          {/* ═══ THE CANARY ═══ */}
+          <section
+            style={{
+              textAlign: "center",
+              marginBottom: "clamp(80px, 10vh, 100px)",
+              paddingTop: "clamp(20px, 3vh, 40px)",
+            }}
+          >
+            <h2 style={{ ...sectionHeadingStyle, textAlign: "center" }}>
+              The canary
             </h2>
 
-            <div className="mt-5 space-y-5 text-[17px] leading-8 text-[#d3e3f7]">
-              <p>You can use this project to:</p>
+            <p
+              style={{
+                ...bodyStyle,
+                textAlign: "center",
+                maxWidth: 560,
+                margin: "0 auto",
+              }}
+            >
+              The canaries are the ones who sense before. If we want to find our
+              way to a kinder reality, we follow them to the places of common
+              ground.
+            </p>
+          </section>
 
-              <ul className="space-y-3 pl-6 text-[#d3e3f7]">
-                <li className="list-disc">Find places near you</li>
-                <li className="list-disc">Explore other regions</li>
-                <li className="list-disc">Read stories of place</li>
-                <li className="list-disc">Add something that should be visible</li>
-                <li className="list-disc">Support projects and businesses</li>
-                <li className="list-disc">Help build the field over time</li>
-              </ul>
-
-              <p>
-                This project grows through participation. It becomes more
-                useful, more true, and more alive as people help reveal what is
-                already here.
+          {/* ═══ CLOSING — gold bookend, no heading ═══ */}
+          <section
+            style={{
+              textAlign: "center",
+              paddingBottom: "clamp(40px, 6vh, 80px)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1.5rem",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
+                  lineHeight: 1.4,
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                  color: GOLD,
+                  textShadow:
+                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
+                }}
+              >
+                What we give our attention to, that is where we live our lives —
+                against or for.
               </p>
-
-              <div className="mt-8 pt-6 text-center">
-                <p className="text-xl font-semibold tracking-wide text-[#f3d36a] sm:text-2xl">
-                  All lights connected, we dawn brighter.
-                </p>
-              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
+                  lineHeight: 1.4,
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                  color: GOLD,
+                  textShadow:
+                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
+                }}
+              >
+                What we give our attention to grows.
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
+                  lineHeight: 1.4,
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                  color: GOLD,
+                  textShadow:
+                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
+                }}
+              >
+                Choose wisely, so your children too can choose.
+              </p>
             </div>
           </section>
         </div>
