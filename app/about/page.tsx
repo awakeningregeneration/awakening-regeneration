@@ -17,6 +17,15 @@ const bodyStyle: React.CSSProperties = {
   margin: "0 0 1.15em",
 };
 
+const glassCard: React.CSSProperties = {
+  borderRadius: 20,
+  border: "1px solid rgba(255,255,255,0.09)",
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(8px)",
+  padding: "26px 28px",
+  marginBottom: 16,
+};
+
 export default function AboutPage() {
   const lights: {
     left: string;
@@ -248,7 +257,7 @@ export default function AboutPage() {
           </div>
 
           {/* ═══ WHAT THIS IS ═══ */}
-          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+          <section style={glassCard}>
             <h2 style={sectionHeadingStyle}>What this is</h2>
 
             <p style={bodyStyle}>
@@ -295,7 +304,7 @@ export default function AboutPage() {
               everywhere.
             </p>
 
-            <p style={bodyStyle}>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>
               Together, these layers hold a simple proposition: most maps show us
               where to extract, consume, or pass through. This one shows us where
               to participate, support, learn, build, and belong.
@@ -303,14 +312,7 @@ export default function AboutPage() {
           </section>
 
           {/* ═══ CENTERED ELEMENTAL PARAGRAPH ═══ */}
-          <div
-            style={{
-              textAlign: "center",
-              maxWidth: 620,
-              margin: "0 auto",
-              padding: "clamp(100px, 12vh, 120px) 0",
-            }}
-          >
+          <div style={{ ...glassCard, textAlign: "center" as const }}>
             <p
               style={{
                 fontSize: "clamp(1.1rem, 1.3vw, 1.22rem)",
@@ -328,7 +330,7 @@ export default function AboutPage() {
           </div>
 
           {/* ═══ A MAP OF DIRECTION ═══ */}
-          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+          <section style={glassCard}>
             <h2 style={sectionHeadingStyle}>A map of direction</h2>
 
             <p style={bodyStyle}>
@@ -346,14 +348,14 @@ export default function AboutPage() {
               you are. Diversity sustains. The ways forward are many-faceted.
             </p>
 
-            <p style={bodyStyle}>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>
               Every listing is a point of light. Individually, these places may
               seem small. Together, they form a constellation.
             </p>
           </section>
 
           {/* ═══ THE INVITATION ═══ */}
-          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+          <section style={glassCard}>
             <h2 style={sectionHeadingStyle}>The invitation</h2>
 
             <p style={bodyStyle}>
@@ -396,7 +398,7 @@ export default function AboutPage() {
           </section>
 
           {/* ═══ WHAT BELONGS HERE ═══ */}
-          <section style={{ marginBottom: "clamp(60px, 8vh, 80px)" }}>
+          <section style={glassCard}>
             <h2 style={sectionHeadingStyle}>What belongs here</h2>
 
             <p style={bodyStyle}>
@@ -431,11 +433,7 @@ export default function AboutPage() {
 
           {/* ═══ THE CANARY ═══ */}
           <section
-            style={{
-              textAlign: "center",
-              marginBottom: "clamp(80px, 10vh, 100px)",
-              paddingTop: "clamp(20px, 3vh, 40px)",
-            }}
+            style={{ ...glassCard, textAlign: "center" as const, marginBottom: "clamp(80px, 10vh, 100px)" }}
           >
             <h2 style={{ ...sectionHeadingStyle, textAlign: "center" }}>
               The canary

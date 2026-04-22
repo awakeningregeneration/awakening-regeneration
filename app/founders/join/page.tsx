@@ -232,20 +232,29 @@ function JoinContent() {
         <h1
           style={{
             fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
-            lineHeight: 1.14,
+            lineHeight: 1.18,
             fontWeight: 650,
             margin: 0,
             marginBottom: 28,
-            color: "rgba(255,255,255,0.98)",
+            color: "#FFD86B",
+            textAlign: "center",
+            textShadow:
+              "0 0 32px rgba(255,216,107,0.3), 0 0 64px rgba(255,200,80,0.12)",
           }}
         >
-          You&apos;re stepping into something that is already alive.
+          Become the Foundation,
+          <br />
+          While the Roots Grow Deep.
+          <br />
+          {"\u2014 Hold the Connected Commons \u2014"}
         </h1>
 
-        <div style={{ maxWidth: 600, marginBottom: 44 }}>
+        <div style={glassCard}>
           <p style={softBody}>
             Canary Commons exists to make what is life-giving visible — without
             hierarchy, without tolls, without anyone paying for placement.
+          </p>
+          <p style={softBody}>
             Every listing on this map is equal. That is not an accident. It is
             the design.
           </p>
@@ -266,22 +275,54 @@ function JoinContent() {
           <p style={softBody}>
             What you are helping build will never charge for visibility. No
             business will pay more to appear first. No community will be priced
-            out of the map. That is the promise this platform is built on.
+            out of the map.
           </p>
-          <p style={{ ...emphasisBody, marginBottom: 0 }}>
-            You are helping make sure it keeps its word.
+          <p style={{ ...softBody, marginBottom: 0 }}>
+            That is the promise this platform is built on. You are helping make
+            sure it keeps its word.
           </p>
         </div>
 
-        {/* What this looks like */}
+        {/* Arc section — held moment */}
+        <div style={{ ...glassCard, textAlign: "center" as const }}>
+          <p
+            style={{
+              fontSize: "1.1rem",
+              lineHeight: 1.72,
+              color: "rgba(255,248,230,0.92)",
+              fontStyle: "italic",
+              margin: "0 0 12px",
+            }}
+          >
+            Any amount and every amount supports the first year of foundation.
+          </p>
+          <p
+            style={{
+              fontSize: "1.1rem",
+              lineHeight: 1.72,
+              color: "rgba(255,248,230,0.92)",
+              fontStyle: "italic",
+              margin: 0,
+            }}
+          >
+            After that, she flies on her own wings.
+          </p>
+        </div>
+
+        {/* What you receive */}
         <div style={glassCard}>
-          <h2 style={sectionHeading}>What this looks like</h2>
-          <p style={softBody}>
+          <h2 style={sectionHeading}>What you receive</h2>
+          <p style={{ ...softBody, marginBottom: 0 }}>
             Once you join, you&apos;ll receive a short email twice a month —
             not a newsletter, more like a letter from the field. It carries a
             few signals: something rising in the constellation, something worth
             supporting, something to notice where you live.
           </p>
+        </div>
+
+        {/* What you're asked */}
+        <div style={glassCard}>
+          <h2 style={sectionHeading}>What you&apos;re asked</h2>
           <p style={softBody}>
             Your one ongoing invitation: add three lights. Place three
             meaningful things on the map that you know — or invite the people
@@ -293,9 +334,9 @@ function JoinContent() {
           </p>
         </div>
 
-        {/* Monthly contribution */}
+        {/* Choose your contribution */}
         <div style={glassCard}>
-          <h2 style={sectionHeading}>Monthly contribution</h2>
+          <h2 style={sectionHeading}>Choose your contribution</h2>
 
           <div style={{ display: "grid", gap: 12 }}>
             {tiers.map((tier) => {
@@ -456,7 +497,7 @@ function JoinContent() {
         >
           {isRedirecting
             ? "Redirecting to secure checkout..."
-            : "Join the Foundation"}
+            : "Become the Foundation for any place"}
         </button>
 
         {errorMessage && (
