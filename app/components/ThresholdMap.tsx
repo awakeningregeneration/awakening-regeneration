@@ -46,6 +46,27 @@ const points: LightPoint[] = [
 
   { left: 75, top: 54, size: 7, glow: 0.8 },
   { left: 77, top: 36, size: 8, glow: 0.84 },
+
+  // Additional points — central/sparse US states with brightness variance
+  // Dimmer points (~70-80% glow)
+  { left: 42, top: 42, size: 6, glow: 0.62 },   // Kansas — Wichita area
+  { left: 44, top: 36, size: 5, glow: 0.58 },   // Nebraska — Lincoln area
+  { left: 40, top: 38, size: 5, glow: 0.65 },   // Kansas — Topeka area
+  { left: 48, top: 56, size: 6, glow: 0.60 },   // Oklahoma — OKC area
+  { left: 36, top: 58, size: 5, glow: 0.62 },   // Arkansas — Little Rock area
+  { left: 52, top: 66, size: 5, glow: 0.58 },   // Mississippi — Jackson area
+
+  // Brighter points (larger/hotter)
+  { left: 44, top: 30, size: 11, glow: 0.98 },  // Iowa — Des Moines area
+  { left: 56, top: 58, size: 11, glow: 0.96 },  // Alabama — Birmingham area
+  { left: 66, top: 42, size: 10, glow: 0.95 },  // West Virginia — Charleston area
+
+  // Standard brightness
+  { left: 46, top: 44, size: 7, glow: 0.82 },   // Missouri — Kansas City area
+  { left: 50, top: 42, size: 8, glow: 0.84 },   // Missouri — St. Louis area
+  { left: 38, top: 50, size: 7, glow: 0.80 },   // Arkansas — Fayetteville area
+  { left: 54, top: 54, size: 7, glow: 0.82 },   // Tennessee — Nashville area
+  { left: 60, top: 56, size: 8, glow: 0.84 },   // Georgia — Atlanta area
 ];
 
 export default function ThresholdMap() {
@@ -56,7 +77,7 @@ export default function ThresholdMap() {
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
-      style: "mapbox://styles/mapbox/navigation-night-v1",
+      style: "mapbox://styles/mapbox/dark-v11",
       center: [-98, 39],
       zoom: 3.2,
       attributionControl: false,
@@ -64,12 +85,58 @@ export default function ThresholdMap() {
       projection: "mercator",
     });
 
+    map.on("load", () => {
+      // Water — gentle luminous cyan-blue
+      if (map.getLayer("water")) {
+        map.setPaintProperty("water", "fill-color", "#6b85c8");
+      }
+
+      if (map.getLayer("water-shadow")) {
+        map.setPaintProperty("water-shadow", "fill-color", "#5a75b6");
+      }
+
+      // Land — lifted with more violet in the navy
+      const landLayer = map.getLayer("land");
+      if (landLayer) {
+        const prop = landLayer.type === "background" ? "background-color" : "fill-color";
+        map.setPaintProperty("land", prop, "#3d4878");
+        console.log("land layer type:", landLayer.type, "→ used", prop);
+      }
+
+      // Landuse — match violet-warmed land
+      if (map.getLayer("landuse")) {
+        map.setPaintProperty("landuse", "fill-color", "#3d4878");
+      }
+
+      // National parks — match violet-warmed land
+      if (map.getLayer("national-park")) {
+        map.setPaintProperty("national-park", "fill-color", "#3d4878");
+      }
+
+      // Waterway (rivers) — warmer violet-blue
+      if (map.getLayer("waterway")) {
+        map.setPaintProperty("waterway", "line-color", "#5a6ea4");
+      }
+
+      // Admin boundaries — violet-blue family
+      if (map.getLayer("admin-0-boundary")) {
+        map.setPaintProperty("admin-0-boundary", "line-color", "#6373a0");
+      }
+
+      if (map.getLayer("admin-1-boundary")) {
+        map.setPaintProperty("admin-1-boundary", "line-color", "#6373a0");
+      }
+
+      // Log available layers for further tuning
+      console.log("Available map layers:", map.getStyle().layers.map((l: { id: string }) => l.id));
+    });
+
     return () => map.remove();
   }, []);
 
   return (
-    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden" }}>
-      <div style={{ position: "absolute", inset: 0, opacity: 0.72 }}>
+    <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: 2 }}>
+      <div style={{ position: "absolute", inset: 0 }}>
         <div
           ref={mapRef}
           style={{

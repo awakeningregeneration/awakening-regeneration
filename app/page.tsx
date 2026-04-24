@@ -1,165 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ThresholdMap from "@/app/components/ThresholdMap";
 import Link from "next/link";
 
-/* ── Seeded PRNG (Mulberry32) — deterministic on server + client ── */
-function mulberry32(seed: number) {
-  return function () {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+const orbs: { left: string; top: string; size: number; opacity: number }[] = [
+  { left: "6%", top: "8%", size: 5, opacity: 0.6 },
+  { left: "18%", top: "15%", size: 3, opacity: 0.45 },
+  { left: "32%", top: "6%", size: 6, opacity: 0.65 },
+  { left: "48%", top: "22%", size: 4, opacity: 0.5 },
+  { left: "64%", top: "12%", size: 7, opacity: 0.7 },
+  { left: "82%", top: "18%", size: 4, opacity: 0.55 },
+  { left: "10%", top: "38%", size: 6, opacity: 0.65 },
+  { left: "42%", top: "44%", size: 3, opacity: 0.4 },
+  { left: "72%", top: "40%", size: 8, opacity: 0.7 },
+  { left: "22%", top: "68%", size: 5, opacity: 0.55 },
+  { left: "56%", top: "72%", size: 4, opacity: 0.5 },
+  { left: "88%", top: "85%", size: 6, opacity: 0.6 },
+];
 
-/* ── Generate starfield at module scope (runs once, same both sides) ── */
-type Star = {
-  x: number;
-  y: number;
-  r: number;
-  color: string;
-  opacity: number;
-};
-
-// Star color palette — weighted for visible variation
-// 50% white/cream, 18% cool-blue, 13% warm-gold, 10% purple-lavender, 9% warm-peach
-function pickStarColor(roll: number, size: number): { color: string; opBoost: number } {
-  const saturated = size >= 2.0;
-  if (roll < 0.50) {
-    return { color: roll < 0.30 ? "#ffffff" : "#fff8e0", opBoost: 0 };
-  } else if (roll < 0.68) {
-    return { color: saturated ? "#b8d0ff" : "#c8d8ff", opBoost: saturated ? 0.2 : 0.1 };
-  } else if (roll < 0.81) {
-    return { color: saturated ? "#ffd888" : "#ffe0a0", opBoost: saturated ? 0.2 : 0.1 };
-  } else if (roll < 0.91) {
-    return { color: saturated ? "#d8c0ff" : "#e0c8ff", opBoost: saturated ? 0.2 : 0.1 };
-  } else {
-    return { color: saturated ? "#ffc8b0" : "#ffd0c8", opBoost: saturated ? 0.15 : 0.05 };
-  }
-}
-
-const rng = mulberry32(77743);
-const STARFIELD: Star[] = [];
-
-// Pass 1: Main radial field — dense outer, hard-cleared center
-// Density zones by normalizedDistance (0 = center, 1 = corner):
-//   0.00–0.45  inner clearing   keepProb  0.01  (near-zero)
-//   0.45–0.60  transition       keepProb  0.25
-//   0.60–1.00  outer dense      keepProb  1.00
-for (let i = 0; i < 16000 && STARFIELD.length < 1800; i++) {
-  const x = rng() * 100;
-  const y = rng() * 100;
-  const dx = x - 50;
-  const dy = y - 50;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const norm = dist / 70.7;
-
-  let keep: number;
-  if (norm < 0.45) {
-    keep = 0.01;
-  } else if (norm < 0.60) {
-    keep = 0.25;
-  } else {
-    keep = 1.0;
-  }
-  if (rng() > keep) continue;
-
-  const sizeRoll = rng();
-  const r =
-    sizeRoll < 0.45
-      ? 0.8
-      : sizeRoll < 0.75
-        ? 1.2
-        : sizeRoll < 0.9
-          ? 1.8
-          : sizeRoll < 0.97
-            ? 2.5
-            : 3.5;
-
-  let baseOp =
-    norm < 0.45 ? 0.08 + rng() * 0.12 : 0.35 + rng() * 0.65;
-
-  const { color, opBoost } = pickStarColor(rng(), r);
-  const opacity = Math.min(1, baseOp + opBoost);
-
-  STARFIELD.push({ x, y, r, color, opacity });
-}
-
-// Pass 2: Milky Way diagonal band (upper-left → lower-right)
-for (let i = 0; i < 2000 && STARFIELD.length < 2100; i++) {
-  const t = rng();
-  const spread = (rng() - 0.5) * 22;
-  const x = t * 100 + spread * 0.7;
-  const y = t * 100 - spread * 0.7;
-
-  if (x < 0 || x > 100 || y < 0 || y > 100) continue;
-
-  const dx = x - 50;
-  const dy = y - 50;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const norm = dist / 70.7;
-  if (norm < 0.45) continue;
-
-  const sizeRoll = rng();
-  const r =
-    sizeRoll < 0.5
-      ? 0.7
-      : sizeRoll < 0.8
-        ? 1.1
-        : sizeRoll < 0.95
-          ? 1.6
-          : 2.2;
-
-  let baseOp = 0.2 + rng() * 0.5;
-  const { color, opBoost } = pickStarColor(rng(), r);
-  const opacity = Math.min(1, baseOp + opBoost);
-
-  STARFIELD.push({ x, y, r, color, opacity });
-}
-
-// Pass 3: Micro-star haze — outer zone only, tiny faint dots for depth
-for (let i = 0; i < 8000 && STARFIELD.length < 3000; i++) {
-  const x = rng() * 100;
-  const y = rng() * 100;
-  const dx = x - 50;
-  const dy = y - 50;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const norm = dist / 70.7;
-
-  if (norm < 0.60) continue;
-
-  const r = 0.4 + rng() * 0.6;
-  const opacity = 0.15 + rng() * 0.35;
-  const colorRoll = rng();
-  const color = colorRoll < 0.50 ? "#ffffff" : colorRoll < 0.68 ? "#c8d8ff" : colorRoll < 0.81 ? "#ffe0a0" : colorRoll < 0.91 ? "#e0c8ff" : "#ffd0c8";
-
-  STARFIELD.push({ x, y, r, color, opacity });
-}
-
-// Pass 4: Outermost micro-star crust — extreme edges only
-for (let i = 0; i < 4000 && STARFIELD.length < 3500; i++) {
-  const x = rng() * 100;
-  const y = rng() * 100;
-  const dx = x - 50;
-  const dy = y - 50;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const norm = dist / 70.7;
-
-  if (norm < 0.85) continue;
-
-  const r = 0.3 + rng() * 0.4;
-  const opacity = 0.12 + rng() * 0.22;
-  const crustRoll = rng();
-  const color = crustRoll < 0.50 ? "#ffffff" : crustRoll < 0.68 ? "#c8d8ff" : crustRoll < 0.81 ? "#ffe0a0" : "#e0c8ff";
-
-  STARFIELD.push({ x, y, r, color, opacity });
-}
-
-/* ── US states list ── */
 const STATES = [
   "Alabama",
   "Alaska",
@@ -217,11 +77,6 @@ const STATES = [
 export default function HomePage() {
   const router = useRouter();
   const [selectedState, setSelectedState] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   function handleEnterPlace() {
     if (!selectedState) return;
@@ -235,79 +90,64 @@ export default function HomePage() {
         minHeight: "100vh",
         overflow: "hidden",
         color: "white",
-        background: "#0b2748",
       }}
     >
-      {/* z-0: Earth — the US map, farthest layer */}
+      {/* Sky Layer 1 — Primary morning sky gradient */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(180,210,255,0.9) 0%, rgba(120,170,230,0.85) 25%, rgba(70,120,200,0.9) 60%, rgba(61,72,120,1) 100%)",
+        }}
+      />
+
+      {/* Sky Layer 2 — Soft white glow at center */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.18) 0%, transparent 58%)",
+        }}
+      />
+
+      {/* Sky Layer 3 — Warm gold orbs */}
+      {orbs.map((orb, i) => (
+        <div
+          key={i}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            left: orb.left,
+            top: orb.top,
+            width: orb.size,
+            height: orb.size,
+            borderRadius: "50%",
+            background: "rgba(255,244,200,0.65)",
+            opacity: orb.opacity,
+            boxShadow:
+              "0 0 8px 3px rgba(255,220,140,0.18), 0 0 20px 5px rgba(255,200,100,0.08)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      ))}
+
+      {/* Map + gold light points — z2 */}
       <ThresholdMap />
 
-      {/* Client-only layers — rendered after hydration to avoid mismatch */}
-      {mounted && (
-        <>
-          {/* Sky color variation — nebular drifts in the periphery */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
-              zIndex: 0,
-              background: [
-                "radial-gradient(ellipse 45% 50% at 12% 18%, rgba(26,24,69,0.22) 0%, transparent 100%)",
-                "radial-gradient(ellipse 40% 55% at 88% 75%, rgba(26,24,69,0.18) 0%, transparent 100%)",
-                "radial-gradient(ellipse 50% 40% at 78% 15%, rgba(42,37,96,0.13) 0%, transparent 100%)",
-                "radial-gradient(ellipse 35% 45% at 20% 82%, rgba(42,37,96,0.11) 0%, transparent 100%)",
-                "radial-gradient(ellipse 55% 35% at 85% 45%, rgba(32,24,64,0.10) 0%, transparent 100%)",
-              ].join(", "),
-            }}
-          />
-
-          {/* z-1: Starfield — the Milky Way, middle layer */}
-          <svg
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          >
-            {STARFIELD.map((s, i) => (
-              <circle
-                key={i}
-                cx={`${s.x}%`}
-                cy={`${s.y}%`}
-                r={s.r}
-                fill={s.color}
-                opacity={s.opacity}
-              />
-            ))}
-          </svg>
-
-          {/* z-1: Subtle warm nimbus behind canary */}
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "15%",
-              width: 800,
-              height: 800,
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "none",
-              zIndex: 1,
-              background:
-                "radial-gradient(circle, rgba(255,216,107,0.08) 0%, rgba(255,216,107,0.03) 35%, transparent 60%)",
-            }}
-          />
-        </>
-      )}
-
-      {/* z-2+: Page content — canary, headline, thesis, CTAs (nearest layer) */}
+      {/* Content — logo, headline, thesis, CTAs — z3 */}
       <div
         style={{
           position: "relative",
-          zIndex: 2,
+          zIndex: 3,
           padding: "0 28px 32px",
         }}
       >
@@ -319,7 +159,7 @@ export default function HomePage() {
             textAlign: "center",
           }}
         >
-          {/* Canary logo — floats above the starfield */}
+          {/* Canary logo */}
           <img
             src="/canary-commons-logo.png"
             alt="Canary Commons"
@@ -340,7 +180,7 @@ export default function HomePage() {
               lineHeight: 0.98,
               fontWeight: 650,
               margin: 0,
-              marginBottom: 70,
+              marginBottom: 45,
               textShadow: "0 12px 34px rgba(6,16,40,0.34)",
             }}
           >
