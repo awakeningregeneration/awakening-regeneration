@@ -478,16 +478,6 @@ export default function SupportPage() {
               filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.3))",
             }}
           />
-          <Link
-            href="/map"
-            style={{
-              color: "#FFD86B",
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            ← Return to the map
-          </Link>
         </div>
 
         {/* Header */}

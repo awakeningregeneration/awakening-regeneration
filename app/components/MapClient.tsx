@@ -380,6 +380,27 @@ export default function MapClient({
         display: block;
         margin-bottom: 6px;
       }
+
+      /* Mobile: anchor popup to upper-right of map */
+      @media (max-width: 767px) {
+        .mapboxgl-popup {
+          position: fixed !important;
+          top: 14px !important;
+          right: 14px !important;
+          left: auto !important;
+          bottom: auto !important;
+          transform: none !important;
+          max-width: 68vw !important;
+          z-index: 20 !important;
+        }
+        .mapboxgl-popup .mapboxgl-popup-content {
+          max-width: 68vw !important;
+        }
+        .ar-popup {
+          max-width: none !important;
+          min-width: 0 !important;
+        }
+      }
     `;
     document.head.appendChild(style);
   }, []);

@@ -175,6 +175,7 @@ export default function HomePage() {
           />
 
           <h1
+            className="cover-headline"
             style={{
               fontSize: "clamp(2.3rem, 6vw, 5.2rem)",
               lineHeight: 0.98,
@@ -233,6 +234,7 @@ export default function HomePage() {
             }}
           >
             <p
+              className="cover-thesis"
               style={{
                 margin: 0,
                 fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
@@ -248,6 +250,7 @@ export default function HomePage() {
               A gateway revealing what is already life-forward.
             </p>
             <p
+              className="cover-thesis"
               style={{
                 margin: 0,
                 fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
@@ -263,6 +266,7 @@ export default function HomePage() {
               We are the change.
             </p>
             <p
+              className="cover-thesis"
               style={{
                 margin: 0,
                 fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",

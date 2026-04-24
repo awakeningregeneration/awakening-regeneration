@@ -205,16 +205,6 @@ export default function AboutPage() {
 
       {/* ── Content ── */}
       <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
-        {/* Return link */}
-        <div style={{ marginBottom: 18 }}>
-          <Link
-            href="/map"
-            style={{ color: GOLD, fontSize: 14, textDecoration: "none" }}
-          >
-            ← Return to the map
-          </Link>
-        </div>
-
         {/* Canary logo */}
         <div className="mx-auto max-w-3xl text-center">
           <img

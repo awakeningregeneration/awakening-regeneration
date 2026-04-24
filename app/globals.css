@@ -25,16 +25,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Gentle float for the constellation bubble on /map */
-@keyframes gentleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.constellation-float {
-  animation: gentleFloat 5s ease-in-out infinite;
-}
-
 /* Soft breathing glow behind the canary on /about */
 @keyframes canaryBreathe {
   0%, 100% { opacity: 0.82; }
@@ -55,4 +45,33 @@ body {
 .foundation-link:hover {
   color: #ffe89d;
   border-color: #FFD86B;
+}
+
+/* North Star nav — pulse animation */
+@keyframes northStarPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-star-button] svg {
+    animation: none !important;
+  }
+}
+
+/* Mobile text legibility — dark halo behind cover page text over light field */
+@media (max-width: 767px) {
+  .cover-headline {
+    text-shadow:
+      0 12px 34px rgba(6,16,40,0.34),
+      0 0 24px rgba(8,25,45,0.85),
+      0 0 8px rgba(8,25,45,0.65) !important;
+  }
+  .cover-thesis {
+    text-shadow:
+      0 0 24px rgba(8,25,45,0.85),
+      0 0 8px rgba(8,25,45,0.65),
+      0 0 12px rgba(255,248,230,0.35),
+      0 0 2px rgba(10,20,40,0.6) !important;
+  }
 }

@@ -268,14 +268,7 @@ const countyListings = useMemo(() => {
     return qs ? `/stories?${qs}` : "/stories";
   }, [effectiveState, effectiveCounty]);
 
-  const stateLightCount = stateListings.length;
   const countyLightCount = countyListings.length;
-
-  const countyLabel = effectiveCounty
-    ? effectiveCounty.includes("County")
-      ? effectiveCounty
-      : `${effectiveCounty} County`
-    : "";
 
   const liveRegionLabel =
     mapRegion.county && mapRegion.state
@@ -552,10 +545,6 @@ const countyListings = useMemo(() => {
     opacity: 0.95,
   }}
 >
-  <div style={{ fontWeight: 600, marginBottom: 6 }}>
-    What is this map?
-  </div>
-
   <Link
     href="/about"
     style={{
@@ -589,26 +578,6 @@ const countyListings = useMemo(() => {
             <>
               <div
                 style={{
-                  fontSize: 16,
-                  lineHeight: 1.35,
-                  fontWeight: 600,
-                  marginBottom: 10,
-                }}
-              >
-                {effectiveState}
-              </div>
-
-              <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 10 }}>
-                Visible in this state
-              </div>
-
-              <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.92 }}>
-                {stateLightCount} light{stateLightCount === 1 ? "" : "s"} visible
-                in {effectiveState}.
-              </div>
-
-              <div
-                style={{
                   marginTop: 12,
                   fontSize: 13,
                   lineHeight: 1.55,
@@ -621,111 +590,195 @@ const countyListings = useMemo(() => {
               <div
                 style={{
                   marginTop: 14,
-                  padding: 10,
-                  border: "1px solid rgba(255,216,107,0.15)",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.04)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
                 }}
               >
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Not seeing it yet?
-                </div>
-<div
-  style={{
-    marginTop: 10,
-    padding: 10,
-    border: "1px solid rgba(255,216,107,0.15)",
-    borderRadius: 10,
-    background: "rgba(255,255,255,0.04)",
-    fontSize: 13,
-    lineHeight: 1.5,
-    opacity: 0.95,
-  }}
->
-  <div style={{ fontWeight: 600, marginBottom: 6 }}>
-    What is this map?
-  </div>
+                  {/* About Canary Commons — dawn wash */}
+                  <Link
+                    href="/about"
+                    style={{
+                      display: "block",
+                      padding: "9px 14px",
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,216,107,0.2)",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        pointerEvents: "none",
+                        zIndex: 0,
+                        background:
+                          "linear-gradient(to top right, rgba(255,190,110,0.22) 0%, rgba(255,200,130,0.08) 55%, transparent 75%)",
+                      }}
+                    />
+                    <span style={{ position: "relative", zIndex: 1, color: "#FFD86B", fontSize: 13, fontWeight: 600 }}>
+                      About Canary Commons
+                    </span>
+                  </Link>
 
-  <Link
-    href="/about"
-    style={{
-      textDecoration: "underline",
-      textUnderlineOffset: 3,
-      fontWeight: 600,
-      color: "#FFD86B",
-    }}
-  >
-    About Canary Commons
-  </Link>
-</div>
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
-                  Choose a county to focus the map more precisely, or add a new
-                  point of light in {effectiveState}.
-                </div>
-
-                <div style={{ marginTop: 8 }}>
+                  {/* Add a Point of Light — single glow point */}
                   <Link
                     href={submitListingHref}
                     style={{
                       display: "block",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      fontWeight: 600,
-                      color: "#FFD86B",
-                      fontSize: 13,
-                      marginBottom: 6,
+                      padding: "9px 14px",
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,216,107,0.2)",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    Add a point of light
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        top: "30%",
+                        right: "20%",
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#FFD86B",
+                        boxShadow: "0 0 14px 6px rgba(255,216,107,0.45), 0 0 28px 12px rgba(255,216,107,0.15)",
+                        pointerEvents: "none",
+                        zIndex: 0,
+                      }}
+                    />
+                    <span style={{ position: "relative", zIndex: 1, color: "#FFD86B", fontSize: 13, fontWeight: 600 }}>
+                      Add a Point of Light
+                    </span>
                   </Link>
 
+                  {/* Explore Support Resources — bottom-edge warmth */}
                   <Link
                     href="/support"
                     style={{
                       display: "block",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      fontWeight: 600,
-                      color: "#FFD86B",
-                      fontSize: 13,
+                      padding: "9px 14px",
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,216,107,0.2)",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    Explore support resources
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: "65%",
+                        pointerEvents: "none",
+                        zIndex: 0,
+                        background:
+                          "linear-gradient(to top, rgba(255,190,110,0.28) 0%, rgba(255,200,130,0.1) 45%, transparent 100%)",
+                      }}
+                    />
+                    <span style={{ position: "relative", zIndex: 1, color: "#FFD86B", fontSize: 13, fontWeight: 600 }}>
+                      Explore Support Resources
+                    </span>
                   </Link>
-                </div>
+
+                  {/* The Constellation — starry pill */}
+                  <Link
+                    href="/constellation"
+                    style={{
+                      display: "block",
+                      padding: "9px 14px",
+                      borderRadius: 12,
+                      background:
+                        "radial-gradient(circle at 40% 40%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%)",
+                      border: "1px solid rgba(255,216,107,0.2)",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {/* Star field */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        pointerEvents: "none",
+                        zIndex: 0,
+                        overflow: "hidden",
+                      }}
+                    >
+                      {[
+                        { left: "8%", top: "20%", size: 2 },
+                        { left: "18%", top: "70%", size: 1.5 },
+                        { left: "30%", top: "15%", size: 3 },
+                        { left: "45%", top: "80%", size: 1.5 },
+                        { left: "55%", top: "25%", size: 2 },
+                        { left: "65%", top: "65%", size: 3 },
+                        { left: "72%", top: "10%", size: 1.5 },
+                        { left: "80%", top: "75%", size: 2 },
+                        { left: "88%", top: "35%", size: 2.5 },
+                        { left: "25%", top: "45%", size: 1.5 },
+                        { left: "50%", top: "50%", size: 2 },
+                        { left: "92%", top: "60%", size: 1.5 },
+                      ].map((star, si) => (
+                        <span
+                          key={si}
+                          style={{
+                            position: "absolute",
+                            left: star.left,
+                            top: star.top,
+                            width: star.size,
+                            height: star.size,
+                            borderRadius: "50%",
+                            background: "rgba(255,244,200,0.9)",
+                            boxShadow: `0 0 ${star.size * 3}px rgba(255,216,107,0.6)`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {/* Text */}
+                    <div style={{ position: "relative", zIndex: 1 }}>
+                      <div
+                        style={{
+                          color: "#FFD86B",
+                          fontSize: 13,
+                          fontWeight: 600,
+                        }}
+                      >
+                        The Constellation
+                      </div>
+                      <div
+                        style={{
+                          color: "rgba(255,216,107,0.65)",
+                          fontSize: 11,
+                          fontWeight: 400,
+                          marginTop: 1,
+                        }}
+                      >
+                        A World of Inspiration
+                      </div>
+                    </div>
+                  </Link>
               </div>
             </>
           ) : (
             <>
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.35,
-                  fontWeight: 600,
-                  marginBottom: 10,
-                  color: "rgba(211,227,247,0.9)",
-                }}
-              >
-                {countyLabel}
-                {effectiveState ? `, ${effectiveState}` : ""}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 12,
-                  marginBottom: 10,
-                  color: "rgba(211,227,247,0.85)",
-                }}
-              >
-                Visible here
-              </div>
-
               {countyLightCount > 0 ? (
                 <>
-                  <div style={{ fontSize: 13, lineHeight: 1.45, opacity: 0.92 }}>
-                    {countyLightCount} light
-                    {countyLightCount === 1 ? "" : "s"} visible in this place.
-                  </div>
 
                   <div style={{ marginTop: 12 }}>
                     {countyListings.map((listing) => {
@@ -816,9 +869,10 @@ const countyListings = useMemo(() => {
                     fontWeight: 700,
                     color: "#e8f4ff",
                     marginBottom: 4,
+                    textAlign: "center",
                   }}
                 >
-                  Can&apos;t find it nearby?
+                  Can&apos;t Find It Nearby?
                 </div>
                 <div
                   style={{
@@ -826,27 +880,30 @@ const countyListings = useMemo(() => {
                     color: "rgba(148,196,236,0.8)",
                     lineHeight: 1.45,
                     marginBottom: 10,
+                    textAlign: "center",
                   }}
                 >
                   We&apos;ve gathered aligned options that ship to you — same
                   values, wider reach.
                 </div>
-                <Link
-                  href="/support"
-                  style={{
-                    display: "inline-block",
-                    background: "#FFD86B",
-                    border: "1px solid #FFD86B",
-                    borderRadius: 20,
-                    padding: "6px 14px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#08192d",
-                    textDecoration: "none",
-                  }}
-                >
-                  Explore aligned options →
-                </Link>
+                <div style={{ textAlign: "center" }}>
+                  <Link
+                    href="/support"
+                    style={{
+                      display: "inline-block",
+                      background: "#FFD86B",
+                      border: "1px solid #FFD86B",
+                      borderRadius: 20,
+                      padding: "6px 14px",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#08192d",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Explore Aligned Options →
+                  </Link>
+                </div>
               </div>
 <div
   style={{
@@ -868,6 +925,7 @@ const countyListings = useMemo(() => {
       color: "#b07d2a",
       textTransform: "uppercase",
       marginBottom: 6,
+      textAlign: "center",
     }}
   >
     Story of Place
@@ -879,23 +937,26 @@ const countyListings = useMemo(() => {
       color: "#5a3e1b",
       lineHeight: 1.5,
       marginBottom: 8,
+      textAlign: "center",
     }}
   >
     A place for people to share local stories of what is being built, restored,
     planted, and brought to life here.
   </div>
 
-  <Link
-    href={storiesViewHref}
-    style={{
-      color: "#b07d2a",
-      fontWeight: 600,
-      fontSize: 13,
-      textDecoration: "none",
-    }}
-  >
-    See and Share Local Stories
-  </Link>
+  <div style={{ textAlign: "center" }}>
+    <Link
+      href={storiesViewHref}
+      style={{
+        color: "#b07d2a",
+        fontWeight: 600,
+        fontSize: 13,
+        textDecoration: "none",
+      }}
+    >
+      See and Share Local Stories
+    </Link>
+  </div>
 </div>
 
               {isMobile && countyLightCount > 0 && (
@@ -918,7 +979,7 @@ const countyListings = useMemo(() => {
                       textUnderlineOffset: 3,
                     }}
                   >
-                    view on map →
+                    View on Map →
                   </button>
                 </div>
               )}
@@ -999,95 +1060,6 @@ const countyListings = useMemo(() => {
           highlightState={hasStateSelection ? effectiveState : ""}
         />
 
-        <Link
-          href="/constellation"
-          className="constellation-float"
-          style={{
-            position: "absolute",
-            bottom: 80,
-            right: 16,
-            zIndex: 10,
-            display: "inline-block",
-            minWidth: 180,
-            padding: "12px 18px",
-            borderRadius: 20,
-            background:
-              "radial-gradient(circle at 40% 40%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%)",
-            border: "1px solid rgba(255,216,107,0.35)",
-            boxShadow:
-              "0 0 18px rgba(255,216,107,0.15), 0 4px 24px rgba(0,0,0,0.35)",
-            backdropFilter: "blur(8px)",
-            textDecoration: "none",
-            overflow: "hidden",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow =
-              "0 0 28px rgba(255,216,107,0.28), 0 4px 24px rgba(0,0,0,0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow =
-              "0 0 18px rgba(255,216,107,0.15), 0 4px 24px rgba(0,0,0,0.35)";
-          }}
-        >
-          {/* Background star field */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
-              zIndex: 0,
-              overflow: "hidden",
-            }}
-          >
-            {[
-              { left: "8%", top: "20%", size: 2 },
-              { left: "18%", top: "70%", size: 1.5 },
-              { left: "30%", top: "15%", size: 3 },
-              { left: "45%", top: "80%", size: 1.5 },
-              { left: "55%", top: "25%", size: 2 },
-              { left: "65%", top: "65%", size: 3 },
-              { left: "72%", top: "10%", size: 1.5 },
-              { left: "80%", top: "75%", size: 2 },
-              { left: "88%", top: "35%", size: 2.5 },
-              { left: "25%", top: "45%", size: 1.5 },
-              { left: "50%", top: "50%", size: 2 },
-              { left: "92%", top: "60%", size: 1.5 },
-            ].map((star, i) => (
-              <span
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: star.left,
-                  top: star.top,
-                  width: star.size,
-                  height: star.size,
-                  borderRadius: "50%",
-                  background: "rgba(255,244,200,0.9)",
-                  boxShadow: `0 0 ${star.size * 3}px rgba(255,216,107,0.6)`,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Foreground text */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                color: "rgba(211,227,247,0.95)",
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-            >
-              A world of inspiration
-            </div>
-          </div>
-        </Link>
       </div>
     </main>
   );

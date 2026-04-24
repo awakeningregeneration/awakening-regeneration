@@ -1,61 +1,101 @@
 # Canary Commons — Project State
 
-**Last updated:** April 16, 2026 (evening)
-**Purpose:** Living diary of what is currently in motion, what just finished, and what's next. Update after every meaningful change. For full architecture and system map, see PROJECT_MAP.md.
+*Living state of the work. Updated at the end of each session.*
+
+*For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
+
+*Last updated: April 24, 2026 (evening)*
 
 ---
 
-## What just finished (April 16, 2026)
+## System Overview (at a glance)
 
-The full Founders Stripe loop was built out today. At the start of the day, only the Stripe product and price tiers existed. By end of day:
+Canary Commons is a living map of regenerative, life-supporting efforts across the U.S. Built on Next.js, moving toward PWA status. Operates under Awakening Regeneration LLC.
 
-- **Rotated two compromised keys**: SUPABASE_SERVICE_ROLE_KEY and RESEND_API_KEY. Old keys still exist but unused. New keys live in .env.local and Netlify.
-- **Added 9 columns to Supabase tables**: founders (tier, amount, stripe_customer_id, stripe_subscription_id, subscription_status) and seeder_referrals (tier, amount, payout_amount, payouts_paid).
-- **Added unique constraint** on founders.stripe_customer_id to prevent duplicate rows from webhook retries.
-- **Built the Checkout API route** at app/api/checkout/route.ts — tested locally, successfully redirects to Stripe Checkout with correct tier, one-time amount, and referral code.
-- **Wired the Join page** at app/founders/join/page.tsx — "Join the Foundation" button now calls the API, captures ?ref= URL parameters, shows loading and error states.
-- **Refined the confirmation page copy** at app/founders/confirmation/page.tsx — softer language, one clear pathway to the map, tie-in to the email rhythm.
-- **Built the Stripe Webhook handler** at app/api/stripe/webhook/route.ts — receives checkout.session.completed and customer.subscription.deleted events, writes to founders and seeder_referrals, handles cancellations.
-- **Registered the webhook in Stripe** as "canary-commons-prod" pointing at https://www.canarycommons.org/api/stripe/webhook, listening to 2 events, using API version 2026-03-25.dahlia.
-- **Added STRIPE_WEBHOOK_SECRET** to .env.local and Netlify.
-- **Built the Welcome email flow** — app/lib/emails/welcomeFounder.ts (Ren's letter, exact wording preserved), app/lib/resend.ts (helper with FROM_EMAIL = "Ren at Canary Commons <founder@canarycommons.org>"), wired into webhook handler to fire after successful founder insert.
+### Surfaces
+- **Map** — place-based listings, what's alive near you or where you're going
+- **Constellation** — stories and inspiration layer
+- **Online Resources** — affiliate / non-local / web-based offerings
+- **Founders** — monetary support flow ($9 / $18 / $27 monthly + custom one-time)
+- **Home** — landing and return
 
-## Current state of the loop
+### Global Navigation
+- **North Star nav** (built Apr 24) — top-right fixed, luminous glass dome with 8-point bi-tonal gold compass rose inside. Hover/tap opens dropdown to all surfaces.
 
-- [x] Stripe product + 3 pricing tiers ($9 / $18 / $27)
-- [x] Stripe env vars in .env.local + Netlify (secret key, publishable key, 3 price IDs, webhook secret)
-- [x] Supabase founders and seeder_referrals tables have Stripe columns
-- [x] Checkout API route (app/api/checkout/route.ts) — tested locally
-- [x] Join page wired with button + ?ref= capture
-- [x] Confirmation page copy refined
-- [x] Webhook handler code
-- [x] Webhook registered in Stripe
-- [x] Welcome email template + wiring
-- [ ] Resend DNS verification — as of April 16 6:38 PM, domain canarycommons.org is in "Pending" status with "DNS verified" but "Verifying domain" still spinning. Will flip to "Verified" on its own within hours. Code is wired and waiting; emails will fire as soon as Resend flips green.
-- [ ] Deploy to production
+### Database (18 tables)
+- **Listings & moderation**: listings, listing_edits, listing_flags
+- **Founders & Seeders**: founders, seeders, seeder_referrals
+- **Stewardship**: stewards, steward_edit_sessions, stewardship_claims, stewardship_disputes, affiliate_stewards
+- **Content & Story**: stories, constellation
+- **Resources**: resources, support_resources, affiliate_resources, affiliate_partners
+- **Feedback loop**: unmet_needs (captures failed searches — "tell us what you're looking for")
 
-## Next up
+---
 
-1. Push today's local work to production (git commit + push to main). Netlify will auto-deploy.
-2. Verify the live site works end-to-end: visit /founders, pick a tier, complete a real Stripe payment with a test card or small real amount, confirm the founders row appears in Supabase, confirm the welcome email arrives.
-3. Revoke the old Supabase and Resend keys once production deploy confirms the new keys work.
+## Done (recent)
 
-## Known gaps (deferred, not urgent)
+- **Apr 24 (afternoon)** — PROJECT_STATE.md and PROJECT_MAP.md working pattern established (session opens by reading both files, closes with an update prompt)
+- **Apr 24 (afternoon)** — Homepage cover map mobile fix: widened light spread (10%–87%), added mobile-specific dimming of center lights and boosting of edge lights (useIsMobile hook, debounced resize listener), added mobile text-shadow in globals.css for readability
+- **Apr 24 (afternoon)** — Map page listing popup on mobile: repositioned to upper-right via CSS override, narrower width, tap-outside closes (existing X also works)
+- **Apr 24 (afternoon)** — Map page sidebar cleanup: removed redundant state/county headings and count lines across all three conditional branches; kept "Pan around the state..." instruction
+- **Apr 24 (afternoon)** — Map page "Not seeing it yet?" block restructured: removed the heading, added breathing room, all four items now consistent buttons (About Canary Commons, Add a Point of Light, Explore Support Resources, The Constellation / A World of Inspiration)
+- **Apr 24 (afternoon)** — Constellation naming cohesion: floating pill removed; new inline button with two-line gold treatment ("The Constellation" primary / "A World of Inspiration" subtitle); North Star nav label updated to "The Constellation"
+- **Apr 24 (afternoon)** — Button atmospheric treatments added: dawn wash (About), glow point (Add a Point of Light), bottom warmth (Explore Support Resources), star field (The Constellation)
+- **Apr 24 (afternoon)** — Listing popup text alignment: headings and CTAs center-aligned with Title Case ("Can't Find It Nearby?", "Explore Aligned Options →", "View on Map →"); listing facts (name, location) stay left-aligned
+- **Apr 24 (afternoon)** — Three hydration errors diagnosed and resolved: (1) inline <style> in page.tsx moved to globals.css, (2) mobile popup CSS handled via globals, (3) stale constellation-float CSS + .next build cache cleared
+- **Apr 24** — North Star navigation built (glass dome + compass rose, top-right, dropdown to all surfaces)
+- **Apr 24** — "Become the Foundation." CTA text corrected on /founders/join
+- **Apr 24** — Stripe founders flow confirmed end-to-end and functional
+- **Apr 24** — Both stewardship SQL migrations confirmed run (all stewardship tables exist, currently empty)
+- **Apr 23** — Map tint method locked: setPaintProperty() in ThresholdMap.tsx
+- **Apr 18** — Stewardship Steps 1–5 built locally; Step 3 tested live (verification email received)
+- **Apr** — All major pages rebuilt with two registers: deep sky for browsing, morning sky for forms
+- **Apr** — Seeder/Founder model locked: single-layer, 25% recurring (12-mo max) / 15% one-time
+- **Apr** — Email templates scaffolded at app/lib/emails/ (welcomeFounder.ts first)
 
-- **Seeder claim pathway for missed referrals**: if a seeder verbally tells Ren they brought someone in but the person didn't use the link, handle manually in Supabase for now. Build a claim form later if this becomes frequent.
-- **Seeder payout mechanism**: the 25% recurring payout tracking lives in seeder_referrals (payouts_paid counter), but actual money transfer to seeders is still manual. Stripe Connect integration is a future step.
-- **Pre-launch data cleanup**: 5 test rows exist in founders table from early April (name="AR", status="pending", referred_by="ren"). Clean these before public launch. Also audit listings, stories, constellation for test data.
-- **Admin view for Ren**: currently, to see Founders or manage them, Ren opens Supabase Table Editor. A simple admin dashboard on the site would be nicer long-term, but not urgent.
-- **Resend email drafts for months 1-3**: Ren plans to pre-draft the first 3 months of bi-monthly Founder emails (Inspiration+Direction and Participation+Reflection templates) so they queue ahead. Templates will live at app/lib/emails/ alongside welcomeFounder.ts.
+---
 
-## Security rotation log
+## In Motion
 
-- **April 16, 2026**: Rotated SUPABASE_SERVICE_ROLE_KEY (exposed in chat transcript). New key in .env.local and Netlify. Old key still exists in Supabase — revoke after production deploy confirms new key works.
-- **April 16, 2026**: Rotated RESEND_API_KEY (same reason). New key named "production-cc". Old key "production" still exists in Resend — revoke after production deploy confirms new key works.
+- **Mobile pass partially complete** — Homepage cover map, map page listing popup, and sidebar all responsive. Remaining mobile work: bottom drawer ("lift two"), any other pages not yet tested on narrow viewports.
 
-## Working strategy
+---
 
-- Strategy and direction happen in claude.ai chat
-- Ren pastes Claude Code prompts into VS Code terminal — changes land in the codebase
-- Ren reviews visually on localhost before pushing
-- Never run `git commit` or `git push` in Claude Code prompts without Ren's explicit instruction
+## Open
+
+### Stewardship
+- Step 6: grace-period auto-activation cron — not yet built
+- Step 7: full dispute flow (notifications, resolution, admin review) — not yet built
+- Steps 4 and 5 live-test verification — built but not yet live-tested
+- Code-level audit of stewardship app-side: tables exist and are empty; need to confirm app code reads/writes to them correctly
+
+### Seeder pathway
+- First seeder assignment (Lucia handles manually for now) — someone is waiting
+- Seeder relational entry arc design — how someone brought in by a seeder experiences arrival (orientation before ask, "invitation from [name]" warmth, pacing, where the Founders ask lives in flow). Bigger than /founders fix.
+- QR code per seeder
+
+### Content / service categories
+- Detraumatization, nonviolence training, deescalation as service description tags within listings (Map, Constellation, Online Resources) — not a separate category section
+
+### Code hygiene
+- Hydration error pattern: several SSR/CSR mismatches surfaced during today's work. Most were resolved via moving inline <style> to globals.css or clearing stale build cache. Consider a future audit pass to convert any remaining isMobile-driven inline style switches to CSS media queries where possible, to reduce hydration risk going forward.
+
+### Polish
+- Prose polish pass across the site
+- Mobile bottom drawer ("lift two")
+
+---
+
+## Parked
+
+*(items deferred, not active — add as they arise)*
+
+---
+
+## How we work
+
+- **Session opens**: Claude reads PROJECT_STATE.md and RELEASE_CHECKLIST.md to ground in current state. PROJECT_MAP.md is consulted as needed for architectural reference.
+- **Session closes**: Claude writes a Claude Code prompt that updates PROJECT_STATE.md (and RELEASE_CHECKLIST.md if launch-gate items moved)
+- **Strategy in chat, execution in Claude Code (VS Code terminal)** — Claude writes targeted prompts, Ren pastes and reviews
+- **Never git commit/push without Ren's explicit instruction**
+- **Security rail**: warn before any action that could reveal secrets (API keys, service role keys, webhook secrets, .env contents)

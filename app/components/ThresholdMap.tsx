@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -14,13 +14,13 @@ type LightPoint = {
 };
 
 const points: LightPoint[] = [
-  // Points positioned relative to the Mapbox viewport (100vh),
-  // NOT the full page height. Rendered inside a 100vh-clamped container.
+  // Widened spread: left edge lights shifted -7 to -8, right edge shifted +8
+  // Range now: left 16%–85%, top 25%–66%
   { left: 33, top: 63, size: 8, glow: 0.9 },
-  { left: 24, top: 52, size: 7, glow: 0.8 },
-  { left: 27, top: 33, size: 7, glow: 0.82 },
+  { left: 16, top: 52, size: 7, glow: 0.8 },   // was 24
+  { left: 20, top: 33, size: 7, glow: 0.82 },  // was 27
 
-  { left: 29, top: 60, size: 9, glow: 0.92 },
+  { left: 22, top: 60, size: 9, glow: 0.92 },  // was 29
   { left: 31, top: 47, size: 7, glow: 0.8 },
   { left: 33, top: 28, size: 6, glow: 0.75 },
 
@@ -41,11 +41,11 @@ const points: LightPoint[] = [
   { left: 64, top: 32, size: 7, glow: 0.78 },
 
   { left: 68, top: 60, size: 8, glow: 0.86 },
-  { left: 70, top: 46, size: 9, glow: 0.92 },
-  { left: 72, top: 25, size: 6, glow: 0.72 },
+  { left: 78, top: 46, size: 9, glow: 0.92 },  // was 70
+  { left: 80, top: 25, size: 6, glow: 0.72 },  // was 72
 
-  { left: 75, top: 54, size: 7, glow: 0.8 },
-  { left: 77, top: 36, size: 8, glow: 0.84 },
+  { left: 83, top: 54, size: 7, glow: 0.8 },   // was 75
+  { left: 85, top: 36, size: 8, glow: 0.84 },   // was 77
 
   // Additional points — central/sparse US states with brightness variance
   // Dimmer points (~70-80% glow)
@@ -69,8 +69,82 @@ const points: LightPoint[] = [
   { left: 60, top: 56, size: 8, glow: 0.84 },   // Georgia — Atlanta area
 ];
 
+const faintLights = [
+  { left: 10, top: 42 },  // was 18
+  { left: 13, top: 34 },  // was 21
+  { left: 21, top: 66 },  // was 28
+  { left: 34, top: 29 },
+  { left: 36, top: 54 },
+  { left: 42, top: 63 },
+  { left: 44, top: 28 },
+  { left: 50, top: 68 },
+  { left: 58, top: 30 },
+  { left: 63, top: 58 },
+  { left: 66, top: 27 },
+  { left: 79, top: 64 },  // was 71
+  { left: 82, top: 33 },  // was 74
+  { left: 87, top: 48 },  // was 79
+];
+
+/* ── Mobile light adjustment ──
+   Text zone: left 25%–75%, top 15%–80%
+   Inside text zone: dim to 0.45× size/glow
+   Outside (edges): boost to 1.2× size/glow */
+const MOBILE_DIM = 0.45;
+const MOBILE_EDGE_BOOST = 1.2;
+
+function isEdgeLight(left: number): boolean {
+  return left < 25 || left > 75;
+}
+
+function mobileAdjust(p: LightPoint): LightPoint {
+  if (isEdgeLight(p.left)) {
+    return {
+      ...p,
+      size: Math.min(p.size * MOBILE_EDGE_BOOST, 14),
+      glow: Math.min(p.glow * MOBILE_EDGE_BOOST, 1.0),
+    };
+  }
+  // Text zone: left 25-75, top 15-80
+  if (p.top >= 15 && p.top <= 80) {
+    return {
+      ...p,
+      size: p.size * MOBILE_DIM,
+      glow: p.glow * MOBILE_DIM,
+    };
+  }
+  return p;
+}
+
+function useMobileDetect(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    function check() {
+      setIsMobile(window.innerWidth < 768);
+    }
+
+    function onResize() {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(check, 150);
+    }
+
+    check();
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
+  return isMobile;
+}
+
 export default function ThresholdMap() {
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = useMobileDetect();
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -134,6 +208,12 @@ export default function ThresholdMap() {
     return () => map.remove();
   }, []);
 
+  const displayPoints = isMobile ? points.map(mobileAdjust) : points;
+
+  // Faint lights: on mobile, edge ones get slightly larger/brighter
+  const faintSize = 5;
+  const faintOpacity = 0.82;
+
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: 2 }}>
       <div style={{ position: "absolute", inset: 0 }}>
@@ -183,21 +263,21 @@ export default function ThresholdMap() {
         }}
       />
 
-     {/* Soft deep-ocean wash */}
-<div
-  style={{
-    position: "absolute",
-    inset: 0,
-    pointerEvents: "none",
-    background:
-      "radial-gradient(circle at 50% 62%, rgba(38,92,190,0.10) 0%, rgba(20,48,112,0.05) 38%, rgba(9,22,45,0.00) 75%)",
-    mixBlendMode: "screen",
-  }}
-/>
+      {/* Soft deep-ocean wash */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(circle at 50% 62%, rgba(38,92,190,0.10) 0%, rgba(20,48,112,0.05) 38%, rgba(9,22,45,0.00) 75%)",
+          mixBlendMode: "screen",
+        }}
+      />
 
       {/* Lights */}
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        {points.map((p, i) => (
+        {displayPoints.map((p, i) => (
           <div
             key={i}
             style={{
@@ -239,39 +319,29 @@ export default function ThresholdMap() {
       </div>
 
       {/* Faint background lights */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.82 }}>
-        {[
-          { left: 18, top: 42 },
-          { left: 21, top: 34 },
-          { left: 28, top: 66 },
-          { left: 34, top: 29 },
-          { left: 36, top: 54 },
-          { left: 42, top: 63 },
-          { left: 44, top: 28 },
-          { left: 50, top: 68 },
-          { left: 58, top: 30 },
-          { left: 63, top: 58 },
-          { left: 66, top: 27 },
-          { left: 71, top: 64 },
-          { left: 74, top: 33 },
-          { left: 79, top: 48 },
-        ].map((p, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: `${p.left}%`,
-              top: `${p.top}%`,
-              width: "5px",
-height: "5px",
-borderRadius: "50%",
-background: "rgba(255,242,190,0.82)",
-boxShadow: "0 0 10px rgba(255,220,140,0.48)",
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-        ))}
-            </div>
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: faintOpacity }}>
+        {faintLights.map((p, i) => {
+          const edge = isEdgeLight(p.left);
+          const sz = isMobile && edge ? faintSize * MOBILE_EDGE_BOOST : isMobile ? faintSize * MOBILE_DIM : faintSize;
+          const op = isMobile && edge ? 0.9 : isMobile ? 0.4 : 0.82;
+          return (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: `${p.left}%`,
+                top: `${p.top}%`,
+                width: `${sz}px`,
+                height: `${sz}px`,
+                borderRadius: "50%",
+                background: `rgba(255,242,190,${op})`,
+                boxShadow: `0 0 ${isMobile && edge ? 14 : 10}px rgba(255,220,140,${isMobile && edge ? 0.58 : 0.48})`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -497,7 +497,7 @@ function JoinContent() {
         >
           {isRedirecting
             ? "Redirecting to secure checkout..."
-            : "Become the Foundation for any place"}
+            : "Become the Foundation."}
         </button>
 
         {errorMessage && (

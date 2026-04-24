@@ -97,7 +97,6 @@ export default async function StoriesPage({
     ? `http://localhost:3000/api/stories?${qs.toString()}`
     : `http://localhost:3000/api/stories`;
 
-  const mapHref = qs.toString() ? `/map?${qs.toString()}` : "/map";
   const addStoryHref = qs.toString()
     ? `/stories/submit?${qs.toString()}`
     : "/stories/submit";
@@ -283,16 +282,6 @@ export default async function StoriesPage({
               filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.3))",
             }}
           />
-          <Link
-            href={mapHref}
-            style={{
-              color: "#FFD86B",
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            ← Return to the map
-          </Link>
         </div>
 
         {/* Header + Rose/Thorn */}

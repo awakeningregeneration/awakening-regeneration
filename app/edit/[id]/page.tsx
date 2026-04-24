@@ -328,18 +328,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link
-              href="/map"
-              style={{
-                color: "#FFD86B",
-                fontSize: 14,
-                textDecoration: "none",
-              }}
-            >
-              ← Return to the map
-            </Link>
-          </div>
           <div style={cardStyle}>
             <p style={textStyle}>Loading listing…</p>
           </div>
@@ -354,18 +342,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link
-              href="/map"
-              style={{
-                color: "#FFD86B",
-                fontSize: 14,
-                textDecoration: "none",
-              }}
-            >
-              ← Return to the map
-            </Link>
-          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>Suggest an edit</h1>
             <p style={errorStyle}>{error}</p>
@@ -381,9 +357,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link href="/map" style={{ color: "#FFD86B", fontSize: 14, textDecoration: "none" }}>← Return to the map</Link>
-          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>
               {editMode === "steward_edit" ? "Changes saved" : "Thank you"}
@@ -406,9 +379,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link href="/map" style={{ color: "#FFD86B", fontSize: 14, textDecoration: "none" }}>← Return to the map</Link>
-          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>A claim is pending for this listing.</h1>
             <p style={textStyle}>
@@ -460,9 +430,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link href="/map" style={{ color: "#FFD86B", fontSize: 14, textDecoration: "none" }}>← Return to the map</Link>
-          </div>
           <div style={cardStyle}>
             {editMode === "claim_or_edit" && !claimSent && (
               <>
@@ -593,9 +560,6 @@ export default function EditListingPage({ params }: Props) {
         <Atmosphere />
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
-          <div style={{ marginBottom: 14 }}>
-            <Link href="/map" style={{ color: "#FFD86B", fontSize: 14, textDecoration: "none" }}>← Return to the map</Link>
-          </div>
           <div style={cardStyle}>
             <h1 style={headingStyle}>Verify you&apos;re the steward</h1>
             <p style={textStyle}>
@@ -693,9 +657,6 @@ export default function EditListingPage({ params }: Props) {
       <Atmosphere />
       <div style={contentWrapStyle}>
         <p style={kickerStyle}>Canary Commons</p>
-        <div style={{ marginBottom: 14 }}>
-          <Link href="/map" style={{ color: "#FFD86B", fontSize: 14, textDecoration: "none" }}>← Return to the map</Link>
-        </div>
         <div style={cardStyle}>
           <h1 style={headingStyle}>
             {editMode === "steward_edit" ? "Edit your listing" : "Suggest an edit"}

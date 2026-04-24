@@ -341,17 +341,6 @@ export default function ConstellationPage() {
             filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))",
           }}
         />
-        <Link
-          href="/map"
-          style={{
-            display: "block",
-            color: "#FFD86B",
-            fontSize: 13,
-            textDecoration: "none",
-          }}
-        >
-          ← Return to the map
-        </Link>
       </div>
 
       {/* Search + category filter (fixed, centered top) */}
