@@ -14,7 +14,7 @@ const PRIMARY_CATEGORY_OPTIONS = [
   "Learning & Education",
   "Travel & Movement",
   "Community & Culture",
-  "Communication & Conflict Transformation",
+  "Conflict Transformation & Repair",
   "Finance & Systems",
 ];
 
@@ -39,6 +39,13 @@ const PRACTICE_OPTIONS = [
   "Nonprofit / Mission Driven",
   "Indigenous Led",
   "Women Led",
+  "Trauma-Informed",
+  "Restorative",
+  "Somatic",
+  "Nonviolent",
+  "Peer Supported",
+  "Community Led",
+  "Justice-Oriented",
 ];
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [

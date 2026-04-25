@@ -13,7 +13,7 @@ const PRIMARY_CATEGORY_OPTIONS = [
   "Learning & Education",
   "Travel & Movement",
   "Community & Culture",
-  "Communication & Conflict Transformation",
+  "Conflict Transformation & Repair",
   "Finance & Systems",
 ];
 
@@ -38,6 +38,13 @@ const PRACTICE_OPTIONS = [
   "Nonprofit / Mission Driven",
   "Indigenous Led",
   "Women Led",
+  "Trauma-Informed",
+  "Restorative",
+  "Somatic",
+  "Nonviolent",
+  "Peer Supported",
+  "Community Led",
+  "Justice-Oriented",
 ];
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
@@ -235,7 +242,7 @@ export default function SubmitSupportPage() {
               color: "#0d2a4a",
             }}
           >
-            Submit an aligned affiliate resource
+            Submit an Online Resource
           </h1>
 
           <p
@@ -247,8 +254,8 @@ export default function SubmitSupportPage() {
               fontSize: "0.98rem",
             }}
           >
-            Submissions come in for review before being added to the public
-            support page.
+            Submissions come in for review before being added to the Online
+            Resources directory.
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>

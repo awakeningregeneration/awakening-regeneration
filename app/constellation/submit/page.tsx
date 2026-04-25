@@ -32,6 +32,13 @@ const PRACTICES = [
   "Nonprofit / Mission Driven",
   "Indigenous Led",
   "Women Led",
+  "Trauma-Informed",
+  "Restorative",
+  "Somatic",
+  "Nonviolent",
+  "Peer Supported",
+  "Community Led",
+  "Justice-Oriented",
 ];
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [

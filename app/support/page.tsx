@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type SupportResource = {
+type OnlineResource = {
   id: string | number;
   name: string;
   description: string | null;
@@ -27,7 +27,7 @@ const PRIMARY_CATEGORY_OPTIONS = [
   "Learning & Education",
   "Travel & Movement",
   "Community & Culture",
-  "Communication & Conflict Transformation",
+  "Conflict Transformation & Repair",
   "Finance & Systems",
 ];
 
@@ -189,7 +189,7 @@ function ResourceVisual({
   resource,
   size = 48,
 }: {
-  resource: SupportResource;
+  resource: OnlineResource;
   size?: number;
 }) {
   const [imgError, setImgError] = useState(false);
@@ -234,7 +234,7 @@ function ResourceVisual({
   );
 }
 
-function ResourceCard({ resource }: { resource: SupportResource }) {
+function ResourceCard({ resource }: { resource: OnlineResource }) {
   const visitUrl = resource.affiliate_url || resource.url || "#";
 
   return (
@@ -344,7 +344,7 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
             background: "rgba(255,216,107,0.1)",
           }}
         >
-          Visit resource
+          Visit Resource
         </a>
       </div>
     </article>
@@ -352,7 +352,7 @@ function ResourceCard({ resource }: { resource: SupportResource }) {
 }
 
 export default function SupportPage() {
-  const [resources, setResources] = useState<SupportResource[]>([]);
+  const [resources, setResources] = useState<OnlineResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -729,7 +729,7 @@ export default function SupportPage() {
                 "0 0 28px rgba(255,216,107,0.30), 0 4px 14px rgba(255,200,80,0.2)",
             }}
           >
-            Add a resource
+            Add an Online Resource
           </Link>
         </div>
       </section>
