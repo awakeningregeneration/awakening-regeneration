@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: April 25, 2026*
+*Last updated: April 27, 2026*
 
 ---
 
@@ -34,6 +34,10 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **Apr 27** — Map pin rendering refactored from DOM markers (mapboxgl.Marker) to GeoJSON source + Mapbox circle layers. Pins now scale with zoom (tiny at country level, full glow at county level). Pulse animation reimplemented via requestAnimationFrame. Selected pin highlights via filter-based duplicate layers with warmer gold. Invisible hit-area layer ensures clicks register across the full light footprint.
+- **Apr 27** — Pin clicks now update county/state bar and URL (handlePinSelect wrapped in useCallback for stable reference; GeoJSON source race condition fixed with mapLoadedRef + map.once("load") fallback)
+- **Apr 27** — Popup repositioned to fixed upper-right at all viewports; custom gold close button (×) in upper-left replaces Mapbox built-in; overflow fix so close button isn't clipped by border-radius
+- **Apr 27** — Map area background set to #08192d; ResizeObserver + visible prop trigger map.resize() on mobile view transitions (addresses black-screen issue)
 - **Apr 25** — Listings taxonomy expansion: 7 new practices added (Trauma-Informed, Restorative, Somatic, Nonviolent, Peer Supported, Community Led, Justice-Oriented) across all 4 submit forms — total now 27
 - **Apr 25** — Category rename: "Communication & Conflict Transformation" → "Conflict Transformation & Repair" across all forms, display filter, and database rows (direct SQL UPDATE in Supabase)
 - **Apr 25** — Online Resources naming sweep: user-facing copy on /support and /support/submit unified to "Online Resources"; type SupportResource → OnlineResource; dead type files deleted; NAMING_MAP.md created as canonical alias reference

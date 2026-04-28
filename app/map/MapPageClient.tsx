@@ -13,6 +13,17 @@ import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
 import type { Listing } from "@/types/listing";
 
+type OnlineResource = {
+  id: string | number;
+  name: string;
+  description: string | null;
+  url: string | null;
+  logo_url: string | null;
+  category: string | null;
+  practices: string[] | null;
+  affiliate_url: string | null;
+};
+
 const sidebarLights = [
   { left: "8%", top: "4%", size: 7, opacity: 0.55 },
   { left: "88%", top: "7%", size: 9, opacity: 0.6 },
@@ -89,6 +100,10 @@ export default function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapRegion, setMapRegion] = useState<PropsRegion>({});
   const [storyCount, setStoryCount] = useState<number>(0);
+  const [countySearchQuery, setCountySearchQuery] = useState("");
+  const [onlineResources, setOnlineResources] = useState<OnlineResource[]>([]);
+  const [synonymsCache, setSynonymsCache] = useState<string[]>([]);
+  const searchLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isMobile = useIsMobile();
   const [mobileView, setMobileView] = useState<"browse" | "map">("browse");
@@ -163,8 +178,46 @@ export default function MapPage() {
       setAllListings(normalized);
     }
 
+    async function loadOnlineResources() {
+      try {
+        const res = await fetch("/api/affiliates");
+        if (res.ok) {
+          setOnlineResources(await res.json());
+        }
+      } catch {
+        // quiet fail — online resources are supplementary
+      }
+    }
+
     void loadListings();
+    void loadOnlineResources();
   }, []);
+
+  // Clear search when county changes
+  useEffect(() => {
+    setCountySearchQuery("");
+  }, [selectedCounty]);
+
+  // Fetch synonyms when search query changes (debounced)
+  useEffect(() => {
+    const term = countySearchQuery.trim().toLowerCase();
+    if (!term) {
+      setSynonymsCache([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/synonyms?term=${encodeURIComponent(term)}`);
+        const syns = res.ok ? await res.json() : [];
+        setSynonymsCache(syns);
+      } catch {
+        setSynonymsCache([]);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [countySearchQuery]);
 
   useEffect(() => {
     const stateFromUrl = searchParams.get("state");
@@ -255,6 +308,86 @@ const countyListings = useMemo(() => {
       setSelectedId(null);
     }
   }, [mapListings, selectedId]);
+
+  // ── County search derivation ──
+
+  function buildHaystack(l: Listing): string {
+    return [
+      l.name,
+      l.title ?? "",
+      l.description ?? "",
+      l.category ?? "",
+      ...(l.practices ?? []),
+      l.focus ?? "",
+      l.invitation ?? "",
+      l.address ?? "",
+      l.city ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+  }
+
+  const searchTerm = countySearchQuery.trim().toLowerCase();
+  const isSearching = searchTerm.length > 0;
+
+  const directHits = useMemo(() => {
+    if (!isSearching) return [];
+    return countyListings.filter((l) => buildHaystack(l).includes(searchTerm));
+  }, [countyListings, searchTerm, isSearching]);
+
+  const directHitIds = useMemo(
+    () => new Set(directHits.map((l) => l.id)),
+    [directHits]
+  );
+
+  const relatedNearby = useMemo(() => {
+    if (!isSearching || synonymsCache.length === 0) return [];
+    return countyListings.filter((l) => {
+      if (directHitIds.has(l.id)) return false;
+      const hay = buildHaystack(l);
+      return synonymsCache.some((syn) => hay.includes(syn));
+    });
+  }, [countyListings, isSearching, synonymsCache, directHitIds]);
+
+  const onlineHits = useMemo(() => {
+    if (!isSearching) return [];
+    return onlineResources.filter((r) => {
+      const hay = [
+        r.name ?? "",
+        r.description ?? "",
+        r.category ?? "",
+        ...(r.practices ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(searchTerm);
+    });
+  }, [onlineResources, searchTerm, isSearching]);
+
+  // Fire-and-forget search log (debounced 1s after typing stops)
+  useEffect(() => {
+    if (!isSearching) return;
+    if (searchLogTimer.current) clearTimeout(searchLogTimer.current);
+
+    searchLogTimer.current = setTimeout(() => {
+      fetch("/api/search-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          search_term: searchTerm,
+          county: effectiveCounty || null,
+          state: effectiveState || null,
+          direct_hit_count: directHits.length,
+          related_count: relatedNearby.length,
+          online_count: onlineHits.length,
+        }),
+      }).catch(() => {});
+    }, 1000);
+
+    return () => {
+      if (searchLogTimer.current) clearTimeout(searchLogTimer.current);
+    };
+  }, [searchTerm, isSearching, effectiveCounty, effectiveState, directHits.length, relatedNearby.length, onlineHits.length]);
 
   useEffect(() => {
     async function loadStories() {
@@ -807,79 +940,183 @@ const countyListings = useMemo(() => {
             </>
           ) : (
             <>
-              {countyLightCount > 0 ? (
+              {/* County search input */}
+              <input
+                type="text"
+                placeholder="Search this county..."
+                value={countySearchQuery}
+                onChange={(e) => setCountySearchQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "11px 14px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.11)",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "white",
+                  fontSize: "0.95rem",
+                  outline: "none",
+                  marginBottom: 12,
+                }}
+              />
+
+              {isSearching ? (
                 <>
+                  {/* Direct Hits */}
+                  {directHits.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFD86B", marginBottom: 8 }}>
+                        Direct Hits
+                      </div>
+                      {directHits.map((listing) => {
+                        const isSelected = selectedId === listing.id;
+                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
+                        const imageUrl = getListingImage(listing.image_url, listing.website);
+                        return (
+                          <div
+                            key={listing.id}
+                            onClick={() => setSelectedId(listing.id)}
+                            style={{
+                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
+                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
+                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
+                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
+                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
+                            }}
+                          >
+                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
+                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
+                            </div>
+                            <ElementalSeat element="spirit" size="sm" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                  <div style={{ marginTop: 12 }}>
-                    {countyListings.map((listing) => {
-                      const isSelected = selectedId === listing.id;
-                      const locationParts = [listing.city, listing.state].filter(
-                        Boolean
-                      ) as string[];
-                      const imageUrl = getListingImage(
-                        listing.image_url,
-                        listing.website
-                      );
+                  {/* Related Nearby */}
+                  {relatedNearby.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFD86B", marginBottom: 8 }}>
+                        Related Nearby
+                      </div>
+                      {relatedNearby.map((listing) => {
+                        const isSelected = selectedId === listing.id;
+                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
+                        const imageUrl = getListingImage(listing.image_url, listing.website);
+                        return (
+                          <div
+                            key={listing.id}
+                            onClick={() => setSelectedId(listing.id)}
+                            style={{
+                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
+                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
+                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
+                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
+                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
+                            }}
+                          >
+                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
+                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
+                            </div>
+                            <ElementalSeat element="spirit" size="sm" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                      return (
-                        <div
-                          key={listing.id}
-                          onClick={() => setSelectedId(listing.id)}
+                  {/* Online Resources */}
+                  {onlineHits.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFD86B", marginBottom: 8 }}>
+                        Online Resources
+                      </div>
+                      {onlineHits.map((r) => (
+                        <a
+                          key={String(r.id)}
+                          href={r.affiliate_url || r.url || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           style={{
-                            padding: 12,
-                            marginBottom: 8,
-                            borderRadius: 10,
-                            cursor: "pointer",
-                            border: isSelected
-                              ? "2px solid rgba(255,216,107,0.6)"
-                              : "1px solid rgba(255,255,255,0.12)",
-                            background: isSelected
-                              ? "rgba(255,216,107,0.2)"
-                              : "rgba(224,240,255,0.14)",
-                            display: "flex",
-                            gap: 10,
-                            alignItems: "center",
-                            transition: "all 0.15s ease",
-                            boxShadow: isSelected
-                              ? "0 2px 12px rgba(255,216,107,0.2)"
-                              : "0 1px 4px rgba(8,25,45,0.06)",
+                            display: "block", padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
+                            border: "1px solid rgba(255,255,255,0.12)", background: "rgba(224,240,255,0.14)",
+                            textDecoration: "none", color: "inherit", transition: "all 0.15s ease",
                           }}
                         >
-                          <ListingImageTile
-                            imageUrl={imageUrl}
-                            name={listing.name}
-                            size="sm"
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                color: "#e8f4ff",
-                                fontSize: 15,
-                              }}
-                            >
-                              {listing.name}
+                          <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 14 }}>{r.name}</div>
+                          {r.description && (
+                            <div style={{ fontSize: 12, color: "rgba(148,196,236,0.75)", marginTop: 4, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                              {r.description}
                             </div>
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: "rgba(148,196,236,0.8)",
-                                marginTop: 2,
-                              }}
-                            >
-                              {locationParts.join(", ") || effectiveState}
-                            </div>
-                          </div>
-                          <ElementalSeat element="spirit" size="sm" />
-                        </div>
-                      );
-                    })}
-                  </div>
+                          )}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {directHits.length === 0 && relatedNearby.length === 0 && onlineHits.length === 0 && (
+                    <div style={{ textAlign: "center", padding: "20px 12px" }}>
+                      <div style={{ fontSize: 14, color: "rgba(211,227,247,0.82)", lineHeight: 1.6, marginBottom: 14 }}>
+                        Nothing here matches that — yet.
+                        <br />
+                        If you know of something that should be on this map, you&apos;re invited to add it.
+                      </div>
+                      <Link
+                        href={submitListingHref}
+                        style={{
+                          display: "inline-block", padding: "10px 20px", borderRadius: 999,
+                          background: "#FFD86B", color: "#1a2a0e", fontWeight: 700, fontSize: 14,
+                          textDecoration: "none",
+                          boxShadow: "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                        }}
+                      >
+                        Add a Point of Light
+                      </Link>
+                    </div>
+                  )}
                 </>
               ) : (
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.88 }}>
-                  No lights mapped here yet.
-                </div>
+                <>
+                  {/* Unfiltered county view — existing listing cards */}
+                  {countyLightCount > 0 ? (
+                    <div style={{ marginTop: 12 }}>
+                      {countyListings.map((listing) => {
+                        const isSelected = selectedId === listing.id;
+                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
+                        const imageUrl = getListingImage(listing.image_url, listing.website);
+                        return (
+                          <div
+                            key={listing.id}
+                            onClick={() => setSelectedId(listing.id)}
+                            style={{
+                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
+                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
+                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
+                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
+                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
+                            }}
+                          >
+                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
+                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
+                            </div>
+                            <ElementalSeat element="spirit" size="sm" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.88 }}>
+                      No lights mapped here yet.
+                    </div>
+                  )}
+                </>
               )}
 
 <div
