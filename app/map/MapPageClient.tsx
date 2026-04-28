@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -119,6 +119,36 @@ export default function MapPage() {
     const qs = params.toString();
     router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
   }
+
+  /** Called when a map pin is clicked — re-anchors county/state to match the listing */
+  const handlePinSelect = useCallback(
+    (id: string, context?: { county?: string; state?: string }) => {
+      setSelectedId(id);
+
+      if (!context?.state) return;
+
+      const pinState = context.state;
+      const pinCounty = context.county
+        ? context.county.replace(/\s+County$/i, "").trim()
+        : "";
+
+      const stateChanged = pinState !== selectedState;
+      const countyChanged = pinCounty
+        ? pinCounty.toLowerCase() !== selectedCounty.toLowerCase()
+        : selectedCounty !== "All";
+
+      if (stateChanged || countyChanged) {
+        setSelectedState(pinState);
+        setSelectedCounty(pinCounty || "All");
+
+        const params = new URLSearchParams();
+        params.set("state", pinState);
+        if (pinCounty) params.set("county", pinCounty);
+        router.push(`/map?${params.toString()}`, { scroll: false });
+      }
+    },
+    [selectedState, selectedCounty, router]
+  );
 
   useEffect(() => {
     async function loadListings() {
@@ -1127,6 +1157,7 @@ const countyListings = useMemo(() => {
       {/* Map area */}
       <div
         style={{
+          background: "#08192d",
           ...(isMobile
             ? {
                 position: "absolute" as const,
@@ -1189,10 +1220,11 @@ const countyListings = useMemo(() => {
         <MapClient
           listings={mapListings}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={handlePinSelect}
           onRegionChange={setMapRegion}
           highlightCounty={hasCountySelection ? effectiveCounty : ""}
           highlightState={hasStateSelection ? effectiveState : ""}
+          visible={!isMobile || mobileView === "map"}
         />
 
       </div>

@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: April 24, 2026 (evening)*
+*Last updated: April 25, 2026*
 
 ---
 
@@ -34,6 +34,11 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **Apr 25** — Listings taxonomy expansion: 7 new practices added (Trauma-Informed, Restorative, Somatic, Nonviolent, Peer Supported, Community Led, Justice-Oriented) across all 4 submit forms — total now 27
+- **Apr 25** — Category rename: "Communication & Conflict Transformation" → "Conflict Transformation & Repair" across all forms, display filter, and database rows (direct SQL UPDATE in Supabase)
+- **Apr 25** — Online Resources naming sweep: user-facing copy on /support and /support/submit unified to "Online Resources"; type SupportResource → OnlineResource; dead type files deleted; NAMING_MAP.md created as canonical alias reference
+- **Apr 25** — County-level sidebar: restored 4 action buttons (About, Add a Point of Light, Explore Online Resources, The Constellation); removed redundant "Can't Find It Nearby?" card; underlined "See and Share Local Stories"; renamed "Explore Support Resources" → "Explore Online Resources"
+- **Apr 25** — Ghost tables (support_resources, affiliate_partners) confirmed empty and unused by code; held in observation mode pending real data flow
 - **Apr 24 (afternoon)** — PROJECT_STATE.md and PROJECT_MAP.md working pattern established (session opens by reading both files, closes with an update prompt)
 - **Apr 24 (afternoon)** — Homepage cover map mobile fix: widened light spread (10%–87%), added mobile-specific dimming of center lights and boosting of edge lights (useIsMobile hook, debounced resize listener), added mobile text-shadow in globals.css for readability
 - **Apr 24 (afternoon)** — Map page listing popup on mobile: repositioned to upper-right via CSS override, narrower width, tap-outside closes (existing X also works)
@@ -75,10 +80,12 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 - QR code per seeder
 
 ### Content / service categories
-- Detraumatization, nonviolence training, deescalation as service description tags within listings (Map, Constellation, Online Resources) — not a separate category section
+- Trauma-Informed, Nonviolent, Restorative, Somatic, Justice-Oriented now exist as practices/values tags (added Apr 25). Deescalation not yet represented as a distinct tag — may not need one if covered by "Nonviolent" and "Restorative" in practice.
 
 ### Code hygiene
-- Hydration error pattern: several SSR/CSR mismatches surfaced during today's work. Most were resolved via moving inline <style> to globals.css or clearing stale build cache. Consider a future audit pass to convert any remaining isMobile-driven inline style switches to CSS media queries where possible, to reduce hydration risk going forward.
+- Hydration error pattern: several SSR/CSR mismatches surfaced during Apr 24 work. Most resolved via moving inline <style> to globals.css or clearing stale build cache. Consider a future audit pass to convert remaining isMobile-driven inline style switches to CSS media queries where possible.
+- Taxonomy arrays (practices + categories) are duplicated across 4 files rather than centralized. Intentionally held — the four layers (general listings, support/affiliate, contributor, constellation) may want to diverge as the platform's shape clarifies. Reconsider extraction (e.g. app/lib/taxonomy.ts) when layer-specific taxonomies stabilize.
+- Ghost tables in Supabase (support_resources, affiliate_partners): confirmed empty and unused by code as of Apr 25. Held in observation mode — watch real data flow before deciding to drop.
 
 ### Polish
 - Prose polish pass across the site

@@ -15,10 +15,11 @@ type Region = { state?: string; county?: string };
 type Props = {
   listings: Listing[];
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, context?: { county?: string; state?: string }) => void;
   onRegionChange?: (region: Region) => void;
   highlightCounty?: string;
   highlightState?: string;
+  visible?: boolean;
 };
 
 const FLAG_REASON_OPTIONS = [
@@ -30,9 +31,88 @@ const FLAG_REASON_OPTIONS = [
   "Other",
 ];
 
-function norm(s?: string) {
-  return (s || "").trim().toLowerCase();
+/* ── GeoJSON helpers ── */
+
+function listingsToGeoJSON(listings: Listing[]): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: listings.map((l) => ({
+      type: "Feature" as const,
+      geometry: { type: "Point" as const, coordinates: [l.lng, l.lat] },
+      properties: {
+        id: l.id,
+        county: l.county ?? "",
+        state: l.state ?? "",
+      },
+    })),
+  };
 }
+
+/* ── Pulse animation constants ── */
+const PULSE_PERIOD = 2200; // ms — matches original 2.2s arPulse
+const PULSE_SELECTED_PERIOD = 1550; // ms — matches original 1.55s selected
+
+/* ── Zoom-interpolated expressions ── */
+
+// Base layers
+const DOT_RADIUS: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 2,
+  5, 3.5,
+  7, 5,
+  9, 7,
+  12, 10,
+];
+const HALO_RADIUS: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 3,
+  5, 5,
+  7, 8,
+  9, 12,
+  12, 18,
+];
+const GLOW_RADIUS: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 5,
+  5, 10,
+  7, 18,
+  9, 28,
+  12, 40,
+];
+const GLOW_OPACITY: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 0.15,
+  7, 0.35,
+  12, 0.55,
+];
+
+// Selected layers — boosted
+const DOT_RADIUS_SEL: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 2.6,
+  5, 4.5,
+  7, 6.5,
+  9, 9,
+  12, 13,
+];
+const HALO_RADIUS_SEL: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 4.2,
+  5, 7,
+  7, 11,
+  9, 17,
+  12, 25,
+];
+const GLOW_RADIUS_SEL: mapboxgl.ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"],
+  3, 7.5,
+  5, 15,
+  7, 27,
+  9, 42,
+  12, 60,
+];
+
+const SOURCE_ID = "listings-source";
 
 export default function MapClient({
   listings,
@@ -41,14 +121,22 @@ export default function MapClient({
   onRegionChange,
   highlightCounty,
   highlightState,
+  visible = true,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapLoadedRef = useRef(false);
+  const listingsRef = useRef(listings);
   const geocodeTimerRef = useRef<number | null>(null);
   const geocodeCacheRef = useRef<Map<string, Region>>(new Map());
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const popupImageRootRef = useRef<Root | null>(null);
+  const animFrameRef = useRef<number>(0);
+  const prevSelectedRef = useRef<string | null>(null);
+  const onSelectRef = useRef(onSelect);
+
+  listingsRef.current = listings;
+  onSelectRef.current = onSelect;
 
   const isFiltered = !!(highlightState || highlightCounty);
 
@@ -85,9 +173,9 @@ export default function MapClient({
       return;
     }
     if (!flagDetails.trim()) {
-  setFlagError("Please add a brief note.");
-  return;
-}
+      setFlagError("Please add a brief note.");
+      return;
+    }
 
     setFlagError("");
     setFlagSuccess("");
@@ -96,9 +184,7 @@ export default function MapClient({
     try {
       const response = await fetch("/api/listings/flag", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           listingId: flagListingId,
           reason: flagReason.trim(),
@@ -124,9 +210,7 @@ export default function MapClient({
         setFlagSuccess(
           "This listing has reached the community flag limit and is now hidden."
         );
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 1200);
+        window.setTimeout(() => window.location.reload(), 1200);
         return;
       }
 
@@ -135,10 +219,7 @@ export default function MapClient({
           ? `Flag received. Current flag count: ${count}.`
           : "Flag received."
       );
-
-      window.setTimeout(() => {
-        closeFlagModal();
-      }, 1000);
+      window.setTimeout(() => closeFlagModal(), 1000);
     } catch (error) {
       setFlagError(
         error instanceof Error ? error.message : "Failed to flag listing."
@@ -148,143 +229,50 @@ export default function MapClient({
     }
   }
 
+  /* ── Inject popup CSS (once) ── */
   useEffect(() => {
-    if (document.getElementById("ar-marker-glow-styles")) return;
+    if (document.getElementById("ar-popup-styles")) return;
 
     const style = document.createElement("style");
-    style.id = "ar-marker-glow-styles";
+    style.id = "ar-popup-styles";
     style.innerHTML = `
-      @keyframes arPulse {
-        0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.9; }
-        55%  { transform: translate(-50%, -50%) scale(1.7); opacity: 0.0; }
-        100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0.0; }
-      }
-
-      .ar-marker {
-        position: relative;
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        touch-action: manipulation;
-      }
-
-      .ar-shadow {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(
-          circle,
-          rgba(0,0,0,0.72) 0%,
-          rgba(0,0,0,0.42) 45%,
-          rgba(0,0,0,0.0) 78%
-        );
-        pointer-events: none;
-      }
-
-      .ar-halo {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 12px;
-        height: 12px;
-        border-radius: 999px;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 210, 110, 0.55);
-        animation: arPulse 2.2s ease-out infinite;
-        pointer-events: none;
-      }
-
-      .ar-ring {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 14px;
-        height: 14px;
-        border-radius: 999px;
-        transform: translate(-50%, -50%);
-        border: 2px solid rgba(0,0,0,0.35);
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.25) inset;
-        pointer-events: none;
-      }
-
-      .ar-dot {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 240, 195, 1);
-        border: 1px solid rgba(255,255,255,0.85);
-        box-shadow:
-          0 0 14px rgba(255, 235, 180, 1),
-          0 0 34px rgba(255, 200, 120, 0.9),
-          0 0 70px rgba(255, 150, 80, 0.55);
-      }
-
-      .ar-marker--in-county .ar-dot {
-        box-shadow:
-          0 0 16px rgba(255, 245, 205, 1),
-          0 0 40px rgba(255, 210, 135, 0.95),
-          0 0 84px rgba(255, 165, 95, 0.65);
-      }
-
-      .ar-marker--in-county .ar-halo {
-        background: rgba(255, 225, 145, 0.62);
-      }
-
-      .ar-marker--selected .ar-dot {
-        background: rgba(255, 250, 215, 1);
-        box-shadow:
-          0 0 18px rgba(255, 250, 215, 1),
-          0 0 48px rgba(255, 220, 150, 1),
-          0 0 96px rgba(255, 160, 90, 0.7);
-        border: 1px solid rgba(255,255,255,0.95);
-      }
-
-      .ar-marker--selected .ar-halo {
-        animation-duration: 1.55s;
-        background: rgba(255, 235, 175, 0.7);
-      }
-
       .mapboxgl-popup-content {
         background: transparent !important;
         box-shadow: none !important;
         padding: 0 !important;
         border-radius: 20px !important;
+        position: relative !important;
       }
-
       .mapboxgl-popup-tip {
         display: none !important;
       }
-
       .mapboxgl-popup-close-button {
-        color: rgba(255,216,107,0.7) !important;
-        font-size: 22px !important;
-        line-height: 1 !important;
-        width: 44px !important;
-        height: 44px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        top: 4px !important;
-        right: 4px !important;
-        border-radius: 50% !important;
-        background: transparent !important;
-        z-index: 2 !important;
+        display: none !important;
       }
-
-      .mapboxgl-popup-close-button:hover {
-        color: #FFD86B !important;
-        background: rgba(255,216,107,0.1) !important;
+      .ar-popup-close {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        color: #FFD86B;
+        border: none;
+        border-radius: 0;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 30;
+        padding: 0;
+        transition: color 0.15s ease, transform 0.15s ease;
       }
-
+      .ar-popup-close:hover {
+        color: #fff8e0;
+        transform: scale(1.1);
+      }
       .ar-popup {
         background: radial-gradient(circle at 30% 20%, rgba(17,41,82,0.97) 0%, rgba(8,25,45,0.99) 100%);
         border: 1px solid rgba(255,216,107,0.35);
@@ -295,56 +283,50 @@ export default function MapClient({
         max-width: 300px;
         color: rgba(211,227,247,0.95);
         position: relative;
-        overflow: hidden;
+        overflow: visible;
       }
-
       .ar-popup-stars {
         position: absolute;
         inset: 0;
         pointer-events: none;
         z-index: 0;
+        overflow: hidden;
+        border-radius: 20px;
       }
-
       .ar-popup-content {
         position: relative;
         z-index: 1;
       }
-
       .ar-popup-title {
         color: rgba(224,242,255,0.98);
         font-size: 16px;
         font-weight: 700;
         margin: 0 0 6px 0;
       }
-
       .ar-popup-description {
         color: rgba(148,196,236,0.85);
         font-size: 13px;
         line-height: 1.45;
         margin: 0 0 8px 0;
       }
-
       .ar-popup-address {
         font-size: 13px;
         color: rgba(148,196,236,0.75);
         line-height: 1.4;
         margin: 0 0 6px 0;
       }
-
       .ar-popup-meta {
         font-size: 12px;
         color: rgba(148,196,236,0.7);
         margin: 0 0 8px 0;
         font-weight: 500;
       }
-
       .ar-popup-practices {
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
         margin-bottom: 10px;
       }
-
       .ar-popup-practice-tag {
         font-size: 11px;
         color: #FFD86B;
@@ -354,7 +336,6 @@ export default function MapClient({
         padding: 2px 8px;
         font-weight: 500;
       }
-
       .ar-popup-link {
         display: block;
         margin-top: 8px;
@@ -364,11 +345,9 @@ export default function MapClient({
         font-size: 14px;
         text-decoration: none;
       }
-
       .ar-popup-link:hover {
         text-decoration: underline;
       }
-
       .ar-popup-action {
         background: none;
         border: none;
@@ -380,18 +359,23 @@ export default function MapClient({
         display: block;
         margin-bottom: 6px;
       }
-
-      /* Mobile: anchor popup to upper-right of map */
+      /* Anchor popup to upper-right at all viewports */
+      .mapboxgl-popup {
+        position: fixed !important;
+        top: 14px !important;
+        right: 14px !important;
+        left: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        max-width: 360px !important;
+        z-index: 20 !important;
+      }
+      .mapboxgl-popup .mapboxgl-popup-content {
+        max-width: 360px !important;
+      }
       @media (max-width: 767px) {
         .mapboxgl-popup {
-          position: fixed !important;
-          top: 14px !important;
-          right: 14px !important;
-          left: auto !important;
-          bottom: auto !important;
-          transform: none !important;
           max-width: 68vw !important;
-          z-index: 20 !important;
         }
         .mapboxgl-popup .mapboxgl-popup-content {
           max-width: 68vw !important;
@@ -405,6 +389,7 @@ export default function MapClient({
     document.head.appendChild(style);
   }, []);
 
+  /* ── Map initialization ── */
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -417,6 +402,13 @@ export default function MapClient({
 
     mapRef.current = map;
 
+    // ResizeObserver for real container resizes (orientation, window)
+    const ro = new ResizeObserver(() => {
+      map.resize();
+    });
+    ro.observe(mapContainerRef.current);
+
+    // Reverse geocode on map movement (region indicator)
     const handleMoveEnd = () => {
       if (!onRegionChange) return;
       const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapboxgl.accessToken;
@@ -481,7 +473,191 @@ export default function MapClient({
     map.on("moveend", handleMoveEnd);
     map.on("load", handleMoveEnd);
 
+    /* ── Add circle layers once map loads ── */
+    map.on("load", () => {
+      mapLoadedRef.current = true;
+
+      // Populate source with current listings (may already have data from API)
+      map.addSource(SOURCE_ID, {
+        type: "geojson",
+        data: listingsToGeoJSON(listingsRef.current),
+        promoteId: "id",
+      });
+
+      // --- Base layers (all listings) ---
+
+      // Layer 1: Outer glow
+      map.addLayer({
+        id: "listings-glow",
+        type: "circle",
+        source: SOURCE_ID,
+        paint: {
+          "circle-radius": GLOW_RADIUS,
+          "circle-color": "rgba(255,180,100,0.3)",
+          "circle-blur": 1,
+          "circle-opacity": GLOW_OPACITY,
+        },
+      });
+
+      // Layer 2: Halo (pulse target)
+      map.addLayer({
+        id: "listings-halo",
+        type: "circle",
+        source: SOURCE_ID,
+        paint: {
+          "circle-radius": HALO_RADIUS,
+          "circle-color": "rgba(255,210,110,0.55)",
+          "circle-blur": 0.6,
+          "circle-opacity": 0.55,
+        },
+      });
+
+      // Layer 3: Core dot
+      map.addLayer({
+        id: "listings-dot",
+        type: "circle",
+        source: SOURCE_ID,
+        paint: {
+          "circle-radius": DOT_RADIUS,
+          "circle-color": "#fff0c3",
+          "circle-stroke-width": [
+            "interpolate", ["linear"], ["zoom"],
+            3, 0.3,
+            9, 1,
+          ] as mapboxgl.ExpressionSpecification,
+          "circle-stroke-color": "rgba(255,255,255,0.85)",
+          "circle-opacity": 1,
+        },
+      });
+
+      // --- Selected layers (filtered to selected listing) ---
+
+      const noMatchFilter: mapboxgl.ExpressionSpecification = ["==", ["get", "id"], ""];
+
+      map.addLayer({
+        id: "listings-glow-selected",
+        type: "circle",
+        source: SOURCE_ID,
+        filter: noMatchFilter,
+        paint: {
+          "circle-radius": GLOW_RADIUS_SEL,
+          "circle-color": "rgba(255,180,100,0.45)",
+          "circle-blur": 1,
+          "circle-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            3, 0.25,
+            7, 0.5,
+            12, 0.7,
+          ] as mapboxgl.ExpressionSpecification,
+        },
+      });
+
+      map.addLayer({
+        id: "listings-halo-selected",
+        type: "circle",
+        source: SOURCE_ID,
+        filter: noMatchFilter,
+        paint: {
+          "circle-radius": HALO_RADIUS_SEL,
+          "circle-color": "rgba(255,235,175,0.7)",
+          "circle-blur": 0.5,
+          "circle-opacity": 0.7,
+        },
+      });
+
+      map.addLayer({
+        id: "listings-dot-selected",
+        type: "circle",
+        source: SOURCE_ID,
+        filter: noMatchFilter,
+        paint: {
+          "circle-radius": DOT_RADIUS_SEL,
+          "circle-color": "#fffad7",
+          "circle-stroke-width": [
+            "interpolate", ["linear"], ["zoom"],
+            3, 0.5,
+            9, 1.2,
+          ] as mapboxgl.ExpressionSpecification,
+          "circle-stroke-color": "rgba(255,255,255,0.95)",
+          "circle-opacity": 1,
+        },
+      });
+
+      // --- Invisible hit-area layer (above all visual layers) ---
+
+      map.addLayer({
+        id: "listings-hit",
+        type: "circle",
+        source: SOURCE_ID,
+        paint: {
+          "circle-radius": [
+            "interpolate", ["linear"], ["zoom"],
+            3, 8,
+            7, 18,
+            9, 32,
+            12, 48,
+          ] as mapboxgl.ExpressionSpecification,
+          "circle-opacity": 0,
+          "circle-color": "#000",
+        },
+      });
+
+      // --- Click & cursor handlers (on hit area) ---
+
+      map.on("click", "listings-hit", (e) => {
+        const feature = e.features?.[0];
+        if (!feature || !feature.properties) return;
+        const props = feature.properties;
+        onSelect(props.id, {
+          county: props.county || undefined,
+          state: props.state || undefined,
+        });
+      });
+
+      map.on("mouseenter", "listings-hit", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "listings-hit", () => {
+        map.getCanvas().style.cursor = "";
+      });
+
+      // --- Pulse animation loop ---
+
+      function animatePulse() {
+        const m = mapRef.current;
+        if (!m || !m.getLayer("listings-halo")) {
+          animFrameRef.current = requestAnimationFrame(animatePulse);
+          return;
+        }
+
+        const now = Date.now();
+
+        // Base halo pulse
+        const tBase = (now % PULSE_PERIOD) / PULSE_PERIOD;
+        const progressBase = Math.min(tBase / 0.55, 1);
+        const easedBase = 1 - Math.pow(1 - progressBase, 2);
+        const baseOpacity = 0.55 * (1 - easedBase);
+        m.setPaintProperty("listings-halo", "circle-opacity", baseOpacity);
+
+        // Selected halo pulse (faster)
+        if (m.getLayer("listings-halo-selected")) {
+          const tSel = (now % PULSE_SELECTED_PERIOD) / PULSE_SELECTED_PERIOD;
+          const progressSel = Math.min(tSel / 0.55, 1);
+          const easedSel = 1 - Math.pow(1 - progressSel, 2);
+          const selOpacity = 0.7 * (1 - easedSel);
+          m.setPaintProperty("listings-halo-selected", "circle-opacity", selOpacity);
+        }
+
+        animFrameRef.current = requestAnimationFrame(animatePulse);
+      }
+
+      animFrameRef.current = requestAnimationFrame(animatePulse);
+    });
+
     return () => {
+      mapLoadedRef.current = false;
+      cancelAnimationFrame(animFrameRef.current);
+      ro.disconnect();
       map.off("moveend", handleMoveEnd);
       popupRef.current?.remove();
       if (popupImageRootRef.current) {
@@ -492,91 +668,58 @@ export default function MapClient({
       map.remove();
       mapRef.current = null;
     };
-  }, [onRegionChange]);
+  }, [onRegionChange, onSelect]);
 
+  /* ── Update GeoJSON source when listings change ── */
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
-
-    markersRef.current = listings.map((listing) => {
-      const markerEl = document.createElement("div");
-      markerEl.className = "ar-marker";
-
-      const shadow = document.createElement("div");
-      shadow.className = "ar-shadow";
-
-      const halo = document.createElement("div");
-      halo.className = "ar-halo";
-
-      const ring = document.createElement("div");
-      ring.className = "ar-ring";
-
-      const dot = document.createElement("div");
-      dot.className = "ar-dot";
-
-      markerEl.appendChild(shadow);
-      markerEl.appendChild(halo);
-      markerEl.appendChild(ring);
-      markerEl.appendChild(dot);
-
-      if (selectedId === listing.id) {
-        markerEl.classList.add("ar-marker--selected");
+    const applyData = () => {
+      const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+      if (source) {
+        source.setData(listingsToGeoJSON(listings));
       }
 
-      const inCounty =
-        highlightCounty &&
-        listing.county &&
-        norm(listing.county) === norm(highlightCounty) &&
-        (!highlightState || norm(listing.state) === norm(highlightState));
-
-      if (inCounty) {
-        markerEl.classList.add("ar-marker--in-county");
+      // fitBounds when filtered
+      if (!selectedId && listings.length > 0 && isFiltered) {
+        const bounds = new mapboxgl.LngLatBounds();
+        listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
+        map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
       }
+    };
 
-      const handleSelect = (e: Event) => {
-        e.stopPropagation();
-        onSelect(listing.id);
-      };
-
-      markerEl.addEventListener("click", handleSelect);
-      markerEl.addEventListener("touchstart", handleSelect);
-
-      return new mapboxgl.Marker(markerEl)
-        .setLngLat({ lng: listing.lng, lat: listing.lat })
-        .addTo(map);
-    });
-
-    if (!selectedId && listings.length > 0 && isFiltered) {
-      const bounds = new mapboxgl.LngLatBounds();
-      listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
-      map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
+    if (mapLoadedRef.current) {
+      applyData();
+    } else {
+      // Map hasn't loaded yet — wait for the source to be created
+      map.once("load", applyData);
     }
-  }, [listings, onSelect, selectedId, highlightCounty, highlightState, isFiltered]);
+  }, [listings, selectedId, isFiltered]);
 
+  /* ── Update selected-layer filters when selection changes ── */
   useEffect(() => {
-    markersRef.current.forEach((marker, idx) => {
-      const el = marker.getElement();
-      const listing = listings[idx];
-      if (!el || !listing) return;
+    const map = mapRef.current;
+    if (!map) return;
 
-      if (selectedId === listing.id) el.classList.add("ar-marker--selected");
-      else el.classList.remove("ar-marker--selected");
+    const filter: mapboxgl.ExpressionSpecification = selectedId
+      ? ["==", ["get", "id"], selectedId]
+      : ["==", ["get", "id"], ""];
 
-      const inCounty =
-        highlightCounty &&
-        listing.county &&
-        norm(listing.county) === norm(highlightCounty) &&
-        (!highlightState || norm(listing.state) === norm(highlightState));
+    if (map.getLayer("listings-glow-selected")) {
+      map.setFilter("listings-glow-selected", filter);
+    }
+    if (map.getLayer("listings-halo-selected")) {
+      map.setFilter("listings-halo-selected", filter);
+    }
+    if (map.getLayer("listings-dot-selected")) {
+      map.setFilter("listings-dot-selected", filter);
+    }
 
-      if (inCounty) el.classList.add("ar-marker--in-county");
-      else el.classList.remove("ar-marker--in-county");
-    });
-  }, [selectedId, listings, highlightCounty, highlightState]);
+    prevSelectedRef.current = selectedId;
+  }, [selectedId]);
 
-  // Return to national view when filters clear back to "All"
+  /* ── Return to national view when filters clear ── */
   useEffect(() => {
     if (!isFiltered && mapRef.current) {
       mapRef.current.flyTo({
@@ -587,6 +730,16 @@ export default function MapClient({
     }
   }, [isFiltered]);
 
+  /* ── Visible prop → map.resize() for mobile ── */
+  useEffect(() => {
+    if (visible && mapRef.current) {
+      // Small delay to let the CSS transform settle
+      const t = setTimeout(() => mapRef.current?.resize(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [visible]);
+
+  /* ── Popup rendering ── */
   useEffect(() => {
     if (!selectedId) {
       popupRef.current?.remove();
@@ -613,7 +766,6 @@ export default function MapClient({
 
     popupRef.current?.remove();
 
-    // Unmount any existing image tile root before building a new popup
     if (popupImageRootRef.current) {
       const prevRoot = popupImageRootRef.current;
       popupImageRootRef.current = null;
@@ -623,10 +775,20 @@ export default function MapClient({
     const popupNode = document.createElement("div");
     popupNode.className = "ar-popup";
 
+    // Custom close button
+    const closeBtn = document.createElement("button");
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.innerHTML = "\u00D7";
+    closeBtn.className = "ar-popup-close";
+    closeBtn.onclick = () => {
+      onSelectRef.current("", undefined);
+    };
+    popupNode.appendChild(closeBtn);
+
     // Background star field
     const starsDiv = document.createElement("div");
     starsDiv.className = "ar-popup-stars";
-    const starPositions = [
+    [
       { left: "10%", top: "15%", size: 2 },
       { left: "25%", top: "70%", size: 1.5 },
       { left: "40%", top: "10%", size: 2.5 },
@@ -637,20 +799,18 @@ export default function MapClient({
       { left: "50%", top: "40%", size: 1.5 },
       { left: "90%", top: "30%", size: 2.5 },
       { left: "35%", top: "55%", size: 1.5 },
-    ];
-    starPositions.forEach((s) => {
+    ].forEach((s) => {
       const star = document.createElement("span");
       star.style.cssText = `position:absolute;left:${s.left};top:${s.top};width:${s.size}px;height:${s.size}px;border-radius:50%;background:rgba(255,244,200,0.85);box-shadow:0 0 ${s.size * 2}px rgba(255,216,107,0.5);pointer-events:none;`;
       starsDiv.appendChild(star);
     });
     popupNode.appendChild(starsDiv);
 
-    // Content wrapper (sits above the stars via z-index)
     const contentDiv = document.createElement("div");
     contentDiv.className = "ar-popup-content";
     popupNode.appendChild(contentDiv);
 
-    // Image tile — mounted as a React root inside the popup DOM
+    // Image tile
     const imageContainer = document.createElement("div");
     imageContainer.style.marginBottom = "10px";
     contentDiv.appendChild(imageContainer);
@@ -669,26 +829,22 @@ export default function MapClient({
     const title = document.createElement("h3");
     title.className = "ar-popup-title";
     title.textContent = listing.title ?? listing.name ?? "";
-
-    const description = document.createElement("p");
-    description.className = "ar-popup-description";
-    description.textContent = listing.description || "";
-
     contentDiv.appendChild(title);
 
     if (listing.description) {
+      const description = document.createElement("p");
+      description.className = "ar-popup-description";
+      description.textContent = listing.description;
       contentDiv.appendChild(description);
     }
 
-    // Street address (when present)
-    if (listing.address && listing.address.trim()) {
+    if (listing.address?.trim()) {
       const addressEl = document.createElement("div");
       addressEl.className = "ar-popup-address";
       addressEl.textContent = listing.address.trim();
       contentDiv.appendChild(addressEl);
     }
 
-    // Category + location meta line
     const meta = document.createElement("div");
     meta.className = "ar-popup-meta";
     meta.textContent = `${listing.category || ""} · ${listing.city || ""}${
@@ -696,7 +852,6 @@ export default function MapClient({
     }`;
     contentDiv.appendChild(meta);
 
-    // Practices tags
     if (listing.practices && listing.practices.length > 0) {
       const practicesContainer = document.createElement("div");
       practicesContainer.className = "ar-popup-practices";
@@ -721,17 +876,14 @@ export default function MapClient({
       contentDiv.appendChild(link);
     }
 
-    // Get directions link
     let destination = "";
-    if (listing.address && listing.address.trim()) {
+    if (listing.address?.trim()) {
       const parts = [listing.address.trim(), listing.city, listing.state]
         .filter(Boolean)
         .join(", ");
       destination = encodeURIComponent(parts);
     } else if (listing.city && listing.state) {
-      destination = encodeURIComponent(
-        `${listing.city}, ${listing.state}`
-      );
+      destination = encodeURIComponent(`${listing.city}, ${listing.state}`);
     } else {
       destination = `${listing.lat},${listing.lng}`;
     }
@@ -762,14 +914,21 @@ export default function MapClient({
     });
     contentDiv.appendChild(flagButton);
 
-    popupRef.current = new mapboxgl.Popup({
+    const popup = new mapboxgl.Popup({
       offset: 18,
-      closeButton: true,
+      closeButton: false,
       closeOnClick: true,
     })
       .setLngLat([listing.lng, listing.lat])
       .setDOMContent(popupNode)
       .addTo(map);
+
+    popup.on("close", () => {
+      // Clear selection so the same listing can be re-clicked
+      onSelectRef.current("", undefined);
+    });
+
+    popupRef.current = popup;
   }, [selectedId, listings]);
 
   return (
@@ -829,25 +988,14 @@ export default function MapClient({
             </div>
 
             <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                marginBottom: 10,
-              }}
+              style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}
             >
               Choose a reason
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 10,
-                marginBottom: 20,
-              }}
-            >
+            <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
               {FLAG_REASON_OPTIONS.map((option) => {
                 const selected = flagReason === option;
-
                 return (
                   <button
                     key={option}
@@ -878,15 +1026,9 @@ export default function MapClient({
               })}
             </div>
 
-       <div
-  style={{
-    fontSize: 14,
-    fontWeight: 600,
-    marginBottom: 8,
-  }}
->
-  Tell us what needs attention
-</div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
+              Tell us what needs attention
+            </div>
 
             <textarea
               value={flagDetails}
