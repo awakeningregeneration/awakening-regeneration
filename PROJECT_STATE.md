@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: April 28, 2026*
+*Last updated: April 30, 2026*
 
 ---
 
@@ -22,7 +22,7 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 ### Global Navigation
 - **North Star nav** (built Apr 24) — top-right fixed, luminous glass dome with 8-point bi-tonal gold compass rose inside. Hover/tap opens dropdown to all surfaces.
 
-### Database (21 tables)
+### Database (23 tables)
 - **Listings & moderation**: listings, listing_edits, listing_flags
 - **Founders & Seeders**: founders, seeders, seeder_referrals
 - **Stewardship**: stewards, steward_edit_sessions, stewardship_claims, stewardship_disputes, affiliate_stewards
@@ -30,11 +30,17 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 - **Resources**: resources, support_resources, affiliate_resources, affiliate_partners
 - **Feedback loop**: unmet_needs (captures failed searches — "tell us what you're looking for")
 - **Search & synonyms**: search_logs, synonym_groups (39 seeded groups), synonym_candidates
+- **Seeder system**: seeder_listing_credits, seeder_login_tokens (+ extensions to seeders and listings tables)
 
 ---
 
 ## Done (recent)
 
+- **Apr 30** — Seeder system Phase 1 complete: schema additions to listings (source, placed_by_seeder_id, outreach_status, outreach_started_at, last_outreach_at, removal_token) and seeders (url_handle, bio, phone, orientation_completed_at); new tables seeder_listing_credits and seeder_login_tokens; RLS enabled on seeders, seeder_listing_credits, seeder_login_tokens
+- **Apr 30** — Seeder magic-link auth: POST /api/seeder/login-request sends 30-min token via Resend; GET /api/seeder/auth validates token, sets HMAC-signed 30-day session cookie (cc_seeder_session); reuses stewardshipTokens.ts for token generation; new SEEDER_SESSION_SECRET env var
+- **Apr 30** — Seeder URL routing: app/[handle]/layout.tsx validates handle exists (404 if not); app/[handle]/login/page.tsx public login form; app/[handle]/page.tsx auth-gated dashboard stub; Next.js matches specific routes before [handle] so existing routes unaffected
+- **Apr 30** — Handle validation: app/lib/reservedHandles.ts with format checks (lowercase alphanumeric + hyphens, 2-30 chars) and DB uniqueness; blocks all existing top-level routes + common reserved words
+- **Apr 30** — Lucia backfilled with url_handle = 'lucia'; login flow tested end-to-end
 - **Apr 28** — County-level search built: search input on sidebar filters listings into Direct Hits (substring), Related Nearby (synonym-expanded), and Online Resources (affiliate match). Empty state with "Add a Point of Light" CTA. Search clears on county change.
 - **Apr 28** — Synonym feedback loop: search_logs table records every county search; synonym_groups table (39 seeded groups, 27 practices + 12 categories); synonym_candidates table with trigger automation (approve → creates new group, grouped → appends to existing group, rejected → no-op); Netlify scheduled function runs monthly digest, emails Ren with Supabase Studio deep link to review candidates
 - **Apr 28** — Server-side synonym API (GET /api/synonyms?term=xxx) with 1-hour cached DB lookup; search-log API (POST /api/search-log) for fire-and-forget logging; synonymDigest email template
@@ -83,6 +89,25 @@ Monthly cycle, automated end-to-end:
    - `rejected` → no synonym_groups change
    - All transitions auto-set `decided_at = now()`
 5. **Live** — `getSynonyms` reads from `synonym_groups` with 1-hour cache. New synonyms are available to users within an hour of approval.
+
+---
+
+## Seeder system — phased build plan
+
+**Phase 1 — Foundation (complete, Apr 30)**
+Schema additions (listings attribution, seeders profile fields, seeder_listing_credits, seeder_login_tokens). Magic-link auth with HMAC-signed 30-day session cookie. Dynamic /[handle]/ routing with handle validation. Dashboard stub.
+
+**Phase 2 — Seeder dashboard + listing placement (pending)**
+Orientation flow (/[handle]/start). Listing placement form. Dashboard showing placed listings, outreach status, credits. QR code generation.
+
+**Phase 3 — Outreach email sequence (pending)**
+3-email cadence for seeder-placed listings (email 1 at placement, email 2 at 2 weeks, email 3 at 4 weeks). Netlify scheduled function for cadence. Removal/unsubscribe token handling. Outreach status tracking.
+
+**Phase 4 — Attribution + Founder credit (pending)**
+3-month attribution window: if listing owner becomes a Founder within 90 days of claiming a seeder-placed listing, seeder gets credit. Stripe webhook extension. seeder_listing_credits population.
+
+**Phase 5 — Payout + reporting (pending)**
+Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ---
 
