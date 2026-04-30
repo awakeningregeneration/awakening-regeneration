@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: April 27, 2026*
+*Last updated: April 28, 2026*
 
 ---
 
@@ -22,18 +22,24 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 ### Global Navigation
 - **North Star nav** (built Apr 24) — top-right fixed, luminous glass dome with 8-point bi-tonal gold compass rose inside. Hover/tap opens dropdown to all surfaces.
 
-### Database (18 tables)
+### Database (21 tables)
 - **Listings & moderation**: listings, listing_edits, listing_flags
 - **Founders & Seeders**: founders, seeders, seeder_referrals
 - **Stewardship**: stewards, steward_edit_sessions, stewardship_claims, stewardship_disputes, affiliate_stewards
 - **Content & Story**: stories, constellation
 - **Resources**: resources, support_resources, affiliate_resources, affiliate_partners
 - **Feedback loop**: unmet_needs (captures failed searches — "tell us what you're looking for")
+- **Search & synonyms**: search_logs, synonym_groups (39 seeded groups), synonym_candidates
 
 ---
 
 ## Done (recent)
 
+- **Apr 28** — County-level search built: search input on sidebar filters listings into Direct Hits (substring), Related Nearby (synonym-expanded), and Online Resources (affiliate match). Empty state with "Add a Point of Light" CTA. Search clears on county change.
+- **Apr 28** — Synonym feedback loop: search_logs table records every county search; synonym_groups table (39 seeded groups, 27 practices + 12 categories); synonym_candidates table with trigger automation (approve → creates new group, grouped → appends to existing group, rejected → no-op); Netlify scheduled function runs monthly digest, emails Ren with Supabase Studio deep link to review candidates
+- **Apr 28** — Server-side synonym API (GET /api/synonyms?term=xxx) with 1-hour cached DB lookup; search-log API (POST /api/search-log) for fire-and-forget logging; synonymDigest email template
+- **Apr 28** — Bug fix: searchSynonyms.ts was importing supabaseAdmin (service role) but being dynamically imported on the client where the key is undefined; moved to server-side API route
+- **Apr 28** — LOOSE_ENDS.md created (8 tracked deferred items)
 - **Apr 27** — Map pin rendering refactored from DOM markers (mapboxgl.Marker) to GeoJSON source + Mapbox circle layers. Pins now scale with zoom (tiny at country level, full glow at county level). Pulse animation reimplemented via requestAnimationFrame. Selected pin highlights via filter-based duplicate layers with warmer gold. Invisible hit-area layer ensures clicks register across the full light footprint.
 - **Apr 27** — Pin clicks now update county/state bar and URL (handlePinSelect wrapped in useCallback for stable reference; GeoJSON source race condition fixed with mapLoadedRef + map.once("load") fallback)
 - **Apr 27** — Popup repositioned to fixed upper-right at all viewports; custom gold close button (×) in upper-left replaces Mapbox built-in; overflow fix so close button isn't clipped by border-radius
@@ -61,6 +67,22 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 - **Apr** — All major pages rebuilt with two registers: deep sky for browsing, morning sky for forms
 - **Apr** — Seeder/Founder model locked: single-layer, 25% recurring (12-mo max) / 15% one-time
 - **Apr** — Email templates scaffolded at app/lib/emails/ (welcomeFounder.ts first)
+
+---
+
+## Synonym candidate review workflow
+
+Monthly cycle, automated end-to-end:
+
+1. **Search logging** — every county-level search fires a POST to `/api/search-log` with term, county, state, and hit counts. Stored in `search_logs` table.
+2. **Monthly digest** — Netlify scheduled function (`netlify/functions/synonym-digest.mts`) runs 1st of each month at 8am Pacific. Aggregates the previous month's search_logs, identifies candidates (3+ searches with avg ≤1 direct hit, OR 5+ searches not in any synonym group), inserts into `synonym_candidates`, emails Ren via Resend.
+3. **Email** — from `synonyms@canarycommons.org`, contains candidate count, table of terms with occurrence counts and suggested groups, and a "Review Candidates" button linking to Supabase Studio filtered to `status = pending`.
+4. **Review in Supabase Studio** — Ren opens the deep link, sees pending candidates. For each row, changes `status` to:
+   - `approved` (no `suggested_group_id`) → trigger creates a new `synonym_groups` row with `terms = [search_term]`
+   - `grouped` (set `suggested_group_id` first) → trigger appends `search_term` to that group's `terms` array
+   - `rejected` → no synonym_groups change
+   - All transitions auto-set `decided_at = now()`
+5. **Live** — `getSynonyms` reads from `synonym_groups` with 1-hour cache. New synonyms are available to users within an hour of approval.
 
 ---
 
