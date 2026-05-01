@@ -395,6 +395,106 @@ After all three emails have been sent, the only remove path is via claiming the 
 
 ---
 
+## 11a. Layered consent model (May 1, 2026 update)
+
+The remove path described in §11 has been refined into a layered
+consent model with three states.
+
+### State 1: Soft removal (email link, no claim)
+
+Business clicks "Remove Listing" in any of the three outreach emails
+without claiming the listing. The listing's `status` becomes
+'removed'; `outreach_status` becomes 'removed'; the email sequence
+stops.
+
+This is a passive non-response made active. The business has not
+verified their identity, has not formally engaged with the system,
+and is expressing "not now" rather than a permanent boundary.
+
+If another seeder or community member later places this same business
+on the map again, it comes back. The first removal expressed a
+moment-in-time "no thanks," not a permanent boundary. The business
+may have missed the vision then; they may welcome it now.
+
+### State 2: Hard removal (claim then opt-out)
+
+Business clicks "Claim this listing" in any email, completes the
+verification flow (domain match auto-approves; declaration triggers
+48-hour grace period), and from inside their claimed steward view
+chooses to remove with a reason.
+
+This is meaningfully different. They have actively engaged with the
+system, verified their identity, and *then* chosen to remove. This is
+a real "I do not want this business on this map" — and it is honored
+permanently unless the business later chooses to reverse it.
+
+When State 2 happens:
+- `status` = 'removed'
+- `do_not_list` = true
+- `do_not_list_reason` = chosen reason (see below)
+- `do_not_list_at` = now()
+
+Future placement attempts for this business — by any seeder or
+community member — get blocked with the notice: *"This business has
+indicated they prefer not to appear on Canary Commons. If you believe
+this is an error or the business has changed their mind, please
+contact us."*
+
+If the business ever wants to come back, they reach out, and the path
+exists — but it requires intention.
+
+### State 3: Closed business (community flag)
+
+Already exists in the flag system (§4 of investigation report).
+"Closed or no longer active" reason. Three flags from different IPs
+auto-hides. Different mechanism from States 1 and 2 — community
+maintenance rather than business consent.
+
+### Removal reason categories (State 2 only)
+
+When a steward claims and chooses to remove, they select from:
+- "We're closed or no longer operating"
+- "This isn't a fit for us"
+- "We don't want to be findable on a map"
+- "Other"
+
+These categories softened from earlier draft language. "This isn't a
+fit for us" replaces "don't agree with the project" — gentler, more
+honest about the nuance of fit.
+
+### Identification logic for do_not_list checks
+
+When any submission form (seeder placement, community submit, etc.)
+attempts to create a listing, check if a `do_not_list = true` row
+exists with matching:
+- normalized business_name (lowercased, trimmed, common articles
+  stripped)
+- city (exact match)
+- normalized address (lowercased, trimmed, common suffixes
+  normalized — e.g., "Street" -> "St")
+
+Why not match by email: contact emails are unreliable identifiers.
+The email a seeder finds for a business is often not the actual
+decision-maker — it might be info@ routing to a former employee, a
+manager who isn't the owner, or a generic shared inbox. Someone in
+that inbox might click remove without representing institutional
+intent. Business name + city + address is the durable identity;
+emails come and go.
+
+### Schema additions (folded into Phase 2+3 build)
+
+On `listings` table:
+- `do_not_list` BOOLEAN DEFAULT false
+- `do_not_list_reason` TEXT (nullable)
+- `do_not_list_at` TIMESTAMPTZ (nullable)
+- `normalized_name` TEXT (auto-populated via trigger on insert/update)
+- `normalized_address` TEXT (auto-populated via trigger)
+
+The audit log table (`listing_removal_log`) is deferred to
+GROWTH_LIST.md for future build when traffic justifies it.
+
+---
+
 ## 12. The Founders webhook extension
 
 ### 12a. The new logic
@@ -499,38 +599,47 @@ Thank you for saying yes to this.
 
 ---
 
-## 15. Build order (proposed)
+## 15. Build order (revised May 1, 2026)
 
-When this is ready to build, suggested phasing:
-
-**Phase 1 — Foundation**
+**Phase 1 — Foundation** ✓ COMPLETE (commit 2f326a8, April 30 2026)
 - Schema additions (listings, seeders, seeder_listing_credits, seeder_login_tokens)
+- Magic-link auth + seeder URL routing
 - Reserved handle validation
-- Magic-link login flow + seeder auth middleware
+- Dashboard stub at /[handle]
 
-**Phase 2 — Seeder surfaces**
-- `/[handle]` dashboard (basic — placements list only)
-- `/[handle]/start` orientation page (with Ren's copy)
-- `/[handle]/place` form
-- Orientation gating on placement form
+**Phase 2+3 — Combined: Seeder surfaces + outreach cadence (next build)**
+- Schema additions for layered consent (do_not_list fields,
+  normalized fields, trigger for normalization)
+- Orientation page at /[handle]/start with full copy
+- Placement form at /[handle]/place with do_not_list check
+- Dashboard at /[handle] (replacing stub)
+- Cross-seeder view at /[handle]/map-view
+- Three outreach email templates (already drafted in design doc)
+- Email 1 fires immediately on placement
+- Scheduled function for emails 2 and 3 (modeled on synonym-digest)
+- Removal token flow (link in each email -> token-based remove route)
+- Unsubscribe handling
+- Bounce tracking via Resend webhook
+- Stop conditions on outreach sequence
+- Steward "remove with reason" flow for State 2 hard removal
+- Folded LOOSE_ENDS items: base URL env var extraction,
+  verifyPayload refactor
 
-**Phase 3 — Outreach**
-- Three email templates
-- Email-1-on-create trigger
-- Outreach scheduled function (handles emails 2 and 3)
-- Remove token + remove flow
+**Phase 4 — Attribution + Founder credit (future)**
+- Stripe webhook extension to read placed_by_seeder_id
+- "Thank the seeder" gesture on /steward/verify/success
+- seeder_listing_credits population
+- Clean /[handle]/join referral URL pattern (from GROWTH_LIST)
 
-**Phase 4 — Attribution**
-- Founders webhook extension
-- Credits panel on dashboard
-- Payout integration
+**Phase 5 — Payout + reporting (future)**
+- Seeder payout tracking
+- Admin reporting
+- Seeder-facing earnings view
 
-**Phase 5 — Coordination**
-- Cross-seeder view (`/[handle]/map-view`)
-- "Thank the seeder" gesture on `/steward/verify/success`
-- Onboarding email template
-
-Phases 1-3 are the minimum to start placing lights. Phase 4 is required before any Founder credits accrue. Phase 5 adds the coordination and relational layers.
+Phases 2+3 combined was decided May 1, 2026 — the outreach cadence is
+tightly coupled to the placement flow, and shipping placement without
+the cadence would create incomplete relationships ("ruckus" in Ren's
+language). Build them together as one weight-bearing system.
 
 ---
 
