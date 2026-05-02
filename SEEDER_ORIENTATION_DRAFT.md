@@ -10,7 +10,7 @@ Thank you. You are placing lights on this map. Thank you for bringing your light
 
 If you are here, we've talked together, we've walked together. I am excited about what this is coming to be and I am inspired and grateful you are here with me.
 
-I have carried this vision for sixteen years.
+I have carried this vision for sixteen years. Right now, I lean into it with all I am because this is the path I want us to walk forward in, one where harmony rises and grace lives. I know that attention is what fuels. I'm leaning in to this. Thank you for joining me.
 
 Courage forward, it flies.
 
@@ -22,11 +22,13 @@ May we all grow lighter as it does.
 
 ## What Canary Commons is
 
-Canary Commons is a living map of regenerative, life-supporting work across the United States.
+Canary Commons is a living map of regenerative, life-supporting work across the United States and inspired by a world of people doing amazing.
 
 The premise is simple. There is more good already happening in communities than is visible. Businesses, projects, organizations, people — quietly choosing life forward, for themselves and for those who come after. Quietly choosing differently. Most of them are not easy to find. Most of them are not connected to one another. Most of them are doing the work without external recognition.
 
-Canary Commons exists to make that work visible. So it can be found. So it can be trusted. So it can be supported. So the people doing it know they are not alone.
+The other premise to this work is where we place our focus is what, in the end, we do with our life. Where we place our focus is what grows. If we are against — that is where our energy lives. If we are for, that is what we grow. It is time to grow the amazing and let the rest wither from lack of fuel.
+
+Canary Commons exists to make the amazing visible. So it can be found. So it can be trusted. So it can be supported. So the people doing it can become stronger. So we can live in THAT world.
 
 It is non-extractive, non-competitive, and invitational. Listings are free. Contribution does not buy placement. The map is not a marketplace. It is a commons.
 
@@ -42,7 +44,7 @@ Seeders are identifying aligned nodes and initiating first-contact circuitry.
 
 The work is not just to make something visible. It is to make something visible in a way that is accurate, respectful, and easy for the business to recognize itself in.
 
-That means the goal of seeding is not volume first. The goal is signal integrity first.
+That means the goal of seeding is not volume first. The goal is alignment first.
 
 A seeded listing should feel, to the business receiving it, less like *"someone made assumptions about us"* and more like *"someone saw what we are actually doing and reflected it back accurately."*
 
@@ -72,7 +74,7 @@ Because of this, seeding is not data entry. It is discernment work. Quality matt
 
 ## How this work is paid
 
-A direct conversation about money, because being honest about it matters.
+About the compensation structure.
 
 Seeders earn 25% recurring on monthly Founders subscriptions for twelve months when a placed listing converts into a Founder. On one-time custom contributions, seeders earn 15%.
 
@@ -82,13 +84,23 @@ The work you do at the front end — finding aligned businesses, placing them ca
 
 This is deliberate. It rewards heavy front-end lifting with longer-term return. It does not pay for clicks or for volume. It pays for depth — for placements that are accurate enough, considered enough, and aligned enough that the businesses you place actually want to step into Founder support.
 
-That means: the structure punishes spam by design. A seeder who places fifty listings carelessly gets paid for none of them, because none will convert. A seeder who places ten listings with care gets paid for the ones that find real alignment.
-
 Your work is rewarded when the businesses you bring into visibility recognize themselves and choose to carry the project forward with their support.
 
 This is also, importantly, a bridge. The Founders push is intended for three to six months. The seeder role exists for that window — long enough to populate the map meaningfully, short enough to be a real chapter rather than a forever role. After that, the role evolves. Some seeders may become employees as the project grows. Some may step into other forms of participation. Some may simply have done the work, received their year of trailing revenue, and moved on with our gratitude.
 
 Whichever path is yours, the work you do now matters.
+
+---
+
+## Foundation building — the bigger why
+
+Canary Commons is being built as a grassroots effort. There is no corporate sponsorship behind it. There is no publicity push. The intention is to activate from the commons — from the people seeing it and contributing — rather than from a corporate takeover.
+
+Every word on this site is chosen with this in mind. The aim is to avoid corporate notice for as long as possible. Competition gets bought and closed. The larger hope of this project is to grow what is diverse, small, noble, multi-faceted, and sustainable.
+
+Diversity is the root of sustainability. The effort here is to leave the monolithic, extraction-based hierarchy behind — in words, in actions, in focus. Canary Commons is a dedication to hope.
+
+You are doing two things as a seeder. You are building the map, and you are bringing in Foundation support so there can be economic viability while Canary Commons becomes known. Both matter. Both are part of how this project becomes real enough to last.
 
 ---
 
@@ -201,10 +213,6 @@ It isn't volume-based. Quality of placement is the entire economy here. A few we
 
 It isn't permanent. The seeder role is a bridge, not a career. Three to six months of intentional work, followed by trailing compensation across the year. After that, the role evolves into whatever it becomes — for some, employment; for others, ongoing involvement; for others, a chapter completed and stepped away from with our gratitude.
 
-What seeding *is*: a chosen, time-limited, ethically-paid role in making visible what is already true.
-
-That's the whole work.
-
 ---
 
 ## The seeder ethic
@@ -236,9 +244,9 @@ When you're ready, check the box below and place your first light.
 
 The map is waiting for what you'll bring.
 
-`[ ] I've read this, and I'm ready to begin placing lights with care.`
+`☐ I've read this, and I'm ready to begin placing lights with care.`
 
-`[ Begin -> ]`
+`[ Begin → ]`
 
 ---
 
