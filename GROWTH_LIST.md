@@ -36,6 +36,17 @@ level, or maturity. Items here are not problems — they are
   down. Worth doing before month three of real data. (Migrated from
   LOOSE_ENDS where this was originally tracked.)
 
+- [ ] **Address format variation in normalization** — Some listings
+  have just a street address, others have full "address, city, state,
+  zip, country" strings. Matching works on both formats currently but
+  may want to normalize to a standardized format when the do_not_list
+  check becomes higher-stakes.
+
+- [ ] **Directional prefix handling in address normalization** —
+  "N./E./S./W." periods are preserved. "N. First St" and "N First St"
+  would not match. Consider stripping periods from directional prefixes
+  when matching becomes more sensitive.
+
 - [ ] **Founders referral URL cleanup with /[handle]/join pattern** —
   Lucia's current Founders referral link is clunky; the seeder URL
   structure (/[handle]) suggests a clean parallel pattern for

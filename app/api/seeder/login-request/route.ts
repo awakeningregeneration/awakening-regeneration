@@ -67,7 +67,8 @@ export async function POST(req: Request) {
     });
 
     // Send email
-    const loginUrl = `https://www.canarycommons.org/api/seeder/auth?token=${encodeURIComponent(token)}`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
+    const loginUrl = `${siteUrl}/api/seeder/auth?token=${encodeURIComponent(token)}`;
     const emailContent = seederLoginLinkEmail({
       name: seeder.name,
       loginUrl,

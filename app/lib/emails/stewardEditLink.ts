@@ -1,6 +1,6 @@
 import { resend, FROM_EMAIL } from "../resend";
 
-const SITE_URL = "https://www.canarycommons.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
 export async function sendStewardEditLinkEmail(options: {
   toEmail: string;

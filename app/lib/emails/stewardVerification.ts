@@ -6,7 +6,7 @@
 import { resend, FROM_EMAIL } from "../resend";
 import type { VerificationPath } from "../../../types/steward";
 
-const SITE_URL = "https://www.canarycommons.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
 export async function sendStewardVerificationEmail(options: {
   toEmail: string;

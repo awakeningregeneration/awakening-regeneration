@@ -3,9 +3,13 @@ import { createHmac } from "crypto";
 /**
  * Seeder session authentication.
  *
- * Reads and verifies the cc_seeder_session HMAC-signed cookie.
- * The cookie payload contains { seeder_id, handle, exp }.
- * Sessions last 30 days.
+ * The cc_seeder_session cookie contains an HMAC-signed JSON payload
+ * with { seeder_id, handle, exp }. Sessions last 30 days.
+ *
+ * Two entry points:
+ * - getSeederSession(req)          — for API routes (reads from Request)
+ * - getSeederSessionFromCookieValue(value) — for Server Components
+ *   (accepts the raw cookie string from next/headers cookies())
  */
 
 const SESSION_SECRET = process.env.SEEDER_SESSION_SECRET!;
@@ -15,7 +19,11 @@ export type SeederSession = {
   handle: string;
 };
 
-function verifyPayload(signed: string): SeederSession | null {
+/**
+ * Core verification: takes the raw signed cookie string,
+ * verifies HMAC signature and expiry, returns session or null.
+ */
+export function verifySeederCookie(signed: string): SeederSession | null {
   const parts = signed.split(".");
   if (parts.length !== 2) return null;
 
@@ -39,8 +47,7 @@ function verifyPayload(signed: string): SeederSession | null {
 }
 
 /**
- * Extract and verify the seeder session from the request cookie.
- * Returns null if no session or invalid/expired.
+ * For API routes: extract and verify session from a Request object.
  */
 export function getSeederSession(req: Request): SeederSession | null {
   const cookieHeader = req.headers.get("cookie") || "";
@@ -54,5 +61,16 @@ export function getSeederSession(req: Request): SeederSession | null {
   const token = cookies["cc_seeder_session"];
   if (!token) return null;
 
-  return verifyPayload(token);
+  return verifySeederCookie(token);
+}
+
+/**
+ * For Server Components: accepts the raw cookie value string
+ * (from cookies().get("cc_seeder_session")?.value).
+ */
+export function getSeederSessionFromCookieValue(
+  value: string | undefined
+): SeederSession | null {
+  if (!value) return null;
+  return verifySeederCookie(value);
 }

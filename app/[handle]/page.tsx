@@ -1,43 +1,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
-import { createHmac } from "crypto";
+import { getSeederSessionFromCookieValue } from "@/app/lib/seederAuth";
 
 /**
  * Seeder dashboard at /[handle].
  * Auth required — redirects to /[handle]/login if no valid session.
  * Phase 1 stub — Phase 2 will replace with the full dashboard.
  */
-
-const SESSION_SECRET = process.env.SEEDER_SESSION_SECRET!;
-
-type SeederSession = {
-  seeder_id: string;
-  handle: string;
-};
-
-function verifyPayload(signed: string): SeederSession | null {
-  const parts = signed.split(".");
-  if (parts.length !== 2) return null;
-
-  const [payloadB64, sig] = parts;
-  const json = Buffer.from(payloadB64, "base64url").toString();
-  const expectedSig = createHmac("sha256", SESSION_SECRET)
-    .update(json)
-    .digest("base64url");
-
-  if (sig !== expectedSig) return null;
-
-  try {
-    const payload = JSON.parse(json);
-    if (typeof payload.exp === "number" && payload.exp < Date.now() / 1000) {
-      return null;
-    }
-    return { seeder_id: payload.seeder_id, handle: payload.handle };
-  } catch {
-    return null;
-  }
-}
 
 export default async function SeederDashboardPage({
   params,
@@ -50,11 +20,7 @@ export default async function SeederDashboardPage({
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("cc_seeder_session")?.value;
 
-  if (!sessionCookie) {
-    redirect(`/${handle}/login`);
-  }
-
-  const session = verifyPayload(sessionCookie);
+  const session = getSeederSessionFromCookieValue(sessionCookie);
 
   if (!session) {
     redirect(`/${handle}/login`);

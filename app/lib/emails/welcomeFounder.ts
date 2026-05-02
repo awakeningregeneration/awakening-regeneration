@@ -8,6 +8,8 @@
 export function welcomeFounderEmail(options: {
   name?: string;
 }): { subject: string; html: string; text: string } {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
+
   const greeting = options.name
     ? `Welcome, ${options.name},`
     : "Welcome,";
@@ -29,7 +31,7 @@ Start with three.
 Not because it's a rule, but because it's enough to feel the shape of this.
 
 → Visit the map and place a point of light
-https://www.canarycommons.org/map
+${siteUrl}/map
 
 You'll see where something is missing. You can add what you know.
 
@@ -97,7 +99,7 @@ You're receiving this because you just joined Canary Commons as a Founder.`;
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
                 <tr>
                   <td align="center" style="border-radius:999px; background-color:#FFD86B;">
-                    <a href="https://www.canarycommons.org/map"
+                    <a href="${siteUrl}/map"
                        target="_blank"
                        style="display:inline-block; padding:14px 28px; color:#1a2a0e; font-weight:700; font-size:16px; text-decoration:none; border-radius:999px;">
                       &rarr; Visit the map and place a point of light
