@@ -32,21 +32,23 @@ Canary Commons exists to make the amazing visible. So it can be found. So it can
 
 It is non-extractive, non-competitive, and invitational. Listings are free. Contribution does not buy placement. The map is not a marketplace. It is a commons.
 
+Foundation Builders — Founders, for short — carry the project economically while the grassroots work fills it in. Their support sustains the platform, the people tending it, and the time required to make this real.
+
 Your work as a seeder is part of how this map becomes real.
 
 ---
 
 ## What seeding actually is
 
-Seeders are not populating a database.
+Seeders do two kinds of work. Both bring the project forward.
 
-Seeders are identifying aligned nodes and initiating first-contact circuitry.
+The first is direct invitation. People you know — friends, colleagues, people in your network — who want to support the commons as Founders, even if they don't have a business to list. Their contribution carries the project economically while the work matures. You invite them. They contribute. The commons holds because of it.
 
-The work is not just to make something visible. It is to make something visible in a way that is accurate, respectful, and easy for the business to recognize itself in.
+The second is placing aligned listings on the map. Identifying businesses, projects, and organizations already doing meaningful work, and opening first contact in a way that is accurate, respectful, and easy for the business to recognize itself in.
 
-That means the goal of seeding is not volume first. The goal is alignment first.
+Both paths are seeding. Both are how the map and the project become real.
 
-A seeded listing should feel, to the business receiving it, less like *"someone made assumptions about us"* and more like *"someone saw what we are actually doing and reflected it back accurately."*
+For the listing path: the goal is not volume first. The goal is alignment first. A seeded listing should feel, to the business receiving it, less like *"someone made assumptions about us"* and more like *"someone saw what we are actually doing and reflected it back accurately."*
 
 That is the standard.
 
@@ -68,7 +70,19 @@ Seed lightly. Seed accurately. Leave room.
 
 **First-contact initiation.** Opening the possibility for stewardship, participation, and relationship.
 
+**Direct invitation.** Bringing people you trust into Founder support — people who want to carry the work forward economically while the rest fills in around them.
+
 Because of this, seeding is not data entry. It is discernment work. Quality matters more than quantity.
+
+---
+
+## Your direct invitation link
+
+Your direct invitation link is `canarycommons.org/[your-handle]/join`. When someone clicks that link and becomes a Founder, you're credited.
+
+Use it in conversation. In emails. In a message to a friend who you think would want to be part of this. The link does its own work — it carries your attribution forward through the signup, through Stripe, into the system.
+
+Share with anyone you feel would be in alignment.
 
 ---
 
@@ -76,15 +90,15 @@ Because of this, seeding is not data entry. It is discernment work. Quality matt
 
 About the compensation structure.
 
-Seeders earn 25% recurring on monthly Founders subscriptions for twelve months when a placed listing converts into a Founder. On one-time custom contributions, seeders earn 15%.
+Seeders earn 25% recurring on monthly Founders subscriptions for twelve months. On one-time custom contributions, seeders earn 15%.
 
-The structure is intentional.
+This applies to both ways of bringing people into participation. When someone you've directly invited becomes a Founder, you're credited. When a business you've placed on the map chooses to step into Founder support, you're credited. Same structure, both paths.
 
-The work you do at the front end — finding aligned businesses, placing them carefully, doing the discernment work this orientation is asking of you — happens early. The compensation trails it across the next year. You do the work this month; you receive the rewards across the twelve months that follow. There will be a point where you are no longer working actively on it, and you will still be receiving revenue from listings you placed months earlier.
+The work you do at the front end — finding aligned businesses, placing them carefully, having the conversations that bring people in — happens early. The compensation trails it across the next year. You do the work this month; you receive the rewards across the twelve months that follow. There will be a point where you are no longer working actively on it, and you will still be receiving revenue from listings and invitations you placed months earlier.
 
-This is deliberate. It rewards heavy front-end lifting with longer-term return. It does not pay for clicks or for volume. It pays for depth — for placements that are accurate enough, considered enough, and aligned enough that the businesses you place actually want to step into Founder support.
+This is deliberate. It rewards heavy front-end lifting with longer-term return. It does not pay for clicks or for volume. It pays for depth — for placements and invitations that are accurate enough, considered enough, and aligned enough that the people you bring in actually want to step into Founder support.
 
-Your work is rewarded when the businesses you bring into visibility recognize themselves and choose to carry the project forward with their support.
+Your work is rewarded when the people and businesses you bring into visibility recognize themselves and choose to carry the project forward with their support.
 
 This is also, importantly, a bridge. The Founders push is intended for three to six months. The seeder role exists for that window — long enough to populate the map meaningfully, short enough to be a real chapter rather than a forever role. After that, the role evolves. Some seeders may become employees as the project grows. Some may step into other forms of participation. Some may simply have done the work, received their year of trailing revenue, and moved on with our gratitude.
 
@@ -177,6 +191,8 @@ The three automated emails the system sends to each business you place are the f
 
 The system handles outreach to businesses you don't have a direct line to. Email one goes out the moment you place a listing. Email two follows seven to ten days later. Email three follows three to four weeks after that. If the business claims, removes, or unsubscribes at any point, the sequence stops. The cadence is gentle, the language is unpressured, and each email carries the same three doors: claim and refine your listing, share your story, or help carry the commons.
 
+Read each one before you place your first listing — these go out in your name.
+
 But automated emails do what automated emails do. They reach the inbox. They respect the relationship. They cannot substitute for personal contact.
 
 If you know the business owner — if you have a phone number, if you've shaken their hand, if there's a person behind the listing you can actually reach — your personal outreach is what turns a placement into a relationship. A short message saying *"I added your business to a project I think you'd want to know about, here's the link, no pressure"* lands very differently than an automated email.
@@ -195,7 +211,7 @@ When you log in to your seeder page at `canarycommons.org/yourhandle`, you'll fi
 
 **The cross-seeder view.** A shared map of where lights are being placed across the country. Alphabetized by county. Every seeder's placements visible to every other seeder. This is here on purpose. It lets you see where coverage is dense and where it's thin, so you can focus your work where it'll matter most. It also reduces redundancy — you can see if another seeder has already placed a business you were considering. The visibility is intentional. We work better when we can see each other.
 
-**Your credits.** A quiet panel showing how many of your placements have become Founders and what your current month's payout looks like. Not the focus of the page, but available when you want to look.
+**Your credits.** A quiet panel showing how many of your placements and direct invitations have become Founders and what your current month's payout looks like. Not the focus of the page, but available when you want to look.
 
 The dashboard is yours. It is private. The cross-seeder view is shared. Both are tools to support the work, not measure it.
 
@@ -205,11 +221,11 @@ The dashboard is yours. It is private. The cross-seeder view is shared. Both are
 
 What seeding *isn't*.
 
-It isn't sales. You're not pitching businesses. You're identifying alignment that's already there and making it visible.
+It isn't sales. You're not pitching businesses or recruiting people. You're identifying alignment that's already there and making it visible.
 
-It isn't recruitment into a downline. The structure is single-layer. You earn from the businesses you personally place. There is no second tier, no team-building, no pyramid. Just the relationship between you and the businesses whose work you saw.
+It isn't recruitment into a downline. The structure is single-layer. You earn from the businesses you personally place and the people you personally invite. There is no second tier, no team-building, no pyramid. Just the relationship between you and what you bring forward.
 
-It isn't volume-based. Quality of placement is the entire economy here. A few well-chosen, well-described listings are worth more than dozens of careless ones — both ethically and financially. The compensation structure rewards depth.
+It isn't volume-based. Quality is the entire economy here. A few well-chosen, well-described listings and a few aligned invitations are worth more than dozens of careless ones — both ethically and financially. The compensation structure rewards depth.
 
 It isn't permanent. The seeder role is a bridge, not a career. Three to six months of intentional work, followed by trailing compensation across the year. After that, the role evolves into whatever it becomes — for some, employment; for others, ongoing involvement; for others, a chapter completed and stepped away from with our gratitude.
 
@@ -219,7 +235,7 @@ It isn't permanent. The seeder role is a bridge, not a career. Three to six mont
 
 Seeders are not assigning identity.
 
-They are creating the lightest accurate public signal that allows a business to recognize itself and choose whether to step further in.
+They are creating the lightest accurate public signal that allows a business to recognize itself, and inviting people who are already aligned to step further in.
 
 That means:
 
@@ -231,6 +247,8 @@ That means:
 Reflect what is already publicly true.
 
 Leave room for the business to define itself.
+
+Invite the people who are ready.
 
 That is the work.
 
