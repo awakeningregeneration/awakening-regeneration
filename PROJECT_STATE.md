@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: April 30, 2026*
+*Last updated: May 2, 2026*
 
 ---
 
@@ -36,6 +36,9 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 2** — Stage B complete: orientation page at /[handle]/start with morning-sky aesthetic, ReactMarkdown rendering with custom typography, three accessible email modals (Recognition, Visibility, Stewardship) with full outreach copy, copy-on-click direct invitation link, completion gate (must open all three emails + check box), dashboard orientation redirect, /[handle]/join clean referral URL redirect. Dependencies: react-markdown 10.1.0, remark-gfm 4.0.1
+- **May 2** — Stage A complete: do_not_list consent schema (do_not_list, do_not_list_reason, do_not_list_at, normalized_name, normalized_address) with normalize_listing_fields() trigger and backfill; NEXT_PUBLIC_SITE_URL env var replaces hardcoded URLs in 4 email templates; verifyPayload refactored into shared seederAuth.ts (verifySeederCookie + getSeederSessionFromCookieValue)
+- **May 2** — SEEDER_ORIENTATION_DRAFT.md revised with dual-paths reframing: direct invitation + listing placement treated as equal seeder work paths; Foundation Builders introduction; /[handle]/join direct invitation link section added
 - **Apr 30** — Seeder system Phase 1 complete: schema additions to listings (source, placed_by_seeder_id, outreach_status, outreach_started_at, last_outreach_at, removal_token) and seeders (url_handle, bio, phone, orientation_completed_at); new tables seeder_listing_credits and seeder_login_tokens; RLS enabled on seeders, seeder_listing_credits, seeder_login_tokens
 - **Apr 30** — Seeder magic-link auth: POST /api/seeder/login-request sends 30-min token via Resend; GET /api/seeder/auth validates token, sets HMAC-signed 30-day session cookie (cc_seeder_session); reuses stewardshipTokens.ts for token generation; new SEEDER_SESSION_SECRET env var
 - **Apr 30** — Seeder URL routing: app/[handle]/layout.tsx validates handle exists (404 if not); app/[handle]/login/page.tsx public login form; app/[handle]/page.tsx auth-gated dashboard stub; Next.js matches specific routes before [handle] so existing routes unaffected
@@ -94,19 +97,22 @@ Monthly cycle, automated end-to-end:
 
 ## Seeder system — phased build plan
 
-**Phase 1 — Foundation (complete, Apr 30)**
-Schema additions (listings attribution, seeders profile fields, seeder_listing_credits, seeder_login_tokens). Magic-link auth with HMAC-signed 30-day session cookie. Dynamic /[handle]/ routing with handle validation. Dashboard stub.
+**Phase 1 — Foundation** ✓ COMPLETE (Apr 30)
+Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 
-**Phase 2 — Seeder dashboard + listing placement (pending)**
-Orientation flow (/[handle]/start). Listing placement form. Dashboard showing placed listings, outreach status, credits. QR code generation.
+**Phase 2+3 — Combined: Seeder surfaces + outreach cadence**
+- Stage A ✓ COMPLETE (May 2): consent schema (do_not_list fields, normalized fields, normalization trigger), base URL env var extraction, verifyPayload refactor
+- Stage B ✓ COMPLETE (May 2): orientation page with morning-sky aesthetic and email modals, completion gate, /[handle]/join redirect, dashboard orientation gating
+- Stage C (next): placement form at /[handle]/place with do_not_list check
+- Stage D: real dashboard with placements list replacing stub
+- Stage E: cross-seeder view at /[handle]/map-view
+- Stage F: outreach cadence — scheduled function for emails 2 and 3, bounce handling
+- Stage G: removal flows — token-based soft removal, steward hard removal with reason
 
-**Phase 3 — Outreach email sequence (pending)**
-3-email cadence for seeder-placed listings (email 1 at placement, email 2 at 2 weeks, email 3 at 4 weeks). Netlify scheduled function for cadence. Removal/unsubscribe token handling. Outreach status tracking.
+**Phase 4 — Attribution + Founder credit (future)**
+Stripe webhook extension, "thank the seeder" gesture, seeder_listing_credits population.
 
-**Phase 4 — Attribution + Founder credit (pending)**
-3-month attribution window: if listing owner becomes a Founder within 90 days of claiming a seeder-placed listing, seeder gets credit. Stripe webhook extension. seeder_listing_credits population.
-
-**Phase 5 — Payout + reporting (pending)**
+**Phase 5 — Payout + reporting (future)**
 Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ---
