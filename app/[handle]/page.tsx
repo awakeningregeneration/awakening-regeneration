@@ -2,10 +2,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSessionFromCookieValue } from "@/app/lib/seederAuth";
+import Link from "next/link";
 
 /**
  * Seeder dashboard at /[handle].
  * Auth required — redirects to /[handle]/login if no valid session.
+ * Orientation required — redirects to /[handle]/start if not completed.
  * Phase 1 stub — Phase 2 will replace with the full dashboard.
  */
 
@@ -19,26 +21,33 @@ export default async function SeederDashboardPage({
   // Read session cookie
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("cc_seeder_session")?.value;
-
   const session = getSeederSessionFromCookieValue(sessionCookie);
 
   if (!session) {
     redirect(`/${handle}/login`);
   }
 
-  // If logged in as a different seeder, redirect to their dashboard
   if (session.handle !== handle) {
     redirect(`/${session.handle}`);
   }
 
-  // Look up seeder name for the greeting
+  // Look up seeder
   const { data: seeder } = await supabaseAdmin
     .from("seeders")
-    .select("name")
+    .select("name, orientation_completed_at")
     .eq("id", session.seeder_id)
     .single();
 
-  const name = seeder?.name || "Seeder";
+  if (!seeder) {
+    redirect(`/${handle}/login`);
+  }
+
+  // Orientation gate
+  if (!seeder.orientation_completed_at) {
+    redirect(`/${handle}/start`);
+  }
+
+  const name = seeder.name || "Seeder";
 
   return (
     <main
@@ -83,6 +92,21 @@ export default async function SeederDashboardPage({
         >
           Dashboard coming in Phase 2.
         </p>
+
+        {/* Revisit orientation link */}
+        <Link
+          href={`/${handle}/start`}
+          style={{
+            display: "inline-block",
+            marginTop: 32,
+            fontSize: 13,
+            color: "rgba(148,196,236,0.5)",
+            textDecoration: "none",
+            transition: "color 0.15s",
+          }}
+        >
+          Revisit orientation
+        </Link>
       </div>
     </main>
   );
