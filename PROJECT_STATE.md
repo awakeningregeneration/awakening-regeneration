@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: May 2, 2026*
+*Last updated: May 3, 2026*
 
 ---
 
@@ -36,6 +36,10 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 3** — Stage C complete: placement form at /[handle]/place with morning-sky aesthetic, three-view flow (form/override/success), 8-field form (business name, description, category, practice pills, city+state, address, website, steward email), do_not_list override with database integrity (original opt-out preserved, new placement attributed with do_not_list_override flag), Email 1 fires through Resend on placement when steward_email provided
+- **May 3** — Placement API: POST /api/seeder/place-listing with server-side validation, do_not_list check via normalized name matching (same algorithm as DB trigger), Mapbox geocoding with auto-county extraction from response context, removal token generation, Email 1 send
+- **May 3** — Email 1 template: app/lib/emails/seederOutreach1Recognition.ts — Recognition + Claim email with three gold-pill CTAs (Claim/View Listing, Help Carry the Commons, Remove Listing) and triple ornaments. Tested end-to-end through Resend.
+- **May 3** — Schema: do_not_list_override boolean column added to listings (default false, set true on conscious override)
 - **May 2** — Stage B complete: orientation page at /[handle]/start with morning-sky aesthetic, ReactMarkdown rendering with custom typography, three accessible email modals (Recognition, Visibility, Stewardship) with full outreach copy, copy-on-click direct invitation link, completion gate (must open all three emails + check box), dashboard orientation redirect, /[handle]/join clean referral URL redirect. Dependencies: react-markdown 10.1.0, remark-gfm 4.0.1
 - **May 2** — Stage A complete: do_not_list consent schema (do_not_list, do_not_list_reason, do_not_list_at, normalized_name, normalized_address) with normalize_listing_fields() trigger and backfill; NEXT_PUBLIC_SITE_URL env var replaces hardcoded URLs in 4 email templates; verifyPayload refactored into shared seederAuth.ts (verifySeederCookie + getSeederSessionFromCookieValue)
 - **May 2** — SEEDER_ORIENTATION_DRAFT.md revised with dual-paths reframing: direct invitation + listing placement treated as equal seeder work paths; Foundation Builders introduction; /[handle]/join direct invitation link section added
@@ -103,8 +107,8 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 **Phase 2+3 — Combined: Seeder surfaces + outreach cadence**
 - Stage A ✓ COMPLETE (May 2): consent schema (do_not_list fields, normalized fields, normalization trigger), base URL env var extraction, verifyPayload refactor
 - Stage B ✓ COMPLETE (May 2): orientation page with morning-sky aesthetic and email modals, completion gate, /[handle]/join redirect, dashboard orientation gating
-- Stage C (next): placement form at /[handle]/place with do_not_list check
-- Stage D: real dashboard with placements list replacing stub
+- Stage C ✓ COMPLETE (May 3): placement form with do_not_list override flow, Email 1 fires on placement, auto-county geocoding, removal token generation
+- Stage D (next): real dashboard with placements list replacing stub
 - Stage E: cross-seeder view at /[handle]/map-view
 - Stage F: outreach cadence — scheduled function for emails 2 and 3, bounce handling
 - Stage G: removal flows — token-based soft removal, steward hard removal with reason
