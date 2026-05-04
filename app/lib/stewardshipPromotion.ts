@@ -14,6 +14,8 @@
  */
 
 import { supabaseAdmin } from "./supabaseAdmin";
+import { resend, FROM_EMAIL } from "./resend";
+import { stewardClaimConfirmationEmail } from "./emails/stewardClaimConfirmation";
 
 export async function promoteIfGraceExpired(
   listingId: string
@@ -54,12 +56,13 @@ export async function promoteIfGraceExpired(
         .update({ status: "active", activated_at: now })
         .eq("id", steward.id);
 
-      // Link to listing only if no steward is currently set
+      // Link to listing and mark outreach as claimed (only if no steward is currently set)
       await supabaseAdmin
         .from("listings")
         .update({
           steward_id: steward.id,
           steward_email: steward.email,
+          outreach_status: "claimed",
         })
         .eq("id", listingId)
         .is("steward_id", null);
@@ -67,6 +70,37 @@ export async function promoteIfGraceExpired(
       console.log(
         `Steward auto-promoted: ${steward.email} → listing ${listingId}`
       );
+
+      // Send claim confirmation email (non-blocking)
+      try {
+        const { data: listing } = await supabaseAdmin
+          .from("listings")
+          .select("title")
+          .eq("id", listingId)
+          .single();
+
+        const { data: stewardRecord } = await supabaseAdmin
+          .from("stewards")
+          .select("display_name")
+          .eq("id", steward.id)
+          .single();
+
+        const emailContent = stewardClaimConfirmationEmail({
+          stewardName: stewardRecord?.display_name || "",
+          listingTitle: listing?.title || "your listing",
+          listingId,
+        });
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: steward.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+      } catch (emailErr) {
+        console.error("Steward claim confirmation email failed (grace promotion):", emailErr);
+      }
 
       // Only promote one steward per listing (the earliest by declared_at)
       break;

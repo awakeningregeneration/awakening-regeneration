@@ -5,6 +5,7 @@
 
 import { resend, FROM_EMAIL } from "../resend";
 import type { VerificationPath } from "../../../types/steward";
+import { getEmailHeader } from "./components/emailHeader";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
@@ -61,6 +62,8 @@ If you didn't claim this listing, you can ignore this email — no action will b
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px; width:100%;">
           <tr>
             <td style="font-size:16px; line-height:1.7; color:#1a2332;">
+
+              ${getEmailHeader()}
 
               <p style="margin:0 0 18px;">${greeting}</p>
 

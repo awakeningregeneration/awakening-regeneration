@@ -5,6 +5,8 @@
  * Content matches EmailModals.tsx → Email1Recognition() exactly.
  */
 
+import { getEmailHeader } from "./components/emailHeader";
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
@@ -24,6 +26,7 @@ export function seederOutreach1Email(options: {
 
   const html = `
 <div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#1a2a3a;padding:32px 24px;">
+  ${getEmailHeader()}
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hello ${businessName},</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">

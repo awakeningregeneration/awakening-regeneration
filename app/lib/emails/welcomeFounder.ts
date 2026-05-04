@@ -5,6 +5,8 @@
  * The HTML is a plain letter — no banners, no logos, no social icons.
  */
 
+import { getEmailHeader } from "./components/emailHeader";
+
 export function welcomeFounderEmail(options: {
   name?: string;
 }): { subject: string; html: string; text: string } {
@@ -69,6 +71,8 @@ You're receiving this because you just joined Canary Commons as a Founder.`;
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px; width:100%;">
           <tr>
             <td style="font-size:16px; line-height:1.7; color:#1a2332;">
+
+              ${getEmailHeader()}
 
               <p style="margin:0 0 18px;">${greeting}</p>
 

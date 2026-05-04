@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { isTokenExpired } from "@/app/lib/stewardshipTokens";
+import { resend, FROM_EMAIL } from "@/app/lib/resend";
+import { stewardClaimConfirmationEmail } from "@/app/lib/emails/stewardClaimConfirmation";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -70,14 +72,40 @@ export async function GET(request: Request) {
         })
         .eq("id", steward.id);
 
-      // Link the steward to the listing
+      // Link the steward to the listing and mark outreach as claimed
       await supabaseAdmin
         .from("listings")
         .update({
           steward_id: steward.id,
           steward_email: steward.email,
+          outreach_status: "claimed",
         })
         .eq("id", steward.listing_id);
+
+      // Send claim confirmation email (non-blocking)
+      try {
+        const { data: listing } = await supabaseAdmin
+          .from("listings")
+          .select("title")
+          .eq("id", steward.listing_id)
+          .single();
+
+        const emailContent = stewardClaimConfirmationEmail({
+          stewardName: steward.display_name || "",
+          listingTitle: listing?.title || "your listing",
+          listingId: steward.listing_id,
+        });
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: steward.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+      } catch (emailErr) {
+        console.error("Steward claim confirmation email failed:", emailErr);
+      }
     } else {
       // Declaration path — verified but waiting grace period
       const gracePeriodEnd = new Date(
@@ -100,7 +128,8 @@ export async function GET(request: Request) {
         .eq("id", claim.id);
 
       // Do NOT set listings.steward_id yet — that happens
-      // when the grace period ends (Step 6 cron/scheduled fn)
+      // when the grace period ends (inline via promoteIfGraceExpired).
+      // outreach_status and confirmation email also fire at that point.
     }
 
     // ── 5. Redirect to success page ────────────────────────

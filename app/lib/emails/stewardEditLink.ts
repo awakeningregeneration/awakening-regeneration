@@ -1,4 +1,5 @@
 import { resend, FROM_EMAIL } from "../resend";
+import { getEmailHeader } from "./components/emailHeader";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
@@ -33,6 +34,7 @@ Ren at Canary Commons`;
     <tr><td align="center" style="padding:40px 20px;">
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px; width:100%;">
         <tr><td style="font-size:16px; line-height:1.7; color:#1a2332;">
+          ${getEmailHeader()}
           <p style="margin:0 0 18px;">${greeting}</p>
           <p style="margin:0 0 18px;">Here's your access link to edit <strong>${listingName}</strong> on Canary Commons.</p>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
