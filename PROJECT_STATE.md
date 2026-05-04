@@ -36,6 +36,8 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 3** — Stage F-prep complete: shared email header helper (centered 80px logo across all user-facing templates), steward claim confirmation email ("You've claimed [Business Name]") firing on both domain-match auto-approve and grace-period activation, outreach_status transition to 'claimed' wired into both stewardship paths. No Step 6 cron prerequisite — promoteIfGraceExpired handles the grace path inline.
+- **May 3** — Stage D complete: real seeder dashboard at /[handle] replacing Phase 1 stub. Morning-sky aesthetic at 820px, centered "Place a new light" CTA, placements list with 9 status badge states (forward-compatible for Stage G soft opt-out), status summary (placed/in outreach/claimed), recognition credits panel placeholder, copy-on-click direct invitation link in utility register, "Revisit orientation" footer. OPT_OUT_LAYERS.md canonical reference doc added to repo.
 - **May 3** — Stage C complete: placement form at /[handle]/place with morning-sky aesthetic, three-view flow (form/override/success), 8-field form (business name, description, category, practice pills, city+state, address, website, steward email), do_not_list override with database integrity (original opt-out preserved, new placement attributed with do_not_list_override flag), Email 1 fires through Resend on placement when steward_email provided
 - **May 3** — Placement API: POST /api/seeder/place-listing with server-side validation, do_not_list check via normalized name matching (same algorithm as DB trigger), Mapbox geocoding with auto-county extraction from response context, removal token generation, Email 1 send
 - **May 3** — Email 1 template: app/lib/emails/seederOutreach1Recognition.ts — Recognition + Claim email with three gold-pill CTAs (Claim/View Listing, Help Carry the Commons, Remove Listing) and triple ornaments. Tested end-to-end through Resend.
@@ -108,7 +110,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage A ✓ COMPLETE (May 2): consent schema (do_not_list fields, normalized fields, normalization trigger), base URL env var extraction, verifyPayload refactor
 - Stage B ✓ COMPLETE (May 2): orientation page with morning-sky aesthetic and email modals, completion gate, /[handle]/join redirect, dashboard orientation gating
 - Stage C ✓ COMPLETE (May 3): placement form with do_not_list override flow, Email 1 fires on placement, auto-county geocoding, removal token generation
-- Stage D (next): real dashboard with placements list replacing stub
+- Stage D ✓ COMPLETE (May 3): real dashboard with placements list replacing stub
 - Stage D.5: seeder welcome email — fires when a seeder row is created. Welcomes them by name, includes their dashboard link (canarycommons.org/[handle]) and their direct invitation link (canarycommons.org/[handle]/join) with brief explanation of each. Email template at app/lib/emails/seederWelcome.ts. Trigger mechanism TBD (database trigger calling Resend, or manual send via admin action — decide at Stage D.5 design time).
 - Stage E: cross-seeder view at /[handle]/map-view
 - Stage F-prep ✓ COMPLETE: shared email header (logo across all user-facing templates), steward claim confirmation email, outreach_status transition to 'claimed' wired into both stewardship paths (domain-match auto-approve in verify route + grace-period activation in promoteIfGraceExpired). Both paths fully wired — no Step 6 cron prerequisite.

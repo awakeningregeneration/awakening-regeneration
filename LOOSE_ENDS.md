@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 1, 2026*
+*Last updated: May 3, 2026*
 
 ---
 
@@ -15,4 +15,4 @@
 - [ ] Add BEFORE UPDATE trigger on synonym_groups to auto-bump updated_at when terms array is edited directly in Supabase Studio (current trigger handles this for the "grouped" approval path, but not for manual edits to existing groups)
 - [ ] Move SUPABASE_PROJECT_REF from hardcoded value in netlify/functions/synonym-digest.mts to an env var. Currently fine because there's one Supabase project; revisit if staging is added.
 - [ ] Verify Supabase Studio deep-link filter syntax (?filter=status%3Deq%3Apending) actually lands on a filtered view of pending candidates after first cron run on May 1. If not, adjust URL format.
-- [ ] Magic-link round-trip test — Phase 1 deployed Apr 30 verified at page-load level (login form renders correctly at /lucia/login), but the full round-trip (submit form -> email arrives -> click link -> land on dashboard with valid session) is pending Lucia's availability to test on her real account.
+- [ ] Magic-link round-trip test — Phase 1 deployed Apr 30. Cookie-signing mechanism confirmed working via dev-endpoint testing (Stages B, C, D all exercised the signed session cookie end-to-end). The production email delivery path (submit form -> Resend sends email -> click link -> land on dashboard) is the remaining untested leg, pending Lucia's availability to test on her real account.
