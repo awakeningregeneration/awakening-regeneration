@@ -47,6 +47,13 @@ level, or maturity. Items here are not problems — they are
   would not match. Consider stripping periods from directional prefixes
   when matching becomes more sensitive.
 
+- [ ] **Public-facing override flow for hard opt-outs** — Mirror
+  the seeder Stage C override view on the public submit form
+  when do_not_list_level = 'universal'. Same copy pattern,
+  same reason-required override, writes do_not_list_override
+  on the new listing. Build alongside Stage G's introduction
+  of do_not_list_level. See OPT_OUT_LAYERS.md for full model.
+
 - [ ] **Founders referral URL cleanup with /[handle]/join pattern** —
   Lucia's current Founders referral link is clunky; the seeder URL
   structure (/[handle]) suggests a clean parallel pattern for

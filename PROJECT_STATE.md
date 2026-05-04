@@ -109,6 +109,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage B ✓ COMPLETE (May 2): orientation page with morning-sky aesthetic and email modals, completion gate, /[handle]/join redirect, dashboard orientation gating
 - Stage C ✓ COMPLETE (May 3): placement form with do_not_list override flow, Email 1 fires on placement, auto-county geocoding, removal token generation
 - Stage D (next): real dashboard with placements list replacing stub
+- Stage D.5: seeder welcome email — fires when a seeder row is created. Welcomes them by name, includes their dashboard link (canarycommons.org/[handle]) and their direct invitation link (canarycommons.org/[handle]/join) with brief explanation of each. Email template at app/lib/emails/seederWelcome.ts. Trigger mechanism TBD (database trigger calling Resend, or manual send via admin action — decide at Stage D.5 design time).
 - Stage E: cross-seeder view at /[handle]/map-view
 - Stage F: outreach cadence — scheduled function for emails 2 and 3, bounce handling
 - Stage G: removal flows — token-based soft removal, steward hard removal with reason
