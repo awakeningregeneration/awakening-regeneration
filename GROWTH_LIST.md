@@ -54,6 +54,14 @@ level, or maturity. Items here are not problems — they are
   on the new listing. Build alongside Stage G's introduction
   of do_not_list_level. See OPT_OUT_LAYERS.md for full model.
 
+- [ ] **Retroactive outreach for pre-system listings** — Listings
+  placed before the seeder outreach system existed have no
+  placed_by_seeder_id and don't get caught up in the cron by
+  design. When time allows, audit existing listings and decide
+  which (if any) should be retroactively assigned a seeder and
+  entered into the outreach cadence. Most efficiently handled by
+  Lucia and Ren walking through their own placements by hand.
+
 - [ ] **Founders referral URL cleanup with /[handle]/join pattern** —
   Lucia's current Founders referral link is clunky; the seeder URL
   structure (/[handle]) suggests a clean parallel pattern for

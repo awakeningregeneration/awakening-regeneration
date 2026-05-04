@@ -52,7 +52,7 @@ export default async function SeederDashboardPage({
   const { data: placements } = await supabaseAdmin
     .from("listings")
     .select(
-      "id, title, city, state, outreach_status, steward_email, created_at, status"
+      "id, title, city, state, outreach_status, steward_email, created_at, status, bounce_info"
     )
     .eq("placed_by_seeder_id", session.seeder_id)
     .order("created_at", { ascending: false });

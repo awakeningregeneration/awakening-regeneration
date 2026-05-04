@@ -228,9 +228,11 @@ export function Email2Visibility() {
 
       <p style={bodyText}>
         Thank you for all you are doing to inhabit the planet and community in a
-        thoughtful way,
-        <br />
-        Canary Commons
+        thoughtful way.
+      </p>
+
+      <p style={bodyText}>
+        &mdash; Canary Commons
       </p>
 
       <p style={footer}>

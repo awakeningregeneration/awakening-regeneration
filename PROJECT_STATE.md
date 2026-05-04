@@ -36,6 +36,7 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 4** — Stage F complete: outreach cadence with daily cron (6am Pacific) firing Email 2 at 7 days and Email 3 at 14 days after previous email. Email templates lifted from orientation modal previews. Resend webhook route for bounce/complaint handling with svix signature verification. Dashboard bounce info inline panel with humanized bounce reasons. bounce_info TEXT column added to listings. Throttled at 50 emails per type per cron run.
 - **May 4** — Stage D.5 complete: seeder welcome email template (seederWelcome.ts) with dashboard CTA and direct invitation link. Manual admin endpoint (POST /api/admin/seeders/welcome) with Bearer ADMIN_SECRET auth, duplicate guard via welcomed_at, send-before-mark pattern. Migration: welcomed_at TIMESTAMPTZ added to seeders table.
 - **May 3** — Stage F-prep complete: shared email header helper (centered 80px logo across all user-facing templates), steward claim confirmation email ("You've claimed [Business Name]") firing on both domain-match auto-approve and grace-period activation, outreach_status transition to 'claimed' wired into both stewardship paths. No Step 6 cron prerequisite — promoteIfGraceExpired handles the grace path inline.
 - **May 3** — Stage D complete: real seeder dashboard at /[handle] replacing Phase 1 stub. Morning-sky aesthetic at 820px, centered "Place a new light" CTA, placements list with 9 status badge states (forward-compatible for Stage G soft opt-out), status summary (placed/in outreach/claimed), recognition credits panel placeholder, copy-on-click direct invitation link in utility register, "Revisit orientation" footer. OPT_OUT_LAYERS.md canonical reference doc added to repo.
@@ -115,7 +116,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage D.5 ✓ COMPLETE (May 4): seeder welcome email via manual admin endpoint. Ren fires POST /api/admin/seeders/welcome with Bearer auth when ready to onboard. Template at app/lib/emails/seederWelcome.ts. welcomed_at column tracks delivery.
 - Stage E: cross-seeder view at /[handle]/map-view
 - Stage F-prep ✓ COMPLETE: shared email header (logo across all user-facing templates), steward claim confirmation email, outreach_status transition to 'claimed' wired into both stewardship paths (domain-match auto-approve in verify route + grace-period activation in promoteIfGraceExpired). Both paths fully wired — no Step 6 cron prerequisite.
-- Stage F: outreach cadence — scheduled function for emails 2 and 3, bounce handling
+- Stage F ✓ COMPLETE (May 4): outreach cadence — daily cron for emails 2 and 3, Resend webhook for bounce/complaint handling, dashboard bounce info panel
 - Stage G: removal flows — token-based soft removal, steward hard removal with reason
 
 **Phase 4 — Attribution + Founder credit (future)**

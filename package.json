@@ -18,7 +18,8 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "resend": "^6.10.0",
-    "stripe": "^22.0.2"
+    "stripe": "^22.0.2",
+    "svix": "^1.92.2"
   },
   "devDependencies": {
     "@netlify/functions": "^5.2.0",

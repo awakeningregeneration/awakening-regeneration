@@ -13,6 +13,7 @@ type Placement = {
   steward_email: string | null;
   created_at: string;
   status: string | null;
+  bounce_info: string | null;
   // Stage G will add: do_not_list_level: string | null;
 };
 
@@ -96,6 +97,18 @@ function getStatusBadge(
   }
 }
 
+function humanizeBounceInfo(info: string | null): string {
+  if (!info) return "The outreach email could not be delivered.";
+  if (info.includes("complained") || info.includes("spam"))
+    return "The recipient marked this email as spam.";
+  if (info.includes("does not exist") || info.includes("not found"))
+    return "The email address doesn't appear to exist.";
+  if (info.includes("full") || info.includes("over quota"))
+    return "The recipient's mailbox is full.";
+  const msg = info.replace(/^email\.(bounced|complained):\s*/, "");
+  return msg || "The outreach email could not be delivered.";
+}
+
 export default function DashboardClient({
   handle,
   seederName,
@@ -105,6 +118,7 @@ export default function DashboardClient({
 }: Props) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [expandedBounceId, setExpandedBounceId] = useState<string | null>(null);
 
   // Suppress unused variable — referralCode reserved for future use
   void referralCode;
@@ -332,85 +346,179 @@ export default function DashboardClient({
                     "en-US",
                     { month: "short", day: "numeric", year: "numeric" }
                   );
+                  const isBounced = p.outreach_status === "bounced";
 
                   return (
-                    <div
-                      key={p.id}
-                      onClick={() => router.push(`/edit/${p.id}`)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        padding: "12px 16px",
-                        borderRadius: 12,
-                        border: "1px solid rgba(100,150,220,0.15)",
-                        background: "rgba(255,255,255,0.5)",
-                        cursor: "pointer",
-                        transition: "background 0.15s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background =
-                          "rgba(255,255,255,0.75)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.background =
-                          "rgba(255,255,255,0.5)";
-                      }}
-                    >
-                      {/* Title + location */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontWeight: 650,
-                            color: "#0d2a4a",
-                            fontSize: "0.95rem",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {p.title}
-                        </div>
-                        {location && (
+                    <div key={p.id}>
+                      <div
+                        onClick={() => {
+                          if (isBounced) {
+                            setExpandedBounceId(
+                              expandedBounceId === p.id ? null : p.id
+                            );
+                          } else {
+                            router.push(`/edit/${p.id}`);
+                          }
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "12px 16px",
+                          borderRadius:
+                            expandedBounceId === p.id
+                              ? "12px 12px 0 0"
+                              : 12,
+                          border: "1px solid rgba(100,150,220,0.15)",
+                          background: "rgba(255,255,255,0.5)",
+                          cursor: "pointer",
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.background =
+                            "rgba(255,255,255,0.75)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.background =
+                            "rgba(255,255,255,0.5)";
+                        }}
+                      >
+                        {/* Title + location */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: "0.82rem",
-                              color: "#6b7c94",
-                              marginTop: 2,
+                              fontWeight: 650,
+                              color: "#0d2a4a",
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {location}
+                            {p.title}
                           </div>
-                        )}
+                          {location && (
+                            <div
+                              style={{
+                                fontSize: "0.82rem",
+                                color: "#6b7c94",
+                                marginTop: 2,
+                              }}
+                            >
+                              {location}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Status badge */}
+                        <div
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background: badge.color,
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            color: "#0d2a4a",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {badge.label}
+                        </div>
+
+                        {/* Date */}
+                        <div
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "#8a9ab0",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {date}
+                        </div>
                       </div>
 
-                      {/* Status badge */}
-                      <div
-                        style={{
-                          padding: "4px 10px",
-                          borderRadius: 999,
-                          background: badge.color,
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          color: "#0d2a4a",
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {badge.label}
-                      </div>
-
-                      {/* Date */}
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "#8a9ab0",
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {date}
-                      </div>
+                      {/* Bounce info inline panel */}
+                      {expandedBounceId === p.id && isBounced && (
+                        <div
+                          style={{
+                            padding: "14px 16px",
+                            marginTop: -1,
+                            marginBottom: 8,
+                            borderRadius: "0 0 12px 12px",
+                            border: "1px solid rgba(200,120,120,0.2)",
+                            borderTop: "none",
+                            background: "rgba(255,245,245,0.5)",
+                            fontSize: "0.88rem",
+                            lineHeight: 1.6,
+                            color: "#2a3a4a",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: 650,
+                              color: "#0d2a4a",
+                              marginBottom: 8,
+                            }}
+                          >
+                            This email bounced
+                          </div>
+                          <p style={{ margin: "0 0 8px", color: "#6b7c94" }}>
+                            {humanizeBounceInfo(p.bounce_info)}
+                          </p>
+                          <p style={{ margin: "0 0 14px" }}>
+                            This email didn&apos;t reach who you intended. If
+                            you can find another way to contact this business,
+                            you might try again with a different address. If
+                            not, this listing stays exactly where it is —
+                            visible on the map, just without active outreach.
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 12,
+                              alignItems: "center",
+                            }}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/edit/${p.id}`);
+                              }}
+                              style={{
+                                padding: "8px 18px",
+                                borderRadius: 999,
+                                border: "none",
+                                background: "#FFD86B",
+                                color: "#1a2a0e",
+                                fontWeight: 700,
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              View listing
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedBounceId(null);
+                              }}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#6b7c94",
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                textUnderlineOffset: 2,
+                              }}
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
