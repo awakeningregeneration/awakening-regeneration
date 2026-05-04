@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: May 4, 2026*
+*Last updated: May 4, 2026 (evening)*
 
 ---
 
@@ -36,6 +36,7 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 4** — Stage E complete: cross-seeder map view at /[handle]/map-view. State/county dropdowns derived dynamically from existing placements. Alphabetical listing list with category, address, seeder name, date, and status badge. Privacy boundary enforced — seeder names visible for coordination, steward emails never exposed. Empty state links to placement form. Dashboard link added in utility shelf. Shipped after Stage F because F was time-sensitive (outreach cadence blocked onboarding); E is a coordination tool that didn't block the pipeline.
 - **May 4** — Stage F complete: outreach cadence with daily cron (6am Pacific) firing Email 2 at 7 days and Email 3 at 14 days after previous email. Email templates lifted from orientation modal previews. Resend webhook route for bounce/complaint handling with svix signature verification. Dashboard bounce info inline panel with humanized bounce reasons. bounce_info TEXT column added to listings. Throttled at 50 emails per type per cron run.
 - **May 4** — Stage D.5 complete: seeder welcome email template (seederWelcome.ts) with dashboard CTA and direct invitation link. Manual admin endpoint (POST /api/admin/seeders/welcome) with Bearer ADMIN_SECRET auth, duplicate guard via welcomed_at, send-before-mark pattern. Migration: welcomed_at TIMESTAMPTZ added to seeders table.
 - **May 3** — Stage F-prep complete: shared email header helper (centered 80px logo across all user-facing templates), steward claim confirmation email ("You've claimed [Business Name]") firing on both domain-match auto-approve and grace-period activation, outreach_status transition to 'claimed' wired into both stewardship paths. No Step 6 cron prerequisite — promoteIfGraceExpired handles the grace path inline.
@@ -114,7 +115,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage C ✓ COMPLETE (May 3): placement form with do_not_list override flow, Email 1 fires on placement, auto-county geocoding, removal token generation
 - Stage D ✓ COMPLETE (May 3): real dashboard with placements list replacing stub
 - Stage D.5 ✓ COMPLETE (May 4): seeder welcome email via manual admin endpoint. Ren fires POST /api/admin/seeders/welcome with Bearer auth when ready to onboard. Template at app/lib/emails/seederWelcome.ts. welcomed_at column tracks delivery.
-- Stage E: cross-seeder view at /[handle]/map-view
+- Stage E ✓ COMPLETE (May 4): cross-seeder map view at /[handle]/map-view — coordination tool for distributed seeders. Shipped after Stage F (F was time-sensitive due to outreach cadence; E is a coordination tool that didn't block onboarding).
 - Stage F-prep ✓ COMPLETE: shared email header (logo across all user-facing templates), steward claim confirmation email, outreach_status transition to 'claimed' wired into both stewardship paths (domain-match auto-approve in verify route + grace-period activation in promoteIfGraceExpired). Both paths fully wired — no Step 6 cron prerequisite.
 - Stage F ✓ COMPLETE (May 4): outreach cadence — daily cron for emails 2 and 3, Resend webhook for bounce/complaint handling, dashboard bounce info panel
 - Stage G: removal flows — token-based soft removal, steward hard removal with reason

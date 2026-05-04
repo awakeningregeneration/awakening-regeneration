@@ -594,6 +594,21 @@ export default function DashboardClient({
             )}
           </div>
 
+          {/* ── (d1) CROSS-SEEDER VIEW LINK ── */}
+          <div style={{ marginBottom: 24, textAlign: "center" }}>
+            <Link
+              href={`/${handle}/map-view`}
+              style={{
+                fontSize: "0.82rem",
+                color: "rgba(58,90,122,0.6)",
+                textDecoration: "none",
+                transition: "color 0.15s",
+              }}
+            >
+              All placements across the commons &rarr;
+            </Link>
+          </div>
+
           {/* ── (d2) DIRECT INVITATION LINK ── */}
           <div style={{ marginBottom: 24, textAlign: "center" }}>
             <div
