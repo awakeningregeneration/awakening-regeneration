@@ -1,18 +1,17 @@
 /**
- * POST /api/admin/seeders/welcome
+ * POST /api/admin/seeders/create
  *
- * Sends the welcome email to an existing seeder.
+ * Creates a new seeder row and sends the welcome email in one action.
  *
  * Auth: Authorization: Bearer ${ADMIN_SECRET}
- * Body: { seeder_id: string, force?: boolean }
+ * Body: { name: string, email: string, url_handle: string }
  *
- * Returns 409 Conflict if the seeder has already been welcomed
- * (welcomed_at is set) — unless force=true, which skips the
- * duplicate check and re-sends anyway.
+ * Returns the new seeder ID and send timestamp on success.
+ * Returns 207 if the row was created but the email failed to send.
  */
 
 import { NextResponse } from "next/server";
-import { sendWelcome } from "@/app/lib/adminSeederActions";
+import { createSeeder } from "@/app/lib/adminSeederActions";
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
@@ -34,9 +33,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const { seeder_id, force } = body;
+  const { name, email, url_handle } = body;
 
-  const result = await sendWelcome({ seeder_id, force: force === true });
+  const result = await createSeeder({ name, email, url_handle });
 
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: result.status });
