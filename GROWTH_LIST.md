@@ -68,16 +68,6 @@ level, or maturity. Items here are not problems — they are
   referrals (/[handle]/join). Phase 4 work, deserves architectural
   thought rather than quick patch. (Migrated from LOOSE_ENDS.)
 
-- [ ] **Static state/county dataset for cross-seeder map view
-  dropdowns** — Currently derives state and county options
-  dynamically from existing listings, so only states/counties
-  with at least one placement appear. As seeders scale, they'll
-  want to drill into empty counties to confirm "no one's working
-  here yet." Switch to the full static 50-state + 3,143-county
-  dataset with a "(0 placements)" visual marker on empty counties
-  so they remain selectable. Lift the existing public-map county
-  dataset if it lives in the codebase at that point.
-
 ---
 
 ## Decision criteria for graduating items here

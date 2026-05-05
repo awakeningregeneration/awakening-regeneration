@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 4, 2026*
+*Last updated: May 4, 2026 (end of day)*
 
 ---
 
@@ -16,4 +16,10 @@
 - [ ] Move SUPABASE_PROJECT_REF from hardcoded value in netlify/functions/synonym-digest.mts to an env var. Currently fine because there's one Supabase project; revisit if staging is added.
 - [ ] Verify Supabase Studio deep-link filter syntax (?filter=status%3Deq%3Apending) actually lands on a filtered view of pending candidates after first cron run on May 1. If not, adjust URL format.
 - [ ] Magic-link round-trip test — Phase 1 deployed Apr 30. Cookie-signing mechanism confirmed working via dev-endpoint testing (Stages B, C, D all exercised the signed session cookie end-to-end). The production email delivery path (submit form -> Resend sends email -> click link -> land on dashboard) is the remaining untested leg, pending Lucia's availability to test on her real account.
+- [ ] **Stage E.1 — cross-seeder dropdown fix (HIGH PRIORITY)** — State/county dropdowns on /[handle]/map-view use dynamic derivation from existing placements. With zero seeder-placed listings in production, both dropdowns are empty and appear broken. Fix: swap to static dataset at data/allCounties.ts (51 keys, 3,143 counties). Complication: county name format mismatch. Static dataset stores bare names ("Alameda"). Placement data stores Title Case + " County" suffix ("Alameda County") via toTitleCase() normalization in place-listing/route.ts:~295. Three options: (A) strip " County" suffix from placement data when comparing on client — handles edge cases like Louisiana parishes, Alaska boroughs; (B) normalize storage to bare names going forward — cleanest but requires migration of existing data; (C) append " County" to static dataset entries on server — simplest but incorrect for ~100 edge cases (Louisiana parishes, Alaska boroughs, independent cities) until a seeder actually places there. Investigation complete, no code changes made. First task next session.
+
+- [ ] **Resend webhook secret mismatch (LOW PRIORITY)** — Webhook events arriving with 401 "Invalid signature" responses. The RESEND_WEBHOOK_SECRET in Netlify doesn't byte-for-byte match what Resend signs with. Doesn't affect email sending (uses RESEND_API_KEY which is correct). Fix path: Stage D.6 (admin UI for seeder onboarding) is the natural moment to generate a fresh secret, paste cleanly into both .env.local and Netlify, redeploy.
+
+- [ ] **Proton first-contact mail routing (LOW PRIORITY, OBSERVATION)** — Magic-link emails to founder@canarycommons.org land in Proton's All Mail folder, not Inbox. Likely Proton's conservative first-contact handling for new sender domains (canarycommons.org via Resend). Should warm up over time. Worth verifying SPF/DKIM/DMARC are all green in Resend → Domains → canarycommons.org.
+
 - [ ] Verify seederWelcome email rendering in production — Stage D.5's welcome email and admin endpoint are built and deployed but not yet end-to-end tested. The first real send (when onboarding Lucia or another seeder) is the verification. If the email doesn't arrive or has rendering issues, troubleshoot the curl/auth/Netlify env var setup at that point. Recommendation for first real onboarding: either (a) onboard directly with the real seeder and watch for the email to arrive, or (b) if curl proves consistently finicky across environments, build a tiny admin UI button as a more reliable trigger. Do NOT test against a fake seeder row — the first real onboarding IS the test.
