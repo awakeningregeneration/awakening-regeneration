@@ -209,6 +209,33 @@ export async function POST(req: Request) {
       state: normalizedState,
     });
 
+    // ── Universal block check (do_not_list_level = 'universal') ──
+    // Prevents re-submission of a listing that a steward has permanently removed.
+    // See OPT_OUT_LAYERS.md for the full consent model.
+    if (title?.trim()) {
+      const normalizedTitle = title.trim().toLowerCase()
+        .replace(/^(the|a|an)\s+/i, "")
+        .replace(/\s+/g, " ");
+
+      const { data: blocked } = await supabaseAdmin
+        .from("listings")
+        .select("id, title")
+        .eq("do_not_list", true)
+        .eq("do_not_list_level", "universal")
+        .eq("do_not_list_override", false)
+        .eq("normalized_name", normalizedTitle)
+        .eq("state", normalizedState)
+        .limit(1)
+        .maybeSingle();
+
+      if (blocked) {
+        return NextResponse.json(
+          { error: "UNIVERSALLY_BLOCKED", blocked_title: blocked.title },
+          { status: 403 }
+        );
+      }
+    }
+
     const { data, error } = await supabase
       .from("listings")
       .insert([

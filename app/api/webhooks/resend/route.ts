@@ -36,19 +36,7 @@ export async function POST(req: Request) {
     const wh = new Webhook(RESEND_WEBHOOK_SECRET);
     event = wh.verify(body, headers) as typeof event;
   } catch (err) {
-    // TEMPORARY DIAGNOSTIC LOGGING — remove after webhook signature bug is resolved
-    const errObj = err as { name?: string; message?: string };
-    console.error("[resend-webhook] Signature verification failed:", {
-      error_name: errObj.name || "unknown",
-      error_message: errObj.message || String(err),
-      webhook_id: headers["webhook-id"],
-      webhook_timestamp: headers["webhook-timestamp"],
-      server_time: new Date().toISOString(),
-      body_preview: body.slice(0, 100),
-      body_length: body.length,
-      secret_length: RESEND_WEBHOOK_SECRET?.length ?? 0,
-    });
-    // END TEMPORARY DIAGNOSTIC LOGGING
+    console.error("[resend-webhook] Signature verification failed:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

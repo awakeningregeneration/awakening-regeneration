@@ -125,6 +125,13 @@ export default function EditListingPage({ params }: Props) {
   const [claimSending, setClaimSending] = useState(false);
   const [claimError, setClaimError] = useState("");
 
+  // Hard removal (steward-only)
+  const [showRemovalForm, setShowRemovalForm] = useState(false);
+  const [removalReason, setRemovalReason] = useState("");
+  const [removalOtherText, setRemovalOtherText] = useState("");
+  const [removing, setRemoving] = useState(false);
+  const [removalError, setRemovalError] = useState("");
+
   useEffect(() => {
     async function loadParamsAndListing() {
       try {
@@ -319,6 +326,36 @@ export default function EditListingPage({ params }: Props) {
       setVerifySent(true); // still show success (security — don't reveal match/no-match)
     } finally {
       setVerifySending(false);
+    }
+  }
+
+  // ── Steward hard removal ──────────────────────────────────
+  async function handleHardRemoval() {
+    if (!removalReason) return;
+    setRemoving(true);
+    setRemovalError("");
+
+    try {
+      const res = await fetch("/api/steward/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listing_id: listingId,
+          reason: removalReason,
+          other_text: removalReason === "other" ? removalOtherText : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to remove.");
+
+      window.location.href = `/listings/${listingId}/remove/done-permanent`;
+    } catch (err) {
+      setRemovalError(
+        err instanceof Error ? err.message : "Failed to remove."
+      );
+    } finally {
+      setRemoving(false);
     }
   }
 
@@ -694,6 +731,131 @@ export default function EditListingPage({ params }: Props) {
                   <span style={labelStyle}>Display name</span>
                   <input style={inputStyle} value={stewardDisplayName} onChange={(e) => setStewardDisplayName(e.target.value)} placeholder="Optional" />
                 </label>
+              </div>
+
+              {/* Remove this listing section */}
+              <div style={{ marginTop: 8, paddingTop: 20, borderTop: "1px solid rgba(100,150,220,0.18)" }}>
+                <div style={{ fontSize: "0.84rem", fontWeight: 600, color: "#6b7c94", marginBottom: 8 }}>
+                  Remove this listing
+                </div>
+                {!showRemovalForm ? (
+                  <>
+                    <p style={{ ...mutedStyle, fontSize: "0.82rem", marginBottom: 12 }}>
+                      If you&apos;d like to remove this listing entirely from
+                      Canary Commons, you can do that here. This is different from
+                      temporarily hiding — it&apos;s a permanent removal that also
+                      asks us not to list this place again in the future.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowRemovalForm(true)}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: 999,
+                        border: "1px solid rgba(180,100,100,0.3)",
+                        background: "rgba(255,240,240,0.4)",
+                        color: "#8a4040",
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Remove this listing
+                    </button>
+                  </>
+                ) : (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
+                      {[
+                        { value: "closed", label: "We're closed or no longer operating" },
+                        { value: "not_fit", label: "This isn't a fit for us" },
+                        { value: "not_findable", label: "We don't want to be findable on a map" },
+                        { value: "other", label: "Other" },
+                      ].map((opt) => (
+                        <label
+                          key={opt.value}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            fontSize: "0.88rem",
+                            color: "#0d2a4a",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="removal_reason"
+                            value={opt.value}
+                            checked={removalReason === opt.value}
+                            onChange={() => setRemovalReason(opt.value)}
+                          />
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
+
+                    {removalReason === "other" && (
+                      <input
+                        type="text"
+                        placeholder="Tell us a bit more (optional)"
+                        value={removalOtherText}
+                        onChange={(e) => setRemovalOtherText(e.target.value)}
+                        style={{ ...inputStyle, marginBottom: 16 }}
+                      />
+                    )}
+
+                    <p style={{ ...mutedStyle, fontSize: "0.82rem", marginBottom: 16 }}>
+                      When you click Remove, this listing will be removed from
+                      the map and we won&apos;t list this place again. You can
+                      still reach us at{" "}
+                      <a href="mailto:info@canarycommons.org" style={{ color: "#8a6d2a" }}>
+                        info@canarycommons.org
+                      </a>{" "}
+                      if anything changes.
+                    </p>
+
+                    {removalError && <p style={errorStyle}>{removalError}</p>}
+
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      <button
+                        type="button"
+                        onClick={handleHardRemoval}
+                        disabled={removing || !removalReason}
+                        style={{
+                          padding: "10px 20px",
+                          borderRadius: 999,
+                          border: "none",
+                          background: removing || !removalReason ? "rgba(180,100,100,0.4)" : "rgba(180,80,80,0.85)",
+                          color: "#fff",
+                          fontSize: "0.88rem",
+                          fontWeight: 700,
+                          cursor: removing || !removalReason ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        {removing ? "Removing…" : "Yes, remove permanently"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowRemovalForm(false);
+                          setRemovalReason("");
+                          setRemovalOtherText("");
+                          setRemovalError("");
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#6b7c94",
+                          fontSize: "0.85rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {error ? <p style={errorStyle}>{error}</p> : null}

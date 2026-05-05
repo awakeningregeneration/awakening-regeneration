@@ -313,6 +313,13 @@ export default function SubmitPage() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
+        if (data?.error === "UNIVERSALLY_BLOCKED") {
+          setErrorMessage(
+            "This listing has been removed at the owner\u2019s request and isn\u2019t available for resubmission. If you feel that this placement should happen, please email info@canarycommons.org. Thank you for your care."
+          );
+          setIsSubmitting(false);
+          return;
+        }
         throw new Error(
           data?.error ||
             "Something went wrong while submitting this point of light."
