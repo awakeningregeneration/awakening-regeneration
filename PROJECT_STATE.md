@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: May 4, 2026 (end of day)*
+*Last updated: May 5, 2026*
 
 ---
 
@@ -36,6 +36,7 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 5** — Stage E.1 complete: cross-seeder map view welcome copy added. Redesigned mid-implementation. Original plan was to swap dropdowns to static dataset; reframed to keep dynamic derivation and add welcome copy that makes "showing only worked territory" an intentional design choice. Copy: "You'll see only the states and counties where seeders are currently working. If the place you're thinking of isn't here yet, consider it an invitation."
 - **May 4** — Ren seeder row created in production Supabase (url_handle='ren', active=true). Magic-link login flow tested end-to-end: Resend logs show 200 success, email arrived in Proton All Mail folder. Cross-seeder view confirmed loading at /ren/map-view, dashboard link confirmed, page renders correctly.
 - **May 4** — Stage E shipped (commit 3ca24de): cross-seeder map view at /[handle]/map-view. Alphabetical listing list with category, address, seeder name, date, and status badge. Privacy boundary enforced — seeder names visible for coordination, steward emails never exposed. Empty state links to placement form. Dashboard link added in utility shelf. Shipped after Stage F because F was time-sensitive (outreach cadence blocked onboarding); E is a coordination tool that didn't block the pipeline. **Known bug: state/county dropdowns use dynamic derivation from listings, rendering empty with zero placements — see Stage E.1 in build plan and LOOSE_ENDS.md.**
 - **May 4** — Stage F shipped (commit 13e305e): outreach cadence with daily cron (6am Pacific) firing Email 2 at 7 days and Email 3 at 14 days after previous email. Email templates lifted from orientation modal previews. Resend webhook route for bounce/complaint handling with svix signature verification. Dashboard bounce info inline panel with humanized bounce reasons. bounce_info TEXT column added to listings. Throttled at 50 emails per type per cron run. Deployed to production: bounce_info migration applied, Resend webhook registered (email.bounced/complained/delivered/opened/clicked), RESEND_WEBHOOK_SECRET set in .env.local and Netlify.
@@ -117,7 +118,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage D ✓ COMPLETE (May 3): real dashboard with placements list replacing stub
 - Stage D.5 ✓ COMPLETE (May 4): seeder welcome email via manual admin endpoint. Ren fires POST /api/admin/seeders/welcome with Bearer auth when ready to onboard. Template at app/lib/emails/seederWelcome.ts. welcomed_at column tracks delivery.
 - Stage E ✓ COMPLETE (May 4): cross-seeder map view at /[handle]/map-view — coordination tool for distributed seeders. Shipped after Stage F (F was time-sensitive due to outreach cadence; E is a coordination tool that didn't block onboarding).
-- Stage E.1: swap cross-seeder map view dropdowns from dynamic derivation to static dataset (data/allCounties.ts). Blocks usability of the cross-seeder view — empty dropdowns with zero placements. County name format mismatch to resolve: static dataset uses bare names ("Alameda"), placement data stores "Alameda County". See LOOSE_ENDS.md for Option A/B/C.
+- Stage E.1 ✓ COMPLETE (May 5): welcome copy on cross-seeder map view. Kept dynamic derivation — empty dropdowns reframed as intentional (only shows worked territory).
 - Stage D.6: admin UI for seeder onboarding — replaces manual curl with a button. Natural moment to refresh RESEND_WEBHOOK_SECRET (current secret returns 401 on webhook verification).
 - Stage F-prep ✓ COMPLETE: shared email header (logo across all user-facing templates), steward claim confirmation email, outreach_status transition to 'claimed' wired into both stewardship paths (domain-match auto-approve in verify route + grace-period activation in promoteIfGraceExpired). Both paths fully wired — no Step 6 cron prerequisite.
 - Stage F ✓ COMPLETE (May 4): outreach cadence — daily cron for emails 2 and 3, Resend webhook for bounce/complaint handling, dashboard bounce info panel

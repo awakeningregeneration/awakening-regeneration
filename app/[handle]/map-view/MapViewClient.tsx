@@ -211,12 +211,26 @@ export default function MapViewClient({
               color: "#3a5a7a",
               textAlign: "center",
               lineHeight: 1.5,
-              margin: "0 0 28px",
+              margin: "0 0 12px",
             }}
           >
             Browse what seeders are placing across the country.
             <br />
             Useful before placing a new light yourself.
+          </p>
+          <p
+            style={{
+              fontSize: "0.82rem",
+              color: "#6b7c94",
+              textAlign: "center",
+              lineHeight: 1.5,
+              fontStyle: "italic",
+              margin: "0 0 24px",
+            }}
+          >
+            You&apos;ll see only the states and counties where seeders are
+            currently working. If the place you&apos;re thinking of isn&apos;t
+            here yet, consider it an invitation.
           </p>
 
           {/* ── Dropdowns ── */}
