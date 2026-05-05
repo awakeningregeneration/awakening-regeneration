@@ -26,9 +26,9 @@ export async function POST(req: Request) {
 
   const body = await req.text();
   const headers = {
-    "webhook-id": req.headers.get("webhook-id") || "",
-    "webhook-timestamp": req.headers.get("webhook-timestamp") || "",
-    "webhook-signature": req.headers.get("webhook-signature") || "",
+    "webhook-id": req.headers.get("svix-id") || req.headers.get("webhook-id") || "",
+    "webhook-timestamp": req.headers.get("svix-timestamp") || req.headers.get("webhook-timestamp") || "",
+    "webhook-signature": req.headers.get("svix-signature") || req.headers.get("webhook-signature") || "",
   };
 
   let event: { type: string; data: Record<string, unknown> };
