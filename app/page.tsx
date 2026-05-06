@@ -311,7 +311,7 @@ export default function HomePage() {
                 e.currentTarget.style.color = "#fff8e0";
               }}
             >
-              About this project
+              About this Project
             </Link>
           </div>
 

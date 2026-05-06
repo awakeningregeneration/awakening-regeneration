@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: May 5, 2026*
+*Last updated: May 5, 2026 (end of day)*
 
 ---
 
@@ -36,6 +36,10 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 
 ## Done (recent)
 
+- **May 5** — Founder flow audit (evening): golden path confirmed working end-to-end (/founders → Stripe checkout → founders row → welcome email → confirmation → seeder_referrals with 25% payout). Three gaps identified: (1) founder email rhythm not built (templates + scheduler), (2) listing-to-founder attribution not wired (Phase 4), (3) payout processing not built (Phase 5). Next work: Ren drafts Email 1 (Inspiration + Direction) and Email 2 (Participation + Reflection) in ChatGPT, then brings back to wire templates + Netlify scheduled function.
+- **May 5** — Stage G shipped (commit 456c45a): removal flows + universal block enforcement. Soft removal at /listings/[id]/remove (token-authenticated two-step UX, sets do_not_list_level='seeder_only'). Hard removal in steward edit flow (reason selector, sets do_not_list_level='universal' with reason, per-listing session auth). Universal block enforcement in /api/listings POST — polite UNIVERSALLY_BLOCKED error with mailto link, respects do_not_list_override. New do_not_list_level TEXT column on listings with CHECK constraint. Migration applied to production. Also includes webhook cleanup: temporary diagnostic endpoint deleted, temporary logging removed.
+- **May 5** — Webhook signature verification fixed (commit 30736ed, cleanup in 456c45a). Bug: route was reading "webhook-*" headers but Resend sends "svix-*" prefixed headers. Fix: read svix-* first with webhook-* fallback. email.delivered events now returning 200. Diagnostic endpoint and temporary logging both removed.
+- **May 5** — Stage D.6 fully operational: both Lucia and Ren successfully onboarded via admin UI at /ren/admin. Welcome emails delivered end-to-end.
 - **May 5** — Stage D.6 complete: admin UI for seeder onboarding at /[handle]/admin. Three-gate auth (session + handle match + admin email match against ADMIN_SEEDER_EMAIL), returns 404 on any failure. Creation form (name, email, handle) creates row + sends welcome email in one action via session-authed wrapper endpoints. Seeder list with placement counts, per-row resend welcome button (force=true, auto-clears "Sent!" after 5s). Morning-sky aesthetic. Shared logic at app/lib/adminSeederActions.ts (createSeeder + sendWelcome). Bearer-token endpoints preserved for curl use. No secrets cross to the browser.
 - **May 5** — Stage D.6 backend shipped (pieces 1-4, commit aebe662): shared logic extraction at app/lib/adminSeederActions.ts (createSeeder + sendWelcome with force flag). Bearer-token endpoints refactored to thin wrappers. Session-authed wrapper endpoints at /api/admin/wrapper/create and /wrapper/welcome implement three-gate auth (session + seeder lookup + admin email match against ADMIN_SEEDER_EMAIL env var), returning notFound() on any failure for privacy. Page (piece 5) and Client (piece 6) pending next session.
 - **May 5** — Stage E.1 complete: cross-seeder map view welcome copy added. Redesigned mid-implementation. Original plan was to swap dropdowns to static dataset; reframed to keep dynamic derivation and add welcome copy that makes "showing only worked territory" an intentional design choice. Copy: "You'll see only the states and counties where seeders are currently working. If the place you're thinking of isn't here yet, consider it an invitation."
@@ -124,7 +128,7 @@ Schema additions, magic-link auth, /[handle]/ routing, dashboard stub.
 - Stage D.6 ✓ COMPLETE (May 5): admin UI for seeder onboarding at /[handle]/admin. Create-with-welcome form, seeder list with placement counts, per-row resend welcome. Three-gate auth, session-authed wrapper endpoints, no secrets in browser.
 - Stage F-prep ✓ COMPLETE: shared email header (logo across all user-facing templates), steward claim confirmation email, outreach_status transition to 'claimed' wired into both stewardship paths (domain-match auto-approve in verify route + grace-period activation in promoteIfGraceExpired). Both paths fully wired — no Step 6 cron prerequisite.
 - Stage F ✓ COMPLETE (May 4): outreach cadence — daily cron for emails 2 and 3, Resend webhook for bounce/complaint handling, dashboard bounce info panel
-- Stage G: removal flows — token-based soft removal, steward hard removal with reason
+- Stage G ✓ COMPLETE (May 5): removal flows — token-based soft removal (do_not_list_level='seeder_only'), steward hard removal with reason (do_not_list_level='universal'), universal block enforcement in public submit path. Phase 2+3 complete.
 
 **Phase 4 — Attribution + Founder credit (future)**
 Stripe webhook extension, "thank the seeder" gesture, seeder_listing_credits population.

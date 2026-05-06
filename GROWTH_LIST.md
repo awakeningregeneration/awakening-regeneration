@@ -68,6 +68,16 @@ level, or maturity. Items here are not problems — they are
   referrals (/[handle]/join). Phase 4 work, deserves architectural
   thought rather than quick patch. (Migrated from LOOSE_ENDS.)
 
+- [ ] **Unify listing-name normalization into a shared utility** —
+  Two listing-matching normalizations currently exist: seeder
+  placement uses `normalizeName()` helper (in place-listing/
+  route.ts), and the public submit route inlines its own logic
+  (lowercase, strip articles, collapse spaces). Both do the same
+  thing differently. Consider extracting into a shared utility
+  (e.g. app/lib/normalizeName.ts) when the next match-related
+  change comes through. Not blocking — both produce the same
+  output for normal cases.
+
 ---
 
 ## Decision criteria for graduating items here

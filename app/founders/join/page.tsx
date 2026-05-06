@@ -245,8 +245,6 @@ function JoinContent() {
           Become the Foundation,
           <br />
           While the Roots Grow Deep.
-          <br />
-          {"\u2014 Hold the Connected Commons \u2014"}
         </h1>
 
         <div style={glassCard}>
