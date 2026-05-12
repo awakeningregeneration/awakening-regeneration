@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const PRIMARY_CATEGORY_OPTIONS = [
@@ -46,6 +46,19 @@ const PRACTICE_OPTIONS = [
   "Community Led",
   "Justice-Oriented",
 ];
+
+type Resource = {
+  id: string;
+  name: string;
+  description: string | null;
+  url: string | null;
+  category: string | null;
+  practices: string[] | null;
+  affiliate_url: string | null;
+  why_it_matters: string | null;
+  image_url: string | null;
+  created_at: string | null;
+};
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
   { left: "6%", top: "8%", size: 5, opacity: 0.6 },
@@ -108,9 +121,34 @@ function Atmosphere() {
   );
 }
 
+function truncate(str: string | null, len: number): string {
+  if (!str) return "";
+  return str.length > len ? str.slice(0, len) + "…" : str;
+}
+
 export default function ContributorSubmitPage() {
   const router = useRouter();
 
+  // ── Existing resources ──
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [loadingResources, setLoadingResources] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [flashMessage, setFlashMessage] = useState<string | null>(null);
+
+  // ── Edit state ──
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editAffiliateUrl, setEditAffiliateUrl] = useState("");
+  const [editWhyItMatters, setEditWhyItMatters] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [editPractices, setEditPractices] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // ── New submission state ──
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [url, setUrl] = useState("");
@@ -121,8 +159,111 @@ export default function ContributorSubmitPage() {
   const [practices, setPractices] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    fetchResources();
+  }, []);
+
+  async function fetchResources() {
+    setLoadingResources(true);
+    try {
+      const res = await fetch("/api/contributor");
+      if (res.ok) {
+        const data = await res.json();
+        setResources(data);
+      } else {
+        showFlash("Something went wrong — please refresh.", 4000);
+      }
+    } catch {
+      showFlash("Something went wrong — please refresh.", 4000);
+    } finally {
+      setLoadingResources(false);
+    }
+  }
+
+  function showFlash(msg: string, durationMs = 2500) {
+    setFlashMessage(msg);
+    setTimeout(() => setFlashMessage(null), durationMs);
+  }
+
+  function startEdit(r: Resource) {
+    setEditingId(r.id);
+    setEditName(r.name || "");
+    setEditDescription(r.description || "");
+    setEditUrl(r.url || "");
+    setEditCategory(r.category || "");
+    setEditAffiliateUrl(r.affiliate_url || "");
+    setEditWhyItMatters(r.why_it_matters || "");
+    setEditImageUrl(r.image_url || "");
+    setEditPractices(r.practices || []);
+    setDeleteConfirmId(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function handleSave(id: string) {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/affiliates", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name: editName,
+          description: editDescription,
+          url: editUrl,
+          category: editCategory,
+          affiliate_url: editAffiliateUrl,
+          why_it_matters: editWhyItMatters,
+          image_url: editImageUrl,
+          practices: editPractices,
+        }),
+      });
+      if (res.ok) {
+        setEditingId(null);
+        showFlash("Saved. Live now.");
+        await fetchResources();
+      } else {
+        showFlash("Something went wrong — please refresh.", 4000);
+      }
+    } catch {
+      showFlash("Something went wrong — please refresh.", 4000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/affiliates?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDeleteConfirmId(null);
+        showFlash("Deleted.");
+        setResources((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        showFlash("Something went wrong — please refresh.", 4000);
+      }
+    } catch {
+      showFlash("Something went wrong — please refresh.", 4000);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   function togglePractice(practice: string) {
     setPractices((current) =>
+      current.includes(practice)
+        ? current.filter((item) => item !== practice)
+        : [...current, practice]
+    );
+  }
+
+  function toggleEditPractice(practice: string) {
+    setEditPractices((current) =>
       current.includes(practice)
         ? current.filter((item) => item !== practice)
         : [...current, practice]
@@ -136,9 +277,7 @@ export default function ContributorSubmitPage() {
     try {
       const res = await fetch("/api/affiliates", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           category,
@@ -155,7 +294,16 @@ export default function ContributorSubmitPage() {
       });
 
       if (res.ok) {
-        router.push("/contributor");
+        setName("");
+        setCategory("");
+        setUrl("");
+        setImageUrl("");
+        setAffiliateUrl("");
+        setDescription("");
+        setWhyItMatters("");
+        setPractices([]);
+        showFlash("Added. Live now.");
+        await fetchResources();
       } else {
         alert("Something went wrong.");
       }
@@ -194,6 +342,14 @@ export default function ContributorSubmitPage() {
     fontSize: "0.9rem",
   };
 
+  const cardStyle: React.CSSProperties = {
+    borderRadius: 22,
+    border: "1px solid rgba(255,255,255,0.6)",
+    background: "rgba(255,255,255,0.82)",
+    backdropFilter: "blur(12px)",
+    padding: "clamp(24px, 4vw, 36px)",
+  };
+
   return (
     <main
       style={{
@@ -227,18 +383,484 @@ export default function ContributorSubmitPage() {
           Canary Commons
         </p>
 
-        <div
-          style={{
-            borderRadius: 22,
-            border: "1px solid rgba(255,255,255,0.6)",
-            background: "rgba(255,255,255,0.82)",
-            backdropFilter: "blur(12px)",
-            padding: "clamp(24px, 4vw, 36px)",
-          }}
-        >
+        {/* ── Flash message ── */}
+        {flashMessage && (
+          <div
+            style={{
+              position: "fixed",
+              top: 24,
+              left: "50%",
+              transform: "translateX(-50%)",
+              padding: "10px 24px",
+              borderRadius: 999,
+              background: "rgba(255,216,107,0.95)",
+              color: "#1a2a0e",
+              fontWeight: 700,
+              fontSize: "0.9rem",
+              zIndex: 100,
+              boxShadow: "0 4px 20px rgba(255,200,80,0.3)",
+            }}
+          >
+            {flashMessage}
+          </div>
+        )}
+
+        {/* ── Greeting ── */}
+        <div style={cardStyle}>
           <h1
             style={{
-              fontSize: "clamp(1.7rem, 3.5vw, 2.2rem)",
+              fontSize: "clamp(1.4rem, 3vw, 1.8rem)",
+              lineHeight: 1.25,
+              margin: 0,
+              marginBottom: 8,
+              fontWeight: 650,
+              color: "#8a6d2a",
+            }}
+          >
+            Hi, Lucia — thanks for adding more online affiliate resources.
+          </h1>
+
+          {/* ── Existing resources ── */}
+          <div style={{ marginTop: 24 }}>
+            <h2
+              style={{
+                fontSize: "1.05rem",
+                fontWeight: 650,
+                color: "#0d2a4a",
+                margin: "0 0 14px",
+              }}
+            >
+              Your resources ({resources.length})
+            </h2>
+
+            {loadingResources ? (
+              <p style={{ color: "#3a5a7a", fontSize: "0.9rem" }}>
+                Loading...
+              </p>
+            ) : resources.length === 0 ? (
+              <p
+                style={{
+                  color: "#3a5a7a",
+                  fontSize: "0.9rem",
+                  fontStyle: "italic",
+                }}
+              >
+                No resources yet. Add your first one below.
+              </p>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                {resources.map((r) => {
+                  const isEditing = editingId === r.id;
+                  const isDeleting = deleteConfirmId === r.id;
+
+                  if (isEditing) {
+                    return (
+                      <div
+                        key={r.id}
+                        style={{
+                          padding: "16px",
+                          borderRadius: 14,
+                          border: "1px solid rgba(255,200,80,0.3)",
+                          background: "rgba(255,248,230,0.5)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "grid",
+                            gap: 12,
+                            marginBottom: 14,
+                          }}
+                        >
+                          <div>
+                            <label style={labelStyle}>Name</label>
+                            <input
+                              style={inputStyle}
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Category</label>
+                            <select
+                              style={{ ...inputStyle, appearance: "none" }}
+                              value={editCategory}
+                              onChange={(e) =>
+                                setEditCategory(e.target.value)
+                              }
+                            >
+                              <option value="">Select a category</option>
+                              {PRIMARY_CATEGORY_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Display URL</label>
+                            <input
+                              style={inputStyle}
+                              value={editUrl}
+                              onChange={(e) => setEditUrl(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>
+                              Affiliate tracking link
+                            </label>
+                            <input
+                              style={inputStyle}
+                              value={editAffiliateUrl}
+                              onChange={(e) =>
+                                setEditAffiliateUrl(e.target.value)
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>
+                              Image / logo URL
+                            </label>
+                            <input
+                              style={inputStyle}
+                              value={editImageUrl}
+                              onChange={(e) =>
+                                setEditImageUrl(e.target.value)
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Description</label>
+                            <textarea
+                              style={{ ...inputStyle, resize: "vertical" }}
+                              rows={3}
+                              value={editDescription}
+                              onChange={(e) =>
+                                setEditDescription(e.target.value)
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Why it matters</label>
+                            <textarea
+                              style={{ ...inputStyle, resize: "vertical" }}
+                              rows={3}
+                              value={editWhyItMatters}
+                              onChange={(e) =>
+                                setEditWhyItMatters(e.target.value)
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>
+                              Practices / Values
+                            </label>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 8,
+                              }}
+                            >
+                              {PRACTICE_OPTIONS.map((p) => {
+                                const sel = editPractices.includes(p);
+                                return (
+                                  <button
+                                    key={p}
+                                    type="button"
+                                    onClick={() => toggleEditPractice(p)}
+                                    style={{
+                                      borderRadius: 999,
+                                      border: sel
+                                        ? "1px solid rgba(255,200,80,0.45)"
+                                        : "1px solid rgba(100,150,220,0.22)",
+                                      padding: "8px 12px",
+                                      fontSize: "0.85rem",
+                                      cursor: "pointer",
+                                      background: sel
+                                        ? "rgba(255,216,107,0.18)"
+                                        : "rgba(255,255,255,0.7)",
+                                      color: sel ? "#7a4f00" : "#3a5a7a",
+                                    }}
+                                  >
+                                    {p}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 12,
+                            alignItems: "center",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleSave(r.id)}
+                            disabled={saving}
+                            style={{
+                              padding: "10px 20px",
+                              borderRadius: 999,
+                              border: "none",
+                              background: "#FFD86B",
+                              color: "#1a2a0e",
+                              fontWeight: 700,
+                              fontSize: "0.9rem",
+                              cursor: saving ? "not-allowed" : "pointer",
+                              opacity: saving ? 0.7 : 1,
+                              boxShadow:
+                                "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                            }}
+                          >
+                            {saving ? "Saving…" : "Save"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEdit}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#3a5a7a",
+                              fontSize: "0.85rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={r.id}
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 14,
+                        border: "1px solid rgba(100,150,220,0.15)",
+                        background: "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 12,
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontWeight: 650,
+                              color: "#0d2a4a",
+                              fontSize: "0.95rem",
+                            }}
+                          >
+                            {r.name}
+                          </div>
+                          {r.url && (
+                            <div
+                              style={{
+                                fontSize: "0.8rem",
+                                color: "#6b7c94",
+                                marginTop: 2,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {truncate(r.url, 50)}
+                            </div>
+                          )}
+                          {r.description && (
+                            <div
+                              style={{
+                                fontSize: "0.82rem",
+                                color: "#3a5a7a",
+                                marginTop: 4,
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {truncate(r.description, 120)}
+                            </div>
+                          )}
+                          {(r.category ||
+                            (r.practices && r.practices.length > 0)) && (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 6,
+                                marginTop: 8,
+                              }}
+                            >
+                              {r.category && (
+                                <span
+                                  style={{
+                                    fontSize: "0.72rem",
+                                    padding: "3px 8px",
+                                    borderRadius: 999,
+                                    background: "rgba(255,216,107,0.18)",
+                                    color: "#7a4f00",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {r.category}
+                                </span>
+                              )}
+                              {r.practices?.map((p) => (
+                                <span
+                                  key={p}
+                                  style={{
+                                    fontSize: "0.72rem",
+                                    padding: "3px 8px",
+                                    borderRadius: 999,
+                                    background: "rgba(100,150,220,0.1)",
+                                    color: "#3a5a7a",
+                                  }}
+                                >
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            flexShrink: 0,
+                            paddingTop: 2,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => startEdit(r)}
+                            style={{
+                              padding: "4px 12px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(100,150,220,0.2)",
+                              background: "rgba(255,255,255,0.6)",
+                              color: "#3a5a7a",
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDeleteConfirmId(
+                                isDeleting ? null : r.id
+                              )
+                            }
+                            style={{
+                              padding: "4px 12px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(180,100,100,0.2)",
+                              background: "rgba(255,240,240,0.4)",
+                              color: "#8a4040",
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Delete confirm */}
+                      {isDeleting && (
+                        <div
+                          style={{
+                            marginTop: 12,
+                            padding: "12px 14px",
+                            borderRadius: 10,
+                            background: "rgba(255,240,240,0.6)",
+                            border: "1px solid rgba(180,100,100,0.15)",
+                          }}
+                        >
+                          <p
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6a2020",
+                              margin: "0 0 10px",
+                            }}
+                          >
+                            Delete this listing? This cannot be undone.
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 10,
+                              alignItems: "center",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(r.id)}
+                              disabled={deleting}
+                              style={{
+                                padding: "8px 16px",
+                                borderRadius: 999,
+                                border: "none",
+                                background: deleting
+                                  ? "rgba(180,100,100,0.4)"
+                                  : "rgba(180,80,80,0.85)",
+                                color: "#fff",
+                                fontSize: "0.82rem",
+                                fontWeight: 700,
+                                cursor: deleting
+                                  ? "not-allowed"
+                                  : "pointer",
+                              }}
+                            >
+                              {deleting ? "Deleting…" : "Confirm delete"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmId(null)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#3a5a7a",
+                                fontSize: "0.82rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Submit form ── */}
+        <div style={{ ...cardStyle, marginTop: 20 }}>
+          <h2
+            style={{
+              fontSize: "clamp(1.3rem, 2.5vw, 1.6rem)",
               lineHeight: 1.18,
               margin: 0,
               marginBottom: 14,
@@ -246,21 +868,8 @@ export default function ContributorSubmitPage() {
               color: "#0d2a4a",
             }}
           >
-            Submit a resource
-          </h1>
-
-          <p
-            style={{
-              marginTop: 0,
-              marginBottom: 28,
-              color: "#3a5a7a",
-              lineHeight: 1.65,
-              fontSize: "0.98rem",
-            }}
-          >
-            Submissions come in for review before being added to the public
-            support page.
-          </p>
+            Add a new resource
+          </h2>
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
             <input
@@ -410,7 +1019,7 @@ export default function ContributorSubmitPage() {
                 opacity: submitting ? 0.8 : 1,
               }}
             >
-              {submitting ? "Submitting..." : "Submit for review"}
+              {submitting ? "Submitting..." : "Add resource"}
             </button>
           </form>
         </div>

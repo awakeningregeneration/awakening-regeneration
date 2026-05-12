@@ -94,3 +94,92 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id." }, { status: 400 });
+    }
+
+    const update: Record<string, unknown> = {};
+    const fields = [
+      "name",
+      "description",
+      "url",
+      "category",
+      "affiliate_url",
+      "why_it_matters",
+      "image_url",
+    ] as const;
+
+    for (const f of fields) {
+      if (body[f] !== undefined) {
+        update[f] = typeof body[f] === "string" ? body[f].trim() || null : body[f];
+      }
+    }
+
+    if (body.practices !== undefined) {
+      update.practices = Array.isArray(body.practices)
+        ? body.practices.filter((p: unknown) => typeof p === "string" && (p as string).trim()).map((p: unknown) => (p as string).trim())
+        : [];
+    }
+
+    // name, description, url, category must not be emptied
+    if (update.name === null || update.description === null || update.url === null || update.category === null) {
+      return NextResponse.json(
+        { error: "Name, description, URL, and category are required." },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("affiliate_resources")
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error("Affiliate PATCH error:", err);
+    return NextResponse.json(
+      { error: "Failed to update resource." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id." }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from("affiliate_resources")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Affiliate DELETE error:", err);
+    return NextResponse.json(
+      { error: "Failed to delete resource." },
+      { status: 500 }
+    );
+  }
+}
