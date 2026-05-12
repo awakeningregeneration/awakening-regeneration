@@ -11,10 +11,10 @@ type Placement = {
   state: string | null;
   outreach_status: string | null;
   steward_email: string | null;
+  steward_id: string | null;
   created_at: string;
   status: string | null;
   bounce_info: string | null;
-  // Stage G will add: do_not_list_level: string | null;
 };
 
 type Credit = {
@@ -347,11 +347,13 @@ export default function DashboardClient({
                     { month: "short", day: "numeric", year: "numeric" }
                   );
                   const isBounced = p.outreach_status === "bounced";
+                  const isClaimed = !!p.steward_id;
 
                   return (
                     <div key={p.id}>
                       <div
                         onClick={() => {
+                          if (isClaimed) return;
                           if (isBounced) {
                             setExpandedBounceId(
                               expandedBounceId === p.id ? null : p.id
@@ -371,16 +373,19 @@ export default function DashboardClient({
                               : 12,
                           border: "1px solid rgba(100,150,220,0.15)",
                           background: "rgba(255,255,255,0.5)",
-                          cursor: "pointer",
+                          cursor: isClaimed ? "default" : "pointer",
                           transition: "background 0.15s",
+                          opacity: isClaimed ? 0.6 : 1,
                         }}
                         onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.background =
-                            "rgba(255,255,255,0.75)";
+                          if (!isClaimed)
+                            (e.currentTarget as HTMLElement).style.background =
+                              "rgba(255,255,255,0.75)";
                         }}
                         onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.background =
-                            "rgba(255,255,255,0.5)";
+                          if (!isClaimed)
+                            (e.currentTarget as HTMLElement).style.background =
+                              "rgba(255,255,255,0.5)";
                         }}
                       >
                         {/* Title + location */}
@@ -406,6 +411,19 @@ export default function DashboardClient({
                               }}
                             >
                               {location}
+                            </div>
+                          )}
+                          {isClaimed && (
+                            <div
+                              style={{
+                                fontSize: "0.78rem",
+                                color: "#8a9ab0",
+                                marginTop: 4,
+                                fontStyle: "italic",
+                              }}
+                            >
+                              Listing claimed by steward, no longer needs
+                              tending
                             </div>
                           )}
                         </div>

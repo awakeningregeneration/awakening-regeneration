@@ -12,6 +12,10 @@ type Listing = {
   city?: string;
   state?: string;
   county?: string;
+  steward_id?: string | null;
+  steward_email?: string | null;
+  placed_by_seeder_id?: string | null;
+  source?: string | null;
 };
 
 type Props = {
@@ -81,6 +85,7 @@ function Atmosphere() {
 
 type EditMode =
   | "loading"
+  | "seeder_edit"
   | "steward_edit"
   | "verify_steward"
   | "pending_claim"
@@ -163,33 +168,43 @@ export default function EditListingPage({ params }: Props) {
         setSuggestedState(found.state || "");
         setSuggestedCounty(found.county || "");
 
-        // Determine stewardship state
-        // First check if we have a valid edit session cookie
-        const sessionRes = await fetch(
-          `/api/steward/check-session?listing_id=${id}`
+        // Determine edit mode — seeder check first, then stewardship state
+
+        // 1. Check if the current user is the seeder who placed this listing
+        const seederRes = await fetch(
+          `/api/seeder/check-edit?listing_id=${id}`
         );
-        const sessionData = await sessionRes.json();
+        const seederData = await seederRes.json();
 
-        if (sessionData.isVerifiedSteward) {
-          // State A with valid session → direct edit
-          setEditMode("steward_edit");
-          setStewardEmail(sessionData.steward.email || "");
-          setStewardDisplayName(sessionData.steward.display_name || "");
-        } else if (found.steward_email) {
-          // Has a steward — check if active or pending
-          // The listing has steward_email set, meaning someone is active
-          setEditMode("verify_steward"); // State A without session
+        if (seederData.isPlacingSeeder) {
+          setEditMode("seeder_edit");
         } else {
-          // No steward_email on listing — check for pending claims
-          const claimRes = await fetch(
-            `/api/steward/check-claims?listing_id=${id}`
+          // 2. Check if we have a valid steward edit session cookie
+          const sessionRes = await fetch(
+            `/api/steward/check-session?listing_id=${id}`
           );
-          const claimData = await claimRes.json();
+          const sessionData = await sessionRes.json();
 
-          if (claimData.hasPendingClaim) {
-            setEditMode("pending_claim"); // State B
+          if (sessionData.isVerifiedSteward) {
+            // Verified steward with valid session → direct edit
+            setEditMode("steward_edit");
+            setStewardEmail(sessionData.steward.email || "");
+            setStewardDisplayName(sessionData.steward.display_name || "");
+          } else if (found.steward_id) {
+            // 3. Has a verified steward (steward_id set) — require verification
+            setEditMode("verify_steward");
           } else {
-            setEditMode("claim_or_edit"); // State C
+            // 4. No verified steward — check for pending claims
+            const claimRes = await fetch(
+              `/api/steward/check-claims?listing_id=${id}`
+            );
+            const claimData = await claimRes.json();
+
+            if (claimData.hasPendingClaim) {
+              setEditMode("pending_claim");
+            } else {
+              setEditMode("claim_or_edit");
+            }
           }
         }
       } catch (err) {
@@ -203,6 +218,39 @@ export default function EditListingPage({ params }: Props) {
 
     void loadParamsAndListing();
   }, [params]);
+
+  // ── Seeder direct save ───────────────────────────────────
+  async function handleSeederSave(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/seeder/save-listing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listing_id: listingId,
+          title: suggestedTitle,
+          description: suggestedDescription,
+          website: suggestedWebsite,
+          address: suggestedAddress,
+          city: suggestedCity,
+          state: suggestedState,
+          county: suggestedCounty,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || "Failed to save.");
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   // ── Steward direct save ──────────────────────────────────
   async function handleStewardSave(e: React.FormEvent<HTMLFormElement>) {
@@ -396,10 +444,12 @@ export default function EditListingPage({ params }: Props) {
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
             <h1 style={headingStyle}>
-              {editMode === "steward_edit" ? "Changes saved" : "Thank you"}
+              {editMode === "steward_edit" || editMode === "seeder_edit"
+                ? "Changes saved"
+                : "Thank you"}
             </h1>
             <p style={textStyle}>
-              {editMode === "steward_edit"
+              {editMode === "steward_edit" || editMode === "seeder_edit"
                 ? "Your listing has been updated directly."
                 : "Your suggested edit has been submitted for review."}
             </p>
@@ -696,7 +746,9 @@ export default function EditListingPage({ params }: Props) {
         <p style={kickerStyle}>Canary Commons</p>
         <div style={cardStyle}>
           <h1 style={headingStyle}>
-            {editMode === "steward_edit" ? "Edit your listing" : "Suggest an edit"}
+            {editMode === "steward_edit" || editMode === "seeder_edit"
+              ? "Edit your listing"
+              : "Suggest an edit"}
           </h1>
 
           {originalListing && editMode === "propose_edit" && (
@@ -709,7 +761,16 @@ export default function EditListingPage({ params }: Props) {
             </div>
           )}
 
-          {editMode === "steward_edit" ? (
+          {editMode === "seeder_edit" ? (
+            <form onSubmit={handleSeederSave} style={formStyle}>
+              {listingFields}
+
+              {error ? <p style={errorStyle}>{error}</p> : null}
+              <button type="submit" style={buttonStyle} disabled={submitting}>
+                {submitting ? "Saving…" : "Save changes"}
+              </button>
+            </form>
+          ) : editMode === "steward_edit" ? (
             <form onSubmit={handleStewardSave} style={formStyle}>
               {listingFields}
 
