@@ -39,5 +39,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ isPlacingSeeder: false });
   }
 
-  return NextResponse.json({ isPlacingSeeder: true });
+  return NextResponse.json({ isPlacingSeeder: true, handle: session.handle });
 }

@@ -457,7 +457,7 @@ export default function DashboardClient({
                               expandedBounceId === p.id ? null : p.id
                             );
                           } else {
-                            router.push(`/edit/${p.id}`);
+                            router.push(`/edit/${p.id}?return=/${handle}`);
                           }
                         }}
                         style={{
@@ -600,7 +600,7 @@ export default function DashboardClient({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/edit/${p.id}`);
+                                router.push(`/edit/${p.id}?return=/${handle}`);
                               }}
                               style={{
                                 padding: "8px 18px",

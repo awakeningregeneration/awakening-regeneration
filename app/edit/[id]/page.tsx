@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type Listing = {
@@ -123,11 +124,24 @@ type EditMode =
   | "propose_edit";
 
 export default function EditListingPage({ params }: Props) {
+  return (
+    <Suspense>
+      <EditListingContent params={params} />
+    </Suspense>
+  );
+}
+
+function EditListingContent({ params }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnPath = searchParams.get("return");
+
   const [listingId, setListingId] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [seederHandle, setSeederHandle] = useState<string | null>(null);
 
   const [originalListing, setOriginalListing] = useState<(Listing & { steward_email?: string | null }) | null>(null);
   const [editMode, setEditMode] = useState<EditMode>("loading");
@@ -172,6 +186,21 @@ export default function EditListingPage({ params }: Props) {
   const [removalOtherText, setRemovalOtherText] = useState("");
   const [removing, setRemoving] = useState(false);
   const [removalError, setRemovalError] = useState("");
+
+  // ── Auto-redirect after successful save ──
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = setTimeout(() => {
+      let destination = "/map";
+      if (returnPath && returnPath.startsWith("/")) {
+        destination = returnPath;
+      } else if (editMode === "seeder_edit" && seederHandle) {
+        destination = `/${seederHandle}`;
+      }
+      router.push(destination);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [submitted, returnPath, editMode, seederHandle, router]);
 
   useEffect(() => {
     async function loadParamsAndListing() {
@@ -219,6 +248,7 @@ export default function EditListingPage({ params }: Props) {
 
         if (seederData.isPlacingSeeder) {
           setEditMode("seeder_edit");
+          if (seederData.handle) setSeederHandle(seederData.handle);
         } else {
           // 2. Check if we have a valid steward edit session cookie
           const sessionRes = await fetch(
@@ -493,12 +523,12 @@ export default function EditListingPage({ params }: Props) {
           <div style={cardStyle}>
             <h1 style={headingStyle}>
               {editMode === "steward_edit" || editMode === "seeder_edit"
-                ? "Changes saved"
+                ? "Done"
                 : "Thank you"}
             </h1>
             <p style={textStyle}>
               {editMode === "steward_edit" || editMode === "seeder_edit"
-                ? "Your listing has been updated directly."
+                ? "Changes are live. Thanks for tending this."
                 : "Your suggested edit has been submitted for review."}
             </p>
           </div>
