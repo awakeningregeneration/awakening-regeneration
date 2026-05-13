@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import OutreachMessageDisplay from "@/app/components/OutreachMessageDisplay";
 
 type Props = {
   handle: string;
@@ -130,6 +131,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
   const [stewardEmail, setStewardEmail] = useState("");
+  const [showOutreachSection, setShowOutreachSection] = useState(false);
 
   // ── Submission state ──
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -570,6 +572,80 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                     placeholder="e.g., hello@baycoffeeroasters.com"
                     style={inputStyle}
                   />
+
+                  {!stewardEmail.trim() && (
+                    <div style={{ marginTop: 10 }}>
+                      {!showOutreachSection ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowOutreachSection(true)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#8a6d2a",
+                            fontSize: "0.82rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            padding: 0,
+                            textDecoration: "underline",
+                            textUnderlineOffset: 2,
+                          }}
+                        >
+                          No direct email available?
+                        </button>
+                      ) : (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            padding: "16px",
+                            borderRadius: 14,
+                            border: "1px solid rgba(138,109,42,0.15)",
+                            background: "rgba(255,248,230,0.3)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "0.88rem",
+                              fontWeight: 650,
+                              color: "#8a6d2a",
+                              marginBottom: 6,
+                            }}
+                          >
+                            No direct email? Use this outreach message.
+                          </div>
+                          <p
+                            style={{
+                              fontSize: "0.82rem",
+                              color: "#3a5a7a",
+                              lineHeight: 1.5,
+                              margin: "0 0 12px",
+                            }}
+                          >
+                            Paste this into the business&apos;s contact form,
+                            chat widget, social DM, or read it aloud over
+                            the phone.
+                          </p>
+                          <OutreachMessageDisplay />
+                          <div style={{ marginTop: 10 }}>
+                            <button
+                              type="button"
+                              onClick={() => setShowOutreachSection(false)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#6b7c94",
+                                fontSize: "0.82rem",
+                                cursor: "pointer",
+                                padding: 0,
+                              }}
+                            >
+                              Collapse
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Submit */}

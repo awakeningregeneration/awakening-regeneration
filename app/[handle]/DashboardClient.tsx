@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import OutreachMessageDisplay from "@/app/components/OutreachMessageDisplay";
 
 type Placement = {
   id: string;
@@ -119,6 +120,7 @@ export default function DashboardClient({
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [expandedBounceId, setExpandedBounceId] = useState<string | null>(null);
+  const [showOutreachModal, setShowOutreachModal] = useState(false);
 
   // Suppress unused variable — referralCode reserved for future use
   void referralCode;
@@ -149,6 +151,77 @@ export default function DashboardClient({
         overflow: "hidden",
       }}
     >
+      {/* Outreach message modal */}
+      {showOutreachModal && (
+        <div
+          onClick={() => setShowOutreachModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 560,
+              maxHeight: "85vh",
+              overflow: "auto",
+              borderRadius: 22,
+              border: "1px solid rgba(255,255,255,0.6)",
+              background: "rgba(255,255,255,0.95)",
+              backdropFilter: "blur(12px)",
+              padding: "clamp(24px, 4vw, 36px)",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 650,
+                color: "#8a6d2a",
+                margin: "0 0 8px",
+              }}
+            >
+              Copy this outreach message
+            </h3>
+            <p
+              style={{
+                fontSize: "0.85rem",
+                color: "#3a5a7a",
+                lineHeight: 1.5,
+                margin: "0 0 16px",
+              }}
+            >
+              Use this when reaching out by web form, chat, social DM,
+              phone, or in person. Replace the bracketed placeholders
+              before sending.
+            </p>
+            <OutreachMessageDisplay />
+            <div style={{ textAlign: "center", marginTop: 14 }}>
+              <button
+                type="button"
+                onClick={() => setShowOutreachModal(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#6b7c94",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Morning-sky atmosphere */}
       <div
         style={{
@@ -223,7 +296,16 @@ export default function DashboardClient({
             Welcome, {seederName}.
           </h2>
 
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 14,
+              flexWrap: "wrap",
+              marginBottom: 28,
+            }}
+          >
             <Link
               href={`/${handle}/place`}
               style={{
@@ -242,6 +324,22 @@ export default function DashboardClient({
             >
               Place a new light
             </Link>
+            <button
+              type="button"
+              onClick={() => setShowOutreachModal(true)}
+              style={{
+                padding: "10px 18px",
+                borderRadius: 999,
+                border: "1px solid rgba(138,109,42,0.2)",
+                background: "rgba(255,248,230,0.35)",
+                color: "rgba(138,109,42,0.7)",
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                cursor: "pointer",
+              }}
+            >
+              Copy outreach message
+            </button>
           </div>
 
           {/* ── (b) STATUS SUMMARY ── */}
