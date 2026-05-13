@@ -12,11 +12,40 @@ type Listing = {
   city?: string;
   state?: string;
   county?: string;
+  category?: string | null;
+  practices?: string[] | null;
   steward_id?: string | null;
   steward_email?: string | null;
   placed_by_seeder_id?: string | null;
   source?: string | null;
+  outreach_status?: string | null;
+  bounce_info?: string | null;
 };
+
+const CATEGORIES = [
+  "Food & Nourishment",
+  "Home & Shelter",
+  "Health & Wellbeing",
+  "Energy & Infrastructure",
+  "Land & Ecology",
+  "Materials & Goods",
+  "Learning & Education",
+  "Travel & Movement",
+  "Community & Culture",
+  "Conflict Transformation & Repair",
+  "Finance & Systems",
+];
+
+const PRACTICES = [
+  "Organic", "Regenerative", "Permaculture", "Fair Trade",
+  "Biodegradable", "Compostable", "Recycled Materials", "Upcycled Materials",
+  "Low Waste", "Zero Waste", "Local", "Worker-Owned / Cooperative",
+  "Community Owned", "Renewable Energy", "Educational",
+  "Accessible / Sliding Scale", "Volunteer Run", "Nonprofit / Mission Driven",
+  "Indigenous Led", "Women Led", "Trauma-Informed", "Restorative",
+  "Somatic", "Nonviolent", "Peer Supported", "Community Led",
+  "Justice-Oriented",
+];
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -106,12 +135,19 @@ export default function EditListingPage({ params }: Props) {
   // Fields shared by both steward-edit and propose-edit
   const [suggestedTitle, setSuggestedTitle] = useState("");
   const [suggestedDescription, setSuggestedDescription] = useState("");
+  const [suggestedCategory, setSuggestedCategory] = useState("");
+  const [suggestedPractices, setSuggestedPractices] = useState<string[]>([]);
   const [suggestedWebsite, setSuggestedWebsite] = useState("");
   const [suggestedAddress, setSuggestedAddress] = useState("");
   const [suggestedCity, setSuggestedCity] = useState("");
   const [suggestedState, setSuggestedState] = useState("");
   const [suggestedCounty, setSuggestedCounty] = useState("");
   const [notes, setNotes] = useState("");
+
+  // Seeder-specific fields
+  const [suggestedStewardEmail, setSuggestedStewardEmail] = useState("");
+  const [outreachStatus, setOutreachStatus] = useState<string | null>(null);
+  const [bounceInfo, setBounceInfo] = useState<string | null>(null);
 
   // Steward-specific
   const [stewardEmail, setStewardEmail] = useState("");
@@ -162,11 +198,16 @@ export default function EditListingPage({ params }: Props) {
         setOriginalListing(found);
         setSuggestedTitle(found.title || "");
         setSuggestedDescription(found.description || "");
+        setSuggestedCategory(found.category || "");
+        setSuggestedPractices(found.practices || []);
         setSuggestedWebsite(found.website || "");
         setSuggestedAddress(found.address || "");
         setSuggestedCity(found.city || "");
         setSuggestedState(found.state || "");
         setSuggestedCounty(found.county || "");
+        setSuggestedStewardEmail(found.steward_email || "");
+        setOutreachStatus(found.outreach_status || null);
+        setBounceInfo(found.bounce_info || null);
 
         // Determine edit mode — seeder check first, then stewardship state
 
@@ -233,11 +274,14 @@ export default function EditListingPage({ params }: Props) {
           listing_id: listingId,
           title: suggestedTitle,
           description: suggestedDescription,
+          category: suggestedCategory,
+          practices: suggestedPractices,
           website: suggestedWebsite,
           address: suggestedAddress,
           city: suggestedCity,
           state: suggestedState,
           county: suggestedCounty,
+          steward_email: suggestedStewardEmail,
         }),
       });
 
@@ -266,6 +310,8 @@ export default function EditListingPage({ params }: Props) {
           listing_id: listingId,
           title: suggestedTitle,
           description: suggestedDescription,
+          category: suggestedCategory,
+          practices: suggestedPractices,
           website: suggestedWebsite,
           address: suggestedAddress,
           city: suggestedCity,
@@ -301,6 +347,8 @@ export default function EditListingPage({ params }: Props) {
           listingId,
           suggestedTitle,
           suggestedDescription,
+          suggestedCategory,
+          suggestedPractices,
           suggestedWebsite,
           suggestedAddress,
           suggestedCity,
@@ -705,7 +753,15 @@ export default function EditListingPage({ params }: Props) {
     );
   }
 
-  // ── Shared listing fields (used by both steward-edit and propose-edit) ──
+  function togglePractice(practice: string) {
+    setSuggestedPractices((current) =>
+      current.includes(practice)
+        ? current.filter((p) => p !== practice)
+        : [...current, practice]
+    );
+  }
+
+  // ── Shared listing fields ──
   const listingFields = (
     <>
       <label style={fieldStyle}>
@@ -716,6 +772,49 @@ export default function EditListingPage({ params }: Props) {
         <span style={labelStyle}>Description</span>
         <textarea style={textareaStyle} value={suggestedDescription} onChange={(e) => setSuggestedDescription(e.target.value)} />
       </label>
+      <div style={fieldStyle}>
+        <span style={labelStyle}>Category</span>
+        <select
+          value={suggestedCategory}
+          onChange={(e) => setSuggestedCategory(e.target.value)}
+          style={{ ...inputStyle, appearance: "none" as const }}
+        >
+          <option value="">Select a category</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+      <div style={fieldStyle}>
+        <span style={labelStyle}>Practices / Values</span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {PRACTICES.map((practice) => {
+            const isSelected = suggestedPractices.includes(practice);
+            return (
+              <button
+                key={practice}
+                type="button"
+                onClick={() => togglePractice(practice)}
+                style={{
+                  borderRadius: 999,
+                  border: isSelected
+                    ? "1px solid rgba(255,200,80,0.45)"
+                    : "1px solid rgba(100,150,220,0.22)",
+                  padding: "8px 12px",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  background: isSelected
+                    ? "rgba(255,216,107,0.18)"
+                    : "rgba(255,255,255,0.7)",
+                  color: isSelected ? "#7a4f00" : "#3a5a7a",
+                }}
+              >
+                {practice}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <label style={fieldStyle}>
         <span style={labelStyle}>Website</span>
         <input style={inputStyle} value={suggestedWebsite} onChange={(e) => setSuggestedWebsite(e.target.value)} />
@@ -763,7 +862,51 @@ export default function EditListingPage({ params }: Props) {
 
           {editMode === "seeder_edit" ? (
             <form onSubmit={handleSeederSave} style={formStyle}>
+              {/* Outreach status context */}
+              <div style={{ fontSize: "0.82rem", color: "#6b7c94", marginBottom: 4 }}>
+                Outreach:{" "}
+                {(() => {
+                  switch (outreachStatus) {
+                    case "not_started": return "Outreach has not begun";
+                    case "email_1_sent": return "First outreach email sent";
+                    case "email_2_sent": return "Second outreach email sent";
+                    case "email_3_sent": return "Third outreach email sent";
+                    case "bounced": return "Outreach email bounced";
+                    case "claimed": return "Claimed by steward";
+                    case "removed": return "Removed";
+                    case "unsubscribed": return "Unsubscribed";
+                    case "manual_outreach_sent": return "Manual outreach logged";
+                    case null: case undefined: return "Outreach has not begun";
+                    default: return outreachStatus;
+                  }
+                })()}
+                {bounceInfo && (
+                  <span style={{ color: "#a04040" }}>
+                    {" — "}{bounceInfo}
+                  </span>
+                )}
+              </div>
+
               {listingFields}
+
+              {/* Steward email (seeder-only — steward_edit has its own stewardship section) */}
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  Business contact email
+                </span>
+                <span style={{ fontSize: "0.78rem", color: "#6b7c94", fontWeight: 400, display: "block", marginBottom: 6 }}>
+                  The email you&apos;d use to reach this business. Used for
+                  outreach — only becomes a verified steward identity if the
+                  business claims the listing.
+                </span>
+                <input
+                  type="email"
+                  style={inputStyle}
+                  value={suggestedStewardEmail}
+                  onChange={(e) => setSuggestedStewardEmail(e.target.value)}
+                  placeholder="e.g., hello@baycoffeeroasters.com"
+                />
+              </label>
 
               {error ? <p style={errorStyle}>{error}</p> : null}
               <button type="submit" style={buttonStyle} disabled={submitting}>
