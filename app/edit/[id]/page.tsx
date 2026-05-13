@@ -21,6 +21,9 @@ type Listing = {
   source?: string | null;
   outreach_status?: string | null;
   bounce_info?: string | null;
+  outreach_methods?: string[] | null;
+  outreach_notes?: string | null;
+  manual_outreach_at?: string | null;
 };
 
 const CATEGORIES = [
@@ -46,6 +49,22 @@ const PRACTICES = [
   "Indigenous Led", "Women Led", "Trauma-Informed", "Restorative",
   "Somatic", "Nonviolent", "Peer Supported", "Community Led",
   "Justice-Oriented",
+];
+
+const METHOD_LABELS: Record<string, string> = {
+  copy_paste: "Copy-paste outreach",
+  phone: "Phone",
+  social_dm: "Social DM",
+  in_person: "In person",
+  other: "Other",
+};
+
+const OUTREACH_METHOD_OPTIONS = [
+  { value: "copy_paste", label: "Copy-paste outreach (contact form / chat / DM)" },
+  { value: "phone", label: "Called by phone" },
+  { value: "social_dm", label: "Sent via social media DM" },
+  { value: "in_person", label: "In person" },
+  { value: "other", label: "Other" },
 ];
 
 type Props = {
@@ -162,6 +181,17 @@ function EditListingContent({ params }: Props) {
   const [suggestedStewardEmail, setSuggestedStewardEmail] = useState("");
   const [outreachStatus, setOutreachStatus] = useState<string | null>(null);
   const [bounceInfo, setBounceInfo] = useState<string | null>(null);
+  const [existingMethods, setExistingMethods] = useState<string[]>([]);
+  const [existingNotes, setExistingNotes] = useState<string | null>(null);
+  const [manualOutreachAt, setManualOutreachAt] = useState<string | null>(null);
+
+  // Outreach logging form state
+  const [showOutreachLog, setShowOutreachLog] = useState(false);
+  const [outreachMethods, setOutreachMethods] = useState<string[]>([]);
+  const [outreachNotesInput, setOutreachNotesInput] = useState("");
+  const [outreachLogError, setOutreachLogError] = useState("");
+  const [loggingOutreach, setLoggingOutreach] = useState(false);
+  const [outreachFlash, setOutreachFlash] = useState(false);
 
   // Steward-specific
   const [stewardEmail, setStewardEmail] = useState("");
@@ -237,6 +267,9 @@ function EditListingContent({ params }: Props) {
         setSuggestedStewardEmail(found.steward_email || "");
         setOutreachStatus(found.outreach_status || null);
         setBounceInfo(found.bounce_info || null);
+        setExistingMethods(found.outreach_methods || []);
+        setExistingNotes(found.outreach_notes || null);
+        setManualOutreachAt(found.manual_outreach_at || null);
 
         // Determine edit mode — seeder check first, then stewardship state
 
@@ -871,6 +904,29 @@ function EditListingContent({ params }: Props) {
   return (
     <main style={pageStyle}>
       <Atmosphere />
+
+      {/* Outreach logged flash */}
+      {outreachFlash && (
+        <div
+          style={{
+            position: "fixed",
+            top: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "10px 24px",
+            borderRadius: 999,
+            background: "rgba(255,216,107,0.95)",
+            color: "#1a2a0e",
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            zIndex: 100,
+            boxShadow: "0 4px 20px rgba(255,200,80,0.3)",
+          }}
+        >
+          Outreach logged
+        </div>
+      )}
+
       <div style={contentWrapStyle}>
         <p style={kickerStyle}>Canary Commons</p>
         <div style={cardStyle}>
@@ -914,6 +970,166 @@ function EditListingContent({ params }: Props) {
                   <span style={{ color: "#a04040" }}>
                     {" — "}{bounceInfo}
                   </span>
+                )}
+              </div>
+              {existingMethods.length > 0 && (
+                <div style={{ fontSize: "0.78rem", color: "#6b7c94", marginBottom: 2 }}>
+                  Logged: {existingMethods.map((m) => METHOD_LABELS[m] || m).join(", ")}
+                  {manualOutreachAt && (
+                    <> — {new Date(manualOutreachAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</>
+                  )}
+                </div>
+              )}
+              {existingNotes && (
+                <div style={{ fontSize: "0.78rem", color: "#8a9ab0", fontStyle: "italic", marginBottom: 4 }}>
+                  {existingNotes}
+                </div>
+              )}
+
+              {/* Log outreach section */}
+              <div style={{ marginBottom: 12 }}>
+                {!showOutreachLog ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowOutreachLog(true)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#8a6d2a",
+                      fontSize: "0.82rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      padding: 0,
+                      textDecoration: "underline",
+                      textUnderlineOffset: 2,
+                    }}
+                  >
+                    Log outreach about this listing
+                  </button>
+                ) : (
+                  <div
+                    style={{
+                      padding: 16,
+                      borderRadius: 14,
+                      border: "1px solid rgba(138,109,42,0.15)",
+                      background: "rgba(255,248,230,0.3)",
+                    }}
+                  >
+                    <div style={{ fontSize: "0.88rem", fontWeight: 650, color: "#8a6d2a", marginBottom: 6 }}>
+                      Log outreach
+                    </div>
+                    <p style={{ fontSize: "0.82rem", color: "#3a5a7a", lineHeight: 1.5, margin: "0 0 12px" }}>
+                      Record how and when you reached out to this business.
+                    </p>
+                    <div style={{ display: "grid", gap: 8, marginBottom: 12 }}>
+                      {OUTREACH_METHOD_OPTIONS.map((opt) => (
+                        <label
+                          key={opt.value}
+                          style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem", color: "#0d2a4a", cursor: "pointer" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={outreachMethods.includes(opt.value)}
+                            onChange={() => {
+                              setOutreachMethods((prev) =>
+                                prev.includes(opt.value)
+                                  ? prev.filter((m) => m !== opt.value)
+                                  : [...prev, opt.value]
+                              );
+                              setOutreachLogError("");
+                            }}
+                          />
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 6 }}>
+                        Notes (optional)
+                      </span>
+                      <textarea
+                        value={outreachNotesInput}
+                        onChange={(e) => setOutreachNotesInput(e.target.value)}
+                        placeholder="e.g., Left voicemail with sister who said she'd pass it on."
+                        rows={3}
+                        style={{ ...inputStyle, resize: "vertical" as const }}
+                      />
+                    </div>
+                    {outreachLogError && (
+                      <p style={{ fontSize: "0.82rem", color: "#9b2222", margin: "0 0 10px" }}>
+                        {outreachLogError}
+                      </p>
+                    )}
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      <button
+                        type="button"
+                        disabled={loggingOutreach}
+                        onClick={async () => {
+                          if (outreachMethods.length === 0) {
+                            setOutreachLogError("Please select at least one method.");
+                            return;
+                          }
+                          setLoggingOutreach(true);
+                          setOutreachLogError("");
+                          try {
+                            const res = await fetch("/api/seeder/log-outreach", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                listing_id: listingId,
+                                outreach_methods: outreachMethods,
+                                outreach_notes: outreachNotesInput,
+                              }),
+                            });
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || "Failed to log outreach.");
+                            // Update local state
+                            setOutreachStatus("manual_outreach_sent");
+                            setExistingMethods(data.outreach_methods || outreachMethods);
+                            setExistingNotes(data.outreach_notes || null);
+                            setManualOutreachAt(data.manual_outreach_at || new Date().toISOString());
+                            // Reset form
+                            setShowOutreachLog(false);
+                            setOutreachMethods([]);
+                            setOutreachNotesInput("");
+                            // Flash
+                            setOutreachFlash(true);
+                            setTimeout(() => setOutreachFlash(false), 2500);
+                          } catch (err) {
+                            setOutreachLogError(err instanceof Error ? err.message : "Failed to log outreach.");
+                          } finally {
+                            setLoggingOutreach(false);
+                          }
+                        }}
+                        style={{
+                          padding: "10px 20px",
+                          borderRadius: 999,
+                          border: "none",
+                          background: "#FFD86B",
+                          color: "#1a2a0e",
+                          fontWeight: 700,
+                          fontSize: "0.88rem",
+                          cursor: loggingOutreach ? "not-allowed" : "pointer",
+                          opacity: loggingOutreach ? 0.7 : 1,
+                          boxShadow: "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                        }}
+                      >
+                        {loggingOutreach ? "Logging…" : "Log outreach"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowOutreachLog(false);
+                          setOutreachMethods([]);
+                          setOutreachNotesInput("");
+                          setOutreachLogError("");
+                        }}
+                        style={{ background: "none", border: "none", color: "#6b7c94", fontSize: "0.85rem", cursor: "pointer" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
 
