@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { resend, FROM_EMAIL } from "@/app/lib/resend";
 import { welcomeFounderEmail } from "@/app/lib/emails/welcomeFounder";
+import { notifyFounderJoinedEmail } from "@/app/lib/emails/notifyFounderJoined";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-03-25.dahlia",
@@ -164,6 +165,30 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       console.log(`Welcome email sent to ${email}`);
     } catch (emailErr) {
       console.error("Welcome email failed to send:", emailErr, { email });
+    }
+
+    // --- Send internal notification to Ren ---
+    try {
+      const notification = notifyFounderJoinedEmail({
+        name: name || "",
+        email,
+        tier,
+        amount: amountDollars,
+        referralCode: referralCode || null,
+        isSubscription: !!tier && tier !== "custom",
+      });
+
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: "founder@canarycommons.org",
+        subject: notification.subject,
+        html: notification.html,
+        text: notification.text,
+      });
+
+      console.log(`Founder notification sent to founder@canarycommons.org`);
+    } catch (notifyErr) {
+      console.error("Founder notification email failed:", notifyErr);
     }
   }
 }

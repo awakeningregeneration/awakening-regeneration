@@ -68,6 +68,18 @@ level, or maturity. Items here are not problems — they are
   referrals (/[handle]/join). Phase 4 work, deserves architectural
   thought rather than quick patch. (Migrated from LOOSE_ENDS.)
 
+- [ ] **Audit trail for seeder edits** — When a seeder edits a
+  listing they placed, no record is currently kept of who edited
+  what or when. Worth adding a lightweight audit table or audit
+  columns (last_edited_by_seeder_id, last_edited_at) when seeder
+  activity scales beyond Lucia.
+
+- [ ] **Cross-seeder edit visibility** — Seeders currently cannot
+  edit another seeder's placements (intentional, by design). If
+  multi-seeder coordination ever needs this (e.g., handoffs,
+  regional territory transfers), it would be a future build with
+  explicit permission modeling.
+
 - [ ] **Unify listing-name normalization into a shared utility** —
   Two listing-matching normalizations currently exist: seeder
   placement uses `normalizeName()` helper (in place-listing/
@@ -77,6 +89,123 @@ level, or maturity. Items here are not problems — they are
   (e.g. app/lib/normalizeName.ts) when the next match-related
   change comes through. Not blocking — both produce the same
   output for normal cases.
+
+---
+
+## Affiliate / Online Resources Infrastructure
+
+- [ ] **Multi-contributor identity for /api/contributor** —
+  Currently filters by hardcoded contributor_id = "contributor_001"
+  (Lucia). When a second affiliate contributor is onboarded, this
+  will need to move to a token or session-based identity model.
+  The /contributor/submit form also hardcodes contributor_name =
+  "Lucia" and status = "approved". All three values need to become
+  dynamic.
+
+### Affiliate Redirect Layer — /resource/[slug]
+
+**Status:** ✓ BUILT (May 13, 2026). Migration applied, route
+handler created, emit sites updated. Awaiting push to production.
+Original spec preserved below for reference.
+
+**Problem:**
+Awin affiliate tracking links route through awin1.com. The
+awin1.com domain is on widely-used ad-blocker filter lists (Peter
+Lowe's Ad and tracking server list, uBlock Origin defaults, Brave
+Shields, Firefox Strict mode, Safari content blockers). When a
+user with any of these enabled clicks an Online Resource on CC,
+they see a "Page blocked" warning before reaching the merchant.
+Some click Proceed. Many close the tab silently. This is most
+likely to affect the privacy-conscious audience that most aligns
+with CC's values — they are statistically more likely to run ad
+blockers.
+
+CC operators do not see this on their own machines because they
+typically aren't running these blockers. The friction is invisible
+from the inside; the lost clicks would never surface as feedback.
+
+**Approach: CC-owned redirect layer**
+
+New route: `/resource/[slug]`
+
+Flow:
+1. User clicks "Visit Resource" on an Online Resource card.
+2. Browser navigates to `canarycommons.org/resource/[slug]` (CC's
+   own domain, not on any ad-blocker filter list).
+3. CC's server immediately issues a 302 redirect to the
+   affiliate_url stored on that resource (the Awin tracking URL).
+4. Awin records the click server-side and redirects to the
+   merchant destination.
+5. User lands at merchant.
+
+The user's browser still passes through awin1.com momentarily as
+a redirect hop, but no page renders there and ad blockers
+generally do not block redirect-target domains the way they block
+visible navigation targets. Tracking still works — Awin still
+receives the click, CC still earns commission.
+
+**Schema change required:**
+Add a `slug` column to affiliate_resources table. Auto-generate
+from `name` field on insert/update via a slugify transform
+(lowercase, hyphenated, alphanumeric only). Enforce uniqueness;
+on collision, append numeric suffix. Backfill existing rows on
+migration.
+
+**Route behavior:**
+- `/resource/[slug]` looks up affiliate_resources by slug.
+- If row found and `affiliate_url` is present → 302 redirect to
+  affiliate_url.
+- If row found and `affiliate_url` is empty but `url` is present
+  → 302 redirect to url (handles non-affiliate Online Resources
+  that still want unified routing).
+- If row not found → 404 with friendly copy pointing back to
+  /support.
+
+**UI change:**
+All "Visit Resource" / external links on Online Resource cards
+(anywhere on the site — public Online Resources page, county
+search results, /contributor/submit listings view, anywhere else
+they appear) point to `/resource/[slug]` instead of directly to
+affiliate_url. Stewards/admin views may still show the raw
+affiliate_url for verification purposes.
+
+**Implementation: pure server-side redirect, no interstitial
+page.** Fastest, lowest friction. Revisit interstitial if CC
+wants more brand presence in the moment of transition.
+
+**Transparency copy (Ren to write):**
+This is the values-side counterpart to the technical layer. CC
+will write and place on-site copy — likely on the Online Resources
+index page, possibly also on a dedicated /about page — explaining:
+- Online Resources is how Canary Commons sustains itself
+  financially over the long term.
+- These are affiliate relationships: when a visitor clicks through
+  and purchases from a partner, CC receives a portion of that
+  revenue.
+- This funding model is what allows the local map to remain free,
+  non-pay-to-play, and non-competitive between map listings.
+- We curate Online Resources for alignment with CC's values, not
+  for commission rates.
+
+The redirect layer is not concealment — it's a smoother user
+experience. The model itself is named clearly on the site.
+
+**Decision criteria for revisiting:**
+- Awin dashboard shows meaningful click volume → defer further;
+  current setup is working.
+- Awin dashboard shows low clicks despite good listings and good
+  site traffic → build the redirect layer; ad-blocker friction is
+  the likely culprit.
+- Ren decides to actively scale Online Resources as a revenue arm
+  → build the redirect layer as part of solidifying that system
+  before adding more affiliate partners.
+
+**Related/dependent work:**
+- Slug column migration on affiliate_resources.
+- Update all link-emit sites across the codebase to use
+  `/resource/[slug]`.
+- Coordinate with transparency copy placement so the redirect
+  layer ships paired with the language, not separately.
 
 ---
 

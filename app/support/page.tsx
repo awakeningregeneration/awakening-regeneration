@@ -13,6 +13,7 @@ type OnlineResource = {
   practices: string[] | null;
   why_it_matters: string | null;
   affiliate_url: string | null;
+  slug: string | null;
   status?: string | null;
   created_at?: string | null;
 };
@@ -235,7 +236,7 @@ function ResourceVisual({
 }
 
 function ResourceCard({ resource }: { resource: OnlineResource }) {
-  const visitUrl = resource.affiliate_url || resource.url || "#";
+  const visitUrl = resource.slug ? `/resource/${resource.slug}` : resource.affiliate_url || resource.url || "#";
 
   return (
     <article

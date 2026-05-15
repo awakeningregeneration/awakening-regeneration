@@ -13,6 +13,7 @@ interface ContributorResource {
   practices: string[] | null;
   why_it_matters: string | null;
   affiliate_url: string | null;
+  slug: string | null;
   status: string;
   created_at: string;
 }
@@ -173,8 +174,9 @@ export default function ContributorDashboard() {
         ) : (
           <div style={{ display: "grid", gap: 20 }}>
             {resources.map((resource) => {
-              const visitUrl =
-                resource.affiliate_url || resource.url || "#";
+              const visitUrl = resource.slug
+                ? `/resource/${resource.slug}`
+                : resource.affiliate_url || resource.url || "#";
 
               return (
                 <article

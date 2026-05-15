@@ -50,6 +50,16 @@ export function stewardClaimConfirmationEmail(options: {
     entirely, you can do that from the same edit page.
   </p>
 
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    Canary Commons is a living map of regenerative work across the country,
+    built without ads or rankings. Its foundational year is currently being
+    sustained by those who are able to see the vision before all the anchors
+    are set. You can learn more at
+    <a href="https://www.canarycommons.org/about" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/about</a>
+    or
+    <a href="https://www.canarycommons.org/founders" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/founders</a>.
+  </p>
+
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 16px;">
     &#10047; &nbsp; &#10047; &nbsp; &#10047;
   </div>
@@ -69,6 +79,8 @@ To make changes anytime in the future, just visit your listing's page on Canary 
 View your listing: ${listingUrl}
 
 If you ever want to step away from this role or remove the listing entirely, you can do that from the same edit page.
+
+Canary Commons is a living map of regenerative work across the country, built without ads or rankings. Its foundational year is currently being sustained by those who are able to see the vision before all the anchors are set. You can learn more at canarycommons.org/about or canarycommons.org/founders.
 
 — Ren
 Canary Commons`;

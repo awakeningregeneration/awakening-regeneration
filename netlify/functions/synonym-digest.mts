@@ -23,7 +23,7 @@ const FROM_EMAIL = "Canary Commons <synonyms@canarycommons.org>";
 
 // Supabase Studio deep link for synonym_candidates filtered to pending
 function buildReviewUrl(): string {
-  const projectRef = "lzqlmzqjpztnzgriqyok";
+  const projectRef = process.env.SUPABASE_PROJECT_REF || "lzqlmzqjpztnzgriqyok";
   const tableId = process.env.SUPABASE_SYNONYM_CANDIDATES_TABLE_ID || "";
   if (tableId) {
     return `https://supabase.com/dashboard/project/${projectRef}/editor/${tableId}?filter=status%3Deq%3Apending`;

@@ -22,6 +22,7 @@ type OnlineResource = {
   category: string | null;
   practices: string[] | null;
   affiliate_url: string | null;
+  slug: string | null;
 };
 
 const sidebarLights = [
@@ -1038,7 +1039,7 @@ const countyListings = useMemo(() => {
                       {onlineHits.map((r) => (
                         <a
                           key={String(r.id)}
-                          href={r.affiliate_url || r.url || "#"}
+                          href={r.slug ? `/resource/${r.slug}` : r.affiliate_url || r.url || "#"}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
