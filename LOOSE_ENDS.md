@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 14, 2026*
+*Last updated: May 15, 2026*
 
 ---
 
@@ -20,7 +20,9 @@
 
 - [ ] **Proton first-contact mail routing (LOW PRIORITY, OBSERVATION)** — Magic-link emails to founder@canarycommons.org land in Proton's All Mail folder, not Inbox. Likely Proton's conservative first-contact handling for new sender domains (canarycommons.org via Resend). Should warm up over time. Worth verifying SPF/DKIM/DMARC are all green in Resend → Domains → canarycommons.org.
 
-- [ ] **Push accumulated local changes to production** — Sitting in local working directory, not yet deployed. Bundle includes: (1) affiliate redirect layer (route handler + emit-site updates; migration already live), (2) founder notification email (template + webhook wiring), (3) synonym_groups updated_at trigger migration file, (4) SUPABASE_PROJECT_REF env var change in synonym-digest.mts (Netlify env var also needs adding: lzqlmzqjpztnzgriqyok), (5) steward claim confirmation orientation paragraph. Test live after push: signup test confirms founder row + welcome email + notification email all fire.
+- [ ] **Affiliate ad-blocker friction — acceptable with transparency copy in place** — Users with strict ad blockers (uBlock + Peter Lowe's list) still see a warning when clicking through /resource/[slug] because awin1.com is on the filter list as a redirect destination. The /support overlay now gives full context about why the affiliate links exist and what they fund, so blocker users can proceed informed. This is acceptable given CC's design ethic. Revisit affiliate network alternatives (not Awin) once CC reaches a traffic threshold where other networks will accept the site — Awin remains the right choice for now given CC's current scale.
+
+- [ ] **Cookie Secure flag: project-wide pattern** — When setting cookies client-side via document.cookie, always make the Secure flag conditional: `const secure = window.location.protocol === "https:" ? "; Secure" : ""`. Unconditional "; Secure" causes cookies to silently disappear in local HTTP dev, leading to server/client state divergence and hydration mismatches. Applied in cc_support_intro_acknowledged and cc_compass_seen cookies. Apply to any future client-side cookie-setting code.
 
 - [ ] **Data consistency: outreach_status vs steward_id on claimed listings** — Dashboard counts use outreach_status === "claimed"; muted-row rendering uses steward_id !== null. If a listing can have one set without the other (e.g., steward_id set but outreach_status still at "email_3_sent", or outreach_status = "claimed" but steward_id still null), the counts and styling could diverge. Verify in Supabase by inspecting any currently-claimed listings. Both values should always be set together in the claim flow (/api/steward/verify and stewardshipPromotion.ts both write both fields), but worth confirming empirically.
 

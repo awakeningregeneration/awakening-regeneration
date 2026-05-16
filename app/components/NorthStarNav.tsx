@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import CompassCaption from "./CompassCaption";
 
 const GOLD = "#FFD86B";
 const GOLD_LIGHT = "#FFE8A3";
@@ -548,6 +549,14 @@ export default function NorthStarNav() {
           );
         })}
       </div>
+
+      {/* ── Compass caption bubble ── */}
+      {(pathname === "/" || pathname === "/about") && (
+        <CompassCaption
+          mode={pathname === "/" ? "homepage-timed" : "about-permanent"}
+          isDropdownOpen={open}
+        />
+      )}
 
     </div>
   );
