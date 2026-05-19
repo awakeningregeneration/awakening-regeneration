@@ -44,9 +44,10 @@ export default async function handler() {
   let email3Sent = 0;
   let email3Failed = 0;
 
-  // ── Email 2 candidates: email_1_sent AND 7+ days since outreach started ──
+  // ── Email 2 candidates: email_1_sent AND 28+ days since outreach started ──
+  // Email 2 fires 28 days after Email 1 (was 7)
 
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const twentyEightDaysAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: email2Candidates, error: e2Err } = await supabase
     .from("listings")
@@ -56,7 +57,7 @@ export default async function handler() {
     .eq("status", "active")
     .eq("outreach_status", "email_1_sent")
     .not("steward_email", "is", null)
-    .lte("outreach_started_at", sevenDaysAgo)
+    .lte("outreach_started_at", twentyEightDaysAgo)
     .limit(50);
 
   if (e2Err) {

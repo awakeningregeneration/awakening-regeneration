@@ -29,7 +29,7 @@ export function seederOutreach2Email(options: {
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hello ${businessName},</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Reaching out, briefly. Canary Commons is growing &mdash; a living map of
+    A second brief note. Canary Commons is growing &mdash; a living map of
     people, places, and projects helping make life-forward choices visible,
     actionable, and supportable, so we can all step toward a healthier future
     for ourselves and for those who come after.
@@ -38,9 +38,26 @@ export function seederOutreach2Email(options: {
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Your listing is part of that growing map.</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    As more people begin using it to find local businesses, trusted services,
-    and aligned work in their region, the strongest listings will be the ones
-    shaped by the people doing the work themselves.
+    It&rsquo;s hard to find small places doing great things. Both the people
+    doing the work and the people looking for it have been on opposite sides
+    of that same gap. Canary Commons is being built to close it &mdash; for
+    both sides.
+  </p>
+
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    As the map fills in, what&rsquo;s on it becomes findable. Travelers
+    passing through can locate aligned places they&rsquo;d otherwise never
+    know about. Locals can discover what&rsquo;s been right around the corner
+    all along. And the businesses already doing meaningful work get reached by
+    the people actively looking for them &mdash; not through advertising, not
+    through algorithms, but through a map that&rsquo;s just trying to make
+    the good already happening easier to find.
+  </p>
+
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    As more people begin using Canary Commons to find local businesses,
+    trusted services, and aligned work in their region, the strongest
+    listings will be the ones shaped by the people doing the work themselves.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
@@ -90,6 +107,11 @@ export function seederOutreach2Email(options: {
     </a>
   </div>
 
+  <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
+    This is the second of three emails. If you don&rsquo;t do anything at
+    all, your listing will remain on the map.
+  </p>
+
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
     Thank you for all you are doing to inhabit the planet and community in a
     thoughtful way.
@@ -99,10 +121,9 @@ export function seederOutreach2Email(options: {
     &mdash; Canary Commons
   </p>
 
-  <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
-    This is the second of three brief notes. You&rsquo;ll hear from us once
-    more, and then no further. Not acting is honored &mdash; your listing stays
-    exactly as it is, free as it has always been.
+  <p style="font-size:14px;line-height:1.6;color:#6a7a8a;margin:0 0 16px;text-align:center;">
+    <a href="https://www.canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">www.canarycommons.org</a><br/>
+    <a href="mailto:founder@canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">founder@canarycommons.org</a>
   </p>
 
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 8px;">
@@ -112,11 +133,15 @@ export function seederOutreach2Email(options: {
 
   const text = `Hello ${businessName},
 
-Reaching out, briefly. Canary Commons is growing — a living map of people, places, and projects helping make life-forward choices visible, actionable, and supportable, so we can all step toward a healthier future for ourselves and for those who come after.
+A second brief note. Canary Commons is growing — a living map of people, places, and projects helping make life-forward choices visible, actionable, and supportable, so we can all step toward a healthier future for ourselves and for those who come after.
 
 Your listing is part of that growing map.
 
-As more people begin using it to find local businesses, trusted services, and aligned work in their region, the strongest listings will be the ones shaped by the people doing the work themselves.
+It's hard to find small places doing great things. Both the people doing the work and the people looking for it have been on opposite sides of that same gap. Canary Commons is being built to close it — for both sides.
+
+As the map fills in, what's on it becomes findable. Travelers passing through can locate aligned places they'd otherwise never know about. Locals can discover what's been right around the corner all along. And the businesses already doing meaningful work get reached by the people actively looking for them — not through advertising, not through algorithms, but through a map that's just trying to make the good already happening easier to find.
+
+As more people begin using Canary Commons to find local businesses, trusted services, and aligned work in their region, the strongest listings will be the ones shaped by the people doing the work themselves.
 
 If you'd like, this is a good moment to refine your listing and share a little more about what people should know when they find you.
 
@@ -138,11 +163,14 @@ And if it's not a fit, you can remove your listing at any time.
 
 Remove Listing: ${removeUrl}
 
+This is the second of three emails. If you don't do anything at all, your listing will remain on the map.
+
 Thank you for all you are doing to inhabit the planet and community in a thoughtful way.
 
 — Canary Commons
 
-This is the second of three brief notes. You'll hear from us once more, and then no further. Not acting is honored — your listing stays exactly as it is, free as it has always been.`;
+www.canarycommons.org
+founder@canarycommons.org`;
 
   return { subject, html, text };
 }

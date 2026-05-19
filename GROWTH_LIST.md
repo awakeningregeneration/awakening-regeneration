@@ -90,6 +90,24 @@ level, or maturity. Items here are not problems — they are
   change comes through. Not blocking — both produce the same
   output for normal cases.
 
+- [ ] **Admin tool for steward-email backfills** — The Ashland
+  backfill (May 18) was done via a one-time script
+  (scripts/backfill-email1.ts). The pattern is repeatable:
+  query listings by city/state with outreach_status='not_started',
+  send Email 1, update status. Worth building a small admin
+  dashboard tool when the next batch placement happens, rather
+  than writing a new script each time.
+
+- [ ] **Accented character matching in title-based searches** —
+  Dobrá Tea (with accented á) was caught during the Ashland
+  backfill. Any title-based search or matching function
+  (normalized_name, do_not_list checks, cross-seeder view
+  filters) may fail to match if the query uses an unaccented
+  character against an accented DB value or vice versa.
+  Consider adding Unicode normalization (NFD/NFC folding) to
+  search and matching paths when this becomes a real-world
+  issue beyond Dobrá.
+
 ---
 
 ## Affiliate / Online Resources Infrastructure
@@ -206,6 +224,69 @@ experience. The model itself is named clearly on the site.
   `/resource/[slug]`.
 - Coordinate with transparency copy placement so the redirect
   layer ships paired with the language, not separately.
+
+---
+
+## Email 1 / 2 / 3 Strategic Rewrite — May 18 2026
+
+The current three-email outreach cadence is functioning correctly
+and reads as honest and grounded. However, all three emails define
+Canary Commons through *intention* (life-forward choices,
+visibility, stewardship) without clearly naming the **practical
+gap being filled** — which is the thing stewards and future users
+actually need to understand.
+
+### The gap to name explicitly:
+
+It is hard to find small places doing great things. Both the
+businesses doing the work, and the people seeking what they
+offer, are on opposite sides of that same gap. Canary Commons is
+the bridge.
+
+### Strategic spine for the rewrite:
+
+"Hey — cool new thing you're included in. It's useful because
+it's bringing people to you, and making the things that make
+tomorrow livable accessible to the people who want to find them.
+It's hard to find small places doing great things. Canary
+Commons fills that gap — for the businesses, and for the people."
+
+### Specific addition for Email 1:
+
+Insert (likely between current paragraph 2 and paragraph 3, but
+feel into placement):
+
+"As the map fills in, it becomes a downloadable app that helps
+people find what cares for the long term — for the body, the
+land, the community — wherever they are."
+
+The body / land / community phrasing defines "life-forward"
+inline without replacing the term. The term stays; the meaning
+gets companioned the first time the reader meets it.
+
+### Notes for execution:
+
+- "Life-forward" stays as the chosen term. It does not get
+  replaced. It gets supported.
+- Update both the .ts template file AND EmailModals.tsx in
+  lockstep — they currently match and must continue to match
+  to prevent drift.
+- Email 2 (Visibility) and Email 3 (Stewardship) need their own
+  pass — feel for where the gap-naming and the
+  app/network-effect thread should land in each. Each email has
+  its own job in the arc; the strategic spine threads through
+  all three but expresses differently in each.
+- Don't lose the existing tone. It's honest, ungraspy, gives
+  full agency, doesn't oversell. The rewrite is additive, not
+  replacement.
+
+### Files that will change:
+
+- app/lib/emails/seederOutreach1Recognition.ts
+- app/lib/emails/seederOutreach2Visibility.ts
+- app/lib/emails/seederOutreach3Stewardship.ts
+- app/components/EmailModals.tsx (Email1Recognition,
+  Email2Visibility, Email3Stewardship functions)
 
 ---
 

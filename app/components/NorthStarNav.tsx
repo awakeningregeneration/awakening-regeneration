@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { label: "Online Resources", href: "/support" },
   { label: "Founders", href: "/founders" },
   { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
 ];
 
 /* ── Dropdown item glass styles ── */

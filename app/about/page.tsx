@@ -503,6 +503,29 @@ export default function AboutPage() {
               </p>
             </div>
           </section>
+
+          {/* ═══ CONTACT ═══ */}
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "clamp(0.92rem, 1.05vw, 1rem)",
+              color: "rgba(255,248,224,0.55)",
+              margin: 0,
+              paddingBottom: "clamp(40px, 6vh, 80px)",
+            }}
+          >
+            Reach the project at{" "}
+            <a
+              href="mailto:hello@canarycommons.org"
+              style={{
+                color: "rgba(255,248,224,0.55)",
+                textDecoration: "underline",
+                textUnderlineOffset: 2,
+              }}
+            >
+              hello@canarycommons.org
+            </a>
+          </p>
         </div>
       </div>
     </main>

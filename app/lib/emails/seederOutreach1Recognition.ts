@@ -30,16 +30,20 @@ export function seederOutreach1Email(options: {
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hello ${businessName},</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    We know unsolicited email can be frustrating. We&rsquo;re reaching out
-    only because your work was added to a public community resource, and we
-    wanted to give you full control over how (or whether) it appears.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
     Someone in your community came across what you&rsquo;re doing and added
     your business to Canary Commons &mdash; a living map of people, places, and
     projects helping make life-forward choices more visible, actionable, and
     easier to find.
+  </p>
+
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    As the map fills in, it becomes a downloadable app that helps people find
+    what cares for the long term &mdash; for the body, the land, the community
+    &mdash; wherever they are. The more the map grows, the more useful it becomes:
+    travelers find aligned places in new towns, locals discover what they
+    didn&rsquo;t know was right around the corner, and the small businesses
+    doing the meaningful work become easier to find by the people who are
+    actively looking for them.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
@@ -115,10 +119,16 @@ export function seederOutreach1Email(options: {
     Canary Commons
   </p>
 
+  <p style="font-size:14px;line-height:1.6;color:#6a7a8a;margin:0 0 16px;text-align:center;">
+    <a href="https://www.canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">www.canarycommons.org</a><br/>
+    <a href="mailto:founder@canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">founder@canarycommons.org</a>
+  </p>
+
   <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
-    This is one of three brief notes from CC. You don&rsquo;t need to do
-    anything. Not doing anything at all is fine, you are already listed, and
-    you&rsquo;ll hear from us no more than two more times.
+    This is one of three brief notes from CC, spaced over six weeks. You
+    don&rsquo;t need to do anything. Not doing anything at all is fine, you
+    are already listed, and you&rsquo;ll hear from us no more than two more
+    times.
   </p>
 
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 8px;">
@@ -128,9 +138,9 @@ export function seederOutreach1Email(options: {
 
   const text = `Hello ${businessName},
 
-We know unsolicited email can be frustrating. We're reaching out only because your work was added to a public community resource, and we wanted to give you full control over how (or whether) it appears.
-
 Someone in your community came across what you're doing and added your business to Canary Commons — a living map of people, places, and projects helping make life-forward choices more visible, actionable, and easier to find.
+
+As the map fills in, it becomes a downloadable app that helps people find what cares for the long term — for the body, the land, the community — wherever they are. The more the map grows, the more useful it becomes: travelers find aligned places in new towns, locals discover what they didn't know was right around the corner, and the small businesses doing the meaningful work become easier to find by the people who are actively looking for them.
 
 This project exists to make the things choosing life forward — for ourselves, and for those who come after — visible, actionable, and supportable, so the work already happening in communities is easier to find, easier to trust, and easier to strengthen.
 
@@ -162,7 +172,10 @@ Whether you stay listed here or not, your work is valued for representing choice
 With respect,
 Canary Commons
 
-This is one of three brief notes from CC. You don't need to do anything. Not doing anything at all is fine, you are already listed, and you'll hear from us no more than two more times.`;
+www.canarycommons.org
+founder@canarycommons.org
+
+This is one of three brief notes from CC, spaced over six weeks. You don't need to do anything. Not doing anything at all is fine, you are already listed, and you'll hear from us no more than two more times.`;
 
   return { subject, html, text };
 }

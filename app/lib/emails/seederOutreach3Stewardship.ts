@@ -44,6 +44,14 @@ export function seederOutreach3Email(options: {
     find and strengthen it.
   </p>
 
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    The map is filling in. As it does, it becomes a downloadable app that
+    helps people find what cares for the long term &mdash; for the body, the
+    land, the community &mdash; wherever they are. The small places doing
+    meaningful work get reached by the people actively looking for them. The
+    seekers find what&rsquo;s been hard to find.
+  </p>
+
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Your listing is part of that effort.</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
@@ -86,6 +94,12 @@ export function seederOutreach3Email(options: {
     </a>
   </div>
 
+  <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
+    This is the last of three emails. If you don&rsquo;t do anything at all,
+    your listing will remain on the map. You won&rsquo;t hear from us again
+    unless you choose to engage. You are always welcome to participate.
+  </p>
+
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
     Thank you for contributing to the kind of world this project was built to
     make easier to find.
@@ -96,9 +110,9 @@ export function seederOutreach3Email(options: {
     Canary Commons
   </p>
 
-  <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
-    This is the last of three brief notes. You won&rsquo;t hear from us again
-    unless you choose to engage. You are always welcome to participate.
+  <p style="font-size:14px;line-height:1.6;color:#6a7a8a;margin:0 0 16px;text-align:center;">
+    <a href="https://www.canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">www.canarycommons.org</a><br/>
+    <a href="mailto:founder@canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">founder@canarycommons.org</a>
   </p>
 
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 8px;">
@@ -111,6 +125,8 @@ export function seederOutreach3Email(options: {
 A last note from us. Canary Commons was built to make the things choosing life forward — for ourselves and for those who come after — easier to find, easier to trust, and easier to support.
 
 Not by asking communities to start from scratch — but by helping make visible what is already being done, and making it easier for people to find and strengthen it.
+
+The map is filling in. As it does, it becomes a downloadable app that helps people find what cares for the long term — for the body, the land, the community — wherever they are. The small places doing meaningful work get reached by the people actively looking for them. The seekers find what's been hard to find.
 
 Your listing is part of that effort.
 
@@ -129,12 +145,15 @@ This project is grass-roots-funded by people who recognize what it is. If that f
 
 Help Carry the Commons: ${foundersUrl}
 
+This is the last of three emails. If you don't do anything at all, your listing will remain on the map. You won't hear from us again unless you choose to engage. You are always welcome to participate.
+
 Thank you for contributing to the kind of world this project was built to make easier to find.
 
 With thanks,
 Canary Commons
 
-This is the last of three brief notes. You won't hear from us again unless you choose to engage. You are always welcome to participate.`;
+www.canarycommons.org
+founder@canarycommons.org`;
 
   return { subject, html, text };
 }

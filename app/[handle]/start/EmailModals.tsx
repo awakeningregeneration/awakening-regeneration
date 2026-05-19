@@ -72,16 +72,20 @@ export function Email1Recognition() {
       <p style={bodyText}>Hello [Business Name],</p>
 
       <p style={bodyText}>
-        We know unsolicited email can be frustrating. We&apos;re reaching out
-        only because your work was added to a public community resource, and we
-        wanted to give you full control over how (or whether) it appears.
-      </p>
-
-      <p style={bodyText}>
         Someone in your community came across what you&apos;re doing and added
         your business to Canary Commons — a living map of people, places, and
         projects helping make life-forward choices more visible, actionable, and
         easier to find.
+      </p>
+
+      <p style={bodyText}>
+        As the map fills in, it becomes a downloadable app that helps people
+        find what cares for the long term — for the body, the land, the
+        community — wherever they are. The more the map grows, the more useful
+        it becomes: travelers find aligned places in new towns, locals discover
+        what they didn&apos;t know was right around the corner, and the small
+        businesses doing the meaningful work become easier to find by the people
+        who are actively looking for them.
       </p>
 
       <p style={bodyText}>
@@ -152,10 +156,17 @@ export function Email1Recognition() {
         Canary Commons
       </p>
 
+      <p style={{ ...footer, textAlign: "center" as const, fontStyle: "normal" }}>
+        www.canarycommons.org
+        <br />
+        founder@canarycommons.org
+      </p>
+
       <p style={footer}>
-        This is one of three brief notes from CC. You don&apos;t need to do
-        anything. Not doing anything at all is fine, you are already listed, and
-        you&apos;ll hear from us no more than two more times.
+        This is one of three brief notes from CC, spaced over six weeks. You
+        don&apos;t need to do anything. Not doing anything at all is fine, you
+        are already listed, and you&apos;ll hear from us no more than two more
+        times.
       </p>
 
       <div style={ornament}>❋ &nbsp; ❋ &nbsp; ❋</div>
@@ -171,7 +182,7 @@ export function Email2Visibility() {
       <p style={bodyText}>Hello [Business Name],</p>
 
       <p style={bodyText}>
-        Reaching out, briefly. Canary Commons is growing — a living map of
+        A second brief note. Canary Commons is growing — a living map of
         people, places, and projects helping make life-forward choices visible,
         actionable, and supportable, so we can all step toward a healthier future
         for ourselves and for those who come after.
@@ -180,9 +191,26 @@ export function Email2Visibility() {
       <p style={bodyText}>Your listing is part of that growing map.</p>
 
       <p style={bodyText}>
-        As more people begin using it to find local businesses, trusted services,
-        and aligned work in their region, the strongest listings will be the ones
-        shaped by the people doing the work themselves.
+        It&apos;s hard to find small places doing great things. Both the people
+        doing the work and the people looking for it have been on opposite sides
+        of that same gap. Canary Commons is being built to close it — for both
+        sides.
+      </p>
+
+      <p style={bodyText}>
+        As the map fills in, what&apos;s on it becomes findable. Travelers
+        passing through can locate aligned places they&apos;d otherwise never
+        know about. Locals can discover what&apos;s been right around the corner
+        all along. And the businesses already doing meaningful work get reached
+        by the people actively looking for them — not through advertising, not
+        through algorithms, but through a map that&apos;s just trying to make
+        the good already happening easier to find.
+      </p>
+
+      <p style={bodyText}>
+        As more people begin using Canary Commons to find local businesses,
+        trusted services, and aligned work in their region, the strongest
+        listings will be the ones shaped by the people doing the work themselves.
       </p>
 
       <p style={bodyText}>
@@ -226,19 +254,24 @@ export function Email2Visibility() {
         <span style={subtlePill}>Remove Listing</span>
       </div>
 
+      <p style={footer}>
+        This is the second of three emails. If you don&apos;t do anything at
+        all, your listing will remain on the map.
+      </p>
+
       <p style={bodyText}>
         Thank you for all you are doing to inhabit the planet and community in a
         thoughtful way.
       </p>
 
       <p style={bodyText}>
-        &mdash; Canary Commons
+        — Canary Commons
       </p>
 
-      <p style={footer}>
-        This is the second of three brief notes. You&apos;ll hear from us once
-        more, and then no further. Not acting is honored — your listing stays
-        exactly as it is, free as it has always been.
+      <p style={{ ...footer, textAlign: "center" as const, fontStyle: "normal" }}>
+        www.canarycommons.org
+        <br />
+        founder@canarycommons.org
       </p>
 
       <div style={ornament}>❋ &nbsp; ❋ &nbsp; ❋</div>
@@ -263,6 +296,14 @@ export function Email3Stewardship() {
         Not by asking communities to start from scratch — but by helping make
         visible what is already being done, and making it easier for people to
         find and strengthen it.
+      </p>
+
+      <p style={bodyText}>
+        The map is filling in. As it does, it becomes a downloadable app that
+        helps people find what cares for the long term — for the body, the land,
+        the community — wherever they are. The small places doing meaningful work
+        get reached by the people actively looking for them. The seekers find
+        what&apos;s been hard to find.
       </p>
 
       <p style={bodyText}>Your listing is part of that effort.</p>
@@ -303,6 +344,12 @@ export function Email3Stewardship() {
         <span style={goldPill}>Help Carry the Commons</span>
       </div>
 
+      <p style={footer}>
+        This is the last of three emails. If you don&apos;t do anything at all,
+        your listing will remain on the map. You won&apos;t hear from us again
+        unless you choose to engage. You are always welcome to participate.
+      </p>
+
       <p style={bodyText}>
         Thank you for contributing to the kind of world this project was built to
         make easier to find.
@@ -314,9 +361,10 @@ export function Email3Stewardship() {
         Canary Commons
       </p>
 
-      <p style={footer}>
-        This is the last of three brief notes. You won&apos;t hear from us again
-        unless you choose to engage. You are always welcome to participate.
+      <p style={{ ...footer, textAlign: "center" as const, fontStyle: "normal" }}>
+        www.canarycommons.org
+        <br />
+        founder@canarycommons.org
       </p>
 
       <div style={ornament}>❋ &nbsp; ❋ &nbsp; ❋</div>
