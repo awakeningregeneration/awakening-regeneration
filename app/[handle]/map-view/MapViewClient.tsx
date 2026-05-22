@@ -353,7 +353,7 @@ export default function MapViewClient({
                 // Build metadata line: Category · Address · Placed by Name
                 // Filter nulls so missing address doesn't leave empty segment
                 const metaParts = [
-                  p.category,
+                  Array.isArray(p.category) ? p.category.join(" \u00B7 ") : p.category,
                   p.address,
                   `Placed by ${seederName}`,
                 ].filter(Boolean);

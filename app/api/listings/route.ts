@@ -189,10 +189,16 @@ export async function POST(req: Request) {
     const normalizedState = normalizeState(state);
     const normalizedCounty = normalizeCounty(county);
 
-    const category =
-      Array.isArray(categories) && categories.length > 0
-        ? categories[0]
-        : "";
+    const category = Array.isArray(categories)
+      ? categories.map((c: unknown) => typeof c === "string" ? c.trim() : "").filter(Boolean).slice(0, 5)
+      : [];
+
+    if (category.length === 0) {
+      return NextResponse.json(
+        { error: "At least one category is required." },
+        { status: 400 }
+      );
+    }
 
     const cleanPractices = Array.isArray(practices)
       ? practices

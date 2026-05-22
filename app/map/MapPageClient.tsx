@@ -317,7 +317,7 @@ const countyListings = useMemo(() => {
       l.name,
       l.title ?? "",
       l.description ?? "",
-      l.category ?? "",
+      ...(Array.isArray(l.category) ? l.category : [l.category ?? ""]),
       ...(l.practices ?? []),
       l.focus ?? "",
       l.invitation ?? "",
@@ -356,7 +356,7 @@ const countyListings = useMemo(() => {
       const hay = [
         r.name ?? "",
         r.description ?? "",
-        r.category ?? "",
+        ...(Array.isArray(r.category) ? r.category : [r.category ?? ""]),
         ...(r.practices ?? []),
       ]
         .join(" ")

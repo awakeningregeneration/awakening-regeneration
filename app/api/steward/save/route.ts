@@ -61,13 +61,18 @@ export async function POST(request: Request) {
       "city",
       "state",
       "county",
-      "category",
     ] as const;
 
     for (const f of fields) {
       if (body[f] !== undefined) {
         listingUpdate[f] = typeof body[f] === "string" ? body[f].trim() : body[f];
       }
+    }
+
+    if (body.category !== undefined) {
+      listingUpdate.category = Array.isArray(body.category)
+        ? body.category.filter((c: unknown) => typeof c === "string" && (c as string).trim()).slice(0, 5)
+        : [];
     }
 
     if (body.practices !== undefined) {

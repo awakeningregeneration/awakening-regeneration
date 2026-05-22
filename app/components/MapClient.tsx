@@ -847,7 +847,7 @@ export default function MapClient({
 
     const meta = document.createElement("div");
     meta.className = "ar-popup-meta";
-    meta.textContent = `${listing.category || ""} · ${listing.city || ""}${
+    meta.textContent = `${Array.isArray(listing.category) ? listing.category.join(" \u00B7 ") : listing.category || ""} \u00B7 ${listing.city || ""}${
       listing.state ? ", " + listing.state : ""
     }`;
     contentDiv.appendChild(meta);

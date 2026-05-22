@@ -140,7 +140,7 @@ export default function ContributorSubmitPage() {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editUrl, setEditUrl] = useState("");
-  const [editCategory, setEditCategory] = useState("");
+  const [editCategory, setEditCategory] = useState<string[]>([]);
   const [editAffiliateUrl, setEditAffiliateUrl] = useState("");
   const [editWhyItMatters, setEditWhyItMatters] = useState("");
   const [editImageUrl, setEditImageUrl] = useState("");
@@ -150,7 +150,7 @@ export default function ContributorSubmitPage() {
 
   // ── New submission state ──
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string[]>([]);
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [affiliateUrl, setAffiliateUrl] = useState("");
@@ -190,7 +190,7 @@ export default function ContributorSubmitPage() {
     setEditName(r.name || "");
     setEditDescription(r.description || "");
     setEditUrl(r.url || "");
-    setEditCategory(r.category || "");
+    setEditCategory(Array.isArray(r.category) ? r.category : r.category ? [r.category] : []);
     setEditAffiliateUrl(r.affiliate_url || "");
     setEditWhyItMatters(r.why_it_matters || "");
     setEditImageUrl(r.image_url || "");
@@ -295,7 +295,7 @@ export default function ContributorSubmitPage() {
 
       if (res.ok) {
         setName("");
-        setCategory("");
+        setCategory([]);
         setUrl("");
         setImageUrl("");
         setAffiliateUrl("");
@@ -486,21 +486,18 @@ export default function ContributorSubmitPage() {
                             />
                           </div>
                           <div>
-                            <label style={labelStyle}>Category</label>
-                            <select
-                              style={{ ...inputStyle, appearance: "none" }}
-                              value={editCategory}
-                              onChange={(e) =>
-                                setEditCategory(e.target.value)
-                              }
-                            >
-                              <option value="">Select a category</option>
-                              {PRIMARY_CATEGORY_OPTIONS.map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
+                            <label style={labelStyle}>Category (up to 5)</label>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                              {PRIMARY_CATEGORY_OPTIONS.map((cat) => {
+                                const isSelected = editCategory.includes(cat);
+                                const isDisabled = !isSelected && editCategory.length >= 5;
+                                return (
+                                  <button key={cat} type="button" onClick={() => !isDisabled && setEditCategory(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])} style={{ borderRadius: 999, border: isSelected ? "1px solid rgba(255,200,80,0.45)" : "1px solid rgba(100,150,220,0.22)", padding: "8px 12px", fontSize: "0.85rem", cursor: isDisabled ? "default" : "pointer", background: isSelected ? "rgba(255,216,107,0.18)" : "rgba(255,255,255,0.7)", color: isSelected ? "#7a4f00" : "#3a5a7a", opacity: isDisabled ? 0.4 : 1 }}>
+                                    {cat}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                           <div>
                             <label style={labelStyle}>Display URL</label>
@@ -704,19 +701,22 @@ export default function ContributorSubmitPage() {
                                 marginTop: 8,
                               }}
                             >
-                              {r.category && (
-                                <span
-                                  style={{
-                                    fontSize: "0.72rem",
-                                    padding: "3px 8px",
-                                    borderRadius: 999,
-                                    background: "rgba(255,216,107,0.18)",
-                                    color: "#7a4f00",
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {r.category}
-                                </span>
+                              {r.category && (Array.isArray(r.category) ? r.category.length > 0 : true) && (
+                                (Array.isArray(r.category) ? r.category : [r.category]).map((cat) => (
+                                  <span
+                                    key={cat}
+                                    style={{
+                                      fontSize: "0.72rem",
+                                      padding: "3px 8px",
+                                      borderRadius: 999,
+                                      background: "rgba(255,216,107,0.18)",
+                                      color: "#7a4f00",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {cat}
+                                  </span>
+                                ))
                               )}
                               {r.practices?.map((p) => (
                                 <span
@@ -881,23 +881,21 @@ export default function ContributorSubmitPage() {
             />
 
             <div>
-              <label style={labelStyle}>Primary Category</label>
+              <label style={labelStyle}>Primary Category (up to 5)</label>
               <p style={helperStyle}>
-                Choose the main area of life this resource belongs to.
+                Choose the main areas of life this resource belongs to.
               </p>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                style={{ ...inputStyle, appearance: "none" }}
-              >
-                <option value="">Select a category</option>
-                {PRIMARY_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {PRIMARY_CATEGORY_OPTIONS.map((cat) => {
+                  const isSelected = category.includes(cat);
+                  const isDisabled = !isSelected && category.length >= 5;
+                  return (
+                    <button key={cat} type="button" onClick={() => !isDisabled && setCategory(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])} style={{ borderRadius: 999, border: isSelected ? "1px solid rgba(255,200,80,0.45)" : "1px solid rgba(100,150,220,0.22)", padding: "8px 12px", fontSize: "0.85rem", cursor: isDisabled ? "default" : "pointer", background: isSelected ? "rgba(255,216,107,0.18)" : "rgba(255,255,255,0.7)", color: isSelected ? "#7a4f00" : "#3a5a7a", opacity: isDisabled ? 0.4 : 1 }}>
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>

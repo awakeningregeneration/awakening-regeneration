@@ -10,7 +10,7 @@ type OnlineResource = {
   description: string | null;
   url: string | null;
   logo_url: string | null;
-  category: string | null;
+  category: string[] | null;
   practices: string[] | null;
   why_it_matters: string | null;
   affiliate_url: string | null;
@@ -264,7 +264,7 @@ function ResourceCard({ resource }: { resource: OnlineResource }) {
               marginBottom: 6,
             }}
           >
-            {resource.category || "Uncategorized"}
+            {Array.isArray(resource.category) && resource.category.length > 0 ? resource.category.join(" \u00B7 ") : "Uncategorized"}
           </div>
           <h2
             style={{
@@ -403,11 +403,11 @@ export default function SupportPageClient({
 
   const filteredResources = resources.filter((r) => {
     const matchesCategory =
-      selectedCategory === "All" || r.category === selectedCategory;
+      selectedCategory === "All" || (Array.isArray(r.category) ? r.category.includes(selectedCategory) : r.category === selectedCategory);
     const haystack = [
       r.name,
       r.description ?? "",
-      r.category ?? "",
+      ...(Array.isArray(r.category) ? r.category : [r.category ?? ""]),
       ...(r.practices ?? []),
     ]
       .join(" ")

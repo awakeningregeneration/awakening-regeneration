@@ -31,7 +31,11 @@ export async function POST(req: Request) {
     const name = body.name?.trim();
     const description = body.description?.trim();
     const url = body.url?.trim();
-    const category = body.category?.trim();
+    const category = Array.isArray(body.category)
+      ? body.category.map((c: unknown) => typeof c === "string" ? c.trim() : "").filter(Boolean).slice(0, 5)
+      : typeof body.category === "string" && body.category.trim()
+        ? [body.category.trim()]
+        : [];
 
     const practices = Array.isArray(body.practices)
       ? body.practices
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
     const why_it_matters = body.why_it_matters?.trim() || null;
     const image_url = body.image_url?.trim() || null;
 
-    if (!name || !description || !url || !category) {
+    if (!name || !description || !url || category.length === 0) {
       return NextResponse.json(
         { error: "Missing required fields." },
         { status: 400 }
@@ -109,7 +113,6 @@ export async function PATCH(req: Request) {
       "name",
       "description",
       "url",
-      "category",
       "affiliate_url",
       "why_it_matters",
       "image_url",
@@ -121,6 +124,12 @@ export async function PATCH(req: Request) {
       }
     }
 
+    if (body.category !== undefined) {
+      update.category = Array.isArray(body.category)
+        ? body.category.filter((c: unknown) => typeof c === "string" && (c as string).trim()).slice(0, 5)
+        : [];
+    }
+
     if (body.practices !== undefined) {
       update.practices = Array.isArray(body.practices)
         ? body.practices.filter((p: unknown) => typeof p === "string" && (p as string).trim()).map((p: unknown) => (p as string).trim())
@@ -128,7 +137,7 @@ export async function PATCH(req: Request) {
     }
 
     // name, description, url, category must not be emptied
-    if (update.name === null || update.description === null || update.url === null || update.category === null) {
+    if (update.name === null || update.description === null || update.url === null || (Array.isArray(update.category) && update.category.length === 0)) {
       return NextResponse.json(
         { error: "Name, description, URL, and category are required." },
         { status: 400 }

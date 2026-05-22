@@ -168,7 +168,7 @@ function EditListingContent({ params }: Props) {
   // Fields shared by both steward-edit and propose-edit
   const [suggestedTitle, setSuggestedTitle] = useState("");
   const [suggestedDescription, setSuggestedDescription] = useState("");
-  const [suggestedCategory, setSuggestedCategory] = useState("");
+  const [suggestedCategory, setSuggestedCategory] = useState<string[]>([]);
   const [suggestedPractices, setSuggestedPractices] = useState<string[]>([]);
   const [suggestedWebsite, setSuggestedWebsite] = useState("");
   const [suggestedAddress, setSuggestedAddress] = useState("");
@@ -257,7 +257,7 @@ function EditListingContent({ params }: Props) {
         setOriginalListing(found);
         setSuggestedTitle(found.title || "");
         setSuggestedDescription(found.description || "");
-        setSuggestedCategory(found.category || "");
+        setSuggestedCategory(Array.isArray(found.category) ? found.category : found.category ? [found.category] : []);
         setSuggestedPractices(found.practices || []);
         setSuggestedWebsite(found.website || "");
         setSuggestedAddress(found.address || "");
@@ -816,6 +816,14 @@ function EditListingContent({ params }: Props) {
     );
   }
 
+  function toggleCategory(cat: string) {
+    setSuggestedCategory((current) =>
+      current.includes(cat)
+        ? current.filter((c) => c !== cat)
+        : current.length < 5 ? [...current, cat] : current
+    );
+  }
+
   function togglePractice(practice: string) {
     setSuggestedPractices((current) =>
       current.includes(practice)
@@ -836,17 +844,41 @@ function EditListingContent({ params }: Props) {
         <textarea style={textareaStyle} value={suggestedDescription} onChange={(e) => setSuggestedDescription(e.target.value)} />
       </label>
       <div style={fieldStyle}>
-        <span style={labelStyle}>Category</span>
-        <select
-          value={suggestedCategory}
-          onChange={(e) => setSuggestedCategory(e.target.value)}
-          style={{ ...inputStyle, appearance: "none" as const }}
-        >
-          <option value="">Select a category</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+        <span style={labelStyle}>
+          Category{" "}
+          <span style={{ fontWeight: 400, color: "#6b7c94", fontSize: "0.85em" }}>
+            {suggestedCategory.length >= 5 ? "(5 maximum)" : "(choose up to 5)"}
+          </span>
+        </span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {CATEGORIES.map((cat) => {
+            const isSelected = suggestedCategory.includes(cat);
+            const isDisabled = !isSelected && suggestedCategory.length >= 5;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => !isDisabled && toggleCategory(cat)}
+                style={{
+                  borderRadius: 999,
+                  border: isSelected
+                    ? "1px solid rgba(255,200,80,0.45)"
+                    : "1px solid rgba(100,150,220,0.22)",
+                  padding: "8px 12px",
+                  fontSize: "0.85rem",
+                  cursor: isDisabled ? "default" : "pointer",
+                  background: isSelected
+                    ? "rgba(255,216,107,0.18)"
+                    : "rgba(255,255,255,0.7)",
+                  color: isSelected ? "#7a4f00" : "#3a5a7a",
+                  opacity: isDisabled ? 0.4 : 1,
+                }}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div style={fieldStyle}>
         <span style={labelStyle}>Practices / Values</span>

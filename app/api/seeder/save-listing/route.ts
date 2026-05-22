@@ -21,7 +21,6 @@ const ALLOWED_FIELDS = [
   "city",
   "state",
   "county",
-  "category",
   "steward_email",
   "image_url",
 ] as const;
@@ -76,6 +75,14 @@ export async function POST(req: Request) {
         { error: "Title is required." },
         { status: 400 }
       );
+    }
+
+    if (body.category !== undefined) {
+      update.category = Array.isArray(body.category)
+        ? body.category.filter(
+            (c: unknown) => typeof c === "string" && (c as string).trim()
+          ).slice(0, 5)
+        : [];
     }
 
     if (body.practices !== undefined) {

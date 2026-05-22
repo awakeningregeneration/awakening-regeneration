@@ -2,7 +2,7 @@ export type Listing = {
   id: string
   name: string
   description?: string
-  category?: string
+  category?: string[]
   tags?: string[]
   website?: string
   city?: string

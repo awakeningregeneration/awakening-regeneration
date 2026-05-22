@@ -213,8 +213,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Description must be 2000 characters or fewer." }, { status: 400 });
   }
 
-  if (!category || !VALID_CATEGORIES.has(category)) {
-    return NextResponse.json({ error: "Please select a valid category." }, { status: 400 });
+  // Validate category array (1-5 items, each must be in VALID_CATEGORIES)
+  const categoryArray = Array.isArray(category)
+    ? category.filter((c: string) => VALID_CATEGORIES.has(c)).slice(0, 5)
+    : typeof category === "string" && VALID_CATEGORIES.has(category)
+      ? [category]
+      : [];
+
+  if (categoryArray.length === 0) {
+    return NextResponse.json({ error: "Please select at least one valid category." }, { status: 400 });
   }
 
   if (
@@ -306,7 +313,7 @@ export async function POST(req: Request) {
       {
         title: title.trim(),
         description: description.trim(),
-        category,
+        category: categoryArray,
         practices: practices.filter((p: string) => VALID_PRACTICES.has(p)),
         city: normalizedCity || null,
         state: normalizedState || null,

@@ -9,7 +9,7 @@ interface ContributorResource {
   description: string | null;
   url: string | null;
   logo_url: string | null;
-  category: string;
+  category: string[] | null;
   practices: string[] | null;
   why_it_matters: string | null;
   affiliate_url: string | null;
@@ -210,7 +210,7 @@ export default function ContributorDashboard() {
                           marginBottom: 6,
                         }}
                       >
-                        {resource.category || "Uncategorized"}
+                        {Array.isArray(resource.category) && resource.category.length > 0 ? resource.category.join(" \u00B7 ") : "Uncategorized"}
                       </div>
                       <h2
                         style={{

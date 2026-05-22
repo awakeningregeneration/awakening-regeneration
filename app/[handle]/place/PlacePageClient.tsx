@@ -124,7 +124,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   // ── Form fields ──
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string[]>([]);
   const [practices, setPractices] = useState<string[]>([]);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -140,6 +140,14 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   // ── Saved form data for override resubmission ──
   const [savedFormData, setSavedFormData] = useState<Record<string, unknown> | null>(null);
 
+  function toggleCategory(cat: string) {
+    setCategory((current) =>
+      current.includes(cat)
+        ? current.filter((c) => c !== cat)
+        : current.length < 5 ? [...current, cat] : current
+    );
+  }
+
   function togglePractice(p: string) {
     setPractices((cur) =>
       cur.includes(p) ? cur.filter((x) => x !== p) : [...cur, p]
@@ -149,7 +157,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   function resetForm() {
     setTitle("");
     setDescription("");
-    setCategory("");
+    setCategory([]);
     setPractices([]);
     setCity("");
     setState("");
@@ -175,7 +183,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
       setIsSubmitting(false);
       return;
     }
-    if (!category) {
+    if (category.length === 0) {
       setErrorMessage("Please choose a category.");
       setIsSubmitting(false);
       return;
@@ -406,23 +414,42 @@ export default function PlacePageClient({ handle, seederName }: Props) {
 
                 {/* 3. Category */}
                 <div>
-                  <label style={labelStyle}>Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                      setErrorMessage("");
-                    }}
-                    required
-                    style={{ ...inputStyle, appearance: "none" }}
-                  >
-                    <option value="">Choose one</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+                  <label style={labelStyle}>
+                    Category{" "}
+                    <span style={{ fontWeight: 400, color: "#6b7c94", fontSize: "0.85em" }}>
+                      {category.length >= 5 ? "(5 maximum)" : "(choose up to 5)"}
+                    </span>
+                  </label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {CATEGORIES.map((cat) => {
+                      const isSelected = category.includes(cat);
+                      const isDisabled = !isSelected && category.length >= 5;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => { if (!isDisabled) { toggleCategory(cat); setErrorMessage(""); } }}
+                          style={{
+                            borderRadius: 999,
+                            border: isSelected
+                              ? "1px solid rgba(255,200,80,0.45)"
+                              : "1px solid rgba(100,150,220,0.22)",
+                            padding: "10px 14px",
+                            fontSize: "0.9rem",
+                            cursor: isDisabled ? "default" : "pointer",
+                            background: isSelected
+                              ? "rgba(255,216,107,0.18)"
+                              : "rgba(255,255,255,0.7)",
+                            color: isSelected ? "#7a4f00" : "#3a5a7a",
+                            opacity: isDisabled ? 0.4 : 1,
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* 4. Practices */}

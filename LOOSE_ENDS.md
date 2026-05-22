@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 18, 2026*
+*Last updated: May 21, 2026*
 
 ---
 
@@ -31,5 +31,9 @@
 ## Email rewrite intent captured
 
 See GROWTH_LIST.md → "Email 1 / 2 / 3 Strategic Rewrite — May 18 2026" for the full strategic direction. Not a blocker. Come back when the head is fresh.
+
+- [ ] **Multi-category migration not yet applied to production** — Three migration files created (listings, affiliate_resources, constellation) converting category from TEXT to TEXT[]. Code is ready. Migrations must be run in Supabase Studio SQL Editor before pushing the code changes to production. Run all three, verify backfill, then push.
+
+- [ ] **Category badge styling consistency check deferred** — During multi-category display update, badge styles across map popup (inline text with ·), support cards (uppercase label), contributor cards (uppercase label), and constellation detail (uppercase label) were kept as-is. The inline text join on map popups reads differently from the badge rendering on cards. Harmonizing is a polish task, not blocking.
 
 - [ ] Verify seederWelcome email rendering in production — Stage D.5's welcome email and admin endpoint are built and deployed but not yet end-to-end tested. The first real send (when onboarding Lucia or another seeder) is the verification. If the email doesn't arrive or has rendering issues, troubleshoot the curl/auth/Netlify env var setup at that point. Recommendation for first real onboarding: either (a) onboard directly with the real seeder and watch for the email to arrive, or (b) if curl proves consistently finicky across environments, build a tiny admin UI button as a more reliable trigger. Do NOT test against a fake seeder row — the first real onboarding IS the test.

@@ -13,7 +13,7 @@ export type Listing = {
   name: string;
   title?: string;
 
-  category: string;
+  category: string[];
 
   description?: string;
   website?: string;

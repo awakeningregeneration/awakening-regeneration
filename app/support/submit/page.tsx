@@ -115,7 +115,7 @@ export default function SubmitSupportPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string[]>([]);
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -268,26 +268,21 @@ export default function SubmitSupportPage() {
             />
 
             <div>
-              <label style={labelStyle}>Primary Category</label>
+              <label style={labelStyle}>Primary Category (up to 5)</label>
               <p style={helperStyle}>
-                Choose the main area of life this resource belongs to.
+                Choose the main areas of life this resource belongs to.
               </p>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                style={{
-                  ...inputStyle,
-                  appearance: "none",
-                }}
-              >
-                <option value="">Select a category</option>
-                {PRIMARY_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {PRIMARY_CATEGORY_OPTIONS.map((cat) => {
+                  const isSelected = category.includes(cat);
+                  const isDisabled = !isSelected && category.length >= 5;
+                  return (
+                    <button key={cat} type="button" onClick={() => !isDisabled && setCategory(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])} style={{ borderRadius: 999, border: isSelected ? "1px solid rgba(255,200,80,0.45)" : "1px solid rgba(100,150,220,0.22)", padding: "8px 12px", fontSize: "0.85rem", cursor: isDisabled ? "default" : "pointer", background: isSelected ? "rgba(255,216,107,0.18)" : "rgba(255,255,255,0.7)", color: isSelected ? "#7a4f00" : "#3a5a7a", opacity: isDisabled ? 0.4 : 1 }}>
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <input

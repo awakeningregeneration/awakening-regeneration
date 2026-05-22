@@ -26,7 +26,11 @@ export async function POST(req: Request) {
     const title = body.title?.trim();
     const description = body.description?.trim();
     const region = body.region?.trim();
-    const category = body.category?.trim();
+    const category = Array.isArray(body.category)
+      ? body.category.map((c: unknown) => typeof c === "string" ? c.trim() : "").filter(Boolean).slice(0, 3)
+      : typeof body.category === "string" && body.category.trim()
+        ? [body.category.trim()]
+        : [];
     const link = body.link?.trim();
 
     const practices = Array.isArray(body.practices)
@@ -37,7 +41,7 @@ export async function POST(req: Request) {
           .filter(Boolean)
       : [];
 
-    if (!title || !description || !region || !category || !link) {
+    if (!title || !description || !region || category.length === 0 || !link) {
       return NextResponse.json(
         { error: "Missing required fields." },
         { status: 400 }

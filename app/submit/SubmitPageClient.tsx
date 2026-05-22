@@ -189,7 +189,7 @@ export default function SubmitPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState(prefilledState);
   const [county, setCounty] = useState(prefilledCounty);
-  const [primaryCategory, setPrimaryCategory] = useState("");
+  const [primaryCategory, setPrimaryCategory] = useState<string[]>([]);
   const [practices, setPractices] = useState<string[]>([]);
   const [submittedBy, setSubmittedBy] = useState("");
   const [email, setEmail] = useState("");
@@ -210,6 +210,14 @@ export default function SubmitPage() {
     if (county) return `${county} County`;
     return "";
   }, [county, state]);
+
+  function toggleCategory(cat: string) {
+    setPrimaryCategory((current) =>
+      current.includes(cat)
+        ? current.filter((c) => c !== cat)
+        : current.length < 5 ? [...current, cat] : current
+    );
+  }
 
   function togglePractice(practice: string) {
     setPractices((current) =>
@@ -240,7 +248,7 @@ export default function SubmitPage() {
       return false;
     }
 
-    if (!primaryCategory.trim()) {
+    if (primaryCategory.length === 0) {
       setErrorMessage("Please choose a primary category.");
       return false;
     }
@@ -285,7 +293,7 @@ export default function SubmitPage() {
         state: state.trim(),
         county: county.trim(),
         category: primaryCategory,
-        categories: primaryCategory ? [primaryCategory] : [],
+        categories: primaryCategory,
         practices,
         submittedBy: submittedBy.trim(),
         email: email.trim(),
@@ -342,7 +350,7 @@ export default function SubmitPage() {
       setCity("");
       setState(prefilledState);
       setCounty(prefilledCounty);
-      setPrimaryCategory("");
+      setPrimaryCategory([]);
       setPractices([]);
       setSubmittedBy("");
       setEmail("");
@@ -503,21 +511,39 @@ export default function SubmitPage() {
                 <div>
                   <label style={labelStyle}>Primary Category</label>
                   <p style={helperStyle}>
-                    Choose the main area of life this belongs to.
+                    {primaryCategory.length >= 5 ? "5 maximum" : "Choose up to 5"}
                   </p>
 
-                  <select
-                    value={primaryCategory}
-                    onChange={(e) => setPrimaryCategory(e.target.value)}
-                    style={{ ...inputStyle, appearance: "none" }}
-                  >
-                    <option value="">Select a category</option>
-                    {PRIMARY_CATEGORY_OPTIONS.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {PRIMARY_CATEGORY_OPTIONS.map((cat) => {
+                      const isSelected = primaryCategory.includes(cat);
+                      const isDisabled = !isSelected && primaryCategory.length >= 5;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => !isDisabled && toggleCategory(cat)}
+                          style={{
+                            borderRadius: 999,
+                            border: isSelected
+                              ? "1px solid rgba(255,200,80,0.45)"
+                              : "1px solid rgba(100,150,220,0.22)",
+                            padding: "10px 14px",
+                            fontSize: "0.9rem",
+                            cursor: isDisabled ? "default" : "pointer",
+                            background: isSelected
+                              ? "rgba(255,216,107,0.18)"
+                              : "rgba(255,255,255,0.7)",
+                            color: isSelected ? "#7a4f00" : "#3a5a7a",
+                            opacity: isDisabled ? 0.4 : 1,
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>
@@ -856,9 +882,9 @@ export default function SubmitPage() {
                 </div>
 
                 <div style={reviewBoxStyle}>
-                  <div style={reviewKickerStyle}>Primary Category</div>
+                  <div style={reviewKickerStyle}>Categories</div>
                   <div style={{ marginTop: 6, fontSize: "1rem", color: "#0d2a4a" }}>
-                    {primaryCategory}
+                    {primaryCategory.join(" · ")}
                   </div>
                 </div>
 

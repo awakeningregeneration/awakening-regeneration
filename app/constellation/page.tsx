@@ -10,7 +10,7 @@ type ConstellationSignal = {
   title: string;
   description: string;
   region: string | null;
-  category: string | null;
+  category: string[] | null;
   link: string;
   practices?: string[] | null;
   image_url?: string;
@@ -254,10 +254,10 @@ export default function ConstellationPage() {
   const query = searchQuery.trim().toLowerCase();
   const isVisible = (s: ConstellationSignal) => {
     const matchesCategory =
-      selectedCategory === "All" || s.category === selectedCategory;
+      selectedCategory === "All" || (Array.isArray(s.category) ? s.category.includes(selectedCategory) : s.category === selectedCategory);
     const haystack =
       `${s.title ?? ""} ${s.description ?? ""} ${s.region ?? ""} ${
-        s.category ?? ""
+        Array.isArray(s.category) ? s.category.join(" ") : s.category ?? ""
       }`.toLowerCase();
     const matchesSearch = !query || haystack.includes(query);
     return matchesCategory && matchesSearch;
@@ -557,7 +557,7 @@ export default function ConstellationPage() {
               />
             </div>
 
-            {selectedSignal.category && (
+            {selectedSignal.category && (Array.isArray(selectedSignal.category) ? selectedSignal.category.length > 0 : true) && (
               <div
                 style={{
                   fontSize: "0.75rem",
@@ -567,7 +567,7 @@ export default function ConstellationPage() {
                   marginBottom: 12,
                 }}
               >
-                {selectedSignal.category}
+                {Array.isArray(selectedSignal.category) ? selectedSignal.category.join(" \u00B7 ") : selectedSignal.category}
               </div>
             )}
 
