@@ -187,7 +187,7 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ## How we work
 
-- **Session opens**: Claude reads PROJECT_STATE.md and RELEASE_CHECKLIST.md to ground in current state. PROJECT_MAP.md is consulted as needed for architectural reference.
+- **Session opens**: Claude reads PROJECT_STATE.md, LOOSE_ENDS.md, GROWTH_LIST.md, and BULK_PLACEMENT_JSON.md to ground in current state. PROJECT_MAP.md is consulted as needed for architectural reference. BULK_PLACEMENT_JSON.md is the canonical reference for the JSON shape the bulk placement tool at /[handle]/place/bulk expects.
 - **Session closes**: Claude writes a Claude Code prompt that updates PROJECT_STATE.md (and RELEASE_CHECKLIST.md if launch-gate items moved)
 - **Strategy in chat, execution in Claude Code (VS Code terminal)** — Claude writes targeted prompts, Ren pastes and reviews
 - **Never git commit/push without Ren's explicit instruction**
