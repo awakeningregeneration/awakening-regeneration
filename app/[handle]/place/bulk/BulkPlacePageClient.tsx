@@ -135,14 +135,16 @@ export default function BulkPlacePageClient({
       }
 
       const items: ListingDraft[] = parsed.map((raw) => {
-        const cat = Array.isArray(raw.category)
+        const cat = (Array.isArray(raw.category)
           ? raw.category.filter((c: string) => typeof c === "string")
           : typeof raw.category === "string"
             ? [raw.category]
-            : [];
-        const prac = Array.isArray(raw.practices)
+            : []
+        ).filter((c: string) => CATEGORIES.includes(c));
+        const prac = (Array.isArray(raw.practices)
           ? raw.practices.filter((p: string) => typeof p === "string")
-          : [];
+          : []
+        ).filter((p: string) => PRACTICES.includes(p));
 
         return {
           id: `draft-${nextId++}`,
