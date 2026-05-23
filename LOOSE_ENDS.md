@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 21, 2026*
+*Last updated: May 23, 2026*
 
 ---
 
@@ -24,15 +24,11 @@
 
 - [ ] **Cookie Secure flag: project-wide pattern** — When setting cookies client-side via document.cookie, always make the Secure flag conditional: `const secure = window.location.protocol === "https:" ? "; Secure" : ""`. Unconditional "; Secure" causes cookies to silently disappear in local HTTP dev, leading to server/client state divergence and hydration mismatches. Applied in cc_support_intro_acknowledged and cc_compass_seen cookies. Apply to any future client-side cookie-setting code.
 
-- [ ] **Source-mismatch: seeder placements getting source='community_submitted'** — Listings placed by Ren and Lucia after the seeder system was set up were getting source='community_submitted' instead of 'seeder_placed' in the database. Manually corrected for the Ashland batch on May 18, 2026 via Supabase Studio. Root cause in the placement path is unknown — the seeder placement form at /[handle]/place POSTs to /api/seeder/place-listing which explicitly sets source='seeder_placed', so the mismatch suggests some placements may have gone through /api/listings (the public submit route) instead. Worth investigating before next batch placement so it stops happening.
-
 - [ ] **Data consistency: outreach_status vs steward_id on claimed listings** — Dashboard counts use outreach_status === "claimed"; muted-row rendering uses steward_id !== null. If a listing can have one set without the other (e.g., steward_id set but outreach_status still at "email_3_sent", or outreach_status = "claimed" but steward_id still null), the counts and styling could diverge. Verify in Supabase by inspecting any currently-claimed listings. Both values should always be set together in the claim flow (/api/steward/verify and stewardshipPromotion.ts both write both fields), but worth confirming empirically.
 
 ## Email rewrite intent captured
 
 See GROWTH_LIST.md → "Email 1 / 2 / 3 Strategic Rewrite — May 18 2026" for the full strategic direction. Not a blocker. Come back when the head is fresh.
-
-- [ ] **Multi-category migration not yet applied to production** — Three migration files created (listings, affiliate_resources, constellation) converting category from TEXT to TEXT[]. Code is ready. Migrations must be run in Supabase Studio SQL Editor before pushing the code changes to production. Run all three, verify backfill, then push.
 
 - [ ] **Category badge styling consistency check deferred** — During multi-category display update, badge styles across map popup (inline text with ·), support cards (uppercase label), contributor cards (uppercase label), and constellation detail (uppercase label) were kept as-is. The inline text join on map popups reads differently from the badge rendering on cards. Harmonizing is a polish task, not blocking.
 
