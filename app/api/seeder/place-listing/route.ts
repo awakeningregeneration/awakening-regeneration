@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
-import { resend, FROM_EMAIL } from "@/app/lib/resend";
-import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
+import { sendEmail1 } from "@/app/lib/sendEmail1";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -348,36 +347,13 @@ export async function POST(req: Request) {
 
   if (steward_email?.trim()) {
     try {
-      const { data: seeder } = await supabaseAdmin
-        .from("seeders")
-        .select("name")
-        .eq("id", session.seeder_id)
-        .single();
-
-      const emailContent = seederOutreach1Email({
-        businessName: title.trim(),
+      await sendEmail1({
         listingId: listing.id,
+        businessName: title.trim(),
+        stewardEmail: steward_email.trim(),
         removalToken,
-        seederName: seeder?.name || "A seeder",
+        seederId: session.seeder_id,
       });
-
-      await resend.emails.send({
-        from: FROM_EMAIL,
-        to: steward_email.trim(),
-        subject: emailContent.subject,
-        html: emailContent.html,
-        text: emailContent.text,
-      });
-
-      await supabaseAdmin
-        .from("listings")
-        .update({
-          outreach_status: "email_1_sent",
-          outreach_started_at: new Date().toISOString(),
-          last_outreach_at: new Date().toISOString(),
-        })
-        .eq("id", listing.id);
-
       emailSent = true;
     } catch (emailErr) {
       console.error("Email 1 failed to send:", emailErr);

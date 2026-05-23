@@ -16,6 +16,7 @@ type Placement = {
   created_at: string;
   status: string | null;
   bounce_info: string | null;
+  last_outreach_at: string | null;
 };
 
 type Credit = {
@@ -121,6 +122,44 @@ export default function DashboardClient({
   const [copied, setCopied] = useState(false);
   const [expandedBounceId, setExpandedBounceId] = useState<string | null>(null);
   const [showOutreachModal, setShowOutreachModal] = useState(false);
+  const [triggeringEmail1, setTriggeringEmail1] = useState<string | null>(null);
+  const [email1Result, setEmail1Result] = useState<Record<string, string>>({});
+
+  async function handleTriggerEmail1(listingId: string, stewardEmail: string) {
+    if (!confirm(`Send Email 1 to ${stewardEmail}?`)) return;
+    setTriggeringEmail1(listingId);
+    try {
+      const res = await fetch("/api/seeder/trigger-email-1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listing_id: listingId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmail1Result((prev) => ({ ...prev, [listingId]: "Sent!" }));
+        setTimeout(() => {
+          setEmail1Result((prev) => {
+            const next = { ...prev };
+            delete next[listingId];
+            return next;
+          });
+          router.refresh();
+        }, 2500);
+      } else {
+        setEmail1Result((prev) => ({
+          ...prev,
+          [listingId]: data.error || "Failed",
+        }));
+      }
+    } catch {
+      setEmail1Result((prev) => ({
+        ...prev,
+        [listingId]: "Network error",
+      }));
+    } finally {
+      setTriggeringEmail1(null);
+    }
+  }
 
   // Suppress unused variable — referralCode reserved for future use
   void referralCode;
@@ -324,6 +363,22 @@ export default function DashboardClient({
             >
               Place a new light
             </Link>
+            <Link
+              href={`/${handle}/place/bulk`}
+              style={{
+                display: "inline-block",
+                padding: "10px 18px",
+                borderRadius: 999,
+                border: "1px solid rgba(138,109,42,0.2)",
+                background: "rgba(255,248,230,0.35)",
+                color: "rgba(138,109,42,0.7)",
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                textDecoration: "none",
+              }}
+            >
+              Place a batch
+            </Link>
             <button
               type="button"
               onClick={() => setShowOutreachModal(true)}
@@ -524,6 +579,56 @@ export default function DashboardClient({
                               tending
                             </div>
                           )}
+                          {/* Send Email 1 action for listings with email but no outreach yet */}
+                          {!isClaimed &&
+                            p.steward_email &&
+                            !p.last_outreach_at &&
+                            p.outreach_status === "not_started" && (
+                              <div style={{ marginTop: 4 }}>
+                                {email1Result[p.id] ? (
+                                  <span
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      fontWeight: 600,
+                                      color:
+                                        email1Result[p.id] === "Sent!"
+                                          ? "#2a6a3a"
+                                          : "#a04040",
+                                    }}
+                                  >
+                                    {email1Result[p.id]}
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleTriggerEmail1(p.id, p.steward_email!);
+                                    }}
+                                    disabled={triggeringEmail1 === p.id}
+                                    style={{
+                                      padding: "3px 10px",
+                                      borderRadius: 999,
+                                      border: "1px solid rgba(138,109,42,0.2)",
+                                      background: "rgba(255,248,230,0.35)",
+                                      color: "rgba(138,109,42,0.7)",
+                                      fontSize: "0.72rem",
+                                      fontWeight: 600,
+                                      cursor:
+                                        triggeringEmail1 === p.id
+                                          ? "not-allowed"
+                                          : "pointer",
+                                      opacity:
+                                        triggeringEmail1 === p.id ? 0.5 : 1,
+                                    }}
+                                  >
+                                    {triggeringEmail1 === p.id
+                                      ? "Sending..."
+                                      : "Send Email 1 now"}
+                                  </button>
+                                )}
+                              </div>
+                            )}
                         </div>
 
                         {/* Status badge */}
