@@ -662,20 +662,49 @@ export default function BulkPlacePageClient({
                     color: "#2a6a3a",
                   }}
                 >
-                  <p style={{ margin: "0 0 12px", fontWeight: 600 }}>
+                  <p style={{ margin: "0 0 16px", fontWeight: 600 }}>
                     Batch complete. {placed} placed, {skipped} skipped.
                   </p>
-                  <Link
-                    href={`/${handle}`}
-                    style={{
-                      color: "#8a6d2a",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 2,
-                      fontSize: "0.88rem",
-                    }}
-                  >
-                    Return to dashboard
-                  </Link>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRawJson("");
+                        setDrafts([]);
+                        setStage("input");
+                      }}
+                      style={{
+                        padding: "12px 24px",
+                        borderRadius: 999,
+                        border: "none",
+                        background: "#FFD86B",
+                        color: "#1a2a0e",
+                        fontWeight: 700,
+                        fontSize: "0.95rem",
+                        cursor: "pointer",
+                        boxShadow:
+                          "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                      }}
+                    >
+                      Place another batch
+                    </button>
+                    <Link
+                      href={`/${handle}`}
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 18px",
+                        borderRadius: 999,
+                        border: "1px solid rgba(138,109,42,0.2)",
+                        background: "rgba(255,248,230,0.35)",
+                        color: "rgba(138,109,42,0.7)",
+                        fontWeight: 600,
+                        fontSize: "0.82rem",
+                        textDecoration: "none",
+                      }}
+                    >
+                      Return to dashboard
+                    </Link>
+                  </div>
                 </div>
               )}
             </>
