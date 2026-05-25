@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
 
 const CATEGORIES = [
   "Food & Nourishment",
@@ -39,6 +40,7 @@ type ListingDraft = {
   address: string;
   website: string;
   steward_email: string;
+  no_public_email: boolean;
   status: "pending" | "placing" | "placed" | "skipped" | "error";
   error?: string;
   listingId?: string;
@@ -157,6 +159,7 @@ export default function BulkPlacePageClient({
           address: String(raw.address || "").trim(),
           website: String(raw.website || "").trim(),
           steward_email: String(raw.steward_email || "").trim(),
+          no_public_email: raw.no_public_email === true,
           status: "pending" as const,
         };
       });
@@ -228,6 +231,7 @@ export default function BulkPlacePageClient({
           address: draft.address,
           website: draft.website,
           steward_email: draft.steward_email || undefined,
+          no_public_email: draft.no_public_email,
         }),
       });
 
@@ -539,8 +543,109 @@ export default function BulkPlacePageClient({
                               </div>
                               <div>
                                 <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Steward email (optional)</label>
-                                <input style={inputStyle} value={draft.steward_email} onChange={(e) => updateDraft(draft.id, "steward_email", e.target.value)} disabled={isPlacing} />
+                                <input
+                                  style={{ ...inputStyle, opacity: draft.no_public_email ? 0.4 : 1 }}
+                                  value={draft.steward_email}
+                                  onChange={(e) => updateDraft(draft.id, "steward_email", e.target.value)}
+                                  disabled={isPlacing || draft.no_public_email}
+                                />
                               </div>
+                            </div>
+
+                            {/* No public email checkbox */}
+                            <div>
+                              <label
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  fontSize: "0.82rem",
+                                  color: "#0d2a4a",
+                                  cursor: isPlacing ? "default" : "pointer",
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={draft.no_public_email}
+                                  onChange={() =>
+                                    updateDraft(draft.id, "no_public_email", !draft.no_public_email)
+                                  }
+                                  disabled={isPlacing}
+                                />
+                                No public email — uses a contact form
+                              </label>
+                              {draft.no_public_email && (
+                                <div
+                                  style={{
+                                    marginTop: 10,
+                                    padding: "12px 14px",
+                                    borderRadius: 10,
+                                    border: "1px solid rgba(138,109,42,0.15)",
+                                    background: "rgba(255,248,230,0.3)",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      fontSize: "0.78rem",
+                                      fontWeight: 650,
+                                      color: "#8a6d2a",
+                                      marginBottom: 6,
+                                    }}
+                                  >
+                                    Outreach letter to paste into contact form
+                                  </div>
+                                  <textarea
+                                    readOnly
+                                    value={
+                                      seederOutreach1Email({
+                                        businessName: draft.business_name || "[Business Name]",
+                                        listingId: "[will be assigned on placement]",
+                                        removalToken: "",
+                                        seederName: "",
+                                      }).text
+                                    }
+                                    style={{
+                                      width: "100%",
+                                      minHeight: 160,
+                                      padding: "10px 12px",
+                                      borderRadius: 8,
+                                      border: "1px solid rgba(100,150,220,0.2)",
+                                      background: "rgba(255,255,255,0.6)",
+                                      color: "#0d2a4a",
+                                      fontSize: "0.78rem",
+                                      lineHeight: 1.5,
+                                      resize: "vertical",
+                                      outline: "none",
+                                      fontFamily: "inherit",
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const { text } = seederOutreach1Email({
+                                        businessName: draft.business_name || "[Business Name]",
+                                        listingId: "[will be assigned on placement]",
+                                        removalToken: "",
+                                        seederName: "",
+                                      });
+                                      navigator.clipboard.writeText(text);
+                                    }}
+                                    style={{
+                                      marginTop: 8,
+                                      padding: "6px 14px",
+                                      borderRadius: 999,
+                                      border: "1px solid rgba(138,109,42,0.2)",
+                                      background: "rgba(255,248,230,0.35)",
+                                      color: "rgba(138,109,42,0.7)",
+                                      fontSize: "0.75rem",
+                                      fontWeight: 600,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    Copy letter
+                                  </button>
+                                </div>
+                              )}
                             </div>
 
                             {/* Category pills */}

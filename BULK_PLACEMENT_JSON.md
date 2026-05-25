@@ -24,8 +24,9 @@ placement pipeline at `/api/seeder/place-listing`.
 | Key | Type | Notes |
 |-----|------|-------|
 | `website` | string | URL of the business |
-| `steward_email` | string | If present and non-empty, Email 1 fires on placement |
+| `steward_email` | string | If present and non-empty, Email 1 fires on placement (unless no_public_email is true) |
 | `practices` | string[] | Must be from the canonical list below. Non-matching values are silently stripped at parse time. |
+| `no_public_email` | boolean | If true, listing is marked as contact-form-only. Email 1 will not fire even if steward_email is populated. Default: false. |
 
 ---
 

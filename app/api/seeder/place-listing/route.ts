@@ -194,6 +194,7 @@ export async function POST(req: Request) {
     website,
     steward_email,
     override_do_not_list,
+    no_public_email,
   } = body;
 
   // ── Validation ──
@@ -326,6 +327,7 @@ export async function POST(req: Request) {
         placed_by_seeder_id: session.seeder_id,
         outreach_status: "not_started",
         do_not_list_override: override_do_not_list === true,
+        no_public_email: no_public_email === true,
         removal_token: removalToken,
         status: "active",
       },
@@ -345,7 +347,7 @@ export async function POST(req: Request) {
 
   let emailSent = false;
 
-  if (steward_email?.trim()) {
+  if (steward_email?.trim() && !no_public_email) {
     try {
       await sendEmail1({
         listingId: listing.id,

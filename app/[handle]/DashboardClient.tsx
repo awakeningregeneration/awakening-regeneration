@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import OutreachMessageDisplay from "@/app/components/OutreachMessageDisplay";
+import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
 
 type Placement = {
   id: string;
@@ -17,6 +18,7 @@ type Placement = {
   status: string | null;
   bounce_info: string | null;
   last_outreach_at: string | null;
+  no_public_email: boolean;
 };
 
 type Credit = {
@@ -63,7 +65,8 @@ const orbs = [
 function getStatusBadge(
   outreachStatus: string | null,
   stewardEmail: string | null,
-  listingStatus: string | null
+  listingStatus: string | null,
+  noPublicEmail?: boolean
 ): { label: string; color: string } {
   // Stage G: soft opt-out check will go here
   // if (listingStatus === 'removed' && doNotListLevel === 'seeder_only')
@@ -71,6 +74,8 @@ function getStatusBadge(
 
   switch (outreachStatus) {
     case "not_started":
+      if (noPublicEmail)
+        return { label: "Contact form only", color: "rgba(255,240,200,0.5)" };
       return stewardEmail
         ? {
             label: "Awaiting first email",
@@ -159,6 +164,21 @@ export default function DashboardClient({
     } finally {
       setTriggeringEmail1(null);
     }
+  }
+
+  const [copiedLetterId, setCopiedLetterId] = useState<string | null>(null);
+
+  function handleCopyOutreachLetter(listingId: string, businessName: string) {
+    const { text } = seederOutreach1Email({
+      businessName,
+      listingId,
+      removalToken: "",
+      seederName: "",
+    });
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedLetterId(listingId);
+      setTimeout(() => setCopiedLetterId(null), 2500);
+    });
   }
 
   // Suppress unused variable — referralCode reserved for future use
@@ -490,7 +510,8 @@ export default function DashboardClient({
                   const badge = getStatusBadge(
                     p.outreach_status,
                     p.steward_email,
-                    p.status
+                    p.status,
+                    p.no_public_email
                   );
                   const location = [p.city, p.state]
                     .filter(Boolean)
@@ -579,8 +600,35 @@ export default function DashboardClient({
                               tending
                             </div>
                           )}
+                          {/* Copy outreach letter for no-public-email listings */}
+                          {!isClaimed && p.no_public_email && (
+                            <div style={{ marginTop: 4 }}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyOutreachLetter(p.id, p.title);
+                                }}
+                                style={{
+                                  padding: "3px 10px",
+                                  borderRadius: 999,
+                                  border: "1px solid rgba(138,109,42,0.2)",
+                                  background: "rgba(255,248,230,0.35)",
+                                  color: "rgba(138,109,42,0.7)",
+                                  fontSize: "0.72rem",
+                                  fontWeight: 600,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {copiedLetterId === p.id
+                                  ? "Copied!"
+                                  : "Copy outreach letter"}
+                              </button>
+                            </div>
+                          )}
                           {/* Send Email 1 action for listings with email but no outreach yet */}
                           {!isClaimed &&
+                            !p.no_public_email &&
                             p.steward_email &&
                             !p.last_outreach_at &&
                             p.outreach_status === "not_started" && (

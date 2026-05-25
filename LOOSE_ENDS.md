@@ -33,3 +33,15 @@ See GROWTH_LIST.md → "Email 1 / 2 / 3 Strategic Rewrite — May 18 2026" for t
 - [ ] **Category badge styling consistency check deferred** — During multi-category display update, badge styles across map popup (inline text with ·), support cards (uppercase label), contributor cards (uppercase label), and constellation detail (uppercase label) were kept as-is. The inline text join on map popups reads differently from the badge rendering on cards. Harmonizing is a polish task, not blocking.
 
 - [ ] Verify seederWelcome email rendering in production — Stage D.5's welcome email and admin endpoint are built and deployed but not yet end-to-end tested. The first real send (when onboarding Lucia or another seeder) is the verification. If the email doesn't arrive or has rendering issues, troubleshoot the curl/auth/Netlify env var setup at that point. Recommendation for first real onboarding: either (a) onboard directly with the real seeder and watch for the email to arrive, or (b) if curl proves consistently finicky across environments, build a tiny admin UI button as a more reliable trigger. Do NOT test against a fake seeder row — the first real onboarding IS the test.
+
+## Needs testing when Ren returns (built 2026-05-23, untested)
+
+The "no public email" workflow was built end-to-end but never tested live. Before relying on it, test:
+
+- [ ] Place a listing through the bulk tool with the "No public email" checkbox checked. Confirm the listing lands in Supabase with no_public_email = true and outreach_status = 'not_started' and last_outreach_at IS NULL.
+- [ ] Confirm the "Copy letter" button on the bulk card copies the correct Email 1 text to clipboard.
+- [ ] On the seeder dashboard, confirm the listing displays the "Contact form only" badge (not "No steward email").
+- [ ] Confirm the "Copy outreach letter" button on the dashboard row copies the same Email 1 text.
+- [ ] Confirm "Send Email 1 now" does NOT appear on no_public_email = true rows.
+- [ ] Live test case: A Leap of Taste in Klamath Falls. Either flip its no_public_email flag manually via SQL, or re-place it through the bulk tool with the checkbox checked.
+- [ ] Migration SQL must be run in Supabase Studio FIRST before any of the above: supabase/migrations/20260523_listings_no_public_email.sql
