@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import OutreachMessageDisplay from "@/app/components/OutreachMessageDisplay";
-import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
+import { OUTREACH_TEMPLATE } from "@/app/lib/outreachTemplate";
 
 type Placement = {
   id: string;
@@ -168,14 +168,8 @@ export default function DashboardClient({
 
   const [copiedLetterId, setCopiedLetterId] = useState<string | null>(null);
 
-  function handleCopyOutreachLetter(listingId: string, businessName: string) {
-    const { text } = seederOutreach1Email({
-      businessName,
-      listingId,
-      removalToken: "",
-      seederName: "",
-    });
-    navigator.clipboard.writeText(text).then(() => {
+  function handleCopyOutreachLetter(listingId: string) {
+    navigator.clipboard.writeText(OUTREACH_TEMPLATE).then(() => {
       setCopiedLetterId(listingId);
       setTimeout(() => setCopiedLetterId(null), 2500);
     });
@@ -607,7 +601,7 @@ export default function DashboardClient({
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCopyOutreachLetter(p.id, p.title);
+                                  handleCopyOutreachLetter(p.id);
                                 }}
                                 style={{
                                   padding: "3px 10px",
