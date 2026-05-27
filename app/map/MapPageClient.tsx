@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
+import { normalizeState as normalizeStateStr, normalizeCounty as normalizeCountyStr } from "@/app/lib/normalize";
 import ListingImageTile from "../components/ListingImageTile";
 import ElementalSeat from "../components/ElementalSeat";
 import { getListingImage } from "../../lib/getListingImage";
@@ -262,26 +263,27 @@ const counties = useMemo(() => {
   const stateListings = useMemo(() => {
     if (!effectiveState) return [];
 
+    const target = normalizeStateStr(effectiveState);
     return allListings.filter(
       (l) =>
-        !!l.state && l.state.toLowerCase() === effectiveState.toLowerCase()
+        !!l.state && normalizeStateStr(l.state) === target
     );
   }, [allListings, effectiveState]);
 
 const countyListings = useMemo(() => {
   if (!effectiveState || !effectiveCounty) return [];
 
-  const normalizeCounty = (value?: string | null) =>
-    (value || "").replace(/\s+County$/i, "").trim().toLowerCase();
+  const targetState = normalizeStateStr(effectiveState);
+  const targetCounty = normalizeCountyStr(effectiveCounty);
 
   return allListings
     .filter((l) => {
       const stateOk =
-        !!l.state && l.state.toLowerCase() === effectiveState.toLowerCase();
+        !!l.state && normalizeStateStr(l.state) === targetState;
 
       const countyOk =
         !!l.county &&
-        normalizeCounty(l.county) === normalizeCounty(effectiveCounty);
+        normalizeCountyStr(l.county) === targetCounty;
 
       return stateOk && countyOk;
     })

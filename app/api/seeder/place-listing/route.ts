@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
 import { sendEmail1 } from "@/app/lib/sendEmail1";
+import { toTitleCase, normalizeState, normalizeCounty, normalizeCity, normalizeName } from "@/app/lib/normalize";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -56,64 +57,6 @@ const VALID_PRACTICES = new Set([
   "Community Led",
   "Justice-Oriented",
 ]);
-
-const STATE_ABBREVIATIONS: Record<string, string> = {
-  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas",
-  CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware",
-  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho",
-  IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas",
-  KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
-  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
-  MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada",
-  NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
-  NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
-  OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
-  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah",
-  VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia",
-  WI: "Wisconsin", WY: "Wyoming", DC: "District of Columbia",
-};
-
-/**
- * Normalize a business name the same way the DB trigger does:
- * lowercase, trim, strip leading articles (the/a/an), collapse spaces.
- */
-function normalizeName(name: string): string {
-  let v = name.toLowerCase().trim();
-  v = v.replace(/^(the|a|an)\s+/i, "");
-  v = v.replace(/\s+/g, " ");
-  return v;
-}
-
-function toTitleCase(value: string): string {
-  return value
-    .toLowerCase()
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function normalizeState(value?: string): string {
-  const raw = value?.trim();
-  if (!raw) return "";
-  const upper = raw.toUpperCase();
-  if (STATE_ABBREVIATIONS[upper]) return STATE_ABBREVIATIONS[upper];
-  return toTitleCase(raw);
-}
-
-function normalizeCounty(value?: string): string {
-  const raw = value?.trim();
-  if (!raw) return "";
-  const withoutCounty = raw.replace(/\s+county$/i, "").trim();
-  if (!withoutCounty) return "";
-  return `${toTitleCase(withoutCounty)} County`;
-}
-
-function normalizeCity(value?: string): string {
-  const raw = value?.trim();
-  if (!raw) return "";
-  return toTitleCase(raw);
-}
 
 /**
  * Geocode via Mapbox and extract county from the response context.

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { isDomainMatch } from "@/app/lib/domainMatch";
+import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normalize";
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
 
@@ -65,7 +66,15 @@ export async function POST(request: Request) {
 
     for (const f of fields) {
       if (body[f] !== undefined) {
-        listingUpdate[f] = typeof body[f] === "string" ? body[f].trim() : body[f];
+        if (f === "city") {
+          listingUpdate[f] = normalizeCity(body[f]) || null;
+        } else if (f === "state") {
+          listingUpdate[f] = normalizeState(body[f]) || null;
+        } else if (f === "county") {
+          listingUpdate[f] = normalizeCounty(body[f]) || null;
+        } else {
+          listingUpdate[f] = typeof body[f] === "string" ? body[f].trim() : body[f];
+        }
       }
     }
 

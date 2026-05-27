@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 23, 2026*
+*Last updated: May 26, 2026*
 
 ---
 
@@ -44,4 +44,12 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 - [ ] Confirm the "Copy outreach letter" button on the dashboard row copies the same Email 1 text.
 - [ ] Confirm "Send Email 1 now" does NOT appear on no_public_email = true rows.
 - [ ] Live test case: A Leap of Taste in Klamath Falls. Either flip its no_public_email flag manually via SQL, or re-place it through the bulk tool with the checkbox checked.
-- [ ] Migration SQL must be run in Supabase Studio FIRST before any of the above: supabase/migrations/20260523_listings_no_public_email.sql
+- [ ] Verify whether migration supabase/migrations/20260523_listings_no_public_email.sql has been run against production Supabase. Code was committed and pushed (349d2ab) but production migration status is unconfirmed. Check by looking for the no_public_email column on the listings table in Supabase Studio. If not yet run, run it before any of the live tests above.
+
+## From the May 26 normalization pass
+
+- [ ] Watch for any edge cases the new database trigger surfaces. The trigger normalizes city/state/county on every INSERT/UPDATE. If anything ever fails to insert with a normalization-related error message, the trigger is the place to look. Migration file: supabase/migrations/20260526_extend_normalize_listing_fields.sql.
+
+- [ ] If state abbreviations ever start appearing in the data as "Or" or "Ca" (visibly wrong Title-Cased two-letter forms), it means someone wrote a state abbreviation directly to the database via Supabase Studio or manual SQL, bypassing the JS utility. The trigger intentionally does not expand abbreviations. Manual correction is the fix, and it's a signal that someone needs the canonical format documented somewhere visible.
+
+- [ ] The scripts/backfill-normalization.ts file remains in the repo as a re-runnable cleanup tool. It's idempotent — dry-run shows zero changes when data is canonical. Safe to leave; remove only if it becomes confusing as a historical artifact.

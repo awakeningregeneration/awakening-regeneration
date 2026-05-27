@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
+import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normalize";
 
 /**
  * POST /api/seeder/save-listing
@@ -64,8 +65,16 @@ export async function POST(req: Request) {
 
     for (const f of ALLOWED_FIELDS) {
       if (body[f] !== undefined) {
-        update[f] =
-          typeof body[f] === "string" ? body[f].trim() || null : body[f];
+        if (f === "city") {
+          update[f] = normalizeCity(body[f]) || null;
+        } else if (f === "state") {
+          update[f] = normalizeState(body[f]) || null;
+        } else if (f === "county") {
+          update[f] = normalizeCounty(body[f]) || null;
+        } else {
+          update[f] =
+            typeof body[f] === "string" ? body[f].trim() || null : body[f];
+        }
       }
     }
 

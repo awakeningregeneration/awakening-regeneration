@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { normalizeState, normalizeCounty } from "@/app/lib/normalize";
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -14,8 +15,11 @@ export async function GET(request: Request) {
 
   let query = supabase.from("stories").select("*");
 
-  if (state) query = query.eq("state", state);
-  if (county) query = query.eq("county", county);
+  const normalizedState = state ? normalizeState(state) : "";
+  const normalizedCounty = county ? normalizeCounty(county) : "";
+
+  if (normalizedState) query = query.eq("state", normalizedState);
+  if (normalizedCounty) query = query.eq("county", normalizedCounty);
 
   const { data, error } = await query.order("created_at", { ascending: false });
 
@@ -41,8 +45,8 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase.from("stories").insert([
     {
-      state,
-      county,
+      state: normalizeState(state) || null,
+      county: normalizeCounty(county) || null,
       title,
       body: storyBody,
       link,

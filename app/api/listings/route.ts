@@ -5,102 +5,13 @@ import { isDomainMatch } from "@/app/lib/domainMatch";
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
 
+import { normalizeState, normalizeCounty, normalizeCity, normalizeName } from "@/app/lib/normalize";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-const STATE_ABBREVIATIONS: Record<string, string> = {
-  AL: "Alabama",
-  AK: "Alaska",
-  AZ: "Arizona",
-  AR: "Arkansas",
-  CA: "California",
-  CO: "Colorado",
-  CT: "Connecticut",
-  DE: "Delaware",
-  FL: "Florida",
-  GA: "Georgia",
-  HI: "Hawaii",
-  ID: "Idaho",
-  IL: "Illinois",
-  IN: "Indiana",
-  IA: "Iowa",
-  KS: "Kansas",
-  KY: "Kentucky",
-  LA: "Louisiana",
-  ME: "Maine",
-  MD: "Maryland",
-  MA: "Massachusetts",
-  MI: "Michigan",
-  MN: "Minnesota",
-  MS: "Mississippi",
-  MO: "Missouri",
-  MT: "Montana",
-  NE: "Nebraska",
-  NV: "Nevada",
-  NH: "New Hampshire",
-  NJ: "New Jersey",
-  NM: "New Mexico",
-  NY: "New York",
-  NC: "North Carolina",
-  ND: "North Dakota",
-  OH: "Ohio",
-  OK: "Oklahoma",
-  OR: "Oregon",
-  PA: "Pennsylvania",
-  RI: "Rhode Island",
-  SC: "South Carolina",
-  SD: "South Dakota",
-  TN: "Tennessee",
-  TX: "Texas",
-  UT: "Utah",
-  VT: "Vermont",
-  VA: "Virginia",
-  WA: "Washington",
-  WV: "West Virginia",
-  WI: "Wisconsin",
-  WY: "Wyoming",
-  DC: "District of Columbia",
-};
-
-function toTitleCase(value: string) {
-  return value
-    .toLowerCase()
-    .split(" ")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function normalizeState(value?: string) {
-  const raw = value?.trim();
-  if (!raw) return "";
-
-  const upper = raw.toUpperCase();
-  if (STATE_ABBREVIATIONS[upper]) {
-    return STATE_ABBREVIATIONS[upper];
-  }
-
-  return toTitleCase(raw);
-}
-
-function normalizeCounty(value?: string) {
-  const raw = value?.trim();
-  if (!raw) return "";
-
-  const withoutCounty = raw.replace(/\s+county$/i, "").trim();
-  if (!withoutCounty) return "";
-
-  return `${toTitleCase(withoutCounty)} County`;
-}
-
-function normalizeCity(value?: string) {
-  const raw = value?.trim();
-  if (!raw) return "";
-  return toTitleCase(raw);
-}
 
 async function geocodeLocation(params: {
   address?: string;
@@ -219,9 +130,7 @@ export async function POST(req: Request) {
     // Prevents re-submission of a listing that a steward has permanently removed.
     // See OPT_OUT_LAYERS.md for the full consent model.
     if (title?.trim()) {
-      const normalizedTitle = title.trim().toLowerCase()
-        .replace(/^(the|a|an)\s+/i, "")
-        .replace(/\s+/g, " ");
+      const normalizedTitle = normalizeName(title);
 
       const { data: blocked } = await supabaseAdmin
         .from("listings")

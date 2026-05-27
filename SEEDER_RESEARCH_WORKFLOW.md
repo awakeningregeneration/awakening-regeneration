@@ -7,6 +7,50 @@ workflow every time Ren says "let's add some listings" or similar
 
 ---
 
+## The qualifying filter — what makes a listing belong
+
+"Local" is not the qualifier. Being a small local business is
+wonderful but it's not what this map honors.
+
+For a listing to belong on Canary Commons, the business must be
+visibly doing something life-forward — choosing a practice that
+future generations will be thankful for. The website, social
+presence, or public information should show at least one of:
+
+- Organic, regenerative, or biodynamic sourcing/growing
+- Fair trade or direct-trade relationships
+- Recycled, upcycled, or low-waste practices
+- Non-GMO sourcing
+- Sustainable materials or processes
+- Repair, reuse, refill, or circular models
+- Plant-based or thoughtful meat sourcing (pasture-raised,
+  regenerative ranching)
+- Traditional or heritage craft preserved intentionally
+- Community-owned, worker-owned, or cooperative structure
+- Trauma-informed, somatic, or accessible care practices
+- Indigenous-led, women-led, or justice-oriented framing
+- Volunteer-run, sliding-scale, or accessible economics
+- Renewable energy use as part of their operation
+
+If a business is just "a small local coffee shop" or "a sweet
+bakery in town" with nothing on their site indicating any of the
+above — they don't belong on the map yet. They might be lovely
+places. They're not Canary Commons listings.
+
+Claude's job during research is to surface candidates AND flag
+the qualifying practice. If a website doesn't surface any
+qualifying practice, Claude either:
+(a) digs deeper to find it (social posts, About page, mission
+    statements), or
+(b) marks the candidate as "local only — no surfaced qualifying
+    practice" and lets Ren decide whether to skip or research
+    further.
+
+When in doubt, ask Ren rather than guess. "Local" is not a
+qualifier.
+
+---
+
 ## The workflow
 
 When Ren wants to populate a region or theme, Claude:

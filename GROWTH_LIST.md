@@ -38,14 +38,20 @@ level, or maturity. Items here are not problems — they are
 
 - [ ] **Address format variation in normalization** — Some listings
   have just a street address, others have full "address, city, state,
-  zip, country" strings. Matching works on both formats currently but
-  may want to normalize to a standardized format when the do_not_list
-  check becomes higher-stakes.
+  zip, country" strings. As of May 26 normalization pass, address
+  trimming exists in app/lib/normalize.ts but no deeper address-shape
+  normalization is applied (the JS utility leaves addresses largely
+  as-is; only the SQL trigger normalizes street suffixes via
+  normalized_address). Revisit when do_not_list matching becomes
+  higher-stakes or when address-based deduplication is needed.
 
 - [ ] **Directional prefix handling in address normalization** —
-  "N./E./S./W." periods are preserved. "N. First St" and "N First St"
-  would not match. Consider stripping periods from directional prefixes
-  when matching becomes more sensitive.
+  "N./E./S./W." periods are preserved in stored addresses. "N. First St"
+  and "N First St" would not match in any future fuzzy address
+  comparison. As of May 26 normalization pass, this lives in
+  app/lib/normalize.ts and the SQL trigger but is deferred. Strip
+  periods from directional prefixes when matching becomes more
+  sensitive.
 
 - [ ] **Public-facing override flow for hard opt-outs** — Mirror
   the seeder Stage C override view on the public submit form
@@ -79,16 +85,6 @@ level, or maturity. Items here are not problems — they are
   multi-seeder coordination ever needs this (e.g., handoffs,
   regional territory transfers), it would be a future build with
   explicit permission modeling.
-
-- [ ] **Unify listing-name normalization into a shared utility** —
-  Two listing-matching normalizations currently exist: seeder
-  placement uses `normalizeName()` helper (in place-listing/
-  route.ts), and the public submit route inlines its own logic
-  (lowercase, strip articles, collapse spaces). Both do the same
-  thing differently. Consider extracting into a shared utility
-  (e.g. app/lib/normalizeName.ts) when the next match-related
-  change comes through. Not blocking — both produce the same
-  output for normal cases.
 
 - [ ] **Admin tool for steward-email backfills** — The Ashland
   backfill (May 18) was done via a one-time script
