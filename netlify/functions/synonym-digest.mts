@@ -19,7 +19,7 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL!;
-const FROM_EMAIL = "Canary Commons <synonyms@canarycommons.org>";
+const FROM_EMAIL = "Canary Commons <founder@canarycommons.org>";
 
 // Supabase Studio deep link for synonym_candidates filtered to pending
 function buildReviewUrl(): string {

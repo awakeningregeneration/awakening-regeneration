@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     // Generate token and create claim
     const token = generateVerificationToken();
     const tokenExpiresAt = new Date(
-      Date.now() + 24 * 60 * 60 * 1000
+      Date.now() + 72 * 60 * 60 * 1000
     ).toISOString();
 
     const { error: claimErr } = await supabaseAdmin

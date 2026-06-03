@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Canary Commons — A gateway revealing what is already life-forward",
   description:
-    "A living map of what is already life-forward. Find, reveal, and support places, people, and projects tending the elements that sustain life.",
-  metadataBase: new URL("https://canarycommons.org"),
+    "Connected, we dawn brighter. A living map of places, people, and projects making life-forward choices visible and findable.",
+  metadataBase: new URL("https://www.canarycommons.org"),
   openGraph: {
-    title: "Canary Commons — A gateway revealing what is already life-forward",
+    title: "Canary Commons",
     description:
-      "A living map of what is already life-forward. Find, reveal, and support places, people, and projects tending the elements that sustain life.",
-    url: "https://canarycommons.org",
+      "Connected, we dawn brighter. A living map of places, people, and projects making life-forward choices visible and findable.",
+    url: "https://www.canarycommons.org",
     siteName: "Canary Commons",
     type: "website",
     images: [
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Canary Commons — A gateway revealing what is already life-forward",
+    title: "Canary Commons",
     description:
-      "A living map of what is already life-forward. Find, reveal, and support places, people, and projects tending the elements that sustain life.",
+      "Connected, we dawn brighter. A living map of places, people, and projects making life-forward choices visible and findable.",
     images: ["/opengraph-image"],
   },
 };

@@ -504,6 +504,27 @@ export default function AboutPage() {
             </div>
           </section>
 
+          {/* ═══ LETTER LINK ═══ */}
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)",
+              color: "rgba(255,248,224,0.72)",
+              margin: "0 0 24px",
+            }}
+          >
+            <Link
+              href="/letter"
+              style={{
+                color: "rgba(255,248,224,0.72)",
+                textDecoration: "underline",
+                textUnderlineOffset: 2,
+              }}
+            >
+              Read a letter from the founder
+            </Link>
+          </p>
+
           {/* ═══ CONTACT ═══ */}
           <p
             style={{

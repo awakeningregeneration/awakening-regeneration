@@ -32,6 +32,8 @@ const RESERVED_HANDLES = new Set([
   "terms",
   "contact",
   "home",
+  "letter",
+  "dawning-trial",
   // Defensive extras
   "dashboard",
   "settings",

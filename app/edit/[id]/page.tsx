@@ -734,13 +734,33 @@ function EditListingContent({ params }: Props) {
 
             {claimSent && (
               <div>
-                <h1 style={headingStyle}>Verification link sent</h1>
-                <p style={textStyle}>
-                  We&apos;ve sent a verification link to{" "}
-                  <strong>{claimEmail}</strong>. Please check your inbox
-                  (and spam folder, just in case) within the next 24 hours.
+                <h1
+                  style={{
+                    ...headingStyle,
+                    color: "#FFD86B",
+                    textShadow: "0 0 32px rgba(255,216,107,0.35)",
+                  }}
+                >
+                  Almost there — check your email now
+                </h1>
+                <p style={{ ...textStyle, fontSize: "1.05rem", lineHeight: 1.7 }}>
+                  We&apos;ve sent a confirmation link to{" "}
+                  <strong>{claimEmail}</strong>. Click the link in that email
+                  within 72 hours and you&apos;ll become the steward of this
+                  listing. That click is the last step — the commons is holding
+                  your place until then.
                 </p>
-                <Link href="/map" style={{ ...goldButtonStyle, display: "inline-block", textDecoration: "none", marginTop: 16 }}>
+                <p
+                  style={{
+                    fontSize: "0.95rem",
+                    color: "#3a5a7a",
+                    fontWeight: 600,
+                    margin: "16px 0 0",
+                  }}
+                >
+                  Check your inbox now — and your spam folder, just in case.
+                </p>
+                <Link href="/map" style={{ ...goldButtonStyle, display: "inline-block", textDecoration: "none", marginTop: 24 }}>
                   Return to the map
                 </Link>
               </div>

@@ -73,7 +73,7 @@ export default async function Image() {
         {/* Logo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://canarycommons.org/canary-commons-logo.png"
+          src="https://www.canarycommons.org/canary-commons-logo.png"
           alt=""
           width={280}
           height={280}

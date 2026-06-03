@@ -31,7 +31,10 @@ export async function GET(request: Request) {
     // ── 2. Check expiry ────────────────────────────────────
     if (isTokenExpired(claim.token_expires_at)) {
       return NextResponse.redirect(
-        new URL("/steward/verify/failed?reason=expired", request.url)
+        new URL(
+          `/steward/verify/failed?reason=expired&token=${encodeURIComponent(token)}`,
+          request.url
+        )
       );
     }
 

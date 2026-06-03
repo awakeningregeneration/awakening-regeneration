@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: May 26, 2026*
+*Last updated: June 2, 2026*
 
 ---
 
@@ -46,6 +46,16 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 - [ ] Live test case: A Leap of Taste in Klamath Falls. Either flip its no_public_email flag manually via SQL, or re-place it through the bulk tool with the checkbox checked.
 - [ ] Verify whether migration supabase/migrations/20260523_listings_no_public_email.sql has been run against production Supabase. Code was committed and pushed (349d2ab) but production migration status is unconfirmed. Check by looking for the no_public_email column on the listings table in Supabase Studio. If not yet run, run it before any of the live tests above.
 
+## From the June 2 session
+
+- [ ] **Mobile map renders as a dropdown list instead of an actual map on phones — HIGHEST PRIORITY.** People expect points of light and get a text list. They think the map is broken. Live issue, highest priority next session.
+
+- [ ] **Seeder Email 1 reframe (designed, not yet built).** Simplify to one doorway: "you've been noticed, here you are" pointing at the live listing on the map. Steward claim becomes the natural path from the listing card itself. Remove link stays but moves to fine print. Requires the public listing card to have a steward path first (see next item).
+
+- [ ] **Public listing card has no steward path and no easy remove door.** Currently offers only "Suggest an edit" and "Flag this listing." Before the Email 1 reframe can hand off to the listing card, it needs a visible claim/steward entry point and a plain remove option. Design and build before Email 1 reframe.
+
+- [ ] **Reverify rate-limit: soften to once per hour.** Current reverify endpoint rejects if the current token hasn't expired, meaning a steward who loses the second email is locked out for the full 72h window. Soften to allow one re-issue per hour. Code comment in app/api/steward/reverify/route.ts marks the spot.
+
 ## From the May 26 normalization pass
 
 - [ ] Watch for any edge cases the new database trigger surfaces. The trigger normalizes city/state/county on every INSERT/UPDATE. If anything ever fails to insert with a normalization-related error message, the trigger is the place to look. Migration file: supabase/migrations/20260526_extend_normalize_listing_fields.sql.
@@ -53,3 +63,27 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 - [ ] If state abbreviations ever start appearing in the data as "Or" or "Ca" (visibly wrong Title-Cased two-letter forms), it means someone wrote a state abbreviation directly to the database via Supabase Studio or manual SQL, bypassing the JS utility. The trigger intentionally does not expand abbreviations. Manual correction is the fix, and it's a signal that someone needs the canonical format documented somewhere visible.
 
 - [ ] The scripts/backfill-normalization.ts file remains in the repo as a re-runnable cleanup tool. It's idempotent — dry-run shows zero changes when data is canonical. Safe to leave; remove only if it becomes confusing as a historical artifact.
+
+## Supabase platform changes
+
+- [ ] **Supabase Data API explicit grants — deadline Oct 30, 2026.** Supabase is changing the default behavior so that tables in the `public` schema will no longer be exposed to the Data API (supabase-js, PostgREST, /rest/v1/, /graphql/v1/) without explicit GRANT statements. Effective May 30, 2026 for new projects; Oct 30, 2026 for all existing projects including ours. Existing tables keep their current grants and will continue working — this is forward-looking only.
+
+  **What needs to happen before Oct 30, 2026:**
+
+  1. Update the migration template pattern so every new table-creation migration includes explicit GRANT statements for anon, authenticated, and service_role (per Supabase's documented pattern). Also include ALTER TABLE ... ENABLE ROW LEVEL SECURITY and any needed RLS policies.
+
+  2. Run the Security Advisor in the Supabase dashboard once to audit the current grants posture on existing tables — confirm no surprises.
+
+  3. Be aware: existing migrations create tables without explicit grants. If the project ever needs to be rebuilt from migrations (recovery, fresh environment, staging clone) in a context where the new default applies, those tables will not be exposed to the Data API. Not a fix-today item, but worth knowing as a future fragility.
+
+  **Pattern for new migrations** (per Supabase docs):
+
+  ```sql
+  grant select on public.your_table to anon;
+  grant select, insert, update, delete on public.your_table to authenticated;
+  grant select, insert, update, delete on public.your_table to service_role;
+  alter table public.your_table enable row level security;
+  -- plus RLS policies as appropriate
+  ```
+
+  PostgREST returns a "42501" error with the exact GRANT statement if a grant is missing — so failures will be diagnostic rather than silent.

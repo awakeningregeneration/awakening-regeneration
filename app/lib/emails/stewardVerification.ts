@@ -27,16 +27,16 @@ export async function sendStewardVerificationEmail(options: {
       ? "you'll become the steward of this listing immediately."
       : "there's a brief 48-hour window while we make sure we don't have wires crossed — after that, you'll become the steward automatically.";
 
-  const subject = `Confirm your stewardship of ${listingName}`;
+  const subject = `One click to confirm your place — ${listingName}`;
 
   // ── Plain text ───────────────────────────────────────────
   const text = `${greeting}
 
-You're being welcomed as the steward of ${listingName} on Canary Commons — a living map of places and efforts doing life-forward work.
+You're one step from tending ${listingName} on Canary Commons. To complete it, click the confirmation link below within 72 hours — that click is what makes you the steward. The commons is holding your place until then.
 
-Stewardship means you tend this listing: you can update its details, respond to proposed edits, and keep the information current as your work evolves. The commons holds a place for you here.
+Stewardship means you tend this listing: you can update its details, respond to proposed edits, and keep the information current as your work evolves.
 
-To confirm this is really you, visit this link within the next 24 hours:
+To confirm this is really you, visit this link within the next 72 hours:
 
 ${verifyUrl}
 
@@ -68,15 +68,15 @@ If you didn't claim this listing, you can ignore this email — no action will b
               <p style="margin:0 0 18px;">${greeting}</p>
 
               <p style="margin:0 0 18px;">
-                You're being welcomed as the steward of <strong>${listingName}</strong> on Canary Commons &mdash; a living map of places and efforts doing life-forward work.
+                You&rsquo;re one step from tending <strong>${listingName}</strong> on Canary Commons. To complete it, click the confirmation link below within 72 hours &mdash; that click is what makes you the steward. The commons is holding your place until then.
               </p>
 
               <p style="margin:0 0 18px;">
-                Stewardship means you tend this listing: you can update its details, respond to proposed edits, and keep the information current as your work evolves. The commons holds a place for you here.
+                Stewardship means you tend this listing: you can update its details, respond to proposed edits, and keep the information current as your work evolves.
               </p>
 
               <p style="margin:0 0 18px;">
-                To confirm this is really you, click the link below within the next 24 hours:
+                To confirm this is really you, click the link below within the next 72 hours:
               </p>
 
               <!-- CTA Button -->

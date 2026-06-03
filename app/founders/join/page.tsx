@@ -529,6 +529,26 @@ function JoinContent() {
           support the people tending it, the technology that holds it, and
           life-forward initiatives as it grows.
         </p>
+
+        <p
+          style={{
+            marginTop: 20,
+            fontSize: "0.82rem",
+            textAlign: "center",
+            color: "rgba(159,184,216,0.52)",
+          }}
+        >
+          <a
+            href="/letter"
+            style={{
+              color: "rgba(159,184,216,0.52)",
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+            }}
+          >
+            Read a letter from the founder
+          </a>
+        </p>
       </div>
     </main>
   );
