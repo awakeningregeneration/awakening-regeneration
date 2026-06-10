@@ -20,7 +20,7 @@ export async function sendStewardVerificationEmail(options: {
     options;
 
   const greeting = displayName ? `Hi ${displayName},` : "Hi,";
-  const verifyUrl = `${SITE_URL}/steward/verify?token=${encodeURIComponent(token)}`;
+  const verifyUrl = `${SITE_URL}/api/steward/verify?token=${encodeURIComponent(token)}`;
 
   const afterConfirm =
     verificationPath === "domain_match"
