@@ -286,26 +286,6 @@ const countyListings = useMemo(() => {
     );
 }, [allListings, effectiveState, effectiveCounty]);
 
-  const mapListings = useMemo(() => {
-    if (hasCountySelection) return countyListings;
-    if (hasStateSelection) return stateListings;
-    return allListings;
-  }, [
-    allListings,
-    stateListings,
-    countyListings,
-    hasStateSelection,
-    hasCountySelection,
-  ]);
-  useEffect(() => {
-    if (!selectedId) return;
-
-    const visibleIds = new Set(mapListings.map((l) => l.id));
-    if (!visibleIds.has(selectedId)) {
-      setSelectedId(null);
-    }
-  }, [mapListings, selectedId]);
-
   // Scroll the selected listing card into view (works in both mobile drawer and desktop sidebar)
   useEffect(() => {
     if (!selectedId) return;
@@ -358,6 +338,33 @@ const countyListings = useMemo(() => {
       return synonymsCache.some((syn) => hay.includes(syn));
     });
   }, [countyListings, isSearching, synonymsCache, directHitIds]);
+
+  const mapListings = useMemo(() => {
+    if (hasCountySelection) {
+      if (isSearching) return [...directHits, ...relatedNearby];
+      return countyListings;
+    }
+    if (hasStateSelection) return stateListings;
+    return allListings;
+  }, [
+    allListings,
+    stateListings,
+    countyListings,
+    hasStateSelection,
+    hasCountySelection,
+    isSearching,
+    directHits,
+    relatedNearby,
+  ]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+
+    const visibleIds = new Set(mapListings.map((l) => l.id));
+    if (!visibleIds.has(selectedId)) {
+      setSelectedId(null);
+    }
+  }, [mapListings, selectedId]);
 
   const onlineHits = useMemo(() => {
     if (!isSearching) return [];
@@ -1394,6 +1401,25 @@ const countyListings = useMemo(() => {
               setDrawerSnap(target);
             }}
           >
+            {/* Listing count */}
+            <div
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#0a2540",
+                textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+                marginBottom: 6,
+                lineHeight: 1.3,
+              }}
+            >
+              {mapListings.length === 0
+                ? "Growing Commons — No Lights Mapped Yet"
+                : mapListings.length === 1
+                ? "1 listing"
+                : `${mapListings.length} listings`}
+            </div>
+
             {/* Drawer handle indicator */}
             <div
               style={{
@@ -1420,8 +1446,15 @@ const countyListings = useMemo(() => {
                   display: "block",
                   padding: "8px 10px",
                   borderRadius: 10,
-                  background: "rgba(255,255,255,0.35)",
-                  border: "1px solid rgba(120,100,60,0.2)",
+                  background: mapListings.length === 0
+                    ? "rgba(255,216,107,0.28)"
+                    : "rgba(255,255,255,0.35)",
+                  border: mapListings.length === 0
+                    ? "1.5px solid rgba(255,216,107,0.6)"
+                    : "1px solid rgba(120,100,60,0.2)",
+                  boxShadow: mapListings.length === 0
+                    ? "0 0 10px rgba(255,216,107,0.18)"
+                    : "none",
                   textDecoration: "none",
                   textAlign: "center",
                   color: "#6b4f00",
