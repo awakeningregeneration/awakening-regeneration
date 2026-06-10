@@ -108,6 +108,17 @@ export default function MapPage() {
 
   const isMobile = useIsMobile();
 
+  // ── Mobile drawer snap state ──
+  type DrawerSnap = "peek" | "mid" | "full";
+  const [drawerSnap, setDrawerSnap] = useState<DrawerSnap>("peek");
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    startY: number;
+    startTranslate: number;
+    lastY: number;
+    lastTime: number;
+  } | null>(null);
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -1250,88 +1261,211 @@ const countyListings = useMemo(() => {
           )}
         </div>
 
-        {/* Bottom drawer — listings + action doors */}
+        {/* Bottom drawer — slide-over sheet with snap positions */}
         <div
+          ref={sheetRef}
           className="mobile-day-drawer"
           style={{
             position: "absolute",
             bottom: 0,
             left: 0,
             right: 0,
-            height: "45vh",
+            height: "85vh",
             zIndex: 10,
             background: "rgba(245,249,255,0.15)",
             backdropFilter: "blur(8px)",
             borderTop: "1px solid rgba(138,96,16,0.25)",
             borderRadius: "18px 18px 0 0",
-            overflowY: "auto",
-            padding: "14px 14px 24px",
             color: "#0a2540",
             textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            transform:
+              drawerSnap === "full"
+                ? "translateY(0px)"
+                : drawerSnap === "mid"
+                ? "translateY(40vh)"
+                : "translateY(calc(85vh - 140px))",
+            transition: dragRef.current
+              ? "none"
+              : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
+            willChange: "transform",
           }}
         >
-          {/* Drawer handle indicator */}
+          {/* HEADER — drag grip: handle + action doors */}
           <div
             style={{
-              width: 36,
-              height: 4,
-              borderRadius: 2,
-              background: "rgba(120,100,60,0.3)",
-              margin: "0 auto 12px",
+              flexShrink: 0,
+              padding: "14px 14px 0",
+              touchAction: "none",
             }}
-          />
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              const sheet = sheetRef.current;
+              if (!sheet) return;
+              // Read current translateY from computed transform matrix
+              const matrix = new DOMMatrix(
+                getComputedStyle(sheet).transform
+              );
+              dragRef.current = {
+                startY: touch.clientY,
+                startTranslate: matrix.m42,
+                lastY: touch.clientY,
+                lastTime: Date.now(),
+              };
+              sheet.style.transition = "none";
+            }}
+            onTouchMove={(e) => {
+              const drag = dragRef.current;
+              const sheet = sheetRef.current;
+              if (!drag || !sheet) return;
+              const touch = e.touches[0];
+              const delta = touch.clientY - drag.startY;
+              const maxTranslate =
+                window.innerHeight * 0.85 - 140;
+              const newY = Math.max(
+                0,
+                Math.min(drag.startTranslate + delta, maxTranslate)
+              );
+              sheet.style.transform = `translateY(${newY}px)`;
+              drag.lastY = touch.clientY;
+              drag.lastTime = Date.now();
+            }}
+            onTouchEnd={() => {
+              const drag = dragRef.current;
+              const sheet = sheetRef.current;
+              if (!drag || !sheet) return;
 
-          {/* Action doors — Add a Point of Light + Explore Online Resources */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              marginBottom: 12,
+              const vh = window.innerHeight;
+              const maxTranslate = vh * 0.85 - 140;
+
+              // Current position from the sheet
+              const matrix = new DOMMatrix(
+                getComputedStyle(sheet).transform
+              );
+              const currentY = matrix.m42;
+
+              // Velocity (positive = moving down)
+              const elapsed = Math.max(Date.now() - drag.lastTime, 1);
+              const velocity =
+                (drag.lastY - drag.startY) / elapsed;
+
+              // Snap targets in pixels
+              const snaps: { name: DrawerSnap; y: number }[] = [
+                { name: "full", y: 0 },
+                { name: "mid", y: vh * 0.4 },
+                { name: "peek", y: maxTranslate },
+              ];
+
+              let target: DrawerSnap;
+
+              if (Math.abs(velocity) > 0.5) {
+                // Flick: move one step in the flick direction
+                const currentSnap = snaps.reduce((best, s) =>
+                  Math.abs(s.y - currentY) <
+                  Math.abs(best.y - currentY)
+                    ? s
+                    : best
+                );
+                const idx = snaps.findIndex(
+                  (s) => s.name === currentSnap.name
+                );
+                if (velocity > 0 && idx < snaps.length - 1) {
+                  target = snaps[idx + 1].name;
+                } else if (velocity < 0 && idx > 0) {
+                  target = snaps[idx - 1].name;
+                } else {
+                  target = currentSnap.name;
+                }
+              } else {
+                // No flick: snap to nearest
+                target = snaps.reduce((best, s) =>
+                  Math.abs(s.y - currentY) <
+                  Math.abs(best.y - currentY)
+                    ? s
+                    : best
+                ).name;
+              }
+
+              dragRef.current = null;
+              sheet.style.transition =
+                "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)";
+              setDrawerSnap(target);
             }}
           >
-            <Link
-              href={submitListingHref}
+            {/* Drawer handle indicator */}
+            <div
               style={{
-                flex: 1,
-                display: "block",
-                padding: "8px 10px",
-                borderRadius: 10,
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(120,100,60,0.2)",
-                textDecoration: "none",
-                textAlign: "center",
-                color: "#6b4f00",
-                fontSize: 12,
-                fontWeight: 600,
-                textShadow: "0 1px 2px rgba(255,255,255,0.5)",
+                width: 36,
+                height: 4,
+                borderRadius: 2,
+                background: "rgba(120,100,60,0.3)",
+                margin: "0 auto 12px",
+              }}
+            />
+
+            {/* Action doors — Add a Point of Light + Explore Online Resources */}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginBottom: 12,
               }}
             >
-              Add a Point of Light
-            </Link>
-            <Link
-              href="/support"
-              style={{
-                flex: 1,
-                display: "block",
-                padding: "8px 10px",
-                borderRadius: 10,
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(120,100,60,0.2)",
-                textDecoration: "none",
-                textAlign: "center",
-                color: "#6b4f00",
-                fontSize: 12,
-                fontWeight: 600,
-                textShadow: "0 1px 2px rgba(255,255,255,0.5)",
-              }}
-            >
-              Online Resources
-            </Link>
+              <Link
+                href={submitListingHref}
+                style={{
+                  flex: 1,
+                  display: "block",
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.35)",
+                  border: "1px solid rgba(120,100,60,0.2)",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  color: "#6b4f00",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textShadow: "0 1px 2px rgba(255,255,255,0.5)",
+                }}
+              >
+                Add a Point of Light
+              </Link>
+              <Link
+                href="/support"
+                style={{
+                  flex: 1,
+                  display: "block",
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.35)",
+                  border: "1px solid rgba(120,100,60,0.2)",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  color: "#6b4f00",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textShadow: "0 1px 2px rgba(255,255,255,0.5)",
+                }}
+              >
+                Online Resources
+              </Link>
+            </div>
           </div>
 
-          {/* Listing content */}
-          <div style={{ position: "relative", zIndex: 1 }}>
-            {renderSidebarContent({ showCountySearch: false, showActionButtons: false })}
+          {/* SCROLLABLE list region */}
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              padding: "0 14px 24px",
+            }}
+          >
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {renderSidebarContent({ showCountySearch: false, showActionButtons: false })}
+            </div>
           </div>
         </div>
 
