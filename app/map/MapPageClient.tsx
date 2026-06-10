@@ -108,6 +108,9 @@ export default function MapPage() {
 
   const isMobile = useIsMobile();
 
+  // Visible height when drawer is at "peek" snap (count line + handle + action doors + listing crest)
+  const PEEK_HEIGHT = 210;
+
   // ── Mobile drawer snap state ──
   type DrawerSnap = "peek" | "mid" | "full";
   const [drawerSnap, setDrawerSnap] = useState<DrawerSnap>("peek");
@@ -1147,7 +1150,7 @@ const countyListings = useMemo(() => {
       <main
         style={{
           position: "relative",
-          height: "100vh",
+          height: "100dvh",
           width: "100%",
           overflow: "hidden",
         }}
@@ -1160,6 +1163,7 @@ const countyListings = useMemo(() => {
             zIndex: 0,
             background: "#08192d",
           }}
+          onClick={() => (document.activeElement as HTMLElement)?.blur?.()}
         >
           <MapClient
             listings={mapListings}
@@ -1246,9 +1250,16 @@ const countyListings = useMemo(() => {
           {hasCountySelection && (
             <input
               type="text"
+              inputMode="search"
               placeholder="Search this county..."
               value={countySearchQuery}
               onChange={(e) => setCountySearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
+              }}
               className="mobile-search-input"
               style={{
                 position: "relative",
@@ -1293,7 +1304,7 @@ const countyListings = useMemo(() => {
                 ? "translateY(0px)"
                 : drawerSnap === "mid"
                 ? "translateY(40vh)"
-                : "translateY(calc(85vh - 140px))",
+                : `translateY(calc(85vh - ${PEEK_HEIGHT}px))`,
             transition: dragRef.current
               ? "none"
               : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -1330,7 +1341,7 @@ const countyListings = useMemo(() => {
               const touch = e.touches[0];
               const delta = touch.clientY - drag.startY;
               const maxTranslate =
-                window.innerHeight * 0.85 - 140;
+                window.innerHeight * 0.85 - PEEK_HEIGHT;
               const newY = Math.max(
                 0,
                 Math.min(drag.startTranslate + delta, maxTranslate)
@@ -1345,7 +1356,7 @@ const countyListings = useMemo(() => {
               if (!drag || !sheet) return;
 
               const vh = window.innerHeight;
-              const maxTranslate = vh * 0.85 - 140;
+              const maxTranslate = vh * 0.85 - PEEK_HEIGHT;
 
               // Current position from the sheet
               const matrix = new DOMMatrix(
