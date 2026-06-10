@@ -10,12 +10,12 @@ const GOLD_LIGHT = "#FFE8A3";
 const GOLD_DARK = "#E6B84A";
 
 const NAV_ITEMS = [
-  { label: "Map", href: "/map" },
-  { label: "The Constellation", href: "/constellation" },
-  { label: "Online Resources", href: "/support" },
-  { label: "Founders", href: "/founders" },
-  { label: "Home", href: "/" },
   { label: "About", href: "/about" },
+  { label: "Map", href: "/map" },
+  { label: "Story of Place", href: "/stories" },
+  { label: "Online Resources", href: "/support" },
+  { label: "The Constellation", href: "/constellation" },
+  { label: "Founders", href: "/founders" },
 ];
 
 /* ── Dropdown item glass styles ── */

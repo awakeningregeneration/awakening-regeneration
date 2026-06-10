@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: June 2, 2026*
+*Last updated: June 9, 2026*
 
 ---
 
@@ -20,7 +20,14 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 - **Home** — landing and return
 
 ### Global Navigation
-- **North Star nav** (built Apr 24) — top-right fixed, luminous glass dome with 8-point bi-tonal gold compass rose inside. Hover/tap opens dropdown to all surfaces.
+- **North Star nav** (built Apr 24, reordered Jun 9) — top-right fixed, luminous glass dome with 8-point bi-tonal gold compass rose inside. Hover/tap opens dropdown. Current item order: About, Map, Story of Place (/stories), Online Resources, The Constellation, Founders. "Home" intentionally removed — the homepage is the orientation gateway; there is no back-out from the living surface by design.
+
+### Two Skies (established Jun 9)
+Canary Commons now operates in two visual registers:
+- **Night sky** — orientation pages (Home, About, Constellation, Founder's Letter, Founders/Join). Deep navy (#08192d), gold (#FFD86B), pale text. The sky you arrive under.
+- **Day sky** — the mobile map surface (the living layer). Light frosted fog, dark navy text (#0a2540), bronze accents (#6b4f00). The sky you live under.
+- Desktop map retains the night-sky sidebar (unchanged). The day register is mobile-only.
+- The install (home-screen PWA) is the threshold between orientation and living — dawn between the two skies. See MOBILE_MAP_PLAN.md for the full arrival philosophy.
 
 ### Database (23 tables)
 - **Listings & moderation**: listings, listing_edits, listing_flags
@@ -35,6 +42,26 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 ---
 
 ## Done (recent)
+
+- **Jun 9** — Mobile map-first rebuild (Steps 1–3 of MOBILE_MAP_PLAN.md). The mobile /map page is now map-as-hero: the Mapbox map fills the viewport full-bleed and is always visible (no more hidden browse/map swap). Layout: floating top bar (RegionSelector + county search) over the map, bottom drawer (45vh, listing cards + action doors) scrollable over the map, North Star nav persistent in top-right corner. Retired the old mobileView state, "View on Map →" button, "← browse" button, and swipe-down-from-top return handler. Desktop is completely unchanged (sidebar + map side-by-side).
+
+  **Component extraction (Step 1):** ListingCard (app/components/ListingCard.tsx) and RegionSelector (app/components/RegionSelector.tsx) extracted from inline markup in MapPageClient.tsx — reused in both mobile and desktop paths. ListingImageTile, ElementalSeat, getListingImage moved into ListingCard; MapPageClient no longer imports them directly.
+
+  **Shared content parametrization:** The sidebar/drawer content is rendered via `renderSidebarContent({ showCountySearch, showActionButtons })` — desktop passes both true (unchanged output), mobile passes both false (county search lives in the floating bar; action buttons live as drawer-top doors and in the North Star nav).
+
+  **Day register (mobile fog treatment):** Light frosted fog rgba(245,249,255,0.15) blur 8px on drawer + bar. Dark navy text #0a2540 with light text-shadow 0 1px 2px rgba(255,255,255,0.6). Gold accents → bronze #6b4f00. Dropdowns dark-on-light via scoped CSS (.mobile-day-bar). Search input: white-tinted rgba(255,255,255,0.6), dark text, muted dark placeholder via ::placeholder rule. ListingCard text forced dark via scoped CSS (.mobile-day-drawer [data-listing-id] div { color:#0a2540 !important }) — ListingCard.tsx itself NOT modified (desktop needs its pale colors). This scoped override is intentional and is the first place to look if card text misbehaves on mobile.
+
+  **Tap-linking:** Tapping a listing card sets selectedId → map highlights the pin (boosted glow/halo/dot layers). Tapping a map pin sets selectedId → matching card scrolls into view in the drawer (data-listing-id attribute + scrollIntoView({ behavior:"smooth", block:"nearest" })). Both directions work on mobile and desktop.
+
+  **Selection popup (portal fix):** The real Mapbox popup (with its real Flag reason-picker modal and real Suggest-an-edit/steward-claim flow) is reused — not rebuilt. On mobile, the popup element is portaled to document.body after creation to escape the map wrapper's stacking context (position:absolute;zIndex:0 created a trap). Mobile popup CSS: full-screen centered flex container with semi-transparent backdrop, z-index 9999. No flyTo on mobile (map stays put). Backdrop-tap and × both dismiss. Flag modal also portaled to body on mobile (z-index 10000). Desktop popup unchanged (top-right, in-map, with flyTo).
+
+  **Nav reorder:** North Star nav items changed to: About, Map, Story of Place (/stories), Online Resources, The Constellation, Founders. "Home" removed by design.
+
+  **Other fixes:** Empty-county text: "This county is still waiting for its first light — you could add one." CompassCaption width: min(240px, calc(100vw - 32px)) for mobile viewport safety (renders on / and /about only, not /map).
+
+  **Throwaway trial routes deleted:** app/fog-trial/ and app/dawning-trial/ removed. "fog-trial" and "dawning-trial" removed from RESERVED_HANDLES. DawningBrighter component (app/components/DawningBrighter.tsx) remains in repo for future use on real pages.
+
+  **Files created:** app/components/ListingCard.tsx, app/components/RegionSelector.tsx. **Files modified:** app/map/MapPageClient.tsx (mobile branch rewritten; desktop untouched), app/components/MapClient.tsx (isMobile prop, flyTo guard, popup portal, flag modal portal), app/components/NorthStarNav.tsx (NAV_ITEMS reorder), app/components/CompassCaption.tsx (responsive width), app/lib/reservedHandles.ts (trial entries removed).
 
 - **Jun 2** — Stewardship verification recovery flow. Two real stewards (Jill at Asana Yoga, Rebekah at Takubeh) both claimed listings, received the verification email, and never clicked — the 24h window was too short and the expired-link page was a dead end. Changes: (1) Token expiry extended from 24h to 72h in app/api/steward/claim/route.ts. (2) Verification email rewritten: subject now "One click to confirm your place — [Business Name]", opening line makes clicking explicitly required ("that click is what makes you the steward"), copy updated to 72h in both plain text and HTML. File: app/lib/emails/stewardVerification.ts. (3) New reverify endpoint at app/api/steward/reverify/route.ts — accepts expired token, checks steward is still pending, generates fresh token with new 72h window, sends new verification email. Rate-limited: rejects if current token hasn't expired (comment notes future softening to once-per-hour). (4) Expired-link page (app/steward/verify/failed/page.tsx) rebuilt with gold "Resend confirmation link" button that calls the reverify endpoint, shows success/error feedback. Verify route now passes expired token through in redirect URL. (5) Post-claim success state on edit page (app/edit/[id]/page.tsx) made visually prominent: gold heading "Almost there — check your email now", explicit 72h window, "that click is the last step — the commons is holding your place until then." Previously a quiet line people were missing.
 - **Jun 2** — OG metadata + www consistency fix. metadataBase, og:url, and OG image logo src all pointed at https://canarycommons.org (no www) while the live site 301-redirects to https://www.canarycommons.org. Facebook debugger showed blank preview card due to the mismatch. Fixed all three to use www in app/layout.tsx and app/opengraph-image.tsx. Updated og:title to "Canary Commons", og:description to "Connected, we dawn brighter. A living map of places, people, and projects making life-forward choices visible and findable." Browser tab title unchanged.
@@ -154,7 +181,7 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ## In Motion
 
-- **Mobile pass partially complete** — Homepage cover map, map page listing popup, and sidebar all responsive. Remaining mobile work: bottom drawer ("lift two"), any other pages not yet tested on narrow viewports.
+- **Mobile map-first rebuild — drawer swipe gesture remaining.** The map page is now map-first on mobile with floating bar + bottom drawer (Jun 9). Remaining: the drawer is a fixed 45vh panel — needs a swipe gesture to drag it up/down between snap points (peek / mid / full). See LOOSE_ENDS.md for detailed next-task description and gotchas. Other pages not yet tested on narrow viewports.
 
 ---
 
@@ -181,7 +208,6 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ### Polish
 - Prose polish pass across the site
-- Mobile bottom drawer ("lift two")
 
 ---
 

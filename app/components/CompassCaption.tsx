@@ -74,7 +74,7 @@ export default function CompassCaption({ mode, isDropdownOpen }: Props) {
       <div
         style={{
           position: "relative",
-          width: 240,
+          width: "min(240px, calc(100vw - 32px))",
           padding: "10px 16px",
           background: "rgba(8,25,45,0.92)",
           border: "1px solid rgba(255,216,107,0.65)",

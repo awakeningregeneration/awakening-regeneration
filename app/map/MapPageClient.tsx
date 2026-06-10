@@ -6,9 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import MapClient from "@/app/components/MapClient";
 import { normalizeState as normalizeStateStr, normalizeCounty as normalizeCountyStr } from "@/app/lib/normalize";
-import ListingImageTile from "../components/ListingImageTile";
-import ElementalSeat from "../components/ElementalSeat";
-import { getListingImage } from "../../lib/getListingImage";
+import ListingCard from "../components/ListingCard";
+import RegionSelector from "../components/RegionSelector";
 import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
@@ -108,22 +107,6 @@ export default function MapPage() {
   const searchLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isMobile = useIsMobile();
-  const [mobileView, setMobileView] = useState<"browse" | "map">("browse");
-  const swipeStartY = useRef<number>(0);
-
-  // Auto-switch to map view when a listing is tapped on mobile
-  useEffect(() => {
-    if (isMobile && selectedId) {
-      setMobileView("map");
-    }
-  }, [selectedId, isMobile]);
-
-  // Reset to browse view when switching from mobile to desktop
-  useEffect(() => {
-    if (!isMobile) {
-      setMobileView("browse");
-    }
-  }, [isMobile]);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -312,6 +295,19 @@ const countyListings = useMemo(() => {
     }
   }, [mapListings, selectedId]);
 
+  // Scroll the selected listing card into view (works in both mobile drawer and desktop sidebar)
+  useEffect(() => {
+    if (!selectedId) return;
+    // Small delay so the DOM has rendered the highlighted card
+    const t = setTimeout(() => {
+      const el = document.querySelector(`[data-listing-id="${selectedId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, 100);
+    return () => clearTimeout(t);
+  }, [selectedId]);
+
   // ── County search derivation ──
 
   function buildHaystack(l: Listing): string {
@@ -445,260 +441,76 @@ const countyListings = useMemo(() => {
         }, ${mapRegion.state}`
       : mapRegion.state || "";
 
-  return (
-    <main
-      style={{
-        display: isMobile ? undefined : "flex",
-        height: "100vh",
-        width: "100%",
-        position: isMobile ? "relative" : undefined,
-        overflow: isMobile ? "hidden" : undefined,
-      }}
-    >
-      {/* Sidebar / Browse view */}
-      <div
-        style={{
-          padding: 16,
-          overflowY: "auto",
-          color: "rgba(211,227,247,0.85)",
-          background:
-            "linear-gradient(160deg, rgba(12,52,110,0.78) 0%, rgba(17,65,130,0.82) 50%, rgba(12,52,110,0.78) 100%)",
-          backdropFilter: "blur(12px)",
-          ...(isMobile
-            ? {
-                position: "absolute" as const,
-                inset: 0,
-                zIndex: mobileView === "browse" ? 2 : 0,
-                transform:
-                  mobileView === "browse"
-                    ? "translateX(0)"
-                    : "translateX(-100%)",
-                opacity: mobileView === "browse" ? 1 : 0,
-                transition:
-                  "transform 300ms ease, opacity 300ms ease",
-              }
-            : {
-                width: "380px",
-                position: "relative" as const,
-                boxShadow: "2px 0 24px rgba(8,25,45,0.13)",
-                borderTop: "3px solid rgba(255,216,107,0.6)",
-              }),
-        }}
-      >
-        {/* Sidebar emission light field */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 0,
-            overflow: "hidden",
-          }}
-        >
-          {sidebarLights.map((p, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: p.left,
-                top: p.top,
-                width: p.size,
-                height: p.size,
-                borderRadius: "50%",
-                background: "rgba(255,210,80,0.82)",
-                opacity: p.opacity,
-                boxShadow: `0 0 ${p.size * 3}px ${
-                  p.size
-                }px rgba(255,200,60,0.45), 0 0 ${p.size * 6}px ${
-                  p.size * 2
-                }px rgba(255,170,40,0.2)`,
-                pointerEvents: "none",
-              }}
-            />
-          ))}
-        </div>
-
-        <section
-          style={{
-            position: "relative",
-            zIndex: 1,
-            background: "rgba(255,255,255,0.08)",
-            borderRadius: 14,
-            border: "1px solid rgba(255,216,107,0.2)",
-            borderLeft: "3px solid rgba(255,216,107,0.5)",
-            padding: 16,
-            marginBottom: 12,
-            backdropFilter: "blur(8px)",
-          }}
-        >
+  /* ── Sidebar content shared between desktop and mobile drawer ── */
+  function renderSidebarContent(opts: { showCountySearch: boolean; showActionButtons: boolean }) {
+    return (
+    <>
+      {!hasStateSelection ? (
+        <>
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(211,227,247,0.7)",
+              fontSize: 16,
+              lineHeight: 1.35,
+              fontWeight: 600,
               marginBottom: 10,
             }}
           >
-            Region
+            A field of visible lights
           </div>
 
-          <label
+          <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.95 }}>
+            You’re viewing the broader map. Choose a state to focus what’s
+            visible there, then narrow further by county if you want to land
+            in a specific place.
+          </div>
+
+          <div
             style={{
-              display: "block",
-              fontSize: 12,
-              marginBottom: 6,
-              color: "rgba(211,227,247,0.8)",
-              opacity: hasStateSelection ? 0.85 : 0.45,
+              marginTop: 12,
+              fontSize: 13,
+              lineHeight: 1.5,
+              opacity: 0.92,
             }}
           >
-            County
-          </label>
+            {allListings.length} light
+            {allListings.length === 1 ? "" : "s"} visible across the map.
+          </div>
 
-          <select
-            value={selectedCounty}
-            disabled={!hasStateSelection}
-            onChange={(e) => {
-              const newCounty = e.target.value;
-              setSelectedCounty(newCounty);
-              setSelectedId(null);
-              updateMapUrl(selectedState, newCounty);
-            }}
+          {liveRegionLabel ? (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 10,
+                border: "1px solid rgba(255,216,107,0.15)",
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.04)",
+                fontSize: 13,
+                lineHeight: 1.5,
+                opacity: 0.95,
+              }}
+            >
+              Map center is currently over <strong>{liveRegionLabel}</strong>.
+            </div>
+          ) : null}
+
+          {opts.showActionButtons && (
+          <div
             style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid rgba(148,196,236,0.3)",
-              background: "rgba(255,255,255,0.1)",
-              color: "#e8f4ff",
-              fontSize: 14,
-              outlineColor: "rgba(255,216,107,0.6)",
-              cursor: "pointer",
-              opacity: hasStateSelection ? 1 : 0.65,
-              marginBottom: 10,
+              marginTop: 14,
+              padding: 10,
+              border: "1px solid rgba(255,216,107,0.15)",
+              borderRadius: 10,
+              background: "rgba(255,255,255,0.04)",
             }}
           >
-            {counties.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              Want to add something?
+            </div>
 
-          <label
-            style={{
-              display: "block",
-              fontSize: 12,
-              marginBottom: 6,
-              color: "rgba(211,227,247,0.8)",
-              opacity: 0.85,
-            }}
-          >
-            State
-          </label>
-
-          <select
-            value={selectedState}
-            onChange={(e) => {
-              const newState = e.target.value;
-              setSelectedState(newState);
-              setSelectedCounty("All");
-              setSelectedId(null);
-              updateMapUrl(newState, "All");
-            }}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid rgba(148,196,236,0.3)",
-              background: "rgba(255,255,255,0.1)",
-              color: "#e8f4ff",
-              fontSize: 14,
-              outlineColor: "rgba(255,216,107,0.6)",
-              cursor: "pointer",
-            }}
-          >
-            {states.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </section>
-
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            background: "transparent",
-          }}
-        >
-          {!hasStateSelection ? (
-            <>
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.35,
-                  fontWeight: 600,
-                  marginBottom: 10,
-                }}
-              >
-                A field of visible lights
-              </div>
-
-              <div style={{ fontSize: 13, lineHeight: 1.55, opacity: 0.95 }}>
-                You’re viewing the broader map. Choose a state to focus what’s
-                visible there, then narrow further by county if you want to land
-                in a specific place.
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  opacity: 0.92,
-                }}
-              >
-                {allListings.length} light
-                {allListings.length === 1 ? "" : "s"} visible across the map.
-              </div>
-
-              {liveRegionLabel ? (
-                <div
-                  style={{
-                    marginTop: 12,
-                    padding: 10,
-                    border: "1px solid rgba(255,216,107,0.15)",
-                    borderRadius: 10,
-                    background: "rgba(255,255,255,0.04)",
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                    opacity: 0.95,
-                  }}
-                >
-                  Map center is currently over <strong>{liveRegionLabel}</strong>.
-                </div>
-              ) : null}
-
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 10,
-                  border: "1px solid rgba(255,216,107,0.15)",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.04)",
-                }}
-              >
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Want to add something?
-                </div>
-
-                <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
-                  Choose a place first to ground the listing in a specific
-                  region, or add a light directly and let the map place it.
-                </div>
+            <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.95 }}>
+              Choose a place first to ground the listing in a specific
+              region, or add a light directly and let the map place it.
+            </div>
 <div
   style={{
     marginTop: 10,
@@ -723,24 +535,25 @@ const countyListings = useMemo(() => {
     About Canary Commons
   </Link>
 </div>
-                <div style={{ marginTop: 8 }}>
-                  <Link
-                    href="/submit"
-                    style={{
-                      display: "block",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      fontWeight: 600,
-                      color: "#FFD86B",
-                      fontSize: 13,
-                    }}
-                  >
-                    Add a point of light
-                  </Link>
-                </div>
-              </div>
-            </>
-          ) : hasStateSelection && !hasCountySelection ? (
+            <div style={{ marginTop: 8 }}>
+              <Link
+                href="/submit"
+                style={{
+                  display: "block",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                  fontWeight: 600,
+                  color: "#FFD86B",
+                  fontSize: 13,
+                }}
+              >
+                Add a point of light
+              </Link>
+            </div>
+          </div>
+          )}
+        </>
+      ) : hasStateSelection && !hasCountySelection ? (
             <>
               <div
                 style={{
@@ -753,6 +566,7 @@ const countyListings = useMemo(() => {
                 Pan around the state, or choose a county to focus more closely.
               </div>
 
+              {opts.showActionButtons && (
               <div
                 style={{
                   marginTop: 14,
@@ -940,10 +754,12 @@ const countyListings = useMemo(() => {
                     </div>
                   </Link>
               </div>
+              )}
             </>
           ) : (
             <>
               {/* County search input */}
+              {opts.showCountySearch && (
               <input
                 type="text"
                 placeholder="Search this county..."
@@ -961,6 +777,7 @@ const countyListings = useMemo(() => {
                   marginBottom: 12,
                 }}
               />
+              )}
 
               {isSearching ? (
                 <>
@@ -970,31 +787,9 @@ const countyListings = useMemo(() => {
                       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFD86B", marginBottom: 8 }}>
                         Direct Hits
                       </div>
-                      {directHits.map((listing) => {
-                        const isSelected = selectedId === listing.id;
-                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
-                        const imageUrl = getListingImage(listing.image_url, listing.website);
-                        return (
-                          <div
-                            key={listing.id}
-                            onClick={() => setSelectedId(listing.id)}
-                            style={{
-                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
-                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
-                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
-                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
-                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
-                            }}
-                          >
-                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
-                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
-                            </div>
-                            <ElementalSeat element="spirit" size="sm" />
-                          </div>
-                        );
-                      })}
+                      {directHits.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                      ))}
                     </div>
                   )}
 
@@ -1004,31 +799,9 @@ const countyListings = useMemo(() => {
                       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFD86B", marginBottom: 8 }}>
                         Related Nearby
                       </div>
-                      {relatedNearby.map((listing) => {
-                        const isSelected = selectedId === listing.id;
-                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
-                        const imageUrl = getListingImage(listing.image_url, listing.website);
-                        return (
-                          <div
-                            key={listing.id}
-                            onClick={() => setSelectedId(listing.id)}
-                            style={{
-                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
-                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
-                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
-                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
-                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
-                            }}
-                          >
-                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
-                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
-                            </div>
-                            <ElementalSeat element="spirit" size="sm" />
-                          </div>
-                        );
-                      })}
+                      {relatedNearby.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                      ))}
                     </div>
                   )}
 
@@ -1088,35 +861,13 @@ const countyListings = useMemo(() => {
                   {/* Unfiltered county view — existing listing cards */}
                   {countyLightCount > 0 ? (
                     <div style={{ marginTop: 12 }}>
-                      {countyListings.map((listing) => {
-                        const isSelected = selectedId === listing.id;
-                        const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
-                        const imageUrl = getListingImage(listing.image_url, listing.website);
-                        return (
-                          <div
-                            key={listing.id}
-                            onClick={() => setSelectedId(listing.id)}
-                            style={{
-                              padding: 12, marginBottom: 8, borderRadius: 10, cursor: "pointer",
-                              border: isSelected ? "2px solid rgba(255,216,107,0.6)" : "1px solid rgba(255,255,255,0.12)",
-                              background: isSelected ? "rgba(255,216,107,0.2)" : "rgba(224,240,255,0.14)",
-                              display: "flex", gap: 10, alignItems: "center", transition: "all 0.15s ease",
-                              boxShadow: isSelected ? "0 2px 12px rgba(255,216,107,0.2)" : "0 1px 4px rgba(8,25,45,0.06)",
-                            }}
-                          >
-                            <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>{listing.name}</div>
-                              <div style={{ fontSize: 12, color: "rgba(148,196,236,0.8)", marginTop: 2 }}>{locationParts.join(", ") || effectiveState}</div>
-                            </div>
-                            <ElementalSeat element="spirit" size="sm" />
-                          </div>
-                        );
-                      })}
+                      {countyListings.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                      ))}
                     </div>
                   ) : (
                     <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.88 }}>
-                      No lights mapped here yet.
+                      This county is still waiting for its first light — you could add one.
                     </div>
                   )}
                 </>
@@ -1178,6 +929,7 @@ const countyListings = useMemo(() => {
 </div>
 
               {/* Action buttons — same as state-level view */}
+              {opts.showActionButtons && (
               <div
                 style={{
                   marginTop: 14,
@@ -1363,34 +1115,314 @@ const countyListings = useMemo(() => {
                     </div>
                   </Link>
               </div>
-
-              {isMobile && countyLightCount > 0 && (
-                <div style={{ marginTop: 16, textAlign: "center" }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(null);
-                      setMobileView("map");
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      color: "#FFD86B",
-                      fontWeight: 600,
-                      fontSize: 14,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                    }}
-                  >
-                    View on Map →
-                  </button>
-                </div>
               )}
 
             </>
           )}
+    </>
+    );
+  }
+
+  /* ── Mobile: map-first with floating bar + bottom drawer ── */
+  if (isMobile) {
+    return (
+      <main
+        style={{
+          position: "relative",
+          height: "100vh",
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        {/* Map — full bleed, always visible */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            background: "#08192d",
+          }}
+        >
+          <MapClient
+            listings={mapListings}
+            selectedId={selectedId}
+            onSelect={handlePinSelect}
+            onRegionChange={setMapRegion}
+            highlightCounty={hasCountySelection ? effectiveCounty : ""}
+            highlightState={hasStateSelection ? effectiveState : ""}
+            visible={true}
+            isMobile={true}
+          />
+        </div>
+
+        {/* Scoped mobile day-mode overrides for RegionSelector dropdowns */}
+        <style>{`
+          .mobile-day-bar section {
+            background: rgba(255,255,255,0.3) !important;
+            border-color: rgba(120,100,60,0.2) !important;
+            border-left-color: rgba(120,100,60,0.35) !important;
+            backdrop-filter: none !important;
+          }
+          .mobile-day-bar section div,
+          .mobile-day-bar section label {
+            color: #0a2540 !important;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.6) !important;
+          }
+          .mobile-day-bar section select {
+            background: rgba(255,255,255,0.55) !important;
+            color: #0a2540 !important;
+            border-color: rgba(120,100,60,0.25) !important;
+          }
+          .mobile-day-bar section select option {
+            background: #f5f9ff;
+            color: #0a2540;
+          }
+          .mobile-search-input::placeholder {
+            color: rgba(10,37,64,0.55);
+            text-shadow: none;
+            opacity: 1;
+          }
+          .mobile-day-drawer [data-listing-id] div {
+            color: #0a2540 !important;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.6) !important;
+          }
+        `}</style>
+
+        {/* Floating top bar — region selector + search */}
+        <div
+          className="mobile-day-bar"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 54,
+            zIndex: 10,
+            padding: "8px 10px",
+            background:
+              "linear-gradient(180deg, rgba(245,249,255,0.15) 0%, rgba(245,249,255,0.07) 80%, transparent 100%)",
+            backdropFilter: "blur(8px)",
+            color: "#0a2540",
+            textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+          }}
+        >
+          <RegionSelector
+            selectedState={selectedState}
+            selectedCounty={selectedCounty}
+            counties={counties}
+            states={states}
+            hasStateSelection={hasStateSelection}
+            onStateChange={(newState) => {
+              setSelectedState(newState);
+              setSelectedCounty("All");
+              setSelectedId(null);
+              updateMapUrl(newState, "All");
+            }}
+            onCountyChange={(newCounty) => {
+              setSelectedCounty(newCounty);
+              setSelectedId(null);
+              updateMapUrl(selectedState, newCounty);
+            }}
+          />
+
+          {/* County search — only when a county is selected */}
+          {hasCountySelection && (
+            <input
+              type="text"
+              placeholder="Search this county..."
+              value={countySearchQuery}
+              onChange={(e) => setCountySearchQuery(e.target.value)}
+              className="mobile-search-input"
+              style={{
+                position: "relative",
+                zIndex: 1,
+                width: "100%",
+                padding: "9px 12px",
+                borderRadius: 10,
+                border: "1px solid rgba(138,96,16,0.25)",
+                background: "rgba(255,255,255,0.6)",
+                color: "#0a2540",
+                fontSize: "0.88rem",
+                fontWeight: 400,
+                outline: "none",
+                textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Bottom drawer — listings + action doors */}
+        <div
+          className="mobile-day-drawer"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "45vh",
+            zIndex: 10,
+            background: "rgba(245,249,255,0.15)",
+            backdropFilter: "blur(8px)",
+            borderTop: "1px solid rgba(138,96,16,0.25)",
+            borderRadius: "18px 18px 0 0",
+            overflowY: "auto",
+            padding: "14px 14px 24px",
+            color: "#0a2540",
+            textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+          }}
+        >
+          {/* Drawer handle indicator */}
+          <div
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              background: "rgba(120,100,60,0.3)",
+              margin: "0 auto 12px",
+            }}
+          />
+
+          {/* Action doors — Add a Point of Light + Explore Online Resources */}
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginBottom: 12,
+            }}
+          >
+            <Link
+              href={submitListingHref}
+              style={{
+                flex: 1,
+                display: "block",
+                padding: "8px 10px",
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(120,100,60,0.2)",
+                textDecoration: "none",
+                textAlign: "center",
+                color: "#6b4f00",
+                fontSize: 12,
+                fontWeight: 600,
+                textShadow: "0 1px 2px rgba(255,255,255,0.5)",
+              }}
+            >
+              Add a Point of Light
+            </Link>
+            <Link
+              href="/support"
+              style={{
+                flex: 1,
+                display: "block",
+                padding: "8px 10px",
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(120,100,60,0.2)",
+                textDecoration: "none",
+                textAlign: "center",
+                color: "#6b4f00",
+                fontSize: 12,
+                fontWeight: 600,
+                textShadow: "0 1px 2px rgba(255,255,255,0.5)",
+              }}
+            >
+              Online Resources
+            </Link>
+          </div>
+
+          {/* Listing content */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {renderSidebarContent({ showCountySearch: false, showActionButtons: false })}
+          </div>
+        </div>
+
+      </main>
+    );
+  }
+
+  /* ── Desktop: unchanged sidebar + map layout ── */
+  return (
+    <main
+      style={{
+        display: "flex",
+        height: "100vh",
+        width: "100%",
+      }}
+    >
+      {/* Sidebar */}
+      <div
+        style={{
+          padding: 16,
+          overflowY: "auto",
+          color: "rgba(211,227,247,0.85)",
+          background:
+            "linear-gradient(160deg, rgba(12,52,110,0.78) 0%, rgba(17,65,130,0.82) 50%, rgba(12,52,110,0.78) 100%)",
+          backdropFilter: "blur(12px)",
+          width: "380px",
+          position: "relative" as const,
+          boxShadow: "2px 0 24px rgba(8,25,45,0.13)",
+          borderTop: "3px solid rgba(255,216,107,0.6)",
+        }}
+      >
+        {/* Sidebar emission light field */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 0,
+            overflow: "hidden",
+          }}
+        >
+          {sidebarLights.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: p.left,
+                top: p.top,
+                width: p.size,
+                height: p.size,
+                borderRadius: "50%",
+                background: "rgba(255,210,80,0.82)",
+                opacity: p.opacity,
+                boxShadow: `0 0 ${p.size * 3}px ${
+                  p.size
+                }px rgba(255,200,60,0.45), 0 0 ${p.size * 6}px ${
+                  p.size * 2
+                }px rgba(255,170,40,0.2)`,
+                pointerEvents: "none",
+              }}
+            />
+          ))}
+        </div>
+
+        <RegionSelector
+          selectedState={selectedState}
+          selectedCounty={selectedCounty}
+          counties={counties}
+          states={states}
+          hasStateSelection={hasStateSelection}
+          onStateChange={(newState) => {
+            setSelectedState(newState);
+            setSelectedCounty("All");
+            setSelectedId(null);
+            updateMapUrl(newState, "All");
+          }}
+          onCountyChange={(newCounty) => {
+            setSelectedCounty(newCounty);
+            setSelectedId(null);
+            updateMapUrl(selectedState, newCounty);
+          }}
+        />
+
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            background: "transparent",
+          }}
+        >
+          {renderSidebarContent({ showCountySearch: true, showActionButtons: true })}
         </div>
       </div>
 
@@ -1398,65 +1430,10 @@ const countyListings = useMemo(() => {
       <div
         style={{
           background: "#08192d",
-          ...(isMobile
-            ? {
-                position: "absolute" as const,
-                inset: 0,
-                zIndex: mobileView === "map" ? 2 : 0,
-                transform:
-                  mobileView === "map"
-                    ? "translateX(0)"
-                    : "translateX(100%)",
-                opacity: mobileView === "map" ? 1 : 0,
-                transition:
-                  "transform 300ms ease, opacity 300ms ease",
-              }
-            : {
-                flex: 1,
-                position: "relative" as const,
-              }),
-        }}
-        onTouchStart={(e) => {
-          if (isMobile && e.touches[0].clientY < 80) {
-            swipeStartY.current = e.touches[0].clientY;
-          }
-        }}
-        onTouchEnd={(e) => {
-          if (
-            isMobile &&
-            swipeStartY.current > 0 &&
-            e.changedTouches[0].clientY - swipeStartY.current >= 60
-          ) {
-            setMobileView("browse");
-          }
-          swipeStartY.current = 0;
+          flex: 1,
+          position: "relative" as const,
         }}
       >
-        {/* ← browse tab (mobile map view only) */}
-        {isMobile && mobileView === "map" && (
-          <button
-            type="button"
-            onClick={() => setMobileView("browse")}
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              zIndex: 10,
-              background: "rgba(8, 25, 45, 0.85)",
-              border: "1px solid rgba(255, 216, 107, 0.35)",
-              color: "#FFD86B",
-              padding: "8px 14px",
-              borderRadius: 999,
-              fontSize: 13,
-              fontWeight: 600,
-              backdropFilter: "blur(8px)",
-              cursor: "pointer",
-            }}
-          >
-            ← browse
-          </button>
-        )}
-
         <MapClient
           listings={mapListings}
           selectedId={selectedId}
@@ -1464,9 +1441,8 @@ const countyListings = useMemo(() => {
           onRegionChange={setMapRegion}
           highlightCounty={hasCountySelection ? effectiveCounty : ""}
           highlightState={hasStateSelection ? effectiveState : ""}
-          visible={!isMobile || mobileView === "map"}
+          visible={true}
         />
-
       </div>
     </main>
   );

@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: June 2, 2026*
+*Last updated: June 9, 2026*
 
 ---
 
@@ -46,9 +46,23 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 - [ ] Live test case: A Leap of Taste in Klamath Falls. Either flip its no_public_email flag manually via SQL, or re-place it through the bulk tool with the checkbox checked.
 - [ ] Verify whether migration supabase/migrations/20260523_listings_no_public_email.sql has been run against production Supabase. Code was committed and pushed (349d2ab) but production migration status is unconfirmed. Check by looking for the no_public_email column on the listings table in Supabase Studio. If not yet run, run it before any of the live tests above.
 
+## From the June 9 session
+
+- [ ] **NEXT TASK — Drawer swipe gesture (the one remaining piece of the mobile map rebuild).** In the founder's words: "the map is the resting state; you swipe the drawer UP to bring the listing list over the map, and swipe it DOWN to get the map back." Currently the bottom drawer is a fixed 45vh panel. Replace with a draggable drawer that snaps between 2–3 positions (low peek showing handle + action doors / mid ~45vh / full ~85vh). Decide exact feel during the build.
+
+  **Known gotchas:**
+  - The drag gesture must not fight the drawer's internal list scroll — dragging the handle (or the top edge area) moves the drawer, but once the drawer is at a snap point and the user scrolls INSIDE the list, that should scroll the list, not drag the drawer. Handle this touch distinction carefully.
+  - The map must resize smoothly as the drawer height changes without a black-screen flash. Call map.resize() correctly — the existing ResizeObserver on MapClient's container should handle this if the map container's dimensions change, but verify on a real device.
+  - Drawer height is currently a fixed `45vh` in the mobile return of MapPageClient.tsx — the swipe replaces that with a dynamic draggable height.
+  - **MUST be tested on a REAL PHONE** — swipe physics, touch discrimination (drag vs scroll), and map resize behavior can't be reliably judged in a narrowed desktop browser window. The site needs to be reachable from the phone: deploy a preview branch, or set up local-network dev access (e.g. `next dev --hostname 0.0.0.0`).
+
+- [ ] **Jun 9 session work is UNCOMMITTED.** All mobile rebuild changes are on disk pending commit + push. Commit immediately after this doc update.
+
 ## From the June 2 session
 
-- [ ] **Mobile map renders as a dropdown list instead of an actual map on phones — HIGHEST PRIORITY.** People expect points of light and get a text list. They think the map is broken. Live issue, highest priority next session.
+- [ ] **Founder pipeline never fired in production — verify before driving signups.** The founders table is empty. The full path (Stripe checkout → founders row → welcome email → founder@canarycommons.org notification) has never run live — it was confirmed in April but possibly only in Stripe test mode. Before driving any founder signups, run a live test-card checkout through /founders/join and watch that all three fire: the founders row is written, the welcome email sends, and the notification reaches founder@canarycommons.org. The notification uses the same Resend setup as the synonym digest that 422'd on Jun 2 with an unverified sender — verify the founder notification address actually delivers.
+
+- [x] ~~**Mobile map renders as a dropdown list instead of an actual map on phones — HIGHEST PRIORITY.**~~ Fixed Jun 9 — mobile is now map-first with floating bar + bottom drawer. The old browse/map two-panel swap is retired.
 
 - [ ] **Seeder Email 1 reframe (designed, not yet built).** Simplify to one doorway: "you've been noticed, here you are" pointing at the live listing on the map. Steward claim becomes the natural path from the listing card itself. Remove link stays but moves to fine print. Requires the public listing card to have a steward path first (see next item).
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -20,6 +21,7 @@ type Props = {
   highlightCounty?: string;
   highlightState?: string;
   visible?: boolean;
+  isMobile?: boolean;
 };
 
 const FLAG_REASON_OPTIONS = [
@@ -122,6 +124,7 @@ export default function MapClient({
   highlightCounty,
   highlightState,
   visible = true,
+  isMobile = false,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -137,6 +140,8 @@ export default function MapClient({
 
   listingsRef.current = listings;
   onSelectRef.current = onSelect;
+  const isMobileRef = useRef(isMobile);
+  isMobileRef.current = isMobile;
 
   const isFiltered = !!(highlightState || highlightCounty);
 
@@ -375,10 +380,25 @@ export default function MapClient({
       }
       @media (max-width: 767px) {
         .mapboxgl-popup {
-          max-width: 68vw !important;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          max-width: none !important;
+          width: 100% !important;
+          height: 100% !important;
+          z-index: 9999 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          background: rgba(8,25,45,0.5) !important;
+          transform: none !important;
         }
         .mapboxgl-popup .mapboxgl-popup-content {
-          max-width: 68vw !important;
+          max-width: min(340px, calc(100vw - 40px)) !important;
+          max-height: 80vh !important;
+          overflow-y: auto !important;
         }
         .ar-popup {
           max-width: none !important;
@@ -758,11 +778,14 @@ export default function MapClient({
     const listing = listings.find((l) => l.id === selectedId);
     if (!listing) return;
 
-    map.flyTo({
-      center: [listing.lng, listing.lat],
-      zoom: Math.max(map.getZoom(), 9),
-      duration: 800,
-    });
+    // On mobile, skip the flyTo — the popup appears centered, map stays put
+    if (!isMobileRef.current) {
+      map.flyTo({
+        center: [listing.lng, listing.lat],
+        zoom: Math.max(map.getZoom(), 9),
+        duration: 800,
+      });
+    }
 
     popupRef.current?.remove();
 
@@ -928,20 +951,33 @@ export default function MapClient({
       onSelectRef.current("", undefined);
     });
 
+    // On mobile, portal the popup to document.body so it escapes the
+    // map wrapper's stacking context (position:absolute + zIndex:0)
+    // and renders above the floating bar and drawer.
+    if (isMobileRef.current) {
+      const popupEl = popup.getElement();
+      if (popupEl) {
+        document.body.appendChild(popupEl);
+
+        popupEl.addEventListener("click", (e) => {
+          // Dismiss when tapping the backdrop (outside the card)
+          if (e.target === popupEl || e.target === popupEl.querySelector(".mapboxgl-popup-content")) {
+            popup.remove();
+          }
+        });
+      }
+    }
+
     popupRef.current = popup;
   }, [selectedId, listings]);
 
-  return (
-    <>
-      <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
-
-      {flagListingId ? (
+  const flagModal = flagListingId ? (
         <div
           onClick={closeFlagModal}
           style={{
             position: "fixed",
             inset: 0,
-            zIndex: 9999,
+            zIndex: 10000,
             background: "rgba(8, 25, 45, 0.45)",
             display: "flex",
             alignItems: "center",
@@ -1132,7 +1168,14 @@ export default function MapClient({
             </div>
           </div>
         </div>
-      ) : null}
+      ) : null;
+
+  return (
+    <>
+      <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+      {isMobile && flagModal
+        ? createPortal(flagModal, document.body)
+        : flagModal}
     </>
   );
 }
