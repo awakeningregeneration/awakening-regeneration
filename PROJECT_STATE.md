@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: June 9, 2026*
+*Last updated: June 10, 2026*
 
 ---
 
@@ -42,6 +42,20 @@ Canary Commons now operates in two visual registers:
 ---
 
 ## Done (recent)
+
+- **Jun 10** — Mobile map drawer polish + search-to-pins + keyboard fix + steward verification 404 fix.
+
+  **Drawer listing count + empty-state highlight:** Added a listing-count line as the first child of the drawer header strip, above the bronze handle bar. Count reflects the currently filtered set (`mapListings.length`): "N listings" / "1 listing" / "Growing Commons — No Lights Mapped Yet" when empty. When count is 0, the "Add a Point of Light" action door gets a gold/bronze highlight (fill, border, glow) to draw the eye; "Online Resources" keeps its calm style. Highlight disappears when count > 0.
+
+  **Search narrows map pins:** Wired the county search to also narrow the map pins. Previously, typing in the county search narrowed only the sidebar/drawer listing list (`directHits` + `relatedNearby`) while the map continued showing all `countyListings`. Fix: relocated `mapListings` memo below the search derivation and added a branch — when `hasCountySelection && isSearching`, `mapListings` resolves to `[...directHits, ...relatedNearby]` instead of full `countyListings`. MapClient already reacts to its `listings` prop, so pins and `fitBounds` update automatically. Applies to both mobile and desktop (intentional — per MOBILE_MAP_PLAN.md "Search → map decision"). No changes to MapClient.tsx.
+
+  **Drawer peek height:** Increased visible peek height from 140px to 210px so the taller header (count line + handle bar + both action doors + a listing crest) all show at rest. Defined `PEEK_HEIGHT = 210` as a single constant used in the resting transform AND both touch-handler clamps.
+
+  **Mobile keyboard handling:** Fixed a real bug where focusing the county search input on iOS opened the keyboard, trapping the user — the bottom-anchored drawer was hidden behind the keyboard with no way to dismiss or reach it. Root cause: `<main>` was `height: 100vh`, which does not shrink when the iOS keyboard opens. Fix: (1) Changed to `100dvh` (dynamic viewport height, iOS 15.4+/~97% of iPhones) so the container tracks the visual viewport. (2) Added `onKeyDown` blur-on-Enter to dismiss the keyboard (search filters live, so Enter = done typing). (3) Added `inputMode="search"` so the iOS keyboard shows a "Search" key. (4) Added tap-map-to-dismiss: `onClick` on the map wrapper div blurs the active element. The blur handler fires before Mapbox's internal click handlers and does not interfere with pin taps, pan, or zoom.
+
+  **Steward verification 404 — root cause found and fixed (commit 5ded70b).** The steward verification email link pointed to `/steward/verify?token=...` (a page route that does not exist) instead of the API handler at `/api/steward/verify?token=...`. Every steward who ever clicked a confirmation link hit a Next.js 404. No steward had ever successfully verified from an email click. Fixed in `app/lib/emails/stewardVerification.ts` line 23 — the single link-generation function used by the claim route, the reverify endpoint, and all resend flows. One-line fix. The June 2 token-expiry work (72h window, reverify endpoint, resend button on failed page) was correctly built and is now reachable. A full sweep of `stewardship_claims` confirmed only Rebekah (Takubeh) and Jill (Asana Yoga) were affected — no other stranded stewards. Both re-issued fresh 72h verification links via `/api/steward/reverify`; emails sent successfully.
+
+  **Files modified:** app/map/MapPageClient.tsx (listing count, empty-state highlight, mapListings search wiring, PEEK_HEIGHT, 100dvh, keyboard handlers — mobile branch only, desktop untouched), app/lib/emails/stewardVerification.ts (verify URL fix).
 
 - **Jun 9** — Mobile map-first rebuild (Steps 1–3 of MOBILE_MAP_PLAN.md). The mobile /map page is now map-as-hero: the Mapbox map fills the viewport full-bleed and is always visible (no more hidden browse/map swap). Layout: floating top bar (RegionSelector + county search) over the map, bottom drawer (45vh, listing cards + action doors) scrollable over the map, North Star nav persistent in top-right corner. Retired the old mobileView state, "View on Map →" button, "← browse" button, and swipe-down-from-top return handler. Desktop is completely unchanged (sidebar + map side-by-side).
 
@@ -181,7 +195,7 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ## In Motion
 
-- **Mobile map-first rebuild — drawer swipe gesture remaining.** The map page is now map-first on mobile with floating bar + bottom drawer (Jun 9). Remaining: the drawer is a fixed 45vh panel — needs a swipe gesture to drag it up/down between snap points (peek / mid / full). See LOOSE_ENDS.md for detailed next-task description and gotchas. Other pages not yet tested on narrow viewports.
+- **Steward verification — first successful end-to-end claim pending.** Fresh 72h verification links sent to Rebekah (Takubeh) and Jill (Asana Yoga) on Jun 10. Awaiting their click to confirm the first successful steward verification on the platform. Other pages not yet tested on narrow viewports.
 
 ---
 

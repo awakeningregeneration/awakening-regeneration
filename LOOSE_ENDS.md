@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: June 9, 2026*
+*Last updated: June 10, 2026*
 
 ---
 
@@ -48,15 +48,25 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 
 ## From the June 9 session
 
-- [ ] **NEXT TASK — Drawer swipe gesture (the one remaining piece of the mobile map rebuild).** In the founder's words: "the map is the resting state; you swipe the drawer UP to bring the listing list over the map, and swipe it DOWN to get the map back." Currently the bottom drawer is a fixed 45vh panel. Replace with a draggable drawer that snaps between 2–3 positions (low peek showing handle + action doors / mid ~45vh / full ~85vh). Decide exact feel during the build.
+- [x] ~~**Drawer swipe gesture.**~~ Shipped Jun 10 — draggable slide-over sheet with peek/mid/full snap points, hand-rolled touch handling, PEEK_HEIGHT=210px constant. Tested on real iPhone.
 
-  **Known gotchas:**
-  - The drag gesture must not fight the drawer's internal list scroll — dragging the handle (or the top edge area) moves the drawer, but once the drawer is at a snap point and the user scrolls INSIDE the list, that should scroll the list, not drag the drawer. Handle this touch distinction carefully.
-  - The map must resize smoothly as the drawer height changes without a black-screen flash. Call map.resize() correctly — the existing ResizeObserver on MapClient's container should handle this if the map container's dimensions change, but verify on a real device.
-  - Drawer height is currently a fixed `45vh` in the mobile return of MapPageClient.tsx — the swipe replaces that with a dynamic draggable height.
-  - **MUST be tested on a REAL PHONE** — swipe physics, touch discrimination (drag vs scroll), and map resize behavior can't be reliably judged in a narrowed desktop browser window. The site needs to be reachable from the phone: deploy a preview branch, or set up local-network dev access (e.g. `next dev --hostname 0.0.0.0`).
+- [x] ~~**Jun 9 session work is UNCOMMITTED.**~~ Committed and pushed (058222e, Jun 9).
 
-- [ ] **Jun 9 session work is UNCOMMITTED.** All mobile rebuild changes are on disk pending commit + push. Commit immediately after this doc update.
+## From the June 10 session
+
+- [ ] **Steward claims awaiting click — Rebekah (Takubeh) and Jill (Asana Yoga).** Both have fresh 72h verification links in their inboxes (sent Jun 10 via /api/steward/reverify). Status is still `pending` until they click. This will be the first successful end-to-end steward claim on the platform.
+
+- [ ] **Rebekah duplicate stewardship_claims row.** She has two pending rows: original (2026-05-27) and a duplicate (2026-06-03, declaration_text NULL, same email). After she successfully verifies, delete the stale leftover row — keep the verified one, delete the unverified duplicate.
+
+- [ ] **Mobile drawer peek height tuning.** PEEK_HEIGHT=210px is a first-pass value based on layout math. May want a small nudge after more real-phone feel. Not urgent.
+
+- [ ] **Mobile keyboard tap-to-dismiss: verify pin taps still work.** The tap-to-blur onClick handler is on the map wrapper div (fires before Mapbox's internal handlers). Should not swallow pin taps — but confirm on a real phone when convenient.
+
+- [ ] **Claude Code auto-update failing.** "Auto-update failed" errors and tool freezes during this session. Run `npm i -g @anthropic-ai/claude-code` to update before next heavy session.
+
+## Search match quality
+
+- [ ] **County search under-matches — matching logic needs improvement.** Observed on the live map: searching "thrift" does not return all thrift-related listings, and "thrift clothing" returned zero stores that do carry clothing. This is SEPARATE from the pins-mirroring fix shipped June 10 (pins now faithfully mirror whatever the list returns — but if the list under-matches, the pins faithfully mirror a too-short list). The open work is the MATCHING logic itself: how `directHits` / `relatedNearby` in `MapPageClient.tsx` decide what counts as a match against the search term and the synonyms cache (`buildHaystack` + `searchTerm.includes` + `synonymsCache`). Likely needs: (1) review of synonym vocabulary/coverage in the `synonym_groups` table, (2) partial/multi-word matching (e.g. "thrift clothing" should match listings that contain "thrift" OR "clothing", not only the exact substring), (3) possibly category-aware matching so searching a category term surfaces all listings in that category. Deferred deliberately; revisit as its own focused session.
 
 ## From the June 2 session
 
