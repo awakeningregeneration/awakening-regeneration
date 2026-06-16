@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: June 10, 2026*
+*Last updated: June 15, 2026*
 
 ---
 
@@ -196,6 +196,33 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 ## In Motion
 
 - **Steward verification — first successful end-to-end claim pending.** Fresh 72h verification links sent to Rebekah (Takubeh) and Jill (Asana Yoga) on Jun 10. Awaiting their click to confirm the first successful steward verification on the platform. Other pages not yet tested on narrow viewports.
+
+---
+
+## Next: Homepage restructure
+
+Decided June 15. Simplify the homepage, pulling it off the concept-about-concept register. Remove the "connected we dawn brighter" line / DawningBrighter concept-line from the hero entirely.
+
+### New structure, top to bottom
+
+1. **Canary Commons logo**
+2. **About**
+3. **Hero line** (exact copy, preserve verbatim): "There's a constellation of small and diverse solutions being created and tended everywhere, beneath the noise. Diversity sustains. Our attention is the fuel."
+4. **"explore the commons"** — moves up the visual field, leads into the state directory / region selector (already-built explore door, slight rename)
+5. **"tend the commons"** — the contribution / founders door
+6. **Closing line** (exact copy, preserve verbatim): "your participation makes a difference"
+
+### Design notes
+
+- Hero deliberately ends on "our attention is the fuel." No "return your attention" / CTA line in the hero — the two buttons complete the gesture, so the line would be redundant. Less is more.
+- "explore" = receive posture; "tend" = give posture. Receive-then-give breath, top to bottom.
+- The closing line is the last thing on the page. Do not add a supporting line beneath it — the white space is intentional.
+
+### Related context (in progress, not finalized — feel-revisit, not tasks)
+
+- **Founders page reframing** into two sections: "what you receive" (explore the commons) and "what you contribute" (tend the commons).
+- **Founders monthly model** moving toward analog correspondence: a quarterly physical "Evidence from the Field" letter as the centerpiece, with a lighter monthly digital signal between. One-time gift gets seed packet + welcome letter. Year-one elevated contribution steps down to base subscription after 12 months, stated openly. Product framing: orientation/witness, not "positive news."
+- **"tend"** is the shared verb for the giving posture across both homepage and founders page.
 
 ---
 

@@ -173,45 +173,6 @@ export default function HomePage() {
               zIndex: 3,
             }}
           />
-
-          <h1
-            className="cover-headline"
-            style={{
-              fontSize: "clamp(2.3rem, 6vw, 5.2rem)",
-              lineHeight: 0.98,
-              fontWeight: 650,
-              margin: 0,
-              marginBottom: 45,
-              textShadow: "0 12px 34px rgba(6,16,40,0.34)",
-            }}
-          >
-            Connected,
-            <br />
-            <span
-              style={{
-                color: "#FFD86B",
-                textShadow:
-                  "0 0 32px rgba(255,216,107,0.38), 0 0 64px rgba(255,200,80,0.18)",
-              }}
-            >
-              We Dawn Brighter
-            </span>
-            <span
-              style={{
-                display: "inline-block",
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                background: "rgba(255,244,200,0.95)",
-                boxShadow:
-                  "0 0 10px 4px rgba(255,220,140,0.45), 0 0 22px 6px rgba(255,200,100,0.18)",
-                marginLeft: "4px",
-                verticalAlign: "baseline",
-                position: "relative",
-                top: "2px",
-              }}
-            />
-          </h1>
         </div>
 
         <div
@@ -223,70 +184,11 @@ export default function HomePage() {
             paddingBottom: "clamp(20px, 3vh, 36px)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "1.35rem",
-              margin: "0 auto 50px",
-              maxWidth: 700,
-            }}
-          >
-            <p
-              className="cover-thesis"
-              style={{
-                margin: 0,
-                fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
-                lineHeight: 1.5,
-                fontWeight: 500,
-                letterSpacing: "0.025em",
-                color: "#fffcf0",
-                textShadow:
-                  "0 0 12px rgba(255,248,230,0.35), 0 0 24px rgba(255,248,230,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                textAlign: "center",
-              }}
-            >
-              A gateway revealing what is already life-forward.
-            </p>
-            <p
-              className="cover-thesis"
-              style={{
-                margin: 0,
-                fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
-                lineHeight: 1.5,
-                fontWeight: 500,
-                letterSpacing: "0.025em",
-                color: "#fffcf0",
-                textShadow:
-                  "0 0 12px rgba(255,248,230,0.35), 0 0 24px rgba(255,248,230,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                textAlign: "center",
-              }}
-            >
-              We are the change.
-            </p>
-            <p
-              className="cover-thesis"
-              style={{
-                margin: 0,
-                fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
-                lineHeight: 1.5,
-                fontWeight: 500,
-                letterSpacing: "0.025em",
-                color: "#fffcf0",
-                textShadow:
-                  "0 0 12px rgba(255,248,230,0.35), 0 0 24px rgba(255,248,230,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                textAlign: "center",
-              }}
-            >
-              Our attention is what fuels it.
-            </p>
-          </div>
-
+          {/* About link */}
           <div
             style={{
               textAlign: "center",
-              marginBottom: 18,
+              marginBottom: 48,
             }}
           >
             <Link
@@ -294,11 +196,13 @@ export default function HomePage() {
               style={{
                 color: "#fff8e0",
                 fontSize: "1.1rem",
-                fontWeight: 550,
-                fontStyle: "italic",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
                 textDecoration: "none",
-                borderBottom: "2.5px solid #FFD86B",
-                paddingBottom: 2,
+                borderBottom: "3.5px solid #FFD86B",
+                paddingBottom: 4,
+                paddingLeft: 6,
+                paddingRight: 6,
                 textShadow: "0 0 8px rgba(0,0,0,0.3)",
                 transition: "border-color 0.2s, color 0.2s",
               }}
@@ -311,10 +215,47 @@ export default function HomePage() {
                 e.currentTarget.style.color = "#fff8e0";
               }}
             >
-              About this Project
+              ABOUT
             </Link>
           </div>
 
+          {/* Hero line */}
+          <p
+            className="cover-thesis"
+            style={{
+              margin: "0 auto 56px",
+              maxWidth: 620,
+              fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
+              lineHeight: 1.65,
+              fontWeight: 500,
+              letterSpacing: "0.025em",
+              color: "#fffcf0",
+              textShadow:
+                "0 0 12px rgba(255,248,230,0.35), 0 0 24px rgba(255,248,230,0.20), 0 0 2px rgba(10,20,40,0.6)",
+              textAlign: "center",
+            }}
+          >
+            There&apos;s a constellation of small and diverse solutions
+            being created and tended, rising beneath the noise.
+            <span style={{ display: "block", height: "1.4em" }} />
+            Diversity sustains. Our attention fuels it.
+          </p>
+
+          {/* Explore the commons — label + state selector */}
+          <div
+            style={{
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              letterSpacing: "0.18em",
+              fontStyle: "italic",
+              color: "rgba(255,252,240,0.92)",
+              textAlign: "center",
+              marginBottom: 14,
+              textShadow: "0 0 10px rgba(255,248,230,0.25), 0 0 8px rgba(10,20,40,0.5)",
+            }}
+          >
+            Explore what&apos;s rising.
+          </div>
           <div
             style={{
               display: "flex",
@@ -322,6 +263,7 @@ export default function HomePage() {
               flexWrap: "wrap",
               justifyContent: "center",
               alignItems: "center",
+              marginBottom: 44,
             }}
           >
             <select
@@ -377,28 +319,20 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="mt-6 flex justify-center">
+          {/* Tend the commons — founders door */}
+          <div className="flex justify-center" style={{ marginBottom: 36 }}>
             <Link
               href="/founders"
               className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
             >
-              Become the Foundation
+              Tend the Commons
             </Link>
           </div>
 
+          {/* Closing line */}
           <div
             style={{
-              marginTop: 10,
-              fontSize: 14,
-              color: "rgba(255,255,255,0.72)",
-            }}
-          >
-            Join the people helping turn on the first lights.
-          </div>
-
-          <div
-            style={{
-              marginTop: 24,
+              marginTop: 20,
               fontSize: "0.95rem",
               letterSpacing: "0.18em",
               color: "rgba(255,248,224,0.88)",
@@ -407,7 +341,7 @@ export default function HomePage() {
               textShadow: "0 0 8px rgba(10,20,40,0.5)",
             }}
           >
-            A forming commons
+            Your participation makes a difference.
           </div>
         </div>
       </div>
