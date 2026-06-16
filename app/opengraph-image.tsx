@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const alt =
-  "Canary Commons — a starry night sky with the Canary Commons logo and the headline Connected, We Dawn Brighter";
+  "Canary Commons — There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -84,26 +84,26 @@ export default async function Image() {
         <div
           style={{
             color: "white",
-            fontSize: 64,
-            fontWeight: 700,
+            fontSize: 42,
+            fontWeight: 600,
             textAlign: "center",
-            lineHeight: 1.0,
+            lineHeight: 1.15,
           }}
         >
-          Connected,
+          Life-giving work, rising everywhere —
         </div>
         <div
           style={{
             color: "#FFD86B",
-            fontSize: 86,
+            fontSize: 72,
             fontWeight: 700,
             textAlign: "center",
             lineHeight: 1.0,
-            marginTop: 4,
+            marginTop: 12,
             textShadow: "0 0 40px rgba(255,216,107,0.4)",
           }}
         >
-          We Dawn Brighter
+          made visible.
         </div>
 
         {/* Subtitle */}
