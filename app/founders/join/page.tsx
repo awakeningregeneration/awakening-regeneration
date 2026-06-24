@@ -144,8 +144,8 @@ function Atmosphere() {
 function JoinContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref") || "";
-  const [selectedTier, setSelectedTier] = useState("$18");
-  const [oneTime, setOneTime] = useState("");
+  const [selectedTier, setSelectedTier] = useState<string | null>("$18");
+  const [oneTimeGift, setOneTimeGift] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -170,30 +170,22 @@ function JoinContent() {
     marginBottom: 16,
   };
 
-  const sectionHeading: React.CSSProperties = {
-    fontSize: "1.12rem",
-    fontWeight: 650,
-    color: "rgba(255,255,255,0.95)",
-    margin: 0,
-    marginBottom: 18,
-  };
-
   const softBody: React.CSSProperties = {
     fontSize: "1.02rem",
     lineHeight: 1.78,
-    color: "rgba(211,227,247,0.78)",
+    color: "rgba(224,238,255,0.92)",
     margin: 0,
     marginBottom: 16,
   };
 
-  const emphasisBody: React.CSSProperties = {
-    fontSize: "1.04rem",
-    lineHeight: 1.78,
-    color: "rgba(255,255,255,0.95)",
-    fontWeight: 600,
-    margin: 0,
-    marginBottom: 16,
-  };
+  // ── Derived state for the unified button ──
+  const oneTimeAmount = oneTimeGift ? parseFloat(oneTimeGift) : 0;
+  const oneTimeValid = oneTimeAmount >= 5;
+  const hasTier = selectedTier !== null;
+  const hasOneTime = oneTimeGift.length > 0 && oneTimeValid;
+  const oneTimeOnly = !hasTier && hasOneTime;
+  const nothingSelected = !hasTier && !hasOneTime;
+  const oneTimeTooLow = oneTimeGift.length > 0 && !oneTimeValid;
 
   return (
     <main
@@ -216,19 +208,6 @@ function JoinContent() {
           margin: "0 auto",
         }}
       >
-        <p
-          style={{
-            fontSize: "0.82rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "rgba(159,184,216,0.65)",
-            margin: 0,
-            marginBottom: 14,
-          }}
-        >
-          Canary Commons
-        </p>
-
         <h1
           style={{
             fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
@@ -242,100 +221,38 @@ function JoinContent() {
               "0 0 32px rgba(255,216,107,0.3), 0 0 64px rgba(255,200,80,0.12)",
           }}
         >
-          Become the Foundation,
-          <br />
-          While the Roots Grow Deep.
+          Tending the Commons
         </h1>
 
+        {/* ── THE THRESHOLD ── */}
         <div style={glassCard}>
           <p style={softBody}>
-            Canary Commons exists to make what is life-giving visible — without
-            hierarchy, without tolls, without anyone paying for placement.
+            Many have forgotten how much power is already contained in a single
+            act of attention directed towards life. What we repeatedly attend
+            becomes visible, what becomes visible becomes easier to choose, what
+            is chosen, grows and shapes the world we inhabit. Canary Commons is
+            here to re-orient our attention to the people, activities, stories,
+            and places that are already living in ways that are sustainable,
+            regenerative, and life affirming.
           </p>
           <p style={softBody}>
-            Every listing on this map is equal. That is not an accident. It is
-            the design.
-          </p>
-          <p style={softBody}>
-            Right now, the map is being populated organically — by the people
-            of place, adding what they know and love where they live. That
-            process takes time. It takes trust. It takes roots.
-          </p>
-          <p style={emphasisBody}>
-            Your contribution is the bridge while that happens.
-          </p>
-          <p style={softBody}>
-            Your contribution supports the infrastructure that holds this —
-            the technology, the people tending it, and the debt carried to
-            bring it into being. It sustains the platform while the grassroots
-            field fills in.
-          </p>
-          <p style={softBody}>
-            What you are helping build will never charge for visibility. No
-            business will pay more to appear first. No community will be priced
-            out of the map.
+            Your subscription gives you four in-hand and caringly crafted notes
+            from the field of people, places, and projects creating the world we
+            want to live in now. Each month you will also receive an email
+            offering you possibilities to place your attention with things that
+            make a difference.
           </p>
           <p style={{ ...softBody, marginBottom: 0 }}>
-            That is the promise this platform is built on. You are helping make
-            sure it keeps its word.
+            Each subscription offers a different measure of support as the map
+            gathers the life-giving options being stewarded throughout the United
+            States. You are stabilizing the map while it organically fills in.
+            Together we strengthen what we wish to see grow.
           </p>
         </div>
 
-        {/* Arc section — held moment */}
-        <div style={{ ...glassCard, textAlign: "center" as const }}>
-          <p
-            style={{
-              fontSize: "1.1rem",
-              lineHeight: 1.72,
-              color: "rgba(255,248,230,0.92)",
-              fontStyle: "italic",
-              margin: "0 0 12px",
-            }}
-          >
-            Any amount and every amount supports the first year of foundation.
-          </p>
-          <p
-            style={{
-              fontSize: "1.1rem",
-              lineHeight: 1.72,
-              color: "rgba(255,248,230,0.92)",
-              fontStyle: "italic",
-              margin: 0,
-            }}
-          >
-            After that, she flies on her own wings.
-          </p>
-        </div>
-
-        {/* What you receive */}
+        {/* ── TENDING THE COMMONS — unified contribution area ── */}
         <div style={glassCard}>
-          <h2 style={sectionHeading}>What you receive</h2>
-          <p style={{ ...softBody, marginBottom: 0 }}>
-            Once you join, you&apos;ll receive a short email twice a month —
-            not a newsletter, more like a letter from the field. It carries a
-            few signals: something rising in the constellation, something worth
-            supporting, something to notice where you live.
-          </p>
-        </div>
-
-        {/* What you're asked */}
-        <div style={glassCard}>
-          <h2 style={sectionHeading}>What you&apos;re asked</h2>
-          <p style={softBody}>
-            Your one ongoing invitation: add three lights. Place three
-            meaningful things on the map that you know — or invite the people
-            tending those places to add themselves.
-          </p>
-          <p style={{ ...softBody, marginBottom: 0 }}>
-            That&apos;s it. No meetings. No obligations beyond that. Just
-            participation at the pace of your life.
-          </p>
-        </div>
-
-        {/* Choose your contribution */}
-        <div style={glassCard}>
-          <h2 style={sectionHeading}>Choose your contribution</h2>
-
+          {/* The three monthly tiers */}
           <div style={{ display: "grid", gap: 12 }}>
             {tiers.map((tier) => {
               const isSelected = selectedTier === tier.value;
@@ -343,7 +260,9 @@ function JoinContent() {
                 <button
                   key={tier.value}
                   type="button"
-                  onClick={() => setSelectedTier(tier.value)}
+                  onClick={() =>
+                    setSelectedTier(isSelected ? null : tier.value)
+                  }
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -373,46 +292,66 @@ function JoinContent() {
                       flexShrink: 0,
                     }}
                   />
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "1.02rem",
-                        color: isSelected
-                          ? "#FFE8A0"
-                          : "rgba(255,255,255,0.92)",
-                      }}
-                    >
-                      {tier.label}
-                    </div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "1.02rem",
+                      color: isSelected
+                        ? "#FFE8A0"
+                        : "rgba(255,255,255,0.92)",
+                    }}
+                  >
+                    {tier.label}
                   </div>
                 </button>
               );
             })}
           </div>
-        </div>
 
-        {/* One-time contribution */}
-        <div style={{ ...glassCard, marginBottom: 32 }}>
-          <label
+          {/* Step-down line */}
+          <p
             style={{
-              display: "block",
-              fontSize: "0.95rem",
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.88)",
-              marginBottom: 10,
+              fontSize: "0.88rem",
+              lineHeight: 1.6,
+              color: "rgba(190,210,235,0.82)",
+              textAlign: "center",
+              margin: "16px 0 0",
             }}
           >
-            Additional one-time contribution to the foundation
-          </label>
+            After twelve months, every subscription settles to a $12 base.
+          </p>
+
+          {/* Soft divider */}
+          <div
+            style={{
+              margin: "24px 0",
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              paddingTop: 20,
+            }}
+          >
+            <p
+              style={{
+                fontSize: "0.9rem",
+                lineHeight: 1.6,
+                color: "rgba(190,210,235,0.78)",
+                textAlign: "center",
+                margin: 0,
+              }}
+            >
+              If you&apos;d like to give more on top of your
+              subscription — or make a one-time gift without subscribing.
+            </p>
+          </div>
+
+          {/* One-time amount input */}
           <input
             type="text"
             inputMode="numeric"
-            placeholder="$ (optional)"
-            value={oneTime}
+            placeholder="$ one-time (minimum $5)"
+            value={oneTimeGift}
             onChange={(e) => {
               const v = e.target.value.replace(/[^0-9.]/g, "");
-              setOneTime(v);
+              setOneTimeGift(v);
             }}
             style={{
               width: "100%",
@@ -423,15 +362,42 @@ function JoinContent() {
               color: "white",
               fontSize: "0.98rem",
               outline: "none",
+              marginBottom: 10,
             }}
           />
+          {oneTimeTooLow && (
+            <p
+              style={{
+                fontSize: "0.84rem",
+                color: "rgba(255,160,140,0.8)",
+                margin: "0 0 6px",
+              }}
+            >
+              Minimum one-time gift is $5.
+            </p>
+          )}
+          <p
+            style={{
+              fontSize: "0.9rem",
+              lineHeight: 1.65,
+              color: "rgba(224,238,255,0.85)",
+              margin: 0,
+              fontStyle: "italic",
+            }}
+          >
+            A one-time gift receives a first edition of Notes from the
+            Field — a warm thank you for standing with the work.
+          </p>
         </div>
 
-        {/* CTA */}
+        {/* ── PRIMARY CTA — routes on combined state ── */}
         <button
           type="button"
-          disabled={isRedirecting}
+          disabled={isRedirecting || nothingSelected || oneTimeOnly || oneTimeTooLow}
           onClick={async () => {
+            // oneTimeOnly is stubbed — button is disabled for that case
+            if (!hasTier) return;
+
             setErrorMessage("");
             setIsRedirecting(true);
 
@@ -444,7 +410,7 @@ function JoinContent() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   tier: tierObj.tier,
-                  oneTimeAmount: oneTime ? parseFloat(oneTime) : undefined,
+                  oneTimeAmount: hasOneTime ? oneTimeAmount : undefined,
                   referralCode: ref || undefined,
                 }),
               });
@@ -473,26 +439,38 @@ function JoinContent() {
             width: "100%",
             padding: "16px 24px",
             borderRadius: 999,
-            background: "#FFD86B",
-            color: "#1a2a0e",
+            background: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+              ? "rgba(255,216,107,0.25)"
+              : "#FFD86B",
+            color: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+              ? "rgba(26,42,14,0.5)"
+              : "#1a2a0e",
             fontWeight: 700,
             fontSize: "1.05rem",
             border: "none",
-            cursor: isRedirecting ? "not-allowed" : "pointer",
-            boxShadow: "0 0 32px rgba(255,216,107,0.20)",
+            cursor: (isRedirecting || nothingSelected || oneTimeOnly || oneTimeTooLow)
+              ? "not-allowed"
+              : "pointer",
+            boxShadow: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+              ? "none"
+              : "0 0 32px rgba(255,216,107,0.20)",
             opacity: isRedirecting ? 0.8 : 1,
-            transition: "opacity 0.15s ease",
+            transition: "opacity 0.15s ease, background 0.15s ease",
+            marginBottom: 16,
           }}
         >
           {isRedirecting
             ? "Redirecting to secure checkout..."
-            : "Become the Foundation."}
+            : oneTimeOnly
+            ? "One-time gifts — coming soon"
+            : "Tend the Commons"}
         </button>
 
         {errorMessage && (
           <p
             style={{
-              marginTop: 14,
+              marginTop: 0,
+              marginBottom: 16,
               fontSize: "0.88rem",
               lineHeight: 1.55,
               color: "rgba(255,160,140,0.9)",
@@ -503,7 +481,7 @@ function JoinContent() {
           </p>
         )}
 
-        {/* Footer note */}
+        {/* ── FOOTER ── */}
         <p
           style={{
             marginTop: 36,
