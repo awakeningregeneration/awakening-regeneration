@@ -144,7 +144,7 @@ function Atmosphere() {
 function JoinContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref") || "";
-  const [selectedTier, setSelectedTier] = useState("$9");
+  const [selectedTier, setSelectedTier] = useState("$18");
   const [oneTime, setOneTime] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -156,9 +156,9 @@ function JoinContent() {
   }, [ref]);
 
   const tiers = [
-    { value: "$9", tier: "tier_1", label: "$9/month", title: "Foundation Builder" },
-    { value: "$18", tier: "tier_2", label: "$18/month", title: "Supporting Foundation Builder" },
-    { value: "$27", tier: "tier_3", label: "$27/month", title: "Sustaining Foundation Builder" },
+    { value: "$18", tier: "tier_1", label: "$18/month" },
+    { value: "$28", tier: "tier_2", label: "$28/month" },
+    { value: "$42", tier: "tier_3", label: "$42/month" },
   ];
 
   const glassCard: React.CSSProperties = {
@@ -262,7 +262,7 @@ function JoinContent() {
             process takes time. It takes trust. It takes roots.
           </p>
           <p style={emphasisBody}>
-            Foundation Builders are the bridge while that happens.
+            Your contribution is the bridge while that happens.
           </p>
           <p style={softBody}>
             Your contribution supports the infrastructure that holds this —
@@ -384,15 +384,6 @@ function JoinContent() {
                       }}
                     >
                       {tier.label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "0.9rem",
-                        color: "rgba(211,227,247,0.65)",
-                        marginTop: 2,
-                      }}
-                    >
-                      {tier.title}
                     </div>
                   </div>
                 </button>

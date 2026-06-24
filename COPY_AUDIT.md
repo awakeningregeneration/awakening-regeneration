@@ -437,7 +437,7 @@ Gathered 2026-04-20. Every piece of user-facing text, verbatim.
 - "Founding-role recognition as the commons takes root"
 
 **Card 4 — "Contribution"**
-- "Founders make a small monthly contribution of $9/month. This supports the early building phase and helps establish the foundation of a visible, life-supporting commons."
+- "Founders make a monthly contribution of $18/month (foundation year). This supports the early building phase and helps establish the foundation of a visible, life-supporting commons."
 
 **Card 5 — "Seed referral pathway"**
 - "If someone invited you into this, you can include their referral code or name when you join so their contribution is recognized."
@@ -461,7 +461,7 @@ Gathered 2026-04-20. Every piece of user-facing text, verbatim.
 ### Narrative Body
 1. "Canary Commons exists to make what is life-giving visible — without hierarchy, without tolls, without anyone paying for placement. Every listing on this map is equal. That is not an accident. It is the design."
 2. "Right now, the map is being populated organically — by the people of place, adding what they know and love where they live. That process takes time. It takes trust. It takes roots."
-3. "Foundation Builders are the bridge while that happens."
+3. "Your contribution is the bridge while that happens."
 4. "Your contribution supports the infrastructure that holds this — the technology, the people tending it, and the debt carried to bring it into being. It sustains the platform while the grassroots field fills in."
 5. "What you are helping build will never charge for visibility. No business will pay more to appear first. No community will be priced out of the map. That is the promise this platform is built on."
 6. "You are helping make sure it keeps its word."
@@ -474,9 +474,9 @@ Gathered 2026-04-20. Every piece of user-facing text, verbatim.
 
 ### Tier Selection
 - **Section heading:** "Monthly contribution"
-- **Tier 1:** "$9/month" — "Foundation Builder"
-- **Tier 2:** "$18/month" — "Supporting Foundation Builder"
-- **Tier 3:** "$27/month" — "Sustaining Foundation Builder"
+- **Tier 1:** "$18/month"
+- **Tier 2:** "$28/month"
+- **Tier 3:** "$42/month"
 
 ### One-Time Contribution
 - **Label:** "Additional one-time contribution to the foundation"

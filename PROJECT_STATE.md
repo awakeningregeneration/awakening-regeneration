@@ -16,7 +16,7 @@ Canary Commons is a living map of regenerative, life-supporting efforts across t
 - **Map** — place-based listings, what's alive near you or where you're going
 - **Constellation** — stories and inspiration layer
 - **Online Resources** — affiliate / non-local / web-based offerings
-- **Founders** — monetary support flow ($9 / $18 / $27 monthly + custom one-time)
+- **Founders** — monetary support flow ($18 / $28 / $42 monthly + custom one-time)
 - **Home** — landing and return
 
 ### Global Navigation

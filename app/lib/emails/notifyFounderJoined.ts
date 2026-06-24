@@ -5,9 +5,9 @@
  */
 
 const TIER_LABELS: Record<string, string> = {
-  tier_1: "$9/mo",
-  tier_2: "$18/mo",
-  tier_3: "$27/mo",
+  tier_1: "$18/mo",
+  tier_2: "$28/mo",
+  tier_3: "$42/mo",
 };
 
 export function notifyFounderJoinedEmail(options: {

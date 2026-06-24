@@ -11,9 +11,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 /** Map tier string to monthly amount in cents */
 const TIER_AMOUNTS: Record<string, number> = {
-  tier_1: 900,
-  tier_2: 1800,
-  tier_3: 2700,
+  tier_1: 1800,
+  tier_2: 2800,
+  tier_3: 4200,
 };
 
 export async function POST(request: Request) {
