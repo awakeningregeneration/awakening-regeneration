@@ -15,11 +15,57 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const tier: string = body.tier?.trim();
+    const tier: string | undefined = body.tier?.trim() || undefined;
     const oneTimeAmount: number | undefined = body.oneTimeAmount;
     const referralCode: string | undefined = body.referralCode?.trim() || undefined;
 
-    const priceId = PRICE_MAP[tier];
+    // Determine origin for redirect URLs
+    const origin =
+      request.headers.get("origin") ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      "http://localhost:3000";
+
+    const metadata: Record<string, string> = {};
+    if (referralCode) {
+      metadata.referral_code = referralCode;
+    }
+
+    // ── ONE-TIME-ONLY PATH (no tier, just a gift amount) ──
+    if (!tier && oneTimeAmount) {
+      const amountCents = Math.round(oneTimeAmount * 100);
+      if (amountCents < 500) {
+        return NextResponse.json(
+          { error: "Minimum one-time gift is $5." },
+          { status: 400 }
+        );
+      }
+
+      metadata.mode = "gift";
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "One-time gift to Canary Commons",
+              },
+              unit_amount: amountCents,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${origin}/founders/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/founders`,
+        metadata,
+      });
+
+      return NextResponse.json({ url: session.url });
+    }
+
+    // ── SUBSCRIPTION PATH (existing, unchanged) ──
+    const priceId = tier ? PRICE_MAP[tier] : undefined;
     if (!priceId) {
       return NextResponse.json(
         { error: "Invalid tier selected." },
@@ -27,11 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Determine origin for redirect URLs
-    const origin =
-      request.headers.get("origin") ||
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "http://localhost:3000";
+    metadata.tier = tier!;
 
     // Build line items
     const lineItems: {
@@ -49,7 +91,7 @@ export async function POST(request: Request) {
       },
     ];
 
-    // Optional one-time additional contribution
+    // Optional one-time additional contribution bundled with subscription
     if (oneTimeAmount && oneTimeAmount > 0) {
       lineItems.push({
         price_data: {
@@ -61,12 +103,6 @@ export async function POST(request: Request) {
         },
         quantity: 1,
       });
-    }
-
-    // Metadata — stored on both the session and the subscription
-    const metadata: Record<string, string> = { tier };
-    if (referralCode) {
-      metadata.referral_code = referralCode;
     }
 
     const session = await stripe.checkout.sessions.create({

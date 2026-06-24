@@ -183,7 +183,6 @@ function JoinContent() {
   const oneTimeValid = oneTimeAmount >= 5;
   const hasTier = selectedTier !== null;
   const hasOneTime = oneTimeGift.length > 0 && oneTimeValid;
-  const oneTimeOnly = !hasTier && hasOneTime;
   const nothingSelected = !hasTier && !hasOneTime;
   const oneTimeTooLow = oneTimeGift.length > 0 && !oneTimeValid;
 
@@ -393,23 +392,21 @@ function JoinContent() {
         {/* ── PRIMARY CTA — routes on combined state ── */}
         <button
           type="button"
-          disabled={isRedirecting || nothingSelected || oneTimeOnly || oneTimeTooLow}
+          disabled={isRedirecting || nothingSelected || oneTimeTooLow}
           onClick={async () => {
-            // oneTimeOnly is stubbed — button is disabled for that case
-            if (!hasTier) return;
-
             setErrorMessage("");
             setIsRedirecting(true);
 
-            const tierObj = tiers.find((t) => t.value === selectedTier);
-            if (!tierObj) return;
-
             try {
+              const tierObj = hasTier
+                ? tiers.find((t) => t.value === selectedTier)
+                : null;
+
               const res = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  tier: tierObj.tier,
+                  tier: tierObj?.tier ?? undefined,
                   oneTimeAmount: hasOneTime ? oneTimeAmount : undefined,
                   referralCode: ref || undefined,
                 }),
@@ -439,19 +436,19 @@ function JoinContent() {
             width: "100%",
             padding: "16px 24px",
             borderRadius: 999,
-            background: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+            background: (nothingSelected || oneTimeTooLow)
               ? "rgba(255,216,107,0.25)"
               : "#FFD86B",
-            color: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+            color: (nothingSelected || oneTimeTooLow)
               ? "rgba(26,42,14,0.5)"
               : "#1a2a0e",
             fontWeight: 700,
             fontSize: "1.05rem",
             border: "none",
-            cursor: (isRedirecting || nothingSelected || oneTimeOnly || oneTimeTooLow)
+            cursor: (isRedirecting || nothingSelected || oneTimeTooLow)
               ? "not-allowed"
               : "pointer",
-            boxShadow: (nothingSelected || oneTimeOnly || oneTimeTooLow)
+            boxShadow: (nothingSelected || oneTimeTooLow)
               ? "none"
               : "0 0 32px rgba(255,216,107,0.20)",
             opacity: isRedirecting ? 0.8 : 1,
@@ -461,8 +458,6 @@ function JoinContent() {
         >
           {isRedirecting
             ? "Redirecting to secure checkout..."
-            : oneTimeOnly
-            ? "One-time gifts — coming soon"
             : "Tend the Commons"}
         </button>
 

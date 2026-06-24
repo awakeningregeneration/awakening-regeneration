@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { resend, FROM_EMAIL } from "@/app/lib/resend";
 import { welcomeFounderEmail } from "@/app/lib/emails/welcomeFounder";
+import { oneTimeGiftConfirmationEmail } from "@/app/lib/emails/oneTimeGiftConfirmation";
 import { notifyFounderJoinedEmail } from "@/app/lib/emails/notifyFounderJoined";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -84,6 +85,13 @@ export async function POST(request: Request) {
 // ─────────────────────────────────────────────────────────────
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  // ── Fork on session mode: one-time gift vs subscription ──
+  if (session.mode === "payment") {
+    await handleOneTimeGift(session);
+    return;
+  }
+
+  // ── SUBSCRIPTION PATH (existing, unchanged below this line) ──
   const email =
     session.customer_details?.email || session.customer_email || "";
   const name = session.customer_details?.name || "";
@@ -263,6 +271,182 @@ async function linkSeederReferral(params: {
   } else {
     console.log(
       `Seeder referral linked: seeder ${seeder.id} ← founder ${founderEmail} (${tier}, payout ${payoutAmountCents}¢/mo)`
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// One-time gift (payment mode)
+// ─────────────────────────────────────────────────────────────
+
+async function handleOneTimeGift(session: Stripe.Checkout.Session) {
+  const email =
+    session.customer_details?.email || session.customer_email || "";
+  const name = session.customer_details?.name || "";
+  const referralCode = (session.metadata?.referral_code as string) || "";
+  const stripeCustomerId =
+    typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id || "";
+
+  const amountCents = session.amount_total ?? 0;
+  const amountDollars = Math.round(amountCents / 100);
+
+  // --- Insert founder row (one-time shape) ---
+  const { error: founderError } = await supabaseAdmin
+    .from("founders")
+    .insert([
+      {
+        name,
+        email,
+        tier: "gift",
+        amount: amountDollars,
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: null,
+        subscription_status: null,
+        referral_code: referralCode || null,
+        referred_by: null,
+        status: "completed",
+        city: null,
+        state: null,
+        why: null,
+      },
+    ]);
+
+  if (founderError) {
+    console.error("Failed to insert one-time founder:", founderError.message);
+  } else {
+    console.log(`One-time gift founder created: ${email} ($${amountDollars})`);
+  }
+
+  // --- Link to seeder if a referral code was used (15% one-time rate) ---
+  if (referralCode) {
+    await linkSeederReferralOneTime({
+      referralCode,
+      founderEmail: email,
+      founderName: name,
+      stripeCustomerId,
+      amountCents,
+    });
+  }
+
+  // --- Send one-time confirmation email ---
+  if (!founderError && email) {
+    try {
+      const {
+        subject,
+        html: emailHtml,
+        text: emailText,
+      } = oneTimeGiftConfirmationEmail({
+        name: name || undefined,
+      });
+
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: email,
+        subject,
+        html: emailHtml,
+        text: emailText,
+      });
+
+      console.log(`One-time gift confirmation email sent to ${email}`);
+    } catch (emailErr) {
+      console.error("One-time gift email failed to send:", emailErr, { email });
+    }
+
+    // --- Send internal notification to Ren ---
+    try {
+      const notification = notifyFounderJoinedEmail({
+        name: name || "",
+        email,
+        tier: "gift",
+        amount: amountDollars,
+        referralCode: referralCode || null,
+        isSubscription: false,
+      });
+
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: "founder@canarycommons.org",
+        subject: notification.subject,
+        html: notification.html,
+        text: notification.text,
+      });
+
+      console.log(`One-time gift notification sent to founder@canarycommons.org`);
+    } catch (notifyErr) {
+      console.error("One-time gift notification email failed:", notifyErr);
+    }
+  }
+}
+
+async function linkSeederReferralOneTime(params: {
+  referralCode: string;
+  founderEmail: string;
+  founderName: string;
+  stripeCustomerId: string;
+  amountCents: number;
+}) {
+  const {
+    referralCode,
+    founderEmail,
+    founderName,
+    stripeCustomerId,
+    amountCents,
+  } = params;
+
+  const { data: seeder, error: lookupError } = await supabaseAdmin
+    .from("seeders")
+    .select("id, active")
+    .ilike("referral_code", referralCode)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("Seeder lookup error (one-time):", lookupError.message);
+    return;
+  }
+
+  if (!seeder) {
+    console.warn(
+      `Referral code not matched (one-time): "${referralCode}" (founder: ${founderEmail})`
+    );
+    return;
+  }
+
+  if (!seeder.active) {
+    console.warn(
+      `Seeder found but inactive (one-time): "${referralCode}" (seeder id: ${seeder.id})`
+    );
+    return;
+  }
+
+  // 15% payout for one-time gifts (vs 25% for subscriptions)
+  const payoutAmountCents = Math.round(amountCents * 0.15);
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { error: referralError } = await supabaseAdmin
+    .from("seeder_referrals")
+    .insert([
+      {
+        seeder_id: seeder.id,
+        founder_email: founderEmail,
+        founder_name: founderName,
+        stripe_customer_id: stripeCustomerId,
+        month_joined: today,
+        status: "completed",
+        tier: "gift",
+        amount: amountCents,
+        payout_amount: payoutAmountCents,
+        payouts_paid: 0,
+      },
+    ]);
+
+  if (referralError) {
+    console.error("Failed to insert seeder referral (one-time):", referralError.message);
+  } else {
+    console.log(
+      `Seeder referral linked (one-time): seeder ${seeder.id} ← founder ${founderEmail} (gift $${Math.round(amountCents / 100)}, payout ${payoutAmountCents}¢)`
     );
   }
 }
