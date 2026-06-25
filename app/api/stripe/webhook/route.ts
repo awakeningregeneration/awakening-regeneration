@@ -80,6 +80,31 @@ export async function POST(request: Request) {
   return NextResponse.json({ received: true });
 }
 
+/* ── Extract shipping address defensively (survives Stripe API version changes) ── */
+function extractShipping(session: Stripe.Checkout.Session) {
+  // Stripe Basil (2025-03-31) moved shipping to collected_information.shipping_details.
+  // Cast through unknown to read whichever field exists on the current API version.
+  const s = session as unknown as Record<string, unknown>;
+  const collected = s.collected_information as Record<string, unknown> | undefined;
+  const raw =
+    (collected?.shipping_details as Record<string, unknown> | undefined) ??
+    (s.shipping_details as Record<string, unknown> | undefined) ??
+    null;
+
+  if (!raw) return null;
+
+  const address = (raw.address ?? {}) as Record<string, string | null>;
+  return {
+    shipping_name: (raw.name as string) || null,
+    shipping_address_line1: address.line1 || null,
+    shipping_address_line2: address.line2 || null,
+    shipping_city: address.city || null,
+    shipping_state: address.state || null,
+    shipping_postal_code: address.postal_code || null,
+    shipping_country: address.country || null,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────
 // checkout.session.completed
 // ─────────────────────────────────────────────────────────────
@@ -91,12 +116,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // ── SUBSCRIPTION PATH (existing, unchanged below this line) ──
+  // ── SUBSCRIPTION PATH ──
   const email =
     session.customer_details?.email || session.customer_email || "";
   const name = session.customer_details?.name || "";
   const tier = (session.metadata?.tier as string) || "";
   const referralCode = (session.metadata?.referral_code as string) || "";
+  const wantsMail = session.metadata?.wants_mail !== "false";
   const stripeCustomerId =
     typeof session.customer === "string"
       ? session.customer
@@ -109,6 +135,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const amountCents = TIER_AMOUNTS[tier] || 0;
   // The founders table stores amount in whole dollars (matching existing schema)
   const amountDollars = Math.round(amountCents / 100);
+
+  const shipping = extractShipping(session);
 
   // --- Insert founder row ---
   const { error: founderError } = await supabaseAdmin
@@ -128,6 +156,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         city: null,
         state: null,
         why: null,
+        wants_physical_mail: wantsMail,
+        ...(shipping ?? {}),
       },
     ]);
 
@@ -284,6 +314,7 @@ async function handleOneTimeGift(session: Stripe.Checkout.Session) {
     session.customer_details?.email || session.customer_email || "";
   const name = session.customer_details?.name || "";
   const referralCode = (session.metadata?.referral_code as string) || "";
+  const wantsMail = session.metadata?.wants_mail !== "false";
   const stripeCustomerId =
     typeof session.customer === "string"
       ? session.customer
@@ -291,6 +322,8 @@ async function handleOneTimeGift(session: Stripe.Checkout.Session) {
 
   const amountCents = session.amount_total ?? 0;
   const amountDollars = Math.round(amountCents / 100);
+
+  const shipping = extractShipping(session);
 
   // --- Insert founder row (one-time shape) ---
   const { error: founderError } = await supabaseAdmin
@@ -310,6 +343,8 @@ async function handleOneTimeGift(session: Stripe.Checkout.Session) {
         city: null,
         state: null,
         why: null,
+        wants_physical_mail: wantsMail,
+        ...(shipping ?? {}),
       },
     ]);
 

@@ -4,7 +4,7 @@
 
 *For bigger architectural additions that depend on project maturity rather than urgency, see GROWTH_LIST.md.*
 
-*Last updated: June 10, 2026*
+*Last updated: June 23, 2026*
 
 ---
 
@@ -52,6 +52,14 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 
 - [x] ~~**Jun 9 session work is UNCOMMITTED.**~~ Committed and pushed (058222e, Jun 9).
 
+## From the June 23 session
+
+- [ ] **MAILING ADDRESS CAPTURE — not built.** The flow promises physical mail (quarterly Notes from the Field for subscribers; first-edition welcome letter + seeds for one-time gifts) but collects no shipping address. Settled decisions: everyone normally gets physical mail (both subscription and one-time paths); US-only shipping; physical mail is OPT-OUT (default on) so non-US contributors can still join and decline paper; opt-out members get EMAILS ONLY (no physical, no digital version of the letter — there is deliberately no digital twin); shipping fields saved to founders row via webhook. Build order: add nullable shipping_* columns + wants_physical_mail boolean (default true) to founders table FIRST, then wire checkout + webhook together. Resume phrase: "let's finish up the mailing address tidbit."
+
+- [ ] **TEST DATA CLEANUP.** The live founders table and seeder_referrals contain test rows from Jun 23 one-time gift testing (refunded in Stripe, but the DB rows remain). Clean these before real contributors arrive so the first real founder isn't mis-numbered.
+
+- [ ] **Step-down mechanic ($18/$28/$42 → $12 base after 12 months).** The $12 Stripe Price exists but is not wired. The step-down line on the page is display copy only. Needs: Stripe Subscription Schedule (two-phase: foundation-year price for 12 months, then $12 base indefinitely) set at checkout time. See implementation plan in earlier session recon.
+
 ## From the June 10 session
 
 - [ ] **Steward claims awaiting click — Rebekah (Takubeh) and Jill (Asana Yoga).** Both have fresh 72h verification links in their inboxes (sent Jun 10 via /api/steward/reverify). Status is still `pending` until they click. This will be the first successful end-to-end steward claim on the platform.
@@ -70,7 +78,7 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 
 ## From the June 2 session
 
-- [ ] **Founder pipeline never fired in production — verify before driving signups.** The founders table is empty. The full path (Stripe checkout → founders row → welcome email → founder@canarycommons.org notification) has never run live — it was confirmed in April but possibly only in Stripe test mode. Before driving any founder signups, run a live test-card checkout through /founders/join and watch that all three fire: the founders row is written, the welcome email sends, and the notification reaches founder@canarycommons.org. The notification uses the same Resend setup as the synonym digest that 422'd on Jun 2 with an unverified sender — verify the founder notification address actually delivers.
+- [x] ~~**Founder pipeline never fired in production.**~~ Verified Jun 23 — live test-card checkout confirmed end-to-end: founders row written, welcome/confirmation email delivered, internal notification to founder@canarycommons.org delivered. Both subscription and one-time paths verified.
 
 - [x] ~~**Mobile map renders as a dropdown list instead of an actual map on phones — HIGHEST PRIORITY.**~~ Fixed Jun 9 — mobile is now map-first with floating bar + bottom drawer. The old browse/map two-panel swap is retired.
 

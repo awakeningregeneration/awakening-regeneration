@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
   { left: "6%", top: "8%", size: 5, opacity: 0.6 },
@@ -64,12 +66,70 @@ function Atmosphere() {
   );
 }
 
-export default function FounderConfirmationPage() {
+function ConfirmationContent() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id") || "";
   const referralCode = useRef<string | null>(null);
+  const [checkoutMode, setCheckoutMode] = useState<"subscription" | "payment" | null>(null);
 
   useEffect(() => {
     referralCode.current = localStorage.getItem("referral_code");
   }, []);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    fetch(`/api/checkout/session?session_id=${encodeURIComponent(sessionId)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.mode === "payment") {
+          setCheckoutMode("payment");
+        } else {
+          setCheckoutMode("subscription");
+        }
+      })
+      .catch(() => {
+        // Default to subscription if lookup fails
+        setCheckoutMode("subscription");
+      });
+  }, [sessionId]);
+
+  const cardStyle: React.CSSProperties = {
+    background: "rgba(255,255,255,0.82)",
+    border: "1px solid rgba(255,255,255,0.6)",
+    backdropFilter: "blur(12px)",
+    borderRadius: 22,
+    padding: "clamp(32px, 5vw, 48px) clamp(24px, 4vw, 40px)",
+    textAlign: "center",
+  };
+
+  const bodyStyle: React.CSSProperties = {
+    fontSize: "1.08rem",
+    lineHeight: 1.72,
+    color: "#3a5a7a",
+    margin: 0,
+    marginBottom: 16,
+    maxWidth: 480,
+    marginLeft: "auto",
+    marginRight: "auto",
+  };
+
+  const mapLinkStyle: React.CSSProperties = {
+    display: "inline-block",
+    padding: "16px 28px",
+    borderRadius: 999,
+    background: "#FFD86B",
+    color: "#1a2a0e",
+    fontWeight: 700,
+    fontSize: "1.05rem",
+    textDecoration: "none",
+    boxShadow:
+      "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
+  };
+
+  // Show nothing while loading the mode
+  if (checkoutMode === null) {
+    return null;
+  }
 
   return (
     <main
@@ -108,99 +168,91 @@ export default function FounderConfirmationPage() {
           Canary Commons
         </p>
 
-        <div
-          style={{
-            background: "rgba(255,255,255,0.82)",
-            border: "1px solid rgba(255,255,255,0.6)",
-            backdropFilter: "blur(12px)",
-            borderRadius: 22,
-            padding: "clamp(32px, 5vw, 48px) clamp(24px, 4vw, 40px)",
-            textAlign: "center",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "clamp(1.8rem, 4vw, 2.4rem)",
-              lineHeight: 1.15,
-              margin: 0,
-              marginBottom: 18,
-              fontWeight: 650,
-              color: "#0d2a4a",
-            }}
-          >
-            You&apos;re in. This is already happening.
-          </h1>
+        {checkoutMode === "payment" ? (
+          /* ── ONE-TIME GIFT CONFIRMATION ── */
+          <div style={cardStyle}>
+            <h1
+              style={{
+                fontSize: "clamp(1.8rem, 4vw, 2.4rem)",
+                lineHeight: 1.15,
+                margin: 0,
+                marginBottom: 18,
+                fontWeight: 650,
+                color: "#0d2a4a",
+              }}
+            >
+              Thank you. Your gift is received.
+            </h1>
 
-          <p
-            style={{
-              fontSize: "1.08rem",
-              lineHeight: 1.72,
-              color: "#3a5a7a",
-              margin: 0,
-              marginBottom: 16,
-              maxWidth: 480,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            This map is being built from the ground — not by one person
-            collecting, but by people noticing and adding what&apos;s alive
-            around them.
-          </p>
+            <p style={{ ...bodyStyle, marginBottom: 36 }}>
+              In the next couple of weeks, your first edition of Notes from
+              the Field will arrive in your mailbox. Thank you for standing
+              with the work.
+            </p>
 
-          <p
-            style={{
-              fontSize: "1.08rem",
-              lineHeight: 1.72,
-              color: "#3a5a7a",
-              margin: 0,
-              marginBottom: 36,
-              maxWidth: 480,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            Head to the map and look around. If a place, a person, or something
-            that matters where you are comes to mind, you&apos;ll see the option
-            to add it.
-          </p>
+            <Link href="/map" style={mapLinkStyle}>
+              Go to the map
+            </Link>
+          </div>
+        ) : (
+          /* ── SUBSCRIPTION CONFIRMATION (existing, unchanged) ── */
+          <div style={cardStyle}>
+            <h1
+              style={{
+                fontSize: "clamp(1.8rem, 4vw, 2.4rem)",
+                lineHeight: 1.15,
+                margin: 0,
+                marginBottom: 18,
+                fontWeight: 650,
+                color: "#0d2a4a",
+              }}
+            >
+              You&apos;re in. This is already happening.
+            </h1>
 
-          <Link
-            href="/map"
-            style={{
-              display: "inline-block",
-              padding: "16px 28px",
-              borderRadius: 999,
-              background: "#FFD86B",
-              color: "#1a2a0e",
-              fontWeight: 700,
-              fontSize: "1.05rem",
-              textDecoration: "none",
-              boxShadow:
-                "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
-            }}
-          >
-            Go to the map
-          </Link>
+            <p style={bodyStyle}>
+              This map is being built from the ground — not by one person
+              collecting, but by people noticing and adding what&apos;s alive
+              around them.
+            </p>
 
-          <p
-            style={{
-              fontSize: "0.88rem",
-              lineHeight: 1.65,
-              color: "#6b8aaa",
-              margin: 0,
-              marginTop: 24,
-              maxWidth: 420,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            You&apos;ll also receive a first email soon, gently walking you into
-            placing your first three lights. No rush — take the rhythm that
-            fits.
-          </p>
-        </div>
+            <p style={{ ...bodyStyle, marginBottom: 36 }}>
+              Head to the map and look around. If a place, a person, or
+              something that matters where you are comes to mind, you&apos;ll
+              see the option to add it.
+            </p>
+
+            <Link href="/map" style={mapLinkStyle}>
+              Go to the map
+            </Link>
+
+            <p
+              style={{
+                fontSize: "0.88rem",
+                lineHeight: 1.65,
+                color: "#6b8aaa",
+                margin: 0,
+                marginTop: 24,
+                maxWidth: 420,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              You&apos;ll also receive a first email soon, gently walking you
+              into placing your first three lights. No rush — take the rhythm
+              that fits.
+            </p>
+          </div>
+        )}
       </div>
     </main>
+  );
+}
+
+export default function FounderConfirmationPage() {
+  return (
+    <Suspense>
+      <ConfirmationContent />
+    </Suspense>
   );
 }

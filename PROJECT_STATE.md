@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: June 15, 2026*
+*Last updated: June 23, 2026*
 
 ---
 
@@ -42,6 +42,24 @@ Canary Commons now operates in two visual registers:
 ---
 
 ## Done (recent)
+
+- **Jun 23** — Founders/tending page restructure + repriced tiers + standalone one-time gift checkout.
+
+  **Tier repricing:** $9/$18/$27 → $18/$28/$42 (foundation year). Old "Foundation Builder" / "Supporting" / "Sustaining" tier names removed; tiers display as bare dollar amounts. New Stripe Price objects created; Netlify env vars (STRIPE_PRICE_TIER_1/2/3) repointed. TIER_AMOUNTS in webhook updated so seeder payout math is correct. A $12 base Stripe Price also created, reserved for the future step-down mechanic (not yet wired). Old prices archived, not deleted. Committed fb86f59.
+
+  **Tending page restructure:** app/founders/join/page.tsx rebuilt. Threshold entry frame replaces old headline ("Become the Foundation") + philosophy card + "What you receive" / "What you're asked" cards. "Tending the Commons" is now the centered gold top title (eyebrow removed). Three bare tiers with deselectable toggle. Step-down line displayed: "After twelve months, every subscription settles to a $12 base." (display copy only — mechanic not built). Unified "Tend the Commons" CTA button. Body copy brightened for readability; night-sky atmosphere preserved. Committed 44f8152.
+
+  **Unified contribution flow:** Three working paths through a single button: (1) subscribe-only (tier selected, no one-time), (2) subscribe + one-time gift bundled as first-charge line item (tier selected + amount entered), (3) one-time-only (no tier, just a gift amount). Tier selection and one-time amount are independent — neither clears the other. Button disabled until a tier or valid one-time amount (>= $5) is present.
+
+  **Standalone one-time gift checkout:** New `mode: "payment"` branch in app/api/checkout/route.ts (server-side $5 floor). Webhook fork in app/api/stripe/webhook/route.ts: `handleOneTimeGift` writes founders row (tier="gift", status="completed", no subscription ID), `linkSeederReferralOneTime` at 15% payout (vs 25% recurring for subscriptions). New email template app/lib/emails/oneTimeGiftConfirmation.ts ("Your first Notes from the Field is on its way"). Subscription checkout path left completely untouched. Confirmed end-to-end with a live $5 test card (since refunded): payment → webhook 200 → founders row written → one-time confirmation email delivered → internal notification to founder@canarycommons.org delivered. Committed 93125f6.
+
+  **Bug fix during testing:** founders table had a NOT NULL constraint on the `why` column, blocking one-time inserts (email send is gated on successful insert, so both failed silently). Fixed via: `ALTER TABLE public.founders ALTER COLUMN why DROP NOT NULL`. The entire one-time loop worked after this.
+
+  **Confirmation page fork:** app/founders/confirmation/page.tsx now branches on checkout mode. One-time gift givers see "Thank you. Your gift is received." + Notes from the Field body + quiet map link. Subscribers see the existing "You're in. This is already happening." screen unchanged. New read-only endpoint app/api/checkout/session/route.ts returns only the session mode (no customer data exposed).
+
+  **Files created:** app/lib/emails/oneTimeGiftConfirmation.ts, app/api/checkout/session/route.ts. **Files modified:** app/api/checkout/route.ts (one-time payment branch added beside subscription path), app/api/stripe/webhook/route.ts (handleOneTimeGift + linkSeederReferralOneTime + mode fork), app/founders/join/page.tsx (full restructure), app/founders/confirmation/page.tsx (gift/subscription fork), app/lib/emails/notifyFounderJoined.ts (tier labels updated).
+
+- **Jun 15** — Homepage restructure + OG card update (see separate entries below).
 
 - **Jun 10** — Mobile map drawer polish + search-to-pins + keyboard fix + steward verification 404 fix.
 

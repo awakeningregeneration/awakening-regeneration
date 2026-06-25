@@ -146,6 +146,7 @@ function JoinContent() {
   const ref = searchParams.get("ref") || "";
   const [selectedTier, setSelectedTier] = useState<string | null>("$18");
   const [oneTimeGift, setOneTimeGift] = useState("");
+  const [wantsMail, setWantsMail] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -387,6 +388,50 @@ function JoinContent() {
             A one-time gift receives a first edition of Notes from the
             Field — a warm thank you for standing with the work.
           </p>
+
+          {/* Physical mail opt-in */}
+          <label
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 10,
+              marginTop: 18,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={wantsMail}
+              onChange={(e) => setWantsMail(e.target.checked)}
+              style={{
+                width: 18,
+                height: 18,
+                marginTop: 2,
+                accentColor: "#FFD86B",
+                flexShrink: 0,
+              }}
+            />
+            <div>
+              <div
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  color: "rgba(224,238,255,0.92)",
+                }}
+              >
+                Send me physical mail
+              </div>
+              <div
+                style={{
+                  fontSize: "0.82rem",
+                  color: "rgba(190,210,235,0.65)",
+                  marginTop: 2,
+                }}
+              >
+                Physical mail ships within the US only.
+              </div>
+            </div>
+          </label>
         </div>
 
         {/* ── PRIMARY CTA — routes on combined state ── */}
@@ -409,6 +454,7 @@ function JoinContent() {
                   tier: tierObj?.tier ?? undefined,
                   oneTimeAmount: hasOneTime ? oneTimeAmount : undefined,
                   referralCode: ref || undefined,
+                  wantsMail,
                 }),
               });
 

@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     const tier: string | undefined = body.tier?.trim() || undefined;
     const oneTimeAmount: number | undefined = body.oneTimeAmount;
     const referralCode: string | undefined = body.referralCode?.trim() || undefined;
+    const wantsMail: boolean = body.wantsMail !== false;
 
     // Determine origin for redirect URLs
     const origin =
@@ -25,7 +26,9 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SITE_URL ||
       "http://localhost:3000";
 
-    const metadata: Record<string, string> = {};
+    const metadata: Record<string, string> = {
+      wants_mail: wantsMail ? "true" : "false",
+    };
     if (referralCode) {
       metadata.referral_code = referralCode;
     }
@@ -56,6 +59,9 @@ export async function POST(request: Request) {
             quantity: 1,
           },
         ],
+        ...(wantsMail && {
+          shipping_address_collection: { allowed_countries: ["US"] as const },
+        }),
         success_url: `${origin}/founders/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/founders`,
         metadata,
@@ -108,6 +114,9 @@ export async function POST(request: Request) {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: lineItems,
+      ...(wantsMail && {
+        shipping_address_collection: { allowed_countries: ["US"] as const },
+      }),
       success_url: `${origin}/founders/confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/founders`,
       metadata,
