@@ -235,10 +235,11 @@ export default function HomePage() {
               textAlign: "center",
             }}
           >
-            There&apos;s a constellation of small and diverse solutions
-            being created and tended, rising beneath the noise.
+            A constellation of sustainable, life-supporting places and
+            projects across North America and beyond.
             <span style={{ display: "block", height: "1.4em" }} />
-            Diversity sustains. Our attention fuels it.
+            Diversity sustains us. Our attention fuels it.
+            Let&apos;s tend a brighter future together.
           </p>
 
           {/* Explore the commons — label + state selector */}
@@ -319,29 +320,27 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Tend the commons — founders door */}
-          <div className="flex justify-center" style={{ marginBottom: 36 }}>
-            <Link
-              href="/founders"
-              className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+          {/* Tend the commons — founders door + supporting line as one unit */}
+          <div style={{ textAlign: "center" }}>
+            <div className="flex justify-center" style={{ marginBottom: 10 }}>
+              <Link
+                href="/founders"
+                className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+              >
+                Tend the Commons
+              </Link>
+            </div>
+            <div
+              style={{
+                fontSize: "1.02rem",
+                fontWeight: 550,
+                letterSpacing: "0.06em",
+                color: "rgba(255,232,160,0.92)",
+                textShadow: "0 0 12px rgba(255,216,107,0.25), 0 0 6px rgba(10,20,40,0.4)",
+              }}
             >
-              Tend the Commons
-            </Link>
-          </div>
-
-          {/* Closing line */}
-          <div
-            style={{
-              marginTop: 20,
-              fontSize: "0.95rem",
-              letterSpacing: "0.18em",
-              color: "rgba(255,248,224,0.88)",
-              textAlign: "center",
-              fontStyle: "italic",
-              textShadow: "0 0 8px rgba(10,20,40,0.5)",
-            }}
-          >
-            Your participation makes a difference.
+              Your Contribution Matters
+            </div>
           </div>
         </div>
       </div>

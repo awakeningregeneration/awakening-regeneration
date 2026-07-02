@@ -16,12 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Canary Commons",
   description:
-    "There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.",
+    "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
   metadataBase: new URL("https://www.canarycommons.org"),
   openGraph: {
     title: "Canary Commons",
     description:
-      "There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.",
+      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
     url: "https://www.canarycommons.org",
     siteName: "Canary Commons",
     type: "website",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Canary Commons — There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.",
+        alt: "Canary Commons — A constellation of sustainable, life-supporting places and projects across North America and beyond.",
       },
     ],
   },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Canary Commons",
     description:
-      "There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.",
+      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
     images: ["/opengraph-image"],
   },
 };

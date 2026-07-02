@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: June 23, 2026*
+*Last updated: July 2, 2026*
 
 ---
 
@@ -42,6 +42,8 @@ Canary Commons now operates in two visual registers:
 ---
 
 ## Done (recent)
+
+- **Jul 2** — Homepage hero copy and contribute CTA updated. New hero: "A constellation of sustainable, life-supporting places and projects across North America and beyond." / "Diversity sustains us. Our attention fuels it. Let's tend a brighter future together." Contribute button reads "Tend the Commons" with a brightened, tightened supporting line "Your Contribution Matters" clustered beneath it as a visual unit. OG card image text, meta description (metadata, OpenGraph, Twitter), and alt text all updated to match the new hero register. OPERATING.md added to the repo as the everyday operator's guide.
 
 - **Jun 23** — Founders/tending page restructure + repriced tiers + standalone one-time gift checkout.
 

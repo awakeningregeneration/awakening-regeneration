@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const alt =
-  "Canary Commons — There's a constellation of life-giving work rising everywhere, mostly unseen. Canary Commons is the map that makes it visible.";
+  "Canary Commons — A constellation of sustainable, life-supporting places and projects across North America and beyond.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -90,7 +90,7 @@ export default async function Image() {
             lineHeight: 1.15,
           }}
         >
-          Life-giving work, rising everywhere —
+          Sustainable, life-supporting places —
         </div>
         <div
           style={{
