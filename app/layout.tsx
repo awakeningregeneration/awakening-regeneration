@@ -16,12 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Canary Commons",
   description:
-    "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
+    "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
   metadataBase: new URL("https://www.canarycommons.org"),
   openGraph: {
     title: "Canary Commons",
     description:
-      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
+      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
     url: "https://www.canarycommons.org",
     siteName: "Canary Commons",
     type: "website",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Canary Commons",
     description:
-      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. Our attention fuels it.",
+      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
     images: ["/opengraph-image"],
   },
 };
