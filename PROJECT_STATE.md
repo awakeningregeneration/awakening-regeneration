@@ -43,7 +43,9 @@ Canary Commons now operates in two visual registers:
 
 ## Done (recent)
 
-- **Jul 2** — Front-of-site copy pass: homepage, About page, compass label, OG card.
+- **Jul 2** — Front-of-site copy pass: homepage, About page, compass label, OG card, Story of Place.
+
+  **Story of Place (app/stories/):** Full rebuild. Rose/thorn framing removed throughout — all "rose" / "roses" references replaced with "story" / "stories" in plain warm language. New entry-door flow: arriving at `/stories` with no place shows "STORY OF PLACE" as the centered heading, an invitation line, two definition paragraphs, and a state/county picker (reuses the same county data and normalization as the map page). Selecting a place updates the URL and fetches stories client-side. The "this place" fallback heading removed entirely. Text now floats over the night-sky constellation (card container removed from the header area, matching the About page's treatment); picker stays grounded in a subtle container. Page converted from a server component to a thin server wrapper (`page.tsx`) + client component (`StoriesPageClient.tsx`) to support interactive dropdowns. Submit/read loop verified: both paths use the same `normalizeState`/`normalizeCounty` from `app/lib/normalize.ts`, so stories stored under a normalized state+county pair are correctly retrieved by the same pair. Files created: `app/stories/StoriesPageClient.tsx`. Files modified: `app/stories/page.tsx`.
 
   **Homepage:** New hero copy: "A constellation of sustainable, life-supporting places and projects across North America and beyond." / "Diversity sustains us. What we give our attention to grows. Let's turn toward a brighter future together." Contribute button reads "Tend the Commons" with a brightened, tightened supporting line "Your Contribution Matters" clustered beneath it as a visual unit. OG card image text, meta description (metadata, OpenGraph, Twitter), and alt text all updated to match the new hero register. OPERATING.md added to the repo as the everyday operator's guide.
 

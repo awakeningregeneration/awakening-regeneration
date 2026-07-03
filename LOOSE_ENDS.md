@@ -52,6 +52,12 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 
 - [x] ~~**Jun 9 session work is UNCOMMITTED.**~~ Committed and pushed (058222e, Jun 9).
 
+## From the July 2 session
+
+- [ ] **Stories page server-side fetch uses hardcoded localhost.** The old server-component version of `app/stories/page.tsx` had `http://localhost:3000/api/stories` hardcoded for the server-side fetch. The page is now a client component that fetches via `/api/stories` (relative URL, correct in all environments), so this is no longer a runtime issue — but the pattern is worth noting: any future server-side fetch in this codebase should use `NEXT_PUBLIC_SITE_URL` or a relative path, not a hardcoded localhost.
+
+- [ ] **Story submit form uses free-text state/county fields.** The submit form at `/stories/submit` lets users type state and county rather than selecting from canonical dropdowns. Normalization handles Title Case and the " County" suffix, but can't correct spelling. Consider replacing with the same dropdown pickers used on the stories entry page for consistency and data quality.
+
 ## From the June 23 session
 
 - [ ] **MAILING ADDRESS CAPTURE — not built.** The flow promises physical mail (quarterly Notes from the Field for subscribers; first-edition welcome letter + seeds for one-time gifts) but collects no shipping address. Settled decisions: everyone normally gets physical mail (both subscription and one-time paths); US-only shipping; physical mail is OPT-OUT (default on) so non-US contributors can still join and decline paper; opt-out members get EMAILS ONLY (no physical, no digital version of the letter — there is deliberately no digital twin); shipping fields saved to founders row via webhook. Build order: add nullable shipping_* columns + wants_physical_mail boolean (default true) to founders table FIRST, then wire checkout + webhook together. Resume phrase: "let's finish up the mailing address tidbit."
