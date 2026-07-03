@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: July 2, 2026*
+*Last updated: July 3, 2026*
 
 ---
 
@@ -42,6 +42,8 @@ Canary Commons now operates in two visual registers:
 ---
 
 ## Done (recent)
+
+- **Jul 3** — Founder's letter (/letter) fully rewritten. Personal origin story replacing the old structural/conceptual register: the inn on the Oregon coast, the discovery of hidden care, the forest/diversity value ("the forest grows strong when diversity is its understory"), life among the overlooked ("children carrying abuse," "the sick who have found no medical relief"), motherhood as the deepest calling ("the clearest bell I have ever heard ringing"), and the map as personal dedication. "Life forward" language removed. New closing register: "a great turning," "seeds are the message carriers for tomorrow," "we are right on time — tomorrow is shining on the horizon — let's welcome it together." Lotus signature mark preserved. File: app/letter/page.tsx.
 
 - **Jul 2** — Front-of-site copy pass: homepage, About page, compass label, OG card, Story of Place.
 

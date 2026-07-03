@@ -170,62 +170,83 @@ export default function LetterPage() {
 
           {/* Body */}
           <p style={bodyStyle}>
-            This resource is built to redirect energy from the things we do not
-            want to those that we do. The world is full of extraction based
-            conglomerates that are reducing livability on the planet. There are
-            also a world of endeavors and the incredible people behind them out
-            there seeking to do great things and actively doing great things with
-            limited resources. They don&apos;t have billionaire publicity
-            budgets. Our attention is focused by those who have the capacity to
-            influence.
+            Canary Commons was born many years ago — some fifteen of
+            them — and had an initial run I was never able to carry all the
+            way forward. I tried to let it go and move on. The persistence of
+            the dream never let me go.
           </p>
 
           <p style={bodyStyle}>
-            This map — soon an app — is built on the premise that we build what
-            we pay attention to as our actions follow our attention. Now is the
-            moment to build the world we want to live in.
+            I ran an inn on the Oregon coast, restoring it with care for where
+            everything was sourced and the hands of participation along the way.
+            And in that work I discovered two things at once: how hard it was to
+            find the thoughtful — the well-sourced, the crafted, the
+            made-with-care — and how astonishing it was every time I did. The
+            individual, spectacular solutions to everyday life, living in harmony
+            with the world around them. It was all there. Just hidden. Because
+            care, most of the time, doesn&apos;t have an advertising budget.
           </p>
 
           <p style={bodyStyle}>
-            This map/app/resource and inspiration guide is built to reveal,
-            support, draw attention to and center all of the amazing people
-            making the difference every day. I believe we have the ability to
-            redirect the trajectory of what is by redirecting our focus.
+            Something else I know as essential: the forest grows strong when
+            diversity is its understory and the branches of plenty have many
+            offerings. This is true of life. Everywhere is different, and
+            sustainability looks different from different places.
+            Canary — and the songs leading us toward freedom and
+            possibility — sounds different depending on the geography. This map
+            is built to honor the local and be inspired by the global.
           </p>
 
           <p style={bodyStyle}>
-            What I have discovered along the way is that there are way more
-            amazing things happening out there that help us live in kind
-            relationship with the world and each other. Our job is to lift them,
-            support them, become them, and let the rest go.
+            I learned the power of focus firsthand. I have spent my life working
+            with the cast aside — those who cannot find refuge and health in the
+            current structures — from children carrying abuse and passing it
+            forward in violence, to the sick who have found no medical relief.
+            From that work, and from the silent choices of courage I watched
+            people make to redirect toward the open door, I know the depth of
+            the power of attention. We grow what we give our vision to. We build
+            the world we pay attention to, because our actions follow our
+            focus — and now is the moment to build the world we want to live in.
           </p>
 
           <p style={bodyStyle}>
-            Functionally as an app this will allow you to find those things,
-            learn about them, and participate in them.
+            And then the deepest reason, underneath all the others. I became a
+            mother because that call was the clearest bell I have ever heard
+            ringing — and I knew, in that surrender, that I must bring through
+            what calls the pathways of peace forward. My life is a dedication to
+            that: to a world of kindness she can live in fully, and dream past
+            anything I&apos;m able to dream, because she&apos;s held by the
+            peaceful paths so many people are quietly weaving beneath all the
+            noise. I have always believed the overlooked are where the beauty is.
+            This map is my way of pulling toward that world with everything
+            I&apos;m worth.
           </p>
 
           <p style={bodyStyle}>
-            The front facing languaging of this project may feel obscure. The
-            reason for that is simple – the best of intentions and the words that
-            match them have been bought and repurposed for extraction. If you add
-            something to this map, you will find those words are available in the
-            infrastructure that supports your listing and participation.
+            So this is what Canary Commons is: a way to reveal, support, and
+            draw attention to the people making the difference every day — to
+            find them, learn about them, and take part in them. Not to name
+            what&apos;s broken; that story is told everywhere already. But to
+            lift what&apos;s alive, become it, and let the rest go.
           </p>
 
           <p style={bodyStyle}>
-            If you are here, you are here because you want to participate in the
-            things that I have loosely called life forward. It is not a perfect
-            pair of words to carry the weight. They are words that describe
-            instead of label.
+            I believe we are in a great turning, and that our choice of focus is
+            the pivot point — and our power.
+          </p>
+
+          <p style={bodyStyle}>
+            Seeds are the message carriers for tomorrow.
+          </p>
+
+          <p style={bodyStyle}>
+            Together, we have this. We can, we will, we must — and it is
+            definitely time now.
           </p>
 
           <p style={{ ...bodyStyle, marginBottom: 0 }}>
-            If you recognize yourself in the words, may this map serve you – as
-            a guide to what aligns with a kinder and more resilient way of
-            living, or as a place where what you offer becomes visible and
-            supported. May we all find our way to kinder options, together, one
-            step at a time.
+            We are right on time. Tomorrow is shining on the horizon.
+            Let&apos;s welcome it together.
           </p>
 
           {/* Benediction + Signature */}
@@ -246,7 +267,7 @@ export default function LetterPage() {
                 textTransform: "uppercase",
               }}
             >
-              Connected we dawn brighter
+              Connected, we dawn brighter
             </p>
 
             {/* Lotus mark */}
