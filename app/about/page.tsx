@@ -223,18 +223,17 @@ export default function AboutPage() {
         {/* Content column */}
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
 
-          {/* ═══ TOP BLESSING ═══ */}
+          {/* ═══ HEADING ═══ */}
           <div
             style={{
               textAlign: "center",
-              padding: "clamp(40px, 6vh, 80px) 0 clamp(80px, 10vh, 120px)",
+              padding: "clamp(40px, 6vh, 80px) 0 clamp(60px, 8vh, 80px)",
             }}
           >
-            <p
+            <h1
               style={{
                 fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)",
                 fontWeight: 650,
-                fontStyle: "italic",
                 color: GOLD,
                 margin: 0,
                 lineHeight: 1.2,
@@ -242,266 +241,125 @@ export default function AboutPage() {
                   "0 0 18px rgba(255,216,107,0.3), 0 0 40px rgba(255,216,107,0.12)",
               }}
             >
-              All lights connected, we dawn brighter.
-            </p>
+              About
+            </h1>
           </div>
 
-          {/* ═══ WHAT THIS IS ═══ */}
+          {/* ═══ OPENING ═══ */}
           <section style={glassCard}>
-            <h2 style={sectionHeadingStyle}>What this is</h2>
-
             <p style={bodyStyle}>
-              Canary Commons is a living platform that helps make visible what is
-              already life-supporting — and a way for the people tending that work
-              to find each other.
-            </p>
-
-            <p style={bodyStyle}>It has four layers.</p>
-
-            <p style={bodyStyle}>
-              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
-                The map
-              </span>{" "}
-              shows what is happening in specific places — farms, healing
-              practices, repair shops, tool libraries, community spaces, land
-              restoration, mutual aid, arts, housing, energy, education, and more.
-              The yellow lights are the lights already on. Each one is a place.
+              Canary Commons is an interactive guide to the good around
+              you — many ways to come into contact with the places,
+              people, and projects whose way of living gives back to life
+              instead of depleting it. Every point leads to someone doing
+              the work of creating and nourishing a healthier, more whole
+              world.
             </p>
 
             <p style={bodyStyle}>
-              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
-                The stories
-              </span>{" "}
-              let people share what is being tended, restored, planted, and
-              brought to life where they are. A rose rooted here, not a perfect
-              report.
-            </p>
-
-            <p style={bodyStyle}>
-              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
-                The support layer
-              </span>{" "}
-              gathers aligned options for when the local light isn&apos;t visible yet —
-              businesses, practitioners, and resources you can reach from anywhere.
-            </p>
-
-            <p style={bodyStyle}>
-              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
-                The constellation
-              </span>{" "}
-              drifts wider — signals of life-forward work rising around the world,
-              reminding us that this is not one place&apos;s effort. It is rising
-              everywhere.
+              Our attention isn&apos;t passive. Where it goes, energy flows and
+              action follows. What we give our attention to, we
+              feed — and what we feed becomes the world we live in. Our
+              focus is the most generative resource we have, and most of
+              us are spending it on things we never chose, because there
+              are profits being made by directing our gaze.
             </p>
 
             <p style={{ ...bodyStyle, marginBottom: 0 }}>
-              Together, these layers hold a simple proposition: most maps show us
-              where to extract, consume, or pass through. This one shows us where
-              to participate, support, learn, build, and belong.
+              Canary Commons is a place to put your attention where
+              it&apos;s generative and not extractive: the more visible this
+              work becomes, the more we can turn toward it — and in
+              return, the world we want to live in grows up around us.
             </p>
           </section>
 
-          {/* ═══ CENTERED ELEMENTAL PARAGRAPH ═══ */}
-          <div style={{ ...glassCard, textAlign: "center" as const }}>
-            <p
-              style={{
-                fontSize: "clamp(1.1rem, 1.3vw, 1.22rem)",
-                lineHeight: 1.72,
-                color: BODY_COLOR,
-                margin: 0,
-              }}
-            >
-              Life-forward is life in relationship with, not power over and
-              extraction from — the ground on which we stand, the energy that
-              warms and moves, the breath of fresh restorative air, and the vital
-              water sustaining and cleansing. The elements in relationship, as what
-              connects and holds us all.
-            </p>
-          </div>
-
-          {/* ═══ A MAP OF DIRECTION ═══ */}
-          <section style={glassCard}>
-            <h2 style={sectionHeadingStyle}>A map of direction</h2>
-
-            <p style={bodyStyle}>
-              This is not a map of perfection. It is a map of direction.
-            </p>
-
-            <p style={bodyStyle}>
-              We are not here to decide who is doing everything right. We are here
-              to make visible what is moving toward regeneration, care, resilience,
-              and community — and to help each point of light find the others.
-            </p>
-
-            <p style={bodyStyle}>
-              It is up to your community to decide what life-forward means where
-              you are. Diversity sustains. The ways forward are many-faceted.
-            </p>
-
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>
-              Every listing is a point of light. Individually, these places may
-              seem small. Together, they form a constellation.
-            </p>
-          </section>
-
-          {/* ═══ THE INVITATION ═══ */}
-          <section style={glassCard}>
-            <h2 style={sectionHeadingStyle}>The invitation</h2>
-
-            <p style={bodyStyle}>
-              If you are tending somewhere — add what you know, or invite the
-              people doing the work to add themselves.
-            </p>
-
-            <p style={bodyStyle}>
-              If you are looking for a practitioner, a business, or a resource
-              aligned with how you want to live — search the support layer.
-            </p>
-
-            <p style={bodyStyle}>
-              If you are looking for inspiration from the wider weaving — the
-              constellation is drifting there.
-            </p>
-
-            <p style={bodyStyle}>
-              If you want to help hold the foundation of this while the grassroots
-              field fills in — you can{" "}
-              <Link
-                href="/founders"
-                className="foundation-link"
-              >
-                become the Foundation
-              </Link>
-              .
-            </p>
-
-            <p
-              style={{
-                ...bodyStyle,
-                fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)",
-                color: "rgba(255,248,224,0.72)",
-                marginTop: 8,
-              }}
-            >
-              No meetings. No obligations. Participation at the pace of your life.
-            </p>
-          </section>
-
-          {/* ═══ WHAT BELONGS HERE ═══ */}
-          <section style={glassCard}>
-            <h2 style={sectionHeadingStyle}>What belongs here</h2>
-
-            <p style={bodyStyle}>
-              If you are tending something life-forward, or you know of something
-              that deserves to be seen, ask this:
-            </p>
-
-            <p
-              style={{
-                textAlign: "center",
-                fontStyle: "italic",
-                fontSize: "clamp(1.15rem, 1.4vw, 1.28rem)",
-                lineHeight: 1.6,
-                color: GOLD,
-                margin: "28px 0",
-              }}
-            >
-              Does this help people, land, community, or future generations in a
-              life-supporting way?
-            </p>
-
-            <p style={bodyStyle}>If yes, it likely belongs here.</p>
-
-            <p style={bodyStyle}>
-              A few examples of what fits: farms and food projects, healing
-              practices, repair shops, tool libraries, mutual aid networks, land
-              restoration, community spaces, regenerative building, worker-owned
-              businesses, education projects, arts and gathering places. The list
-              is not the point. The direction is.
-            </p>
-          </section>
-
-          {/* ═══ THE CANARY ═══ */}
-          <section
-            style={{ ...glassCard, textAlign: "center" as const, marginBottom: "clamp(80px, 10vh, 100px)" }}
-          >
-            <h2 style={{ ...sectionHeadingStyle, textAlign: "center" }}>
-              The canary
-            </h2>
-
-            <p
-              style={{
-                ...bodyStyle,
-                textAlign: "center",
-                maxWidth: 560,
-                margin: "0 auto",
-              }}
-            >
-              The canaries are the ones who sense before. If we want to find our
-              way to a kinder reality, we follow them to the places of common
-              ground.
-            </p>
-          </section>
-
-          {/* ═══ CLOSING — gold bookend, no heading ═══ */}
-          <section
+          {/* ═══ MISSION LINE — set apart, emphasized ═══ */}
+          <div
             style={{
               textAlign: "center",
-              paddingBottom: "clamp(40px, 6vh, 80px)",
+              padding: "clamp(36px, 5vh, 56px) 0",
             }}
           >
-            <div
+            <p
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "1.5rem",
+                fontSize: "clamp(1.22rem, 1.6vw, 1.42rem)",
+                lineHeight: 1.65,
+                fontWeight: 450,
+                fontStyle: "italic",
+                color: GOLD,
+                margin: "0 auto",
+                maxWidth: 620,
+                textShadow:
+                  "0 0 14px rgba(255,216,107,0.25), 0 0 32px rgba(255,216,107,0.10)",
               }}
             >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
-                  lineHeight: 1.4,
-                  fontWeight: 600,
-                  fontStyle: "italic",
-                  color: GOLD,
-                  textShadow:
-                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                }}
-              >
-                What we give our attention to, that is where we live our lives —
-                against or for.
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
-                  lineHeight: 1.4,
-                  fontWeight: 600,
-                  fontStyle: "italic",
-                  color: GOLD,
-                  textShadow:
-                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                }}
-              >
-                What we give our attention to grows.
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)",
-                  lineHeight: 1.4,
-                  fontWeight: 600,
-                  fontStyle: "italic",
-                  color: GOLD,
-                  textShadow:
-                    "0 0 12px rgba(255,216,107,0.35), 0 0 24px rgba(255,216,107,0.20), 0 0 2px rgba(10,20,40,0.6)",
-                }}
-              >
-                Choose wisely, so your children too can choose.
-              </p>
-            </div>
+              Our mission is simple: make this life-supporting work more
+              visible — so that we can give it our attention, and, as
+              consumers and neighbors, make choices that help us grow into
+              the world we want to inhabit.
+            </p>
+          </div>
+
+          {/* ═══ WHAT THE COMMONS OFFERS ═══ */}
+          <section style={glassCard}>
+            <h2 style={sectionHeadingStyle}>What the Commons offers</h2>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The Map
+              </span>{" "}
+              — Each yellow light is one of these places: somewhere to
+              eat, shop, gather, or build a life that gives back instead
+              of taking. Together they form a constellation of
+              life-supporting work across North America and beyond.
+            </p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The Stories
+              </span>{" "}
+              — Experience a place through the stories told about it.
+              Whether you&apos;re traveling, putting down roots somewhere
+              new, or looking closer at where you already live, the
+              stories let you meet the people and places making a
+              difference — and feel a place before you ever arrive.
+            </p>
+
+            <p style={bodyStyle}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                Online Resources
+              </span>{" "}
+              — Online options you can reach from anywhere — for when the
+              light near you isn&apos;t on the map yet.
+            </p>
+
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>
+              <span style={{ color: GOLD, fontWeight: 600, fontStyle: "italic" }}>
+                The Greater Constellation
+              </span>{" "}
+              — Signals of life-supporting work rising around the world,
+              reminding us that we are not alone, and that there is good
+              to be inspired by everywhere. Visit the Greater
+              Constellation to explore projects happening across the
+              globe.
+            </p>
+          </section>
+
+          {/* ═══ WHAT DOES IT MEAN TO BE LIFE-SUPPORTING? ═══ */}
+          <section style={{ ...glassCard, marginBottom: "clamp(80px, 10vh, 100px)" }}>
+            <h2 style={sectionHeadingStyle}>
+              What does it mean to be life-supporting?
+            </h2>
+
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>
+              To be life-supporting is to live in relationship with life
+              and what sustains it — not to have power over it, or to
+              extract from it. The ground we stand on, the energy that
+              moves us, the fresh air that restores us, the water that
+              sustains and cleanses. Only a healthy, respectful
+              relationship with these elements can sustain and empower
+              life.
+            </p>
           </section>
 
           {/* ═══ LETTER LINK ═══ */}

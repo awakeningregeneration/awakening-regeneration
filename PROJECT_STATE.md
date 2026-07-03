@@ -43,7 +43,13 @@ Canary Commons now operates in two visual registers:
 
 ## Done (recent)
 
-- **Jul 2** — Homepage hero copy and contribute CTA updated. New hero: "A constellation of sustainable, life-supporting places and projects across North America and beyond." / "Diversity sustains us. What we give our attention to grows. Let's turn toward a brighter future together." Contribute button reads "Tend the Commons" with a brightened, tightened supporting line "Your Contribution Matters" clustered beneath it as a visual unit. OG card image text, meta description (metadata, OpenGraph, Twitter), and alt text all updated to match the new hero register. OPERATING.md added to the repo as the everyday operator's guide.
+- **Jul 2** — Front-of-site copy pass: homepage, About page, compass label, OG card.
+
+  **Homepage:** New hero copy: "A constellation of sustainable, life-supporting places and projects across North America and beyond." / "Diversity sustains us. What we give our attention to grows. Let's turn toward a brighter future together." Contribute button reads "Tend the Commons" with a brightened, tightened supporting line "Your Contribution Matters" clustered beneath it as a visual unit. OG card image text, meta description (metadata, OpenGraph, Twitter), and alt text all updated to match the new hero register. OPERATING.md added to the repo as the everyday operator's guide.
+
+  **About page:** Full copy rewrite. New structure: heading "About", opening three paragraphs (attention as generative resource / redirection of gaze / visibility thesis), emphasized gold italic mission line ("Our mission is simple: make this life-supporting work more visible...") set apart with generous spacing as a resting point, "What the Commons offers" section (The Map, The Stories, Online Resources, The Greater Constellation), and "What does it mean to be life-supporting?" section. Old sections removed: "What this is" (4-layer description), "A map of direction", "The invitation", "What belongs here", "The canary", the three-line gold closing bookend, and the "All lights connected, we dawn brighter" top blessing.
+
+  **Compass label:** Updated from "A way of moving through this — or to wander." to "Site Compass" (label) / "navigate, or wander." (quiet invitation). Box resized from fixed 240px to auto-width that hugs the text snugly. Show/hide behavior unchanged (timed on homepage, static-open on About).
 
 - **Jun 23** — Founders/tending page restructure + repriced tiers + standalone one-time gift checkout.
 

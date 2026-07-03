@@ -74,8 +74,9 @@ export default function CompassCaption({ mode, isDropdownOpen }: Props) {
       <div
         style={{
           position: "relative",
-          width: "min(240px, calc(100vw - 32px))",
-          padding: "10px 16px",
+          width: "auto",
+          maxWidth: "calc(100vw - 32px)",
+          padding: "8px 14px",
           background: "rgba(8,25,45,0.92)",
           border: "1px solid rgba(255,216,107,0.65)",
           borderRadius: 12,
@@ -113,14 +114,26 @@ export default function CompassCaption({ mode, isDropdownOpen }: Props) {
 
         <p
           style={{
-            fontSize: "0.85rem",
+            fontSize: "0.88rem",
+            fontWeight: 600,
             color: "#FFD86B",
-            lineHeight: 1.5,
+            lineHeight: 1.3,
             textAlign: "center",
             margin: 0,
           }}
         >
-          A way of moving through this — or to wander.
+          Site Compass
+        </p>
+        <p
+          style={{
+            fontSize: "0.8rem",
+            color: "rgba(255,216,107,0.7)",
+            lineHeight: 1.4,
+            textAlign: "center",
+            margin: "3px 0 0",
+          }}
+        >
+          navigate, or wander.
         </p>
       </div>
     </div>
