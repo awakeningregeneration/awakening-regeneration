@@ -12,7 +12,7 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.canarycommons.org";
 
 export function getEmailHeader(): string {
-  const logoUrl = `${SITE_URL}/canary-commons-logo.png`;
+  const logoUrl = `${SITE_URL}/canary-logo-new.png`;
 
   return `<div style="text-align:center;margin:0 0 32px;">
   <img

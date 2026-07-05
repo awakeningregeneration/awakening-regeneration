@@ -55,7 +55,7 @@ export default function SeederLoginPage() {
         }}
       >
         <img
-          src="/canary-commons-logo.png"
+          src="/canary-logo-new.png"
           alt="Canary Commons"
           style={{
             width: "clamp(180px, 30vw, 260px)",

@@ -328,7 +328,7 @@ export default function StoriesPageClient({
         {/* Logo */}
         <div style={{ marginBottom: 24, textAlign: "center" }}>
           <img
-            src="/canary-commons-logo.png"
+            src="/canary-logo-new.png"
             alt="Canary Commons"
             style={{
               width: "clamp(200px, 30vw, 320px)",

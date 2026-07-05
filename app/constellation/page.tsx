@@ -331,7 +331,7 @@ export default function ConstellationPage() {
         }}
       >
         <img
-          src="/canary-commons-logo.png"
+          src="/canary-logo-new.png"
           alt="Canary Commons"
           style={{
             width: "clamp(140px, 18vw, 200px)",

@@ -208,7 +208,7 @@ export default function AboutPage() {
         {/* Canary logo */}
         <div className="mx-auto max-w-3xl text-center">
           <img
-            src="/canary-commons-logo.png"
+            src="/canary-logo-new.png"
             alt="Canary Commons"
             style={{
               width: "clamp(240px, 35vw, 380px)",

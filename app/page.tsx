@@ -161,7 +161,7 @@ export default function HomePage() {
         >
           {/* Canary logo */}
           <img
-            src="/canary-commons-logo.png"
+            src="/canary-logo-new.png"
             alt="Canary Commons"
             style={{
               width: "clamp(280px, 40vw, 460px)",
