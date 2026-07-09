@@ -236,7 +236,7 @@ export default function HomePage() {
             }}
           >
             A constellation of sustainable, life-supporting places and
-            projects across North America and beyond.
+            projects across the United States and beyond.
             <span style={{ display: "block", height: "1.4em" }} />
             Diversity sustains us. What we give our attention to grows.
             Let&apos;s turn toward a brighter future together.
