@@ -231,8 +231,8 @@ function JoinContent() {
             to find, choose, and strengthen.
           </p>
           <p style={softBody}>
-            Become a Founding Steward of Canary Commons during the season in
-            which the living commons is being revealed.
+            Become a Founding Steward during the season in which the living
+            commons is being revealed.
           </p>
           <p style={softBody}>
             Many have forgotten how much power is already contained in a single
@@ -245,26 +245,37 @@ function JoinContent() {
           </p>
           <p style={softBody}>
             Canary Commons exists to gently reorient our attention toward the
-            people, places, businesses, organizations, stories, and everyday
+            people, places, organizations, businesses, stories, and everyday
             endeavors already living in ways that are regenerative, sustainable,
             and life-affirming.
           </p>
+          <p style={softBody}>The platform has been built.</p>
           <p style={softBody}>
-            The platform has been built. What comes next is revealing the living
-            landscape itself.
+            What comes next is revealing the living landscape itself.
           </p>
           <p style={softBody}>
             As a Founding Steward, your membership provides the bridge that
-            allows Canary Commons to discover, verify, and make visible the
-            remarkable people and places already creating another way of living.
-            Every light added to the map becomes easier to find, easier to
-            support, and easier for others to learn from.
+            allows Canary Commons to discover, verify, and make visible
+            thousands of remarkable people, places, and projects already helping
+            life flourish.
           </p>
           <p style={softBody}>
-            Your stewardship helps transform a working platform into a living
-            commons.
+            Every light added to the map becomes easier to find.
           </p>
-          <p style={softBody}>As a Founding Steward, you will receive:</p>
+          <p style={softBody}>Easier to choose.</p>
+          <p style={softBody}>Easier to support.</p>
+
+          <h2
+            style={{
+              fontSize: "1.18rem",
+              fontWeight: 650,
+              color: "#FFD86B",
+              margin: "24px 0 14px",
+              textAlign: "center",
+            }}
+          >
+            As a Founding Steward you will receive
+          </h2>
           <ul
             style={{
               paddingLeft: 24,
@@ -275,9 +286,9 @@ function JoinContent() {
             }}
           >
             <li style={{ marginBottom: 10 }}>
-              Four thoughtfully crafted printed field letters each year, sharing
-              stories, people, places, and projects quietly shaping a more
-              life-giving future.
+              Four thoughtfully crafted printed letters from the field each
+              year, sharing the people, places, and projects quietly shaping
+              another way of living.
             </li>
             <li style={{ marginBottom: 10 }}>
               A monthly email highlighting new discoveries, meaningful places to
@@ -285,14 +296,13 @@ function JoinContent() {
               grow.
             </li>
             <li style={{ marginBottom: 10 }}>
-              Early insight into the unfolding of Canary Commons and the growing
-              constellation of communities and initiatives becoming visible
-              across the country.
+              A front-row seat as the living commons unfolds and becomes an
+              increasingly valuable public resource.
             </li>
             <li>
-              The opportunity to help establish a lasting public resource that
-              makes regenerative, community-centered living easier to discover
-              and support.
+              The opportunity to help establish a trusted map that remains free
+              for everyone to use and free for life-supporting endeavors to
+              join.
             </li>
           </ul>
 
@@ -305,28 +315,33 @@ function JoinContent() {
               textAlign: "center",
             }}
           >
-            Your Membership Makes This Possible
+            Your Stewardship
           </h2>
           <p style={softBody}>
-            Your membership provides the bridge capital that allows Canary
-            Commons to continue revealing the living commons — researching,
-            verifying, mapping, and sharing the people, places, and projects
-            already bringing another future into being.
+            Founding Stewardship exists for a season.
           </p>
           <p style={softBody}>
-            You are not funding the creation of the commons.
+            Its purpose is to help transform a working platform into a living
+            commons.
           </p>
           <p style={softBody}>
-            You are helping reveal the commons that already exists.
+            As the map matures into a trusted nationwide resource, Canary
+            gradually becomes sustained through carefully selected
+            mission-aligned online partnerships, allowing the commons to remain
+            open, independent, and free for everyone.
+          </p>
+          <p style={softBody}>Your membership is the bridge.</p>
+          <p style={softBody}>
+            Its destination is a commons that can sustainably stand on its own.
           </p>
           <p style={softBody}>
-            Together we strengthen what we wish to see grow.
+            Together we are not creating the commons.
           </p>
           <p style={softBody}>
-            Because what becomes visible becomes easier to choose.
+            We are helping reveal the commons that already exists.
           </p>
           <p style={{ ...softBody, marginBottom: 0 }}>
-            And what we choose, together, begins to shape the future we share.
+            Together we strengthen what we wish to see grow.
           </p>
         </div>
 
