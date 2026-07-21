@@ -327,7 +327,7 @@ export default function HomePage() {
                 href="/founders"
                 className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
               >
-                Tend the Commons
+                Steward the Commons
               </Link>
             </div>
             <div

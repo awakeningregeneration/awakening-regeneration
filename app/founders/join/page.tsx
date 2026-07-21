@@ -221,32 +221,112 @@ function JoinContent() {
               "0 0 32px rgba(255,216,107,0.3), 0 0 64px rgba(255,200,80,0.12)",
           }}
         >
-          Tending the Commons
+          Steward the Commons
         </h1>
 
         {/* ── THE THRESHOLD ── */}
         <div style={glassCard}>
           <p style={softBody}>
-            Many have forgotten how much power is already contained in a single
-            act of attention directed towards life. What we repeatedly attend
-            becomes visible, what becomes visible becomes easier to choose, what
-            is chosen, grows and shapes the world we inhabit. Canary Commons is
-            here to re-orient our attention to the people, activities, stories,
-            and places that are already living in ways that are sustainable,
-            regenerative, and life affirming.
+            Help make an existing, life-giving world visible enough for others
+            to find, choose, and strengthen.
           </p>
           <p style={softBody}>
-            Your subscription gives you four in-hand and caringly crafted notes
-            from the field of people, places, and projects creating the world we
-            want to live in now. Each month you will also receive an email
-            offering you possibilities to place your attention with things that
-            make a difference.
+            Become a Founding Steward of Canary Commons during the season in
+            which the living commons is being revealed.
+          </p>
+          <p style={softBody}>
+            Many have forgotten how much power is already contained in a single
+            act of attention directed toward life.
+          </p>
+          <p style={softBody}>
+            What we repeatedly attend becomes visible. What becomes visible
+            becomes easier to choose. What we choose grows, and together those
+            choices shape the world we inhabit.
+          </p>
+          <p style={softBody}>
+            Canary Commons exists to gently reorient our attention toward the
+            people, places, businesses, organizations, stories, and everyday
+            endeavors already living in ways that are regenerative, sustainable,
+            and life-affirming.
+          </p>
+          <p style={softBody}>
+            The platform has been built. What comes next is revealing the living
+            landscape itself.
+          </p>
+          <p style={softBody}>
+            As a Founding Steward, your membership provides the bridge that
+            allows Canary Commons to discover, verify, and make visible the
+            remarkable people and places already creating another way of living.
+            Every light added to the map becomes easier to find, easier to
+            support, and easier for others to learn from.
+          </p>
+          <p style={softBody}>
+            Your stewardship helps transform a working platform into a living
+            commons.
+          </p>
+          <p style={softBody}>As a Founding Steward, you will receive:</p>
+          <ul
+            style={{
+              paddingLeft: 24,
+              margin: "0 0 16px",
+              lineHeight: 1.78,
+              color: "rgba(224,238,255,0.92)",
+              fontSize: "1.02rem",
+            }}
+          >
+            <li style={{ marginBottom: 10 }}>
+              Four thoughtfully crafted printed field letters each year, sharing
+              stories, people, places, and projects quietly shaping a more
+              life-giving future.
+            </li>
+            <li style={{ marginBottom: 10 }}>
+              A monthly email highlighting new discoveries, meaningful places to
+              direct your attention, and updates as the commons continues to
+              grow.
+            </li>
+            <li style={{ marginBottom: 10 }}>
+              Early insight into the unfolding of Canary Commons and the growing
+              constellation of communities and initiatives becoming visible
+              across the country.
+            </li>
+            <li>
+              The opportunity to help establish a lasting public resource that
+              makes regenerative, community-centered living easier to discover
+              and support.
+            </li>
+          </ul>
+
+          <h2
+            style={{
+              fontSize: "1.18rem",
+              fontWeight: 650,
+              color: "#FFD86B",
+              margin: "24px 0 14px",
+              textAlign: "center",
+            }}
+          >
+            Your Membership Makes This Possible
+          </h2>
+          <p style={softBody}>
+            Your membership provides the bridge capital that allows Canary
+            Commons to continue revealing the living commons — researching,
+            verifying, mapping, and sharing the people, places, and projects
+            already bringing another future into being.
+          </p>
+          <p style={softBody}>
+            You are not funding the creation of the commons.
+          </p>
+          <p style={softBody}>
+            You are helping reveal the commons that already exists.
+          </p>
+          <p style={softBody}>
+            Together we strengthen what we wish to see grow.
+          </p>
+          <p style={softBody}>
+            Because what becomes visible becomes easier to choose.
           </p>
           <p style={{ ...softBody, marginBottom: 0 }}>
-            Each subscription offers a different measure of support as the map
-            gathers the life-giving options being stewarded throughout the United
-            States. You are stabilizing the map while it organically fills in.
-            Together we strengthen what we wish to see grow.
+            And what we choose, together, begins to shape the future we share.
           </p>
         </div>
 
@@ -504,7 +584,7 @@ function JoinContent() {
         >
           {isRedirecting
             ? "Redirecting to secure checkout..."
-            : "Tend the Commons"}
+            : "Steward the Commons"}
         </button>
 
         {errorMessage && (

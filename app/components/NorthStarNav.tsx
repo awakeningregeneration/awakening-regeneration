@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { label: "Story of Place", href: "/stories" },
   { label: "Online Resources", href: "/support" },
   { label: "The Constellation", href: "/constellation" },
-  { label: "Founders", href: "/founders" },
+  { label: "Stewardship", href: "/founders" },
 ];
 
 /* ── Dropdown item glass styles ── */
