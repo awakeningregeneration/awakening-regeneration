@@ -345,6 +345,69 @@ export default function AboutPage() {
             </p>
           </section>
 
+          {/* ═══ HOW THE COMMONS WORKS ═══ */}
+          <section style={glassCard}>
+            <h2 style={sectionHeadingStyle}>How the Commons Works</h2>
+
+            <p style={bodyStyle}>
+              Canary Commons is built around a simple founding principle:
+            </p>
+
+            <p style={bodyStyle}>
+              <em>Visibility should not belong to the highest bidder.</em>
+            </p>
+
+            <p style={bodyStyle}>
+              There is no pay-to-play. Every place on the map is there
+              because of what it contributes — not because it paid to be
+              found. There is no charge for your place in the commons, and
+              the map remains free for everyone to explore and use.
+            </p>
+
+            <p style={bodyStyle}>
+              We believe that the people, businesses, organizations, farms,
+              artists, educators, and community projects helping life
+              flourish deserve to be visible because of the good they bring
+              into the world — not because they purchased attention.
+            </p>
+
+            <p style={bodyStyle}>
+              The platform itself has been built. What is unfolding now is
+              the living commons: the careful work of discovering,
+              verifying, and making visible the remarkable people and places
+              already creating another way of living. This work is actively
+              stewarded as the commons continues to grow.
+            </p>
+
+            <p style={bodyStyle}>
+              During this founding season, those who choose to{" "}
+              <Link
+                href="/founders/join"
+                style={{
+                  color: GOLD,
+                  fontWeight: 700,
+                  textDecoration: "underline",
+                  textUnderlineOffset: 2,
+                }}
+              >
+                Steward the Commons
+              </Link>{" "}
+              help bridge this work from a completed platform to a richly
+              populated public resource. As the commons matures into a
+              trusted nationwide guide, Canary is designed to become
+              sustainably supported through carefully chosen partnerships
+              with mission-aligned online resources rather than by charging
+              for visibility or access.
+            </p>
+
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>
+              Our hope is simple: to create a trusted, independent commons
+              that remains free to use, free to join, and dedicated to
+              helping us all discover, choose, and strengthen the people and
+              places already giving back to life.
+            </p>
+          </section>
+
           {/* ═══ WHAT DOES IT MEAN TO BE LIFE-SUPPORTING? ═══ */}
           <section style={{ ...glassCard, marginBottom: "clamp(80px, 10vh, 100px)" }}>
             <h2 style={sectionHeadingStyle}>
