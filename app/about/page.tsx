@@ -248,28 +248,35 @@ export default function AboutPage() {
           {/* ═══ OPENING ═══ */}
           <section style={glassCard}>
             <p style={bodyStyle}>
-              Canary Commons is an interactive guide to the good around
-              you — many ways to come into contact with the places,
-              people, and projects whose way of living gives back to life
-              instead of depleting it. Every point leads to someone doing
-              the work of creating and nourishing a healthier, more whole
-              world.
+              Canary Commons is an interactive website — and soon a mobile
+              app — that helps you discover the people, places, businesses,
+              organizations, and stories already helping life flourish in
+              your community and beyond.
+            </p>
+
+            <p style={bodyStyle}>
+              It is an interactive guide to the good around you: a growing
+              map of the people and projects whose way of living gives back
+              to life instead of depleting it. Every point on the map leads
+              to someone doing the quiet work of creating and nourishing a
+              healthier, more whole world.
             </p>
 
             <p style={bodyStyle}>
               Our attention isn&apos;t passive. Where it goes, energy flows and
               action follows. What we give our attention to, we
               feed — and what we feed becomes the world we live in. Our
-              focus is the most generative resource we have, and most of
-              us are spending it on things we never chose, because there
-              are profits being made by directing our gaze.
+              attention is one of the most generative resources we have,
+              yet much of it is spent on things we never consciously chose
+              because there are profits to be made directing our gaze.
             </p>
 
             <p style={{ ...bodyStyle, marginBottom: 0 }}>
-              Canary Commons is a place to put your attention where
-              it&apos;s generative and not extractive: the more visible this
-              work becomes, the more we can turn toward it — and in
-              return, the world we want to live in grows up around us.
+              Canary Commons is a place to reclaim that attention and place
+              it where it is generative rather than extractive. As more
+              life-supporting work becomes visible, it becomes easier to
+              discover, easier to choose, and easier to strengthen. In
+              return, the world we want to live in quietly grows around us.
             </p>
           </section>
 
