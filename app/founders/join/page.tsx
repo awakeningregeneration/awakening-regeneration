@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const orbs: {
   left: string;
@@ -617,10 +618,33 @@ function JoinContent() {
           </p>
         )}
 
+        {/* ── BRIDGE THE COMMONS ── */}
+        <p
+          style={{
+            marginTop: 28,
+            fontSize: "0.88rem",
+            lineHeight: 1.6,
+            color: "rgba(190,210,235,0.72)",
+            textAlign: "center",
+          }}
+        >
+          Want to give in a larger way?{" "}
+          <Link
+            href="/founders/bridge"
+            style={{
+              color: "#FFD86B",
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+            }}
+          >
+            Bridge the Commons
+          </Link>
+        </p>
+
         {/* ── FOOTER ── */}
         <p
           style={{
-            marginTop: 36,
+            marginTop: 20,
             fontSize: "0.82rem",
             lineHeight: 1.68,
             color: "rgba(159,184,216,0.52)",
