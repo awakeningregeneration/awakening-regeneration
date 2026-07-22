@@ -42,6 +42,12 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
+      if (amountCents > 49900) {
+        return NextResponse.json(
+          { error: "For gifts of $500 or more, please use Bridge the Commons." },
+          { status: 400 }
+        );
+      }
 
       metadata.mode = "gift";
 
@@ -98,6 +104,12 @@ export async function POST(request: Request) {
     ];
 
     // Optional one-time additional contribution bundled with subscription
+    if (oneTimeAmount && oneTimeAmount >= 500) {
+      return NextResponse.json(
+        { error: "For gifts of $500 or more, please use Bridge the Commons." },
+        { status: 400 }
+      );
+    }
     if (oneTimeAmount && oneTimeAmount > 0) {
       lineItems.push({
         price_data: {

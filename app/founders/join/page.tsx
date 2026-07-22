@@ -182,11 +182,12 @@ function JoinContent() {
 
   // ── Derived state for the unified button ──
   const oneTimeAmount = oneTimeGift ? parseFloat(oneTimeGift) : 0;
-  const oneTimeValid = oneTimeAmount >= 5;
+  const oneTimeValid = oneTimeAmount >= 5 && oneTimeAmount < 500;
   const hasTier = selectedTier !== null;
   const hasOneTime = oneTimeGift.length > 0 && oneTimeValid;
   const nothingSelected = !hasTier && !hasOneTime;
-  const oneTimeTooLow = oneTimeGift.length > 0 && !oneTimeValid;
+  const oneTimeTooLow = oneTimeGift.length > 0 && oneTimeAmount > 0 && oneTimeAmount < 5;
+  const oneTimeTooHigh = oneTimeGift.length > 0 && oneTimeAmount >= 500;
 
   return (
     <main
@@ -443,7 +444,7 @@ function JoinContent() {
           <input
             type="text"
             inputMode="numeric"
-            placeholder="$ one-time (minimum $5)"
+            placeholder="$ one-time ($5 – $499)"
             value={oneTimeGift}
             onChange={(e) => {
               const v = e.target.value.replace(/[^0-9.]/g, "");
@@ -472,18 +473,63 @@ function JoinContent() {
               Minimum one-time gift is $5.
             </p>
           )}
-          <p
-            style={{
-              fontSize: "0.9rem",
-              lineHeight: 1.65,
-              color: "rgba(224,238,255,0.85)",
-              margin: 0,
-              fontStyle: "italic",
-            }}
-          >
-            A one-time gift receives a first edition of Notes from the
-            Field — a warm thank you for standing with the work.
-          </p>
+          {oneTimeTooHigh && (
+            <div
+              style={{
+                margin: "0 0 10px",
+                padding: "16px 20px",
+                borderRadius: 14,
+                border: "1.5px solid rgba(255,216,107,0.35)",
+                background: "rgba(255,216,107,0.06)",
+                textAlign: "center",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "1.02rem",
+                  lineHeight: 1.65,
+                  fontWeight: 550,
+                  color: "#FFD86B",
+                  margin: "0 0 10px",
+                }}
+              >
+                For gifts of $500 or more, Bridge the Commons is the way
+                to give — it keeps more of your gift going directly to the
+                work.
+              </p>
+              <Link
+                href="/founders/bridge"
+                style={{
+                  display: "inline-block",
+                  padding: "10px 22px",
+                  borderRadius: 999,
+                  background: "#FFD86B",
+                  color: "#1a2a0e",
+                  fontWeight: 700,
+                  fontSize: "0.95rem",
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 0 24px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                }}
+              >
+                Bridge the Commons →
+              </Link>
+            </div>
+          )}
+          {!oneTimeTooHigh && (
+            <p
+              style={{
+                fontSize: "0.9rem",
+                lineHeight: 1.65,
+                color: "rgba(224,238,255,0.85)",
+                margin: 0,
+                fontStyle: "italic",
+              }}
+            >
+              A one-time gift receives a first edition of Notes from the
+              Field — a warm thank you for standing with the work.
+            </p>
+          )}
 
           {/* Physical mail opt-in */}
           <label
@@ -533,7 +579,7 @@ function JoinContent() {
         {/* ── PRIMARY CTA — routes on combined state ── */}
         <button
           type="button"
-          disabled={isRedirecting || nothingSelected || oneTimeTooLow}
+          disabled={isRedirecting || nothingSelected || oneTimeTooLow || oneTimeTooHigh}
           onClick={async () => {
             setErrorMessage("");
             setIsRedirecting(true);
@@ -578,19 +624,19 @@ function JoinContent() {
             width: "100%",
             padding: "16px 24px",
             borderRadius: 999,
-            background: (nothingSelected || oneTimeTooLow)
+            background: (nothingSelected || oneTimeTooLow || oneTimeTooHigh)
               ? "rgba(255,216,107,0.25)"
               : "#FFD86B",
-            color: (nothingSelected || oneTimeTooLow)
+            color: (nothingSelected || oneTimeTooLow || oneTimeTooHigh)
               ? "rgba(26,42,14,0.5)"
               : "#1a2a0e",
             fontWeight: 700,
             fontSize: "1.05rem",
             border: "none",
-            cursor: (isRedirecting || nothingSelected || oneTimeTooLow)
+            cursor: (isRedirecting || nothingSelected || oneTimeTooLow || oneTimeTooHigh)
               ? "not-allowed"
               : "pointer",
-            boxShadow: (nothingSelected || oneTimeTooLow)
+            boxShadow: (nothingSelected || oneTimeTooLow || oneTimeTooHigh)
               ? "none"
               : "0 0 32px rgba(255,216,107,0.20)",
             opacity: isRedirecting ? 0.8 : 1,
@@ -619,27 +665,47 @@ function JoinContent() {
         )}
 
         {/* ── BRIDGE THE COMMONS ── */}
-        <p
+        <div
           style={{
             marginTop: 28,
-            fontSize: "0.88rem",
-            lineHeight: 1.6,
-            color: "rgba(190,210,235,0.72)",
+            padding: "20px 24px",
+            borderRadius: 16,
+            border: "1px solid rgba(255,216,107,0.18)",
+            background: "rgba(255,216,107,0.04)",
             textAlign: "center",
           }}
         >
-          Want to give in a larger way?{" "}
+          <p
+            style={{
+              fontSize: "1.02rem",
+              lineHeight: 1.65,
+              fontWeight: 500,
+              color: "rgba(224,238,255,0.88)",
+              margin: "0 0 12px",
+            }}
+          >
+            Giving $500 or more? Bridge the Commons keeps more of your
+            gift going directly to the work — no transaction fees, just a
+            personal conversation with Ren.
+          </p>
           <Link
             href="/founders/bridge"
             style={{
-              color: "#FFD86B",
-              textDecoration: "underline",
-              textUnderlineOffset: 2,
+              display: "inline-block",
+              padding: "10px 22px",
+              borderRadius: 999,
+              border: "1.5px solid rgba(255,216,107,0.45)",
+              background: "rgba(255,216,107,0.08)",
+              color: "#FFE8A0",
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
             }}
           >
-            Bridge the Commons
+            Bridge the Commons →
           </Link>
-        </p>
+        </div>
 
         {/* ── FOOTER ── */}
         <p
