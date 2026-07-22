@@ -357,6 +357,22 @@ export default function BulkPlacePageClient({
 
           {stage === "input" && (
             <>
+              <div style={{ marginBottom: 16 }}>
+                <a
+                  href={`/${handle}`}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#6b7c94",
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  ← Dashboard
+                </a>
+              </div>
               <textarea
                 value={rawJson}
                 onChange={(e) => setRawJson(e.target.value)}
@@ -533,7 +549,7 @@ export default function BulkPlacePageClient({
                               </div>
                             </div>
                             <div>
-                              <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Address</label>
+                              <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Address <span style={{ fontWeight: 400, color: "#9b2222" }}>(required)</span></label>
                               <input style={inputStyle} value={draft.address} onChange={(e) => updateDraft(draft.id, "address", e.target.value)} disabled={isPlacing} />
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -716,7 +732,12 @@ export default function BulkPlacePageClient({
                           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                             <button
                               type="button"
-                              onClick={() => placeDraft(draft.id)}
+                              onClick={() => {
+                                const ok = window.confirm(
+                                  `Place "${draft.business_name}"? This will add it to the map${draft.steward_email && !draft.no_public_email ? " and send Email 1 to the steward" : ""}.`
+                                );
+                                if (ok) placeDraft(draft.id);
+                              }}
                               disabled={!canPlace || isPlacing}
                               style={{
                                 padding: "10px 20px",

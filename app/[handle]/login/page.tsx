@@ -87,6 +87,25 @@ export default function SeederLoginPage() {
             >
               The link is valid for 30 minutes and can only be used once.
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSubmitted(false);
+                setEmail("");
+              }}
+              style={{
+                marginTop: 20,
+                background: "none",
+                border: "none",
+                color: "rgba(148,196,236,0.7)",
+                fontSize: 13,
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: 2,
+              }}
+            >
+              ← Try a different email
+            </button>
           </div>
         ) : (
           <>

@@ -329,6 +329,22 @@ export default function PlacePageClient({ handle, seederName }: Props) {
           {/* ── FORM VIEW ── */}
           {view === "form" && (
             <>
+              <div style={{ marginBottom: 16 }}>
+                <a
+                  href={`/${handle}`}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#6b7c94",
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  ← Dashboard
+                </a>
+              </div>
               <h2
                 style={{
                   fontSize: "clamp(1.25rem, 2.5vw, 1.5rem)",
