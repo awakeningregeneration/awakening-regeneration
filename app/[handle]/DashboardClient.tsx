@@ -263,7 +263,7 @@ export default function DashboardClient({
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#6b7c94",
+                  color: "#4a5d73",
                   fontSize: "0.85rem",
                   cursor: "pointer",
                 }}
@@ -439,7 +439,7 @@ export default function DashboardClient({
               <p
                 style={{
                   fontSize: "0.82rem",
-                  color: "#6b7c94",
+                  color: "#4a5d73",
                   textAlign: "center",
                   margin: 0,
                   fontStyle: "italic",
@@ -574,7 +574,7 @@ export default function DashboardClient({
                             <div
                               style={{
                                 fontSize: "0.82rem",
-                                color: "#6b7c94",
+                                color: "#4a5d73",
                                 marginTop: 2,
                               }}
                             >
@@ -585,7 +585,7 @@ export default function DashboardClient({
                             <div
                               style={{
                                 fontSize: "0.78rem",
-                                color: "#8a9ab0",
+                                color: "#5a6b80",
                                 marginTop: 4,
                                 fontStyle: "italic",
                               }}
@@ -693,7 +693,7 @@ export default function DashboardClient({
                         <div
                           style={{
                             fontSize: "0.78rem",
-                            color: "#8a9ab0",
+                            color: "#5a6b80",
                             whiteSpace: "nowrap",
                             flexShrink: 0,
                           }}
@@ -770,7 +770,7 @@ export default function DashboardClient({
                               style={{
                                 background: "none",
                                 border: "none",
-                                color: "#6b7c94",
+                                color: "#4a5d73",
                                 fontSize: "0.85rem",
                                 cursor: "pointer",
                                 textDecoration: "underline",
@@ -808,7 +808,7 @@ export default function DashboardClient({
               <p
                 style={{
                   fontSize: "0.9rem",
-                  color: "#6b7c94",
+                  color: "#4a5d73",
                   lineHeight: 1.6,
                   fontStyle: "italic",
                   margin: 0,
@@ -845,7 +845,7 @@ export default function DashboardClient({
                     <span
                       style={{
                         fontSize: "0.78rem",
-                        color: "#8a9ab0",
+                        color: "#5a6b80",
                         textTransform: "capitalize",
                       }}
                     >
@@ -863,7 +863,7 @@ export default function DashboardClient({
               href={`/${handle}/map-view`}
               style={{
                 fontSize: "0.82rem",
-                color: "rgba(58,90,122,0.6)",
+                color: "rgba(42,64,90,0.8)",
                 textDecoration: "none",
                 transition: "color 0.15s",
               }}
@@ -878,7 +878,7 @@ export default function DashboardClient({
               style={{
                 fontSize: "0.72rem",
                 fontWeight: 600,
-                color: "rgba(107,124,148,0.7)",
+                color: "rgba(74,93,115,0.85)",
                 marginBottom: 6,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
@@ -908,14 +908,24 @@ export default function DashboardClient({
           </div>
 
           {/* ── (e) FOOTER ── */}
-          <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              textAlign: "center",
+              maxWidth: "100%",
+              overflow: "hidden",
+              padding: "0 4px",
+            }}
+          >
             <Link
               href={`/${handle}/start`}
               style={{
+                display: "inline-block",
                 fontSize: 13,
-                color: "rgba(107,124,148,0.6)",
+                color: "rgba(74,93,115,0.75)",
                 textDecoration: "none",
                 transition: "color 0.15s",
+                maxWidth: "100%",
+                wordBreak: "break-word",
               }}
             >
               Revisit orientation
