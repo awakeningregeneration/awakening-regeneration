@@ -357,22 +357,6 @@ export default function BulkPlacePageClient({
 
           {stage === "input" && (
             <>
-              <div style={{ marginBottom: 16 }}>
-                <a
-                  href={`/${handle}`}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7c94",
-                    fontSize: "0.82rem",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    textUnderlineOffset: 2,
-                  }}
-                >
-                  ← Dashboard
-                </a>
-              </div>
               <textarea
                 value={rawJson}
                 onChange={(e) => setRawJson(e.target.value)}

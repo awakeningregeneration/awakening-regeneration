@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import SeederHeader from "./SeederHeader";
 
 /**
  * Layout for /[handle]/ routes.
@@ -26,5 +27,10 @@ export default async function SeederLayout({
     notFound();
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SeederHeader handle={handle} />
+      {children}
+    </>
+  );
 }

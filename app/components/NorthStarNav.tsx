@@ -111,6 +111,14 @@ const CompassRose = () => (
   </svg>
 );
 
+// Top-level routes that are NOT seeder handles.
+// Any path whose first segment is not in this set is a seeder route.
+const PUBLIC_ROUTES = new Set([
+  "", "about", "api", "components", "constellation", "contributor",
+  "edit", "founders", "lib", "map", "steward", "stories", "submit",
+  "support", "types", "letter", "privacy", "terms", "contact",
+]);
+
 export default function NorthStarNav() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -219,6 +227,12 @@ export default function NorthStarNav() {
   };
 
   if (!mounted) return null;
+
+  // Hide on seeder pages — they use their own SeederHeader
+  const firstSegment = pathname.split("/")[1] ?? "";
+  if (firstSegment && !PUBLIC_ROUTES.has(firstSegment)) {
+    return null;
+  }
 
   const WELL_SIZE = 62;
 
