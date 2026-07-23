@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import OutreachMessageDisplay from "@/app/components/OutreachMessageDisplay";
-import { OUTREACH_TEMPLATE } from "@/app/lib/outreachTemplate";
+import { buildOutreachMessage } from "@/app/lib/outreachTemplate";
 
 type Placement = {
   id: string;
@@ -168,8 +168,14 @@ export default function DashboardClient({
 
   const [copiedLetterId, setCopiedLetterId] = useState<string | null>(null);
 
-  function handleCopyOutreachLetter(listingId: string) {
-    navigator.clipboard.writeText(OUTREACH_TEMPLATE).then(() => {
+  function handleCopyOutreachLetter(listingId: string, businessName: string) {
+    const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const letter = buildOutreachMessage({
+      businessName,
+      listingUrl: `${siteUrl}/edit/${listingId}`,
+      seederName: seederName || undefined,
+    });
+    navigator.clipboard.writeText(letter).then(() => {
       setCopiedLetterId(listingId);
       setTimeout(() => setCopiedLetterId(null), 2500);
     });
@@ -601,7 +607,7 @@ export default function DashboardClient({
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCopyOutreachLetter(p.id);
+                                  handleCopyOutreachLetter(p.id, p.title);
                                 }}
                                 style={{
                                   padding: "3px 10px",

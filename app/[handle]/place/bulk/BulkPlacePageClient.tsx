@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
 import { normalizeState } from "@/app/lib/normalize";
+import { buildOutreachMessage } from "@/app/lib/outreachTemplate";
 
 const CATEGORIES = [
   "Food & Nourishment",
@@ -125,8 +125,10 @@ let nextId = 0;
 
 export default function BulkPlacePageClient({
   handle,
+  seederName,
 }: {
   handle: string;
+  seederName: string;
 }) {
   const [rawJson, setRawJson] = useState("");
   const [parseError, setParseError] = useState("");
@@ -513,6 +515,54 @@ export default function BulkPlacePageClient({
                               : "Pending review"}
                       </div>
 
+                      {/* Post-placement outreach letter for no-public-email listings */}
+                      {isPlaced && draft.no_public_email && draft.listingId && (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            padding: "12px 14px",
+                            borderRadius: 10,
+                            border: "1px solid rgba(120,200,140,0.25)",
+                            background: "rgba(240,255,245,0.4)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "0.78rem",
+                              fontWeight: 650,
+                              color: "#2a6a3a",
+                              marginBottom: 6,
+                            }}
+                          >
+                            Your outreach letter is ready to paste
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+                              const letter = buildOutreachMessage({
+                                businessName: draft.business_name,
+                                listingUrl: `${siteUrl}/edit/${draft.listingId}`,
+                                seederName: seederName || undefined,
+                              });
+                              navigator.clipboard.writeText(letter);
+                            }}
+                            style={{
+                              padding: "6px 14px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(42,106,58,0.2)",
+                              background: "rgba(240,255,245,0.5)",
+                              color: "#2a6a3a",
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Copy letter to clipboard
+                          </button>
+                        </div>
+                      )}
+
                       {!isPlaced && (
                         <>
                           {/* Fields */}
@@ -603,78 +653,6 @@ export default function BulkPlacePageClient({
                                 />
                                 No public email — uses a contact form
                               </label>
-                              {draft.no_public_email && (
-                                <div
-                                  style={{
-                                    marginTop: 10,
-                                    padding: "12px 14px",
-                                    borderRadius: 10,
-                                    border: "1px solid rgba(138,109,42,0.15)",
-                                    background: "rgba(255,248,230,0.3)",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      fontSize: "0.78rem",
-                                      fontWeight: 650,
-                                      color: "#8a6d2a",
-                                      marginBottom: 6,
-                                    }}
-                                  >
-                                    Outreach letter to paste into contact form
-                                  </div>
-                                  <textarea
-                                    readOnly
-                                    value={
-                                      seederOutreach1Email({
-                                        businessName: draft.business_name || "[Business Name]",
-                                        listingId: "[will be assigned on placement]",
-                                        removalToken: "",
-                                        seederName: "",
-                                      }).text
-                                    }
-                                    style={{
-                                      width: "100%",
-                                      minHeight: 160,
-                                      padding: "10px 12px",
-                                      borderRadius: 8,
-                                      border: "1px solid rgba(100,150,220,0.2)",
-                                      background: "rgba(255,255,255,0.6)",
-                                      color: "#0d2a4a",
-                                      fontSize: "0.78rem",
-                                      lineHeight: 1.5,
-                                      resize: "vertical",
-                                      outline: "none",
-                                      fontFamily: "inherit",
-                                    }}
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const { text } = seederOutreach1Email({
-                                        businessName: draft.business_name || "[Business Name]",
-                                        listingId: "[will be assigned on placement]",
-                                        removalToken: "",
-                                        seederName: "",
-                                      });
-                                      navigator.clipboard.writeText(text);
-                                    }}
-                                    style={{
-                                      marginTop: 8,
-                                      padding: "6px 14px",
-                                      borderRadius: 999,
-                                      border: "1px solid rgba(138,109,42,0.2)",
-                                      background: "rgba(255,248,230,0.35)",
-                                      color: "rgba(138,109,42,0.7)",
-                                      fontSize: "0.75rem",
-                                      fontWeight: 600,
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    Copy letter
-                                  </button>
-                                </div>
-                              )}
                             </div>
 
                             {/* Category pills */}

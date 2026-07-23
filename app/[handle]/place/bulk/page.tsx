@@ -32,5 +32,5 @@ export default async function BulkPlacePage({
   if (!seeder) redirect(`/${handle}/login`);
   if (!seeder.orientation_completed_at) redirect(`/${handle}/start`);
 
-  return <BulkPlacePageClient handle={handle} />;
+  return <BulkPlacePageClient handle={handle} seederName={seeder.name || ""} />;
 }
