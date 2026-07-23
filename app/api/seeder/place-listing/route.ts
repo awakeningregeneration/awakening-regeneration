@@ -250,6 +250,30 @@ export async function POST(req: Request) {
 
   // ── Insert listing ──
 
+  // ── Duplicate check (active listing with same name in same city) ──
+  if (!override_do_not_list) {
+    const normalizedForDupe = normalizeName(title);
+    const { data: existing } = await supabaseAdmin
+      .from("listings")
+      .select("id, title, city")
+      .eq("normalized_name", normalizedForDupe)
+      .ilike("city", normalizedCity)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return NextResponse.json({
+        duplicate_found: true,
+        matched: {
+          id: existing.id,
+          title: existing.title,
+          city: existing.city,
+        },
+      });
+    }
+  }
+
   const { data: listing, error: insertError } = await supabaseAdmin
     .from("listings")
     .insert([

@@ -50,17 +50,16 @@ export default async function MapViewPage({
     redirect(`/${handle}/start`);
   }
 
-  // ── All seeder-placed listings (display-safe fields only) ──
+  // ── All listings (display-safe fields only) ──
   // Privacy boundary: steward_email and bounce_info are never
   // exposed on the cross-seeder view. Only the placing seeder
   // sees those on their personal dashboard.
   const { data: allPlacements } = await supabaseAdmin
     .from("listings")
     .select(
-      "id, title, category, city, state, county, address, created_at, outreach_status, status, placed_by_seeder_id"
+      "id, title, category, city, state, county, address, created_at, outreach_status, status, placed_by_seeder_id, source"
     )
-    .eq("source", "seeder_placed")
-    .not("placed_by_seeder_id", "is", null)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   const placements = allPlacements || [];

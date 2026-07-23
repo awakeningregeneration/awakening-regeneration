@@ -203,6 +203,11 @@ export default function SubmitPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [stewardshipPending, setStewardshipPending] = useState(false);
+  const [duplicateMatch, setDuplicateMatch] = useState<{
+    id: string;
+    title: string;
+    city: string;
+  } | null>(null);
 
   const regionLabel = useMemo(() => {
     if (county && state) return `${county} County, ${state}`;
@@ -272,9 +277,10 @@ export default function SubmitPage() {
     setIsReviewing(true);
   }
 
-  async function handleFinalSubmit() {
+  async function handleFinalSubmit(overrideDuplicate = false) {
     setErrorMessage("");
     setSuccessMessage("");
+    setDuplicateMatch(null);
 
     if (!validateForm()) {
       setIsReviewing(false);
@@ -284,7 +290,7 @@ export default function SubmitPage() {
     setIsSubmitting(true);
 
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         title: title.trim(),
         description: description.trim(),
         website: website.trim(),
@@ -304,11 +310,9 @@ export default function SubmitPage() {
           : null,
       };
 
-      console.log("Submitting listing with:", {
-        claim_stewardship: claimStewardship,
-        steward_email: stewardEmail,
-        steward_display_name: stewardName,
-      });
+      if (overrideDuplicate) {
+        payload.override_duplicate = true;
+      }
 
       const response = await fetch("/api/listings", {
         method: "POST",
@@ -319,6 +323,12 @@ export default function SubmitPage() {
       });
 
       const data = await response.json().catch(() => null);
+
+      if (data?.duplicate_found) {
+        setDuplicateMatch(data.matched);
+        setIsSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
         if (data?.error === "UNIVERSALLY_BLOCKED") {
@@ -1016,6 +1026,71 @@ export default function SubmitPage() {
                 </div>
               ) : null}
 
+              {duplicateMatch && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    padding: "16px 18px",
+                    borderRadius: 14,
+                    background: "rgba(255,216,107,0.08)",
+                    border: "1px solid rgba(255,216,107,0.3)",
+                    fontSize: "0.95rem",
+                    lineHeight: 1.6,
+                    color: "#2a3a4a",
+                  }}
+                >
+                  <p style={{ margin: "0 0 10px", fontWeight: 600 }}>
+                    This looks like a listing we already have
+                  </p>
+                  <p style={{ margin: "0 0 12px" }}>
+                    <strong>{duplicateMatch.title}</strong> in{" "}
+                    <strong>{duplicateMatch.city}</strong> is already on the
+                    map.{" "}
+                    <a
+                      href={`/edit/${duplicateMatch.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#0d2a4a",
+                        textDecoration: "underline",
+                        textUnderlineOffset: 2,
+                      }}
+                    >
+                      View it here
+                    </a>
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setDuplicateMatch(null)}
+                      style={ghostButtonStyle}
+                    >
+                      Cancel — same business
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFinalSubmit(true)}
+                      disabled={isSubmitting}
+                      style={{
+                        ...goldButtonStyle,
+                        cursor: isSubmitting ? "not-allowed" : "pointer",
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting
+                        ? "Submitting..."
+                        : "Different business — submit anyway"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div
                 style={{
                   marginTop: 28,
@@ -1034,12 +1109,12 @@ export default function SubmitPage() {
 
                 <button
                   type="button"
-                  onClick={handleFinalSubmit}
-                  disabled={isSubmitting}
+                  onClick={() => handleFinalSubmit()}
+                  disabled={isSubmitting || !!duplicateMatch}
                   style={{
                     ...goldButtonStyle,
-                    cursor: isSubmitting ? "not-allowed" : "pointer",
-                    opacity: isSubmitting ? 0.6 : 1,
+                    cursor: isSubmitting || duplicateMatch ? "not-allowed" : "pointer",
+                    opacity: isSubmitting || duplicateMatch ? 0.6 : 1,
                   }}
                 >
                   {isSubmitting ? "Submitting..." : "Submit listing"}

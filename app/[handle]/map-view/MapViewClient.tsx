@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type Placement = {
@@ -15,6 +16,7 @@ type Placement = {
   outreach_status: string | null;
   status: string | null;
   placed_by_seeder_id: string | null;
+  source: string | null;
 };
 
 type Props = {
@@ -82,7 +84,11 @@ export default function MapViewClient({
   states,
   countiesByState,
 }: Props) {
-  const [selectedState, setSelectedState] = useState("");
+  const searchParams = useSearchParams();
+  const initialState = searchParams.get("state") || "";
+  const [selectedState, setSelectedState] = useState(
+    states.includes(initialState) ? initialState : ""
+  );
   const [selectedCounty, setSelectedCounty] = useState("");
 
   const availableCounties = selectedState
@@ -203,7 +209,7 @@ export default function MapViewClient({
               textAlign: "center",
             }}
           >
-            All placements across the commons
+            All listings across the commons
           </h2>
           <p
             style={{
@@ -214,7 +220,8 @@ export default function MapViewClient({
               margin: "0 0 12px",
             }}
           >
-            Browse what seeders are placing across the country.
+            Browse what&apos;s already on the map — seeder placements and
+            community submissions alike.
             <br />
             Useful before placing a new light yourself.
           </p>
@@ -228,9 +235,9 @@ export default function MapViewClient({
               margin: "0 0 24px",
             }}
           >
-            You&apos;ll see only the states and counties where seeders are
-            currently working. If the place you&apos;re thinking of isn&apos;t
-            here yet, consider it an invitation.
+            You&apos;ll see only the states and counties where listings exist.
+            If the place you&apos;re thinking of isn&apos;t here yet, consider
+            it an invitation.
           </p>
 
           {/* ── Dropdowns ── */}
@@ -346,16 +353,18 @@ export default function MapViewClient({
                   "en-US",
                   { month: "short", day: "numeric", year: "numeric" }
                 );
-                const seederName = p.placed_by_seeder_id
-                  ? seederMap[p.placed_by_seeder_id] || "Seeder"
-                  : "Seeder";
+                const attribution = p.placed_by_seeder_id
+                  ? `Placed by ${seederMap[p.placed_by_seeder_id] || "Seeder"}`
+                  : p.source === "community_submitted"
+                    ? "Community submitted"
+                    : "On the map";
 
-                // Build metadata line: Category · Address · Placed by Name
+                // Build metadata line: Category · Address · Attribution
                 // Filter nulls so missing address doesn't leave empty segment
                 const metaParts = [
                   Array.isArray(p.category) ? p.category.join(" \u00B7 ") : p.category,
                   p.address,
-                  `Placed by ${seederName}`,
+                  attribution,
                 ].filter(Boolean);
 
                 return (

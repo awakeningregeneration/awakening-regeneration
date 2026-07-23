@@ -149,6 +149,29 @@ export async function POST(req: Request) {
           { status: 403 }
         );
       }
+
+      // ── Duplicate check (active listing with same name in same city) ──
+      if (!body.override_duplicate) {
+        const { data: existing } = await supabaseAdmin
+          .from("listings")
+          .select("id, title, city")
+          .eq("normalized_name", normalizedTitle)
+          .ilike("city", normalizedCity)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+
+        if (existing) {
+          return NextResponse.json({
+            duplicate_found: true,
+            matched: {
+              id: existing.id,
+              title: existing.title,
+              city: existing.city,
+            },
+          });
+        }
+      }
     }
 
     const { data, error } = await supabase

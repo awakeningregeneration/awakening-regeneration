@@ -279,6 +279,21 @@ export default function BulkPlacePageClient({
         return;
       }
 
+      if (data.duplicate_found) {
+        setDrafts((prev) =>
+          prev.map((d) =>
+            d.id === id
+              ? {
+                  ...d,
+                  status: "error",
+                  error: `Possible duplicate: "${data.matched?.title}" in ${data.matched?.city} is already on the map.`,
+                }
+              : d
+          )
+        );
+        return;
+      }
+
       setDrafts((prev) =>
         prev.map((d) =>
           d.id === id

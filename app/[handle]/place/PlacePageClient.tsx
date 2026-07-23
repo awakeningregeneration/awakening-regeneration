@@ -9,7 +9,7 @@ type Props = {
   seederName: string;
 };
 
-type ViewState = "form" | "override" | "success";
+type ViewState = "form" | "override" | "duplicate" | "success";
 
 type OverrideData = {
   title: string;
@@ -119,6 +119,11 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   // ── View state ──
   const [view, setView] = useState<ViewState>("form");
   const [overrideData, setOverrideData] = useState<OverrideData | null>(null);
+  const [duplicateData, setDuplicateData] = useState<{
+    id: string;
+    title: string;
+    city: string;
+  } | null>(null);
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
 
   // ── Form fields ──
@@ -231,6 +236,12 @@ export default function PlacePageClient({ handle, seederName }: Props) {
       if (data.requires_override) {
         setOverrideData(data.matched);
         setView("override");
+        return;
+      }
+
+      if (data.duplicate_found) {
+        setDuplicateData(data.matched);
+        setView("duplicate");
         return;
       }
 
@@ -538,6 +549,24 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                   </div>
                 </div>
 
+                {city.trim() && state && (
+                  <div style={{ marginTop: 4, marginBottom: 8 }}>
+                    <a
+                      href={`/${handle}/map-view?state=${encodeURIComponent(state)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#4a5d73",
+                        textDecoration: "underline",
+                        textUnderlineOffset: 2,
+                      }}
+                    >
+                      See what&apos;s already in {state} &rarr;
+                    </a>
+                  </div>
+                )}
+
                 {/* 6. Address (optional) */}
                 <div>
                   <label style={labelStyle}>
@@ -812,6 +841,104 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                   {isSubmitting
                     ? "Placing..."
                     : "Place anyway — different business or new ownership"}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ── DUPLICATE VIEW ── */}
+          {view === "duplicate" && duplicateData && (
+            <>
+              <h2
+                style={{
+                  fontSize: "clamp(1.25rem, 2.5vw, 1.5rem)",
+                  lineHeight: 1.3,
+                  fontWeight: 650,
+                  color: "#8a6d2a",
+                  margin: "0 0 16px",
+                  textAlign: "center",
+                }}
+              >
+                This looks like a listing we already have
+              </h2>
+
+              <div
+                style={{
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  background: "rgba(255,216,107,0.06)",
+                  border: "1px solid rgba(255,216,107,0.25)",
+                  marginBottom: 20,
+                  fontSize: "0.95rem",
+                  lineHeight: 1.6,
+                  color: "#2a3a4a",
+                }}
+              >
+                <p style={{ margin: "0 0 10px" }}>
+                  <strong>{duplicateData.title}</strong> in{" "}
+                  <strong>{duplicateData.city}</strong> is already on the
+                  map.
+                </p>
+                <p style={{ margin: 0 }}>
+                  If this is the same business, there&rsquo;s no need to
+                  add it again. If it&rsquo;s a different business with a
+                  similar name, you can place it anyway.
+                </p>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setView("form");
+                    setDuplicateData(null);
+                  }}
+                  style={{
+                    padding: "13px 24px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(13,42,74,0.18)",
+                    background: "rgba(255,255,255,0.55)",
+                    color: "#0d2a4a",
+                    fontWeight: 600,
+                    fontSize: "0.95rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel — same business
+                </button>
+                <button
+                  onClick={() => {
+                    setDuplicateData(null);
+                    submitPlacement(true);
+                  }}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: "13px 24px",
+                    borderRadius: 999,
+                    border: "none",
+                    background: isSubmitting
+                      ? "rgba(255,216,107,0.5)"
+                      : "#FFD86B",
+                    color: isSubmitting
+                      ? "rgba(26,42,14,0.5)"
+                      : "#1a2a0e",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    boxShadow: isSubmitting
+                      ? "none"
+                      : "0 0 20px rgba(255,216,107,0.25)",
+                  }}
+                >
+                  {isSubmitting
+                    ? "Placing..."
+                    : "Different business — place anyway"}
                 </button>
               </div>
             </>
