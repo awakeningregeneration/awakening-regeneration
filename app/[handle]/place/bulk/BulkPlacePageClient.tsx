@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { seederOutreach1Email } from "@/app/lib/emails/seederOutreach1Recognition";
+import { normalizeState } from "@/app/lib/normalize";
 
 const CATEGORIES = [
   "Food & Nourishment",
@@ -16,6 +17,19 @@ const CATEGORIES = [
   "Community & Culture",
   "Conflict Transformation & Repair",
   "Finance & Systems",
+];
+
+const STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+  "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming", "District of Columbia",
 ];
 
 const PRACTICES = [
@@ -155,7 +169,7 @@ export default function BulkPlacePageClient({
           category: cat,
           practices: prac,
           city: String(raw.city || "").trim(),
-          state: String(raw.state || "").trim(),
+          state: normalizeState(String(raw.state || "")),
           address: String(raw.address || "").trim(),
           website: String(raw.website || "").trim(),
           steward_email: String(raw.steward_email || "").trim(),
@@ -529,7 +543,22 @@ export default function BulkPlacePageClient({
                               </div>
                               <div>
                                 <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>State</label>
-                                <input style={inputStyle} value={draft.state} onChange={(e) => updateDraft(draft.id, "state", e.target.value)} disabled={isPlacing} />
+                                <select
+                                  style={{ ...inputStyle, appearance: "none" }}
+                                  value={STATES.includes(draft.state) ? draft.state : ""}
+                                  onChange={(e) => updateDraft(draft.id, "state", e.target.value)}
+                                  disabled={isPlacing}
+                                >
+                                  <option value="">Select</option>
+                                  {STATES.map((s) => (
+                                    <option key={s} value={s}>{s}</option>
+                                  ))}
+                                </select>
+                                {draft.state && !STATES.includes(draft.state) && (
+                                  <div style={{ fontSize: "0.72rem", color: "#9b2222", marginTop: 4 }}>
+                                    &quot;{draft.state}&quot; not recognized — please select from the list
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div>

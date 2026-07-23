@@ -639,12 +639,27 @@ export default function SubmitPage() {
 
                   <div>
                     <label style={labelStyle}>State</label>
-                    <input
+                    <select
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      placeholder="Oregon"
-                      style={inputStyle}
-                    />
+                      style={{ ...inputStyle, appearance: "none" }}
+                    >
+                      <option value="">Select</option>
+                      {[
+                        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+                        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+                        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+                        "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+                        "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+                        "New Hampshire", "New Jersey", "New Mexico", "New York",
+                        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+                        "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+                        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+                        "West Virginia", "Wisconsin", "Wyoming", "District of Columbia",
+                      ].map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
