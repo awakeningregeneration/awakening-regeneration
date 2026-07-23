@@ -357,12 +357,27 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                   fontSize: "0.92rem",
                   color: "#3a5a7a",
                   textAlign: "center",
-                  margin: "0 0 24px",
+                  margin: "0 0 10px",
                   fontStyle: "italic",
                 }}
               >
                 Seed lightly. Seed accurately. Leave room.
               </p>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <a
+                  href={`/${handle}/map-view`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "#4a5d73",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  See what&apos;s already on the map &rarr;
+                </a>
+              </div>
 
               {errorMessage && (
                 <div
