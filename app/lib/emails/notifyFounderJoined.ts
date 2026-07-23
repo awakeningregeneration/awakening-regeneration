@@ -32,9 +32,9 @@ export function notifyFounderJoinedEmail(options: {
     timeStyle: "short",
   });
 
-  const subject = `New founder joined: ${displayName}`;
+  const subject = `New Founding Steward joined: ${displayName}`;
 
-  const text = `New founder joined.
+  const text = `New Founding Steward joined.
 
 Name: ${displayName}
 Email: ${email}
@@ -46,7 +46,7 @@ The welcome email has been sent to them automatically.`;
 
   const html = `
 <div style="max-width:480px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#1a2a3a;padding:24px;">
-  <p style="font-size:15px;line-height:1.6;margin:0 0 16px;font-weight:600;">New founder joined.</p>
+  <p style="font-size:15px;line-height:1.6;margin:0 0 16px;font-weight:600;">New Founding Steward joined.</p>
 
   <table style="font-size:14px;line-height:1.8;border-collapse:collapse;">
     <tr><td style="padding:2px 12px 2px 0;color:#6a7a8a;">Name</td><td>${displayName}</td></tr>

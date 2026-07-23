@@ -820,8 +820,8 @@ export default function DashboardClient({
                   margin: 0,
                 }}
               >
-                Credits accumulate when listings you&apos;ve placed convert to
-                Founders. They appear here as the work grows.
+                Credits accumulate when listings you&apos;ve placed become
+                Founding Stewards. They appear here as the work grows.
               </p>
             ) : (
               <div

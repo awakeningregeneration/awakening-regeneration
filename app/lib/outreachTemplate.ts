@@ -15,7 +15,7 @@ The map is non-extractive, non-pay-to-play, and free to be on. We don't rank lis
 
 Your listing is already up, and we'd love for you to take stewardship of it — which just means you'll be able to update it directly as things shift. You can view it here: [listing URL]
 
-We're also seeking Founders to support the map as it gains its footing during this initial phase. If becoming part of the foundation that holds this space feels right to you, we'd be glad to share more — canarycommons.org/founders.
+We're also inviting people to become Founding Stewards — those whose membership helps bridge this season, as the living commons continues to be revealed. If that feels like a fit, we'd be glad to share more — canarycommons.org/founders.
 
 To claim your listing, reply to this message (or visit the listing and click "Is this yours?") and we'll send a link to verify. Questions welcome.
 

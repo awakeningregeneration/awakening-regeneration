@@ -54,7 +54,7 @@ You're part of what makes this visible now.
 — Ren
 Canary Commons
 
-You're receiving this because you just joined Canary Commons as a Founder.`;
+You're receiving this because you just joined Canary Commons as a Founding Steward.`;
 
   // ─── HTML ─────────────────────────────────────────────────
   const html = `<!DOCTYPE html>
@@ -156,7 +156,7 @@ You're receiving this because you just joined Canary Commons as a Founder.`;
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:32px 0 0; font-size:13px; color:#7a8699; line-height:1.5;">
-              You're receiving this because you just joined Canary Commons as a Founder.
+              You're receiving this because you just joined Canary Commons as a Founding Steward.
             </td>
           </tr>
         </table>
