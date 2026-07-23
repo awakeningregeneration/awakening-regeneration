@@ -257,7 +257,7 @@ export default function MapClient({
       .ar-popup-close {
         position: absolute;
         top: 8px;
-        left: 10px;
+        right: 10px;
         width: 22px;
         height: 22px;
         display: flex;

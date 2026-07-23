@@ -52,17 +52,21 @@ export default async function AdminPage({
 
   const seeders = allSeeders || [];
 
-  // ── Fetch placement counts per seeder ──
+  // ── Fetch all placements with details, grouped by seeder ──
   const { data: placementRows } = await supabaseAdmin
     .from("listings")
-    .select("placed_by_seeder_id")
+    .select("id, title, county, created_at, outreach_status, steward_id, placed_by_seeder_id")
     .eq("source", "seeder_placed")
-    .not("placed_by_seeder_id", "is", null);
+    .not("placed_by_seeder_id", "is", null)
+    .order("created_at", { ascending: false });
 
   const placementCounts: Record<string, number> = {};
+  const placementDetails: Record<string, NonNullable<typeof placementRows>> = {};
   for (const row of placementRows || []) {
     const id = row.placed_by_seeder_id as string;
     placementCounts[id] = (placementCounts[id] || 0) + 1;
+    if (!placementDetails[id]) placementDetails[id] = [];
+    placementDetails[id].push(row);
   }
 
   return (
@@ -70,6 +74,7 @@ export default async function AdminPage({
       handle={handle}
       seeders={seeders}
       placementCounts={placementCounts}
+      placementDetails={placementDetails}
     />
   );
 }

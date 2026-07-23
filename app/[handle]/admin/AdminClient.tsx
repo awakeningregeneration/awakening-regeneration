@@ -16,10 +16,20 @@ type Seeder = {
   orientation_completed_at: string | null;
 };
 
+type Placement = {
+  id: string;
+  title: string;
+  county: string | null;
+  created_at: string;
+  outreach_status: string | null;
+  steward_id: string | null;
+};
+
 type Props = {
   handle: string;
   seeders: Seeder[];
   placementCounts: Record<string, number>;
+  placementDetails: Record<string, Placement[]>;
 };
 
 const orbs = [
@@ -41,6 +51,7 @@ export default function AdminClient({
   handle,
   seeders,
   placementCounts,
+  placementDetails,
 }: Props) {
   const router = useRouter();
 
@@ -55,6 +66,26 @@ export default function AdminClient({
   // ── Per-row resend state ──
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [resendResult, setResendResult] = useState<Record<string, string>>({});
+
+  // ── Per-row expand state ──
+  const [expandedSeederId, setExpandedSeederId] = useState<string | null>(null);
+
+  // ── Per-row toggle-active state ──
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  // ── Show/hide hidden seeders ──
+  const [showHidden, setShowHidden] = useState(false);
+
+  async function handleToggleActive(seederId: string, newActive: boolean) {
+    setTogglingId(seederId);
+    await fetch("/api/admin/wrapper/toggle-active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seeder_id: seederId, active: newActive }),
+    });
+    setTogglingId(null);
+    router.refresh();
+  }
 
   const isFormReady =
     !submitting && !!name.trim() && !!email.trim() && !!urlHandle.trim();
@@ -317,170 +348,333 @@ export default function AdminClient({
           />
 
           {/* ── Seeder list ── */}
-          <h3
-            style={{
-              fontSize: "1.05rem",
-              fontWeight: 650,
-              color: "#8a6d2a",
-              margin: "0 0 14px",
-            }}
-          >
-            All seeders ({seeders.length})
-          </h3>
+          {(() => {
+            const activeSeeders = seeders.filter((s) => s.active !== false);
+            const hiddenSeeders = seeders.filter((s) => s.active === false);
 
-          {seeders.length === 0 ? (
-            <p
-              style={{
-                fontSize: "0.9rem",
-                color: "#6b7c94",
-                fontStyle: "italic",
-                margin: 0,
-              }}
-            >
-              No seeders yet.
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              {seeders.map((s) => {
-                const count = placementCounts[s.id] || 0;
-                const welcomed = s.welcomed_at
-                  ? new Date(s.welcomed_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : null;
-                const oriented = !!s.orientation_completed_at;
-                const isResending = resendingId === s.id;
-                const resendMsg = resendResult[s.id];
+            function renderSeederCard(s: Seeder) {
+              const count = placementCounts[s.id] || 0;
+              const placements = placementDetails[s.id] || [];
+              const welcomed = s.welcomed_at
+                ? new Date(s.welcomed_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : null;
+              const oriented = !!s.orientation_completed_at;
+              const isResending = resendingId === s.id;
+              const resendMsg = resendResult[s.id];
+              const isExpanded = expandedSeederId === s.id;
+              const isToggling = togglingId === s.id;
 
-                return (
+              return (
+                <div
+                  key={s.id}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    border: "1px solid rgba(100,150,220,0.15)",
+                    background: s.active === false
+                      ? "rgba(255,255,255,0.3)"
+                      : "rgba(255,255,255,0.5)",
+                    opacity: s.active === false ? 0.7 : 1,
+                  }}
+                >
+                  {/* Row 1: Name + resend button + placement count */}
                   <div
-                    key={s.id}
                     style={{
-                      padding: "12px 16px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(100,150,220,0.15)",
-                      background: "rgba(255,255,255,0.5)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
                     }}
                   >
-                    {/* Row 1: Name + resend button + placement count */}
+                    <div
+                      style={{
+                        flex: 1,
+                        fontWeight: 650,
+                        color: "#0d2a4a",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      {s.name || "Unnamed"}
+                    </div>
+
+                    {/* Resend welcome button / result */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 12,
+                        gap: 8,
+                        flexShrink: 0,
                       }}
                     >
-                      <div
-                        style={{
-                          flex: 1,
-                          fontWeight: 650,
-                          color: "#0d2a4a",
-                          fontSize: "0.95rem",
-                        }}
-                      >
-                        {s.name || "Unnamed"}
-                      </div>
-
-                      {/* Resend welcome button / result */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {resendMsg ? (
-                          <span
-                            style={{
-                              fontSize: "0.78rem",
-                              color:
-                                resendMsg === "Sent!"
-                                  ? "#2a6a3a"
-                                  : "#a04040",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {resendMsg}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleResend(s.id)}
-                            disabled={isResending}
-                            style={{
-                              padding: "4px 12px",
-                              borderRadius: 999,
-                              border: "1px solid rgba(138,109,42,0.2)",
-                              background: "rgba(255,248,230,0.35)",
-                              color: "rgba(138,109,42,0.7)",
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              cursor: isResending
-                                ? "not-allowed"
-                                : "pointer",
-                              opacity: isResending ? 0.5 : 1,
-                            }}
-                          >
-                            {isResending ? "Sending..." : "Resend welcome"}
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Placement count */}
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "#8a9ab0",
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {count} placed
-                      </div>
+                      {resendMsg ? (
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color:
+                              resendMsg === "Sent!"
+                                ? "#2a6a3a"
+                                : "#a04040",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {resendMsg}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleResend(s.id)}
+                          disabled={isResending}
+                          style={{
+                            padding: "4px 12px",
+                            borderRadius: 999,
+                            border: "1px solid rgba(138,109,42,0.2)",
+                            background: "rgba(255,248,230,0.35)",
+                            color: "rgba(138,109,42,0.7)",
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            cursor: isResending
+                              ? "not-allowed"
+                              : "pointer",
+                            opacity: isResending ? 0.5 : 1,
+                          }}
+                        >
+                          {isResending ? "Sending..." : "Resend welcome"}
+                        </button>
+                      )}
                     </div>
 
-                    {/* Row 2: metadata */}
+                    {/* Placement count */}
                     <div
                       style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7c94",
-                        marginTop: 4,
+                        fontSize: "0.78rem",
+                        color: "#5a6b80",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
                       }}
                     >
-                      {[
-                        s.email,
-                        `/${s.url_handle}`,
-                        welcomed
-                          ? `Welcomed ${welcomed}`
-                          : "Not yet welcomed",
-                      ].join(" \u00B7 ")}
+                      {count} placed
                     </div>
+                  </div>
 
-                    {/* Row 3: orientation status */}
+                  {/* Row 2: metadata */}
+                  <div
+                    style={{
+                      fontSize: "0.82rem",
+                      color: "#4a5d73",
+                      marginTop: 4,
+                    }}
+                  >
+                    {[
+                      s.email,
+                      `/${s.url_handle}`,
+                      welcomed
+                        ? `Welcomed ${welcomed}`
+                        : "Not yet welcomed",
+                    ].join(" \u00B7 ")}
+                  </div>
+
+                  {/* Row 3: orientation status + actions */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginTop: 4,
+                    }}
+                  >
                     <div
                       style={{
                         fontSize: "0.78rem",
                         color: oriented
                           ? "rgba(42,106,58,0.7)"
-                          : "rgba(107,124,148,0.6)",
-                        marginTop: 2,
+                          : "rgba(74,93,115,0.6)",
                       }}
                     >
                       Orientation:{" "}
                       {oriented ? "\u2713 complete" : "not yet"}
                     </div>
+
+                    {count > 0 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedSeederId(isExpanded ? null : s.id)
+                        }
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#4a5d73",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          textUnderlineOffset: 2,
+                          padding: 0,
+                        }}
+                      >
+                        {isExpanded ? "Hide placements" : "Show placements"}
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(s.id, !s.active)}
+                      disabled={isToggling}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "rgba(74,93,115,0.5)",
+                        fontSize: "0.72rem",
+                        cursor: isToggling ? "not-allowed" : "pointer",
+                        padding: 0,
+                        marginLeft: "auto",
+                      }}
+                    >
+                      {s.active === false ? "Unhide" : "Hide"}
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          )}
+
+                  {/* Expanded placements */}
+                  {isExpanded && placements.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        padding: "10px 12px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(100,150,220,0.1)",
+                        background: "rgba(255,255,255,0.4)",
+                      }}
+                    >
+                      {placements.map((p) => {
+                        const date = new Date(p.created_at).toLocaleDateString(
+                          "en-US",
+                          { month: "short", day: "numeric", year: "numeric" }
+                        );
+                        const claimed = !!p.steward_id;
+                        return (
+                          <div
+                            key={p.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "baseline",
+                              gap: 8,
+                              padding: "5px 0",
+                              borderBottom: "1px solid rgba(100,150,220,0.06)",
+                              fontSize: "0.82rem",
+                              color: "#0d2a4a",
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <span style={{ fontWeight: 600 }}>{p.title}</span>
+                              {p.county && (
+                                <span style={{ color: "#4a5d73" }}>
+                                  {" "}
+                                  · {p.county}
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.72rem",
+                                color: claimed ? "rgba(42,106,58,0.7)" : "#5a6b80",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {claimed
+                                ? "Claimed"
+                                : p.outreach_status || "not_started"}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.72rem",
+                                color: "#5a6b80",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {date}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <h3
+                  style={{
+                    fontSize: "1.05rem",
+                    fontWeight: 650,
+                    color: "#8a6d2a",
+                    margin: "0 0 14px",
+                  }}
+                >
+                  Seeders ({activeSeeders.length})
+                </h3>
+
+                {activeSeeders.length === 0 ? (
+                  <p
+                    style={{
+                      fontSize: "0.9rem",
+                      color: "#4a5d73",
+                      fontStyle: "italic",
+                      margin: 0,
+                    }}
+                  >
+                    No active seeders.
+                  </p>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    {activeSeeders.map(renderSeederCard)}
+                  </div>
+                )}
+
+                {hiddenSeeders.length > 0 && (
+                  <div style={{ marginTop: 20 }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowHidden(!showHidden)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#4a5d73",
+                        fontSize: "0.82rem",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                        textUnderlineOffset: 2,
+                        padding: 0,
+                      }}
+                    >
+                      {showHidden ? "Hide" : "Show"} hidden ({hiddenSeeders.length})
+                    </button>
+                    {showHidden && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                          marginTop: 10,
+                        }}
+                      >
+                        {hiddenSeeders.map(renderSeederCard)}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* ── Footer ── */}
           <div style={{ textAlign: "center", marginTop: 28 }}>

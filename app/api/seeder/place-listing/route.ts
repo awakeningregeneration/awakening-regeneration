@@ -286,6 +286,17 @@ export async function POST(req: Request) {
     );
   }
 
+  // ── Auto-resurface hidden seeder on new placement ──
+  try {
+    await supabaseAdmin
+      .from("seeders")
+      .update({ active: true })
+      .eq("id", session.seeder_id)
+      .eq("active", false);
+  } catch {
+    // Non-blocking — placement succeeded regardless
+  }
+
   // ── Send Email 1 if steward_email is provided ──
 
   let emailSent = false;
