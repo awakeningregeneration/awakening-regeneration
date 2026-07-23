@@ -68,9 +68,9 @@ The "no public email" workflow was built end-to-end but never tested live. Befor
 
 ## From the June 10 session
 
-- [ ] **Steward claims awaiting click — Rebekah (Takubeh) and Jill (Asana Yoga).** Both have fresh 72h verification links in their inboxes (sent Jun 10 via /api/steward/reverify). Status is still `pending` until they click. This will be the first successful end-to-end steward claim on the platform.
+- [x] ~~**Steward claims awaiting click — Rebekah (Takubeh) and Jill (Asana Yoga).**~~ Rebekah verified Jun 11 — first successful end-to-end steward claim on the platform. Jill (Asana Yoga) never clicked; her steward row remains `pending` with expired token. She would need a fresh re-issue via `/api/steward/reverify` if she wants to claim.
 
-- [ ] **Rebekah duplicate stewardship_claims row.** She has two pending rows: original (2026-05-27) and a duplicate (2026-06-03, declaration_text NULL, same email). After she successfully verifies, delete the stale leftover row — keep the verified one, delete the unverified duplicate.
+- [x] ~~**Rebekah duplicate stewardship_claims row.**~~ Resolved Jul 22. Deleted duplicate listing `a3caac90...` ("Takubeh natural food Market & garden supply" — community_submitted, wrong county "Oregon County", no steward, no outreach) and orphaned steward row `6cb9990e...` (pending, never verified, pointed to the duplicate listing). Cascade-deleted the associated stewardship_claims row. Verified no other references existed before deletion. Rebekah's real claim on listing `0b144f5a...` ("Takubeh Natural Food Market & Garden Supply" — seeder_placed, Josephine County, steward active, outreach claimed) is untouched.
 
 - [ ] **Mobile drawer peek height tuning.** PEEK_HEIGHT=210px is a first-pass value based on layout math. May want a small nudge after more real-phone feel. Not urgent.
 

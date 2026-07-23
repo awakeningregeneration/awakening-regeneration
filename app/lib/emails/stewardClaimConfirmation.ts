@@ -1,8 +1,6 @@
 /**
  * Steward claim confirmation email — sent when a steward successfully
  * claims a listing (domain-match auto-approve or grace-period activation).
- *
- * Uses the Ren-approved copy from Stage F-prep.
  */
 
 import { getEmailHeader } from "./components/emailHeader";
@@ -17,10 +15,12 @@ export function stewardClaimConfirmationEmail(options: {
 }): { subject: string; html: string; text: string } {
   const { stewardName, listingTitle, listingId } = options;
 
-  const greeting = stewardName ? `Hi ${stewardName},` : "Hi,";
+  const greeting = stewardName ? `Hi ${stewardName},` : "Hi there,";
   const listingUrl = `${SITE_URL}/edit/${listingId}`;
+  const submitUrl = `${SITE_URL}/submit`;
+  const storiesUrl = `${SITE_URL}/stories/submit`;
 
-  const subject = `You've claimed ${listingTitle}`;
+  const subject = `You're the steward of ${listingTitle} on Canary Commons`;
 
   const html = `
 <div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#1a2a3a;padding:32px 24px;">
@@ -28,15 +28,15 @@ export function stewardClaimConfirmationEmail(options: {
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">${greeting}</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Thanks for taking stewardship of <strong>${listingTitle}</strong> on Canary
-    Commons. Your listing is now in your care.
+    Thank you for claiming your place on the map.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    To make changes anytime in the future, just visit your listing&rsquo;s page
-    on Canary Commons and enter this email address. We&rsquo;ll send you a fresh
-    edit link. No password to remember, no account to maintain &mdash; just your
-    email and the listing.
+    <strong>${listingTitle}</strong> is now yours to steward &mdash; which means
+    you can update the details, add photos, and keep it current whenever
+    something changes. No account to manage, no password to remember: just
+    visit your listing&rsquo;s edit page and verify with your email when you
+    need to.
   </p>
 
   <div style="text-align:center;margin:20px 0;">
@@ -46,44 +46,59 @@ export function stewardClaimConfirmationEmail(options: {
   </div>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    If you ever want to step away from this role or remove the listing
-    entirely, you can do that from the same edit page.
+    While you&rsquo;re here &mdash; two invitations, no pressure on either:
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Canary Commons is a living map of regenerative work across the country,
-    built without ads or rankings. Its foundational year is currently being
-    sustained by those who are able to see the vision before all the anchors
-    are set. You can learn more at
-    <a href="https://www.canarycommons.org/about" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/about</a>
-    or
-    <a href="https://www.canarycommons.org/founders" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/founders</a>.
+    If you know of another place that belongs on this map, you can add it
+    directly: <a href="${submitUrl}" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/submit</a>
   </p>
 
-  <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 16px;">
-    &#10047; &nbsp; &#10047; &nbsp; &#10047;
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    And if you&rsquo;d ever like to share a story &mdash; of how
+    <strong>${listingTitle}</strong> came to be, or of something else in your
+    area that&rsquo;s making the world a little more whole &mdash; there&rsquo;s
+    a place for that too:
+    <a href="${storiesUrl}" style="color:#1a2a3a;text-decoration:underline;">canarycommons.org/stories/submit</a>
+  </p>
+
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    This map exists because people like you are doing something worth
+    noticing. We&rsquo;re glad it found you.
+  </p>
+
+  <p style="font-size:16px;line-height:1.7;margin:0 0 12px;">
+    Ren
+  </p>
+
+  <div style="text-align:left;">
+    <img
+      src="${SITE_URL}/lotus-mark.png"
+      alt=""
+      width="48"
+      height="35"
+      style="display:inline-block;width:48px;height:auto;"
+    />
   </div>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 0;">
-    &mdash; Ren<br/>
-    Canary Commons
-  </p>
 </div>`.trim();
 
   const text = `${greeting}
 
-Thanks for taking stewardship of ${listingTitle} on Canary Commons. Your listing is now in your care.
+Thank you for claiming your place on the map.
 
-To make changes anytime in the future, just visit your listing's page on Canary Commons and enter this email address. We'll send you a fresh edit link. No password to remember, no account to maintain — just your email and the listing.
+${listingTitle} is now yours to steward — which means you can update the details, add photos, and keep it current whenever something changes. No account to manage, no password to remember: just visit your listing's edit page and verify with your email when you need to.
 
 View your listing: ${listingUrl}
 
-If you ever want to step away from this role or remove the listing entirely, you can do that from the same edit page.
+While you're here — two invitations, no pressure on either:
 
-Canary Commons is a living map of regenerative work across the country, built without ads or rankings. Its foundational year is currently being sustained by those who are able to see the vision before all the anchors are set. You can learn more at canarycommons.org/about or canarycommons.org/founders.
+If you know of another place that belongs on this map, you can add it directly: canarycommons.org/submit
 
-— Ren
-Canary Commons`;
+And if you'd ever like to share a story — of how ${listingTitle} came to be, or of something else in your area that's making the world a little more whole — there's a place for that too: canarycommons.org/stories/submit
+
+This map exists because people like you are doing something worth noticing. We're glad it found you.
+
+Ren`;
 
   return { subject, html, text };
 }

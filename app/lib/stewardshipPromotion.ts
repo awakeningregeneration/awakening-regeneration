@@ -71,33 +71,40 @@ export async function promoteIfGraceExpired(
         `Steward auto-promoted: ${steward.email} → listing ${listingId}`
       );
 
-      // Send claim confirmation email (non-blocking)
+      // Send claim confirmation email (non-blocking, dedup guard)
       try {
-        const { data: listing } = await supabaseAdmin
-          .from("listings")
-          .select("title")
-          .eq("id", listingId)
-          .single();
-
         const { data: stewardRecord } = await supabaseAdmin
           .from("stewards")
-          .select("display_name")
+          .select("display_name, confirmation_email_sent_at")
           .eq("id", steward.id)
           .single();
 
-        const emailContent = stewardClaimConfirmationEmail({
-          stewardName: stewardRecord?.display_name || "",
-          listingTitle: listing?.title || "your listing",
-          listingId,
-        });
+        if (!stewardRecord?.confirmation_email_sent_at) {
+          const { data: listing } = await supabaseAdmin
+            .from("listings")
+            .select("title")
+            .eq("id", listingId)
+            .single();
 
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: steward.email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        });
+          const emailContent = stewardClaimConfirmationEmail({
+            stewardName: stewardRecord?.display_name || "",
+            listingTitle: listing?.title || "your listing",
+            listingId,
+          });
+
+          await resend.emails.send({
+            from: FROM_EMAIL,
+            to: steward.email,
+            subject: emailContent.subject,
+            html: emailContent.html,
+            text: emailContent.text,
+          });
+
+          await supabaseAdmin
+            .from("stewards")
+            .update({ confirmation_email_sent_at: new Date().toISOString() })
+            .eq("id", steward.id);
+        }
       } catch (emailErr) {
         console.error("Steward claim confirmation email failed (grace promotion):", emailErr);
       }

@@ -290,6 +290,23 @@ Decided June 15. Simplify the homepage, pulling it off the concept-about-concept
 
 ---
 
+## Roadmap / Not Yet Built
+
+### Bridge the Commons — large-gift inquiry system
+
+**Trigger:** Currently ~10 large-donation inquiries and growing via manual outreach; time to build once volume justifies the setup.
+
+**Planned shape:**
+
+- New "Bridge the Commons" button/link alongside the existing $18/$28/$42 tiers (not replacing them) — for donors wanting to give in a larger way.
+- Simple inquiry form: gift range ($500–1k / $1k–5k / $5k+), name, email, message. No Stripe/payment step — this path exists specifically to avoid Stripe fees on large gifts.
+- Submissions save to a new `bridge_inquiries` table (name, email, range, message, timestamp, status) AND trigger an immediate email notification.
+- Status field tracks: `new` / `responded` / `gift received` — so nothing silently falls through.
+- Daily scheduled check (Netlify scheduled function): anything still `new` after 24 hours triggers a reminder — email at minimum, with SMS via Twilio as a stretch goal once that account/number is set up (not yet in the stack; requires a Twilio account, phone number, and secure storage of the auth token before this piece can be wired).
+- The auto-response email to the donor should include Ren's transfer/ACH instructions so they have everything needed to send a direct deposit without a manual back-and-forth. **IMPORTANT:** bank/ACH details must NOT be hardcoded into the email template file — store them as an admin-editable setting (Supabase row or env variable) that the template references, so the info lives in one controlled place and isn't sitting in git history.
+
+---
+
 ## How we work
 
 - **Session opens**: Claude reads PROJECT_STATE.md, LOOSE_ENDS.md, GROWTH_LIST.md, and BULK_PLACEMENT_JSON.md to ground in current state. PROJECT_MAP.md is consulted as needed for architectural reference. BULK_PLACEMENT_JSON.md is the canonical reference for the JSON shape the bulk placement tool at /[handle]/place/bulk expects.
