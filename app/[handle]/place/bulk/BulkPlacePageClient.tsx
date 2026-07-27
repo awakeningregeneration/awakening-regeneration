@@ -134,6 +134,35 @@ export default function BulkPlacePageClient({
   const [parseError, setParseError] = useState("");
   const [drafts, setDrafts] = useState<ListingDraft[]>([]);
   const [stage, setStage] = useState<"input" | "review">("input");
+  // confirmPendingId: the draft waiting for the place-confirm dialog
+  const [confirmPendingId, setConfirmPendingId] = useState<string | null>(null);
+
+  const PLACE_CONFIRM_SKIP_KEY = "canary_place_confirm_skip";
+
+  function requestPlacement(id: string) {
+    const skip = typeof window !== "undefined"
+      && localStorage.getItem(PLACE_CONFIRM_SKIP_KEY) === "true";
+    if (skip) {
+      placeDraft(id);
+    } else {
+      setConfirmPendingId(id);
+    }
+  }
+
+  function handleConfirmContinue(dontShowAgain: boolean) {
+    const id = confirmPendingId;
+    setConfirmPendingId(null);
+    if (dontShowAgain) {
+      localStorage.setItem(PLACE_CONFIRM_SKIP_KEY, "true");
+    }
+    if (id) placeDraft(id);
+  }
+
+  function handleConfirmSkip() {
+    const id = confirmPendingId;
+    setConfirmPendingId(null);
+    if (id) skipDraft(id);
+  }
 
   function handleParse() {
     setParseError("");
@@ -738,12 +767,7 @@ export default function BulkPlacePageClient({
                           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                             <button
                               type="button"
-                              onClick={() => {
-                                const ok = window.confirm(
-                                  `Place "${draft.business_name}"? This will add it to the map${draft.steward_email && !draft.no_public_email ? " and send Email 1 to the steward" : ""}.`
-                                );
-                                if (ok) placeDraft(draft.id);
-                              }}
+                              onClick={() => requestPlacement(draft.id)}
                               disabled={!canPlace || isPlacing}
                               style={{
                                 padding: "10px 20px",
@@ -843,6 +867,111 @@ export default function BulkPlacePageClient({
           )}
         </div>
       </div>
+
+      {/* Place-confirm modal */}
+      {confirmPendingId !== null && (() => {
+        const pending = drafts.find((d) => d.id === confirmPendingId);
+        if (!pending) return null;
+        const willEmail = pending.steward_email && !pending.no_public_email;
+        return (
+          <PlaceConfirmModal
+            businessName={pending.business_name}
+            willEmail={!!willEmail}
+            onContinue={handleConfirmContinue}
+            onSkip={handleConfirmSkip}
+          />
+        );
+      })()}
     </main>
+  );
+}
+
+function PlaceConfirmModal({
+  businessName,
+  willEmail,
+  onContinue,
+  onSkip,
+}: {
+  businessName: string;
+  willEmail: boolean;
+  onContinue: (dontShowAgain: boolean) => void;
+  onSkip: () => void;
+}) {
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(10,30,60,0.45)",
+        backdropFilter: "blur(4px)",
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 18,
+          padding: "28px 32px",
+          maxWidth: 420,
+          width: "90%",
+          boxShadow: "0 8px 40px rgba(10,30,60,0.22)",
+        }}
+      >
+        <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "1rem", color: "#0d2a4a" }}>
+          Place &ldquo;{businessName}&rdquo;?
+        </p>
+        <p style={{ margin: "0 0 20px", fontSize: "0.88rem", color: "#3a5a7a", lineHeight: 1.5 }}>
+          This will add it to the map
+          {willEmail ? " and send Email 1 to the steward" : ""}.
+        </p>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={() => onContinue(dontShowAgain)}
+            style={{
+              flex: 1,
+              padding: "10px 0",
+              borderRadius: 999,
+              border: "none",
+              background: "#FFD86B",
+              color: "#1a2a0e",
+              fontWeight: 700,
+              fontSize: "0.88rem",
+              cursor: "pointer",
+            }}
+          >
+            Continue
+          </button>
+          <button
+            type="button"
+            onClick={onSkip}
+            style={{
+              padding: "10px 18px",
+              borderRadius: 999,
+              border: "1px solid rgba(100,150,220,0.3)",
+              background: "none",
+              color: "#6b7c94",
+              fontSize: "0.88rem",
+              cursor: "pointer",
+            }}
+          >
+            Skip
+          </button>
+        </div>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.8rem", color: "#6b7c94", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={dontShowAgain}
+            onChange={(e) => setDontShowAgain(e.target.checked)}
+          />
+          Don&rsquo;t show this message again
+        </label>
+      </div>
+    </div>
   );
 }
