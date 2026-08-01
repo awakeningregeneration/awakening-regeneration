@@ -14,13 +14,13 @@ type LightPoint = {
 };
 
 const points: LightPoint[] = [
-  // Widened spread: left edge lights shifted -7 to -8, right edge shifted +8
-  // Range now: left 16%–85%, top 25%–66%
-  { left: 33, top: 63, size: 8, glow: 0.9 },
-  { left: 16, top: 52, size: 7, glow: 0.8 },   // was 24
-  { left: 20, top: 33, size: 7, glow: 0.82 },  // was 27
+  // All points pulled to interior US — no coastlines, no ocean.
+  // Left range: 26–72%, top range: 26–62%
+  { left: 36, top: 60, size: 8, glow: 0.9 },   // Arkansas / Louisiana interior
+  { left: 26, top: 50, size: 7, glow: 0.8 },   // Nevada / E California interior
+  { left: 28, top: 34, size: 7, glow: 0.82 },  // Idaho interior
 
-  { left: 22, top: 60, size: 9, glow: 0.92 },  // was 29
+  { left: 30, top: 56, size: 9, glow: 0.92 },  // Arizona / New Mexico
   { left: 31, top: 47, size: 7, glow: 0.8 },
   { left: 33, top: 28, size: 6, glow: 0.75 },
 
@@ -28,7 +28,7 @@ const points: LightPoint[] = [
   { left: 39, top: 49, size: 10, glow: 0.96 },
   { left: 41, top: 31, size: 7, glow: 0.8 },
 
-  { left: 45, top: 65, size: 8, glow: 0.86 },
+  { left: 45, top: 63, size: 8, glow: 0.86 },  // Texas interior (not Gulf coast)
   { left: 47, top: 51, size: 8, glow: 0.88 },
   { left: 49, top: 33, size: 7, glow: 0.8 },
 
@@ -36,16 +36,16 @@ const points: LightPoint[] = [
   { left: 55, top: 48, size: 7, glow: 0.8 },
   { left: 57, top: 26, size: 6, glow: 0.74 },
 
-  { left: 60, top: 64, size: 8, glow: 0.88 },
+  { left: 60, top: 62, size: 8, glow: 0.88 },  // Alabama / Georgia interior
   { left: 62, top: 50, size: 8, glow: 0.86 },
   { left: 64, top: 32, size: 7, glow: 0.78 },
 
-  { left: 68, top: 60, size: 8, glow: 0.86 },
-  { left: 78, top: 46, size: 9, glow: 0.92 },  // was 70
-  { left: 80, top: 25, size: 6, glow: 0.72 },  // was 72
+  { left: 68, top: 58, size: 8, glow: 0.86 },  // pulled up from 60 (S Carolina/GA inland)
+  { left: 71, top: 44, size: 9, glow: 0.92 },  // Pennsylvania / Maryland interior
+  { left: 66, top: 28, size: 6, glow: 0.72 },  // Minnesota / Wisconsin
 
-  { left: 83, top: 54, size: 7, glow: 0.8 },   // was 75
-  { left: 85, top: 36, size: 8, glow: 0.84 },   // was 77
+  { left: 70, top: 52, size: 7, glow: 0.8 },   // Virginia interior
+  { left: 72, top: 36, size: 8, glow: 0.84 },  // Pennsylvania / New Jersey interior
 
   // Additional points — central/sparse US states with brightness variance
   // Dimmer points (~70-80% glow)
@@ -54,7 +54,7 @@ const points: LightPoint[] = [
   { left: 40, top: 38, size: 5, glow: 0.65 },   // Kansas — Topeka area
   { left: 48, top: 56, size: 6, glow: 0.60 },   // Oklahoma — OKC area
   { left: 36, top: 58, size: 5, glow: 0.62 },   // Arkansas — Little Rock area
-  { left: 52, top: 66, size: 5, glow: 0.58 },   // Mississippi — Jackson area
+  { left: 52, top: 62, size: 5, glow: 0.58 },   // Mississippi — Jackson area (moved up from 66)
 
   // Brighter points (larger/hotter)
   { left: 44, top: 30, size: 11, glow: 0.98 },  // Iowa — Des Moines area
@@ -67,23 +67,48 @@ const points: LightPoint[] = [
   { left: 38, top: 50, size: 7, glow: 0.80 },   // Arkansas — Fayetteville area
   { left: 54, top: 54, size: 7, glow: 0.82 },   // Tennessee — Nashville area
   { left: 60, top: 56, size: 8, glow: 0.84 },   // Georgia — Atlanta area
+
+  // Pacific / West Coast reach — left 24–28%, safely inland
+  { left: 25, top: 29, size: 6, glow: 0.76 },   // Washington — Spokane / Cascades
+  { left: 24, top: 38, size: 7, glow: 0.78 },   // Oregon — Bend / interior
+  { left: 25, top: 48, size: 6, glow: 0.78 },   // N California — Sacramento Valley
+  { left: 27, top: 57, size: 7, glow: 0.76 },   // Arizona / S California interior
+  { left: 26, top: 43, size: 5, glow: 0.70 },   // Oregon / N Nevada
+  { left: 28, top: 53, size: 6, glow: 0.74 },   // Nevada / Central California
+
+  // Eastern seaboard reach — left 70–75%, Piedmont / inland from coast
+  { left: 73, top: 31, size: 6, glow: 0.74 },   // Vermont / New Hampshire
+  { left: 74, top: 39, size: 7, glow: 0.79 },   // Connecticut / W Massachusetts
+  { left: 74, top: 47, size: 7, glow: 0.78 },   // Maryland / Delaware interior
+  { left: 73, top: 54, size: 6, glow: 0.76 },   // North Carolina — Piedmont
+  { left: 70, top: 60, size: 7, glow: 0.80 },   // South Carolina interior
+  { left: 67, top: 63, size: 6, glow: 0.76 },   // N Florida / S Georgia interior
 ];
 
 const faintLights = [
-  { left: 10, top: 42 },  // was 18
-  { left: 13, top: 34 },  // was 21
-  { left: 21, top: 66 },  // was 28
-  { left: 34, top: 29 },
-  { left: 36, top: 54 },
-  { left: 42, top: 63 },
-  { left: 44, top: 28 },
-  { left: 50, top: 68 },
-  { left: 58, top: 30 },
-  { left: 63, top: 58 },
-  { left: 66, top: 27 },
-  { left: 79, top: 64 },  // was 71
-  { left: 82, top: 33 },  // was 74
-  { left: 87, top: 48 },  // was 79
+  { left: 30, top: 40 },  // South Dakota / Wyoming
+  { left: 33, top: 32 },  // Montana interior
+  { left: 38, top: 58 },  // Oklahoma interior
+  { left: 34, top: 29 },  // Montana / North Dakota
+  { left: 36, top: 54 },  // Arkansas interior
+  { left: 42, top: 61 },  // Texas interior
+  { left: 44, top: 28 },  // South Dakota / Nebraska
+  { left: 50, top: 60 },  // Mississippi interior
+  { left: 58, top: 30 },  // Wisconsin / Michigan
+  { left: 63, top: 57 },  // Georgia interior
+  { left: 66, top: 27 },  // Minnesota / Wisconsin
+  { left: 64, top: 57 },  // Georgia interior
+  { left: 68, top: 34 },  // Ohio interior
+  { left: 70, top: 47 },  // Virginia / WV interior
+  // West coast reach — left 24–27%
+  { left: 26, top: 32 },  // Oregon / N Idaho
+  { left: 25, top: 43 },  // N California / Nevada
+  { left: 26, top: 53 },  // California / Arizona
+  // East coast reach — left 71–74%
+  { left: 72, top: 33 },  // Vermont / New Hampshire interior
+  { left: 73, top: 43 },  // Pennsylvania / NJ interior
+  { left: 72, top: 55 },  // North / South Carolina interior
+  { left: 69, top: 62 },  // Georgia / N Florida interior
 ];
 
 /* ── Mobile light adjustment ──
@@ -94,7 +119,7 @@ const MOBILE_DIM = 0.45;
 const MOBILE_EDGE_BOOST = 1.2;
 
 function isEdgeLight(left: number): boolean {
-  return left < 25 || left > 75;
+  return left < 32 || left > 68;
 }
 
 function mobileAdjust(p: LightPoint): LightPoint {

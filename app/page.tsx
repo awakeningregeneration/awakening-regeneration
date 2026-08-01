@@ -5,19 +5,21 @@ import { useRouter } from "next/navigation";
 import ThresholdMap from "@/app/components/ThresholdMap";
 import Link from "next/link";
 
+// Orb positions: interior US heartland only — left 36–65%, top 29–53%
+// Far from all coastlines and well clear of Pacific, Atlantic, and Gulf.
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
-  { left: "6%", top: "8%", size: 5, opacity: 0.6 },
-  { left: "18%", top: "15%", size: 3, opacity: 0.45 },
-  { left: "32%", top: "6%", size: 6, opacity: 0.65 },
-  { left: "48%", top: "22%", size: 4, opacity: 0.5 },
-  { left: "64%", top: "12%", size: 7, opacity: 0.7 },
-  { left: "82%", top: "18%", size: 4, opacity: 0.55 },
-  { left: "10%", top: "38%", size: 6, opacity: 0.65 },
-  { left: "42%", top: "44%", size: 3, opacity: 0.4 },
-  { left: "72%", top: "40%", size: 8, opacity: 0.7 },
-  { left: "22%", top: "68%", size: 5, opacity: 0.55 },
-  { left: "56%", top: "72%", size: 4, opacity: 0.5 },
-  { left: "88%", top: "85%", size: 6, opacity: 0.6 },
+  { left: "36%", top: "31%", size: 5, opacity: 0.6 },   // Montana / North Dakota
+  { left: "52%", top: "29%", size: 3, opacity: 0.45 },  // Minnesota / Wisconsin
+  { left: "62%", top: "32%", size: 6, opacity: 0.65 },  // Wisconsin / Michigan UP
+  { left: "38%", top: "40%", size: 4, opacity: 0.5 },   // Wyoming / Colorado
+  { left: "46%", top: "37%", size: 7, opacity: 0.7 },   // Nebraska / Iowa
+  { left: "58%", top: "38%", size: 4, opacity: 0.55 },  // Illinois / Indiana
+  { left: "65%", top: "40%", size: 6, opacity: 0.65 },  // Ohio
+  { left: "42%", top: "46%", size: 3, opacity: 0.4 },   // Kansas
+  { left: "54%", top: "44%", size: 8, opacity: 0.7 },   // Missouri / Kentucky
+  { left: "40%", top: "53%", size: 5, opacity: 0.55 },  // Oklahoma interior
+  { left: "52%", top: "52%", size: 4, opacity: 0.5 },   // Tennessee
+  { left: "61%", top: "48%", size: 6, opacity: 0.6 },   // West Virginia
 ];
 
 const STATES = [
@@ -219,25 +221,36 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Hero line */}
+          {/* Hero phrases — in flow, between ABOUT nav and state selector */}
           <p
-            className="cover-thesis"
             style={{
-              margin: "0 auto 56px",
-              maxWidth: 620,
-              fontSize: "clamp(1.56rem, 2.1vw, 1.76rem)",
-              lineHeight: 1.65,
-              fontWeight: 500,
-              letterSpacing: "0.025em",
+              margin: "0 auto 68px",
+              fontSize: "clamp(2.2rem, 3.4vw, 3.4rem)",
+              fontWeight: 800,
+              letterSpacing: "0.12em",
               color: "#fffcf0",
               textShadow:
-                "0 0 12px rgba(255,248,230,0.35), 0 0 24px rgba(255,248,230,0.20), 0 0 2px rgba(10,20,40,0.6)",
+                "0 0 20px rgba(255,248,230,0.5), 0 0 40px rgba(255,248,230,0.22), 0 2px 5px rgba(10,20,40,0.8)",
               textAlign: "center",
+              lineHeight: 1.15,
             }}
           >
-            You care.
-            <span style={{ display: "block", height: "0.2em" }} />
-            Let&apos;s find it.
+            YOU CARE.
+          </p>
+          <p
+            style={{
+              margin: "0 auto 52px",
+              fontSize: "clamp(2.2rem, 3.4vw, 3.4rem)",
+              fontWeight: 800,
+              letterSpacing: "0.12em",
+              color: "#fffcf0",
+              textShadow:
+                "0 0 20px rgba(255,248,230,0.5), 0 0 40px rgba(255,248,230,0.22), 0 2px 5px rgba(10,20,40,0.8)",
+              textAlign: "center",
+              lineHeight: 1.15,
+            }}
+          >
+            LET&apos;S FIND IT.
           </p>
           <div
             style={{
@@ -309,7 +322,7 @@ export default function HomePage() {
                 href="/founders"
                 className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
               >
-                Steward the Commons
+                Stewardship
               </Link>
             </div>
           </div>
