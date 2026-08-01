@@ -235,28 +235,10 @@ export default function HomePage() {
               textAlign: "center",
             }}
           >
-            A constellation of sustainable, life-supporting places and
-            projects across the United States and beyond.
-            <span style={{ display: "block", height: "1.4em" }} />
-            Diversity sustains us. What we give our attention to grows.
-            Let&apos;s turn toward a brighter future together.
+            You care.
+            <span style={{ display: "block", height: "0.2em" }} />
+            Let&apos;s find it.
           </p>
-
-          {/* Explore the commons — label + state selector */}
-          <div
-            style={{
-              fontSize: "0.95rem",
-              fontWeight: 500,
-              letterSpacing: "0.18em",
-              fontStyle: "italic",
-              color: "rgba(255,252,240,0.92)",
-              textAlign: "center",
-              marginBottom: 14,
-              textShadow: "0 0 10px rgba(255,248,230,0.25), 0 0 8px rgba(10,20,40,0.5)",
-            }}
-          >
-            Explore what&apos;s rising.
-          </div>
           <div
             style={{
               display: "flex",
@@ -320,26 +302,15 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Tend the commons — founders door + supporting line as one unit */}
+          {/* Tend the commons — founders door */}
           <div style={{ textAlign: "center" }}>
-            <div className="flex justify-center" style={{ marginBottom: 10 }}>
+            <div className="flex justify-center">
               <Link
                 href="/founders"
                 className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
               >
                 Steward the Commons
               </Link>
-            </div>
-            <div
-              style={{
-                fontSize: "1.02rem",
-                fontWeight: 550,
-                letterSpacing: "0.06em",
-                color: "rgba(255,232,160,0.92)",
-                textShadow: "0 0 12px rgba(255,216,107,0.25), 0 0 6px rgba(10,20,40,0.4)",
-              }}
-            >
-              Your Contribution Matters
             </div>
           </div>
         </div>
