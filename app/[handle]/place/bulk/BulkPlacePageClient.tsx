@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { normalizeState } from "@/app/lib/normalize";
 import { buildOutreachMessage } from "@/app/lib/outreachTemplate";
@@ -137,6 +137,30 @@ export default function BulkPlacePageClient({
   // confirmPendingId: the draft waiting for the place-confirm dialog
   const [confirmPendingId, setConfirmPendingId] = useState<string | null>(null);
 
+  // ── Per-card duplicate detection ──
+  const dupTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const [cardDupMatches, setCardDupMatches] = useState<Record<string, { id: string; title: string; city: string } | null>>({});
+  const [cardDupDismissed, setCardDupDismissed] = useState<Record<string, boolean>>({});
+
+  function checkCardDuplicate(draftId: string, name: string, city: string) {
+    if (dupTimers.current[draftId]) clearTimeout(dupTimers.current[draftId]);
+    if (cardDupDismissed[draftId] || name.trim().length < 2 || city.trim().length < 2) {
+      setCardDupMatches((prev) => ({ ...prev, [draftId]: null }));
+      return;
+    }
+    dupTimers.current[draftId] = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/listings/check-duplicate?name=${encodeURIComponent(name.trim())}&city=${encodeURIComponent(city.trim())}`
+        );
+        const data = await res.json();
+        setCardDupMatches((prev) => ({ ...prev, [draftId]: data.matched ?? null }));
+      } catch {
+        // silent fail
+      }
+    }, 500);
+  }
+
   const PLACE_CONFIRM_SKIP_KEY = "canary_place_confirm_skip";
 
   function requestPlacement(id: string) {
@@ -219,9 +243,19 @@ export default function BulkPlacePageClient({
   }
 
   function updateDraft(id: string, field: keyof ListingDraft, value: unknown) {
-    setDrafts((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, [field]: value } : d))
-    );
+    setDrafts((prev) => {
+      const updated = prev.map((d) => (d.id === id ? { ...d, [field]: value } : d));
+      const draft = updated.find((d) => d.id === id);
+      if (draft) {
+        if (field === "business_name") {
+          setCardDupDismissed((prev) => ({ ...prev, [id]: false }));
+          checkCardDuplicate(id, value as string, draft.city);
+        } else if (field === "city") {
+          checkCardDuplicate(id, draft.business_name, value as string);
+        }
+      }
+      return updated;
+    });
   }
 
   function toggleCategory(id: string, cat: string) {
@@ -619,6 +653,54 @@ export default function BulkPlacePageClient({
                                 onChange={(e) => updateDraft(draft.id, "business_name", e.target.value)}
                                 disabled={isPlacing}
                               />
+                              {/* Per-card duplicate detection banner */}
+                              {cardDupMatches[draft.id] && !cardDupDismissed[draft.id] && (
+                                <div
+                                  style={{
+                                    marginTop: 6,
+                                    padding: "9px 12px",
+                                    borderRadius: 8,
+                                    background: "rgba(255,248,220,0.95)",
+                                    border: "1px solid rgba(255,200,80,0.35)",
+                                    fontSize: "0.78rem",
+                                    color: "#7a5a00",
+                                    display: "flex",
+                                    alignItems: "flex-start",
+                                    gap: 8,
+                                  }}
+                                >
+                                  <span style={{ flex: 1 }}>
+                                    May already exist as{" "}
+                                    <strong>{cardDupMatches[draft.id]!.title}</strong> in{" "}
+                                    <strong>{cardDupMatches[draft.id]!.city}</strong>.{" "}
+                                    <a
+                                      href={`/edit/${cardDupMatches[draft.id]!.id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ color: "#8a6d2a", fontWeight: 600, textDecoration: "underline" }}
+                                    >
+                                      View →
+                                    </a>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCardDupDismissed((prev) => ({ ...prev, [draft.id]: true }))}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      color: "#9a7a3a",
+                                      cursor: "pointer",
+                                      fontSize: "1rem",
+                                      lineHeight: 1,
+                                      padding: 0,
+                                      flexShrink: 0,
+                                    }}
+                                    aria-label="Dismiss"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              )}
                             </div>
                             <div>
                               <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Description</label>

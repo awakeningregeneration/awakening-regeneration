@@ -39,4 +39,15 @@ export type Listing = {
   steward_email?: string | null;
 
   createdAt?: string;
+
+  locations?: Array<{
+    id: string;
+    address?: string | null;
+    city: string;
+    state: string;
+    county?: string | null;
+    lat: number;
+    lng: number;
+    label?: string | null;
+  }>;
 };

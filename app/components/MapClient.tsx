@@ -36,18 +36,39 @@ const FLAG_REASON_OPTIONS = [
 /* ── GeoJSON helpers ── */
 
 function listingsToGeoJSON(listings: Listing[]): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: listings.map((l) => ({
-      type: "Feature" as const,
-      geometry: { type: "Point" as const, coordinates: [l.lng, l.lat] },
-      properties: {
-        id: l.id,
-        county: l.county ?? "",
-        state: l.state ?? "",
-      },
-    })),
-  };
+  const features: GeoJSON.Feature[] = [];
+
+  for (const l of listings) {
+    if (l.locations && l.locations.length > 0) {
+      // Multi-location: one GeoJSON feature per location row
+      for (const loc of l.locations) {
+        features.push({
+          type: "Feature" as const,
+          geometry: { type: "Point" as const, coordinates: [loc.lng, loc.lat] },
+          properties: {
+            id: loc.id,           // unique per pin (for layer filters)
+            listing_id: l.id,     // parent listing (for sidebar lookup on click)
+            county: loc.county ?? l.county ?? "",
+            state: loc.state ?? l.state ?? "",
+          },
+        });
+      }
+    } else {
+      // Single-location (existing behavior)
+      features.push({
+        type: "Feature" as const,
+        geometry: { type: "Point" as const, coordinates: [l.lng, l.lat] },
+        properties: {
+          id: l.id,
+          listing_id: l.id,
+          county: l.county ?? "",
+          state: l.state ?? "",
+        },
+      });
+    }
+  }
+
+  return { type: "FeatureCollection", features };
 }
 
 /* ── Pulse animation constants ── */
@@ -552,7 +573,7 @@ export default function MapClient({
 
       // --- Selected layers (filtered to selected listing) ---
 
-      const noMatchFilter: mapboxgl.ExpressionSpecification = ["==", ["get", "id"], ""];
+      const noMatchFilter: mapboxgl.ExpressionSpecification = ["==", ["get", "listing_id"], ""];
 
       map.addLayer({
         id: "listings-glow-selected",
@@ -628,7 +649,7 @@ export default function MapClient({
         const feature = e.features?.[0];
         if (!feature || !feature.properties) return;
         const props = feature.properties;
-        onSelect(props.id, {
+        onSelect(props.listing_id ?? props.id, {
           county: props.county || undefined,
           state: props.state || undefined,
         });
@@ -723,8 +744,8 @@ export default function MapClient({
     if (!map) return;
 
     const filter: mapboxgl.ExpressionSpecification = selectedId
-      ? ["==", ["get", "id"], selectedId]
-      : ["==", ["get", "id"], ""];
+      ? ["==", ["get", "listing_id"], selectedId]
+      : ["==", ["get", "listing_id"], ""];
 
     if (map.getLayer("listings-glow-selected")) {
       map.setFilter("listings-glow-selected", filter);

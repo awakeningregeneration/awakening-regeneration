@@ -74,7 +74,26 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  // Attach location rows for multi-location listings (table may not exist yet — non-blocking)
+  let locationsMap: Record<string, Array<{ id: string; address: string | null; city: string; state: string; county: string | null; lat: number; lng: number; label: string | null }>> = {};
+  try {
+    const { data: locationRows } = await supabaseAdmin
+      .from("listing_locations")
+      .select("id, listing_id, address, city, state, county, lat, lng, label");
+    if (locationRows) {
+      for (const row of locationRows) {
+        if (!locationsMap[row.listing_id]) locationsMap[row.listing_id] = [];
+        locationsMap[row.listing_id].push(row);
+      }
+    }
+  } catch {
+    // table not yet created — fall through with empty map
+  }
+  const enriched = (data || []).map((l: Record<string, unknown>) => ({
+    ...l,
+    locations: locationsMap[l.id as string] ?? [],
+  }));
+  return NextResponse.json(enriched);
 }
 
 // POST
@@ -204,6 +223,33 @@ export async function POST(req: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // ── Insert extra locations for multi-location listings ──
+    const locationsPayload = body.locations;
+    if (Array.isArray(locationsPayload) && locationsPayload.length > 1 && data?.id) {
+      try {
+        const locationInserts = await Promise.all(
+          locationsPayload.map(async (loc: { address?: string; city?: string; state?: string }) => {
+            const locCoords = await geocodeLocation({
+              address: loc.address,
+              city: loc.city,
+              state: loc.state,
+            });
+            return {
+              listing_id: data.id,
+              address: loc.address?.trim() || null,
+              city: loc.city?.trim() || "",
+              state: loc.state?.trim() || "",
+              lat: locCoords.lat,
+              lng: locCoords.lng,
+            };
+          })
+        );
+        await supabaseAdmin.from("listing_locations").insert(locationInserts);
+      } catch (locErr) {
+        console.error("listing_locations insert failed (non-blocking):", locErr);
+      }
     }
 
     // ── Stewardship claim (optional, non-blocking) ──────────

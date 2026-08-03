@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 const PRIMARY_CATEGORY_OPTIONS = [
@@ -209,6 +209,40 @@ export default function SubmitPage() {
     city: string;
   } | null>(null);
 
+  // ── Early duplicate detection ──
+  const [dupMatch, setDupMatch] = useState<{ id: string; title: string; city: string } | null>(null);
+  const [dupDismissed, setDupDismissed] = useState(false);
+  const dupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Multi-location ──
+  const [isMultiLocation, setIsMultiLocation] = useState(false);
+  const [multiLocationType, setMultiLocationType] = useState<"independent" | "same_team" | null>(null);
+  const [extraLocations, setExtraLocations] = useState<Array<{ id: string; address: string; city: string; state: string }>>([
+    { id: "loc-0", address: "", city: "", state: "" },
+  ]);
+
+  useEffect(() => {
+    if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
+    if (dupDismissed || title.trim().length < 2 || city.trim().length < 2) {
+      setDupMatch(null);
+      return;
+    }
+    dupTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/listings/check-duplicate?name=${encodeURIComponent(title.trim())}&city=${encodeURIComponent(city.trim())}`
+        );
+        const data = await res.json();
+        setDupMatch(data.matched ?? null);
+      } catch {
+        // silent fail
+      }
+    }, 500);
+    return () => {
+      if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
+    };
+  }, [title, city, dupDismissed]);
+
   const regionLabel = useMemo(() => {
     if (county && state) return `${county} County, ${state}`;
     if (state) return state;
@@ -265,6 +299,16 @@ export default function SubmitPage() {
       return false;
     }
 
+    if (isMultiLocation && multiLocationType === "same_team") {
+      for (let i = 0; i < extraLocations.length; i++) {
+        const loc = extraLocations[i];
+        if (!loc.city.trim() || !loc.state) {
+          setErrorMessage(`Please add city and state for location ${i + 2}.`);
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
@@ -308,6 +352,18 @@ export default function SubmitPage() {
         steward_display_name: claimStewardship
           ? stewardName.trim() || null
           : null,
+        ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
+          ? {
+              locations: [
+                { address: address.trim() || undefined, city: city.trim(), state: state.trim() },
+                ...extraLocations.map((l) => ({
+                  address: l.address.trim() || undefined,
+                  city: l.city.trim(),
+                  state: l.state,
+                })),
+              ],
+            }
+          : {}),
       };
 
       if (overrideDuplicate) {
@@ -499,10 +555,58 @@ export default function SubmitPage() {
                     name="ar-place-title"
                     autoComplete="off"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => { setTitle(e.target.value); setDupDismissed(false); }}
                     placeholder=""
                     style={inputStyle}
                   />
+                  {/* Early duplicate detection banner */}
+                  {dupMatch && !dupDismissed && (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        padding: "11px 14px",
+                        borderRadius: 10,
+                        background: "rgba(255,248,220,0.95)",
+                        border: "1px solid rgba(255,200,80,0.35)",
+                        fontSize: "0.87rem",
+                        color: "#7a5a00",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                      }}
+                    >
+                      <span style={{ flex: 1 }}>
+                        This may already be listed as{" "}
+                        <strong>{dupMatch.title}</strong> in{" "}
+                        <strong>{dupMatch.city}</strong>.{" "}
+                        <a
+                          href={`/edit/${dupMatch.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#8a6d2a", fontWeight: 600, textDecoration: "underline" }}
+                        >
+                          View listing →
+                        </a>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setDupDismissed(true)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#9a7a3a",
+                          cursor: "pointer",
+                          fontSize: "1.1rem",
+                          lineHeight: 1,
+                          padding: 0,
+                          flexShrink: 0,
+                        }}
+                        aria-label="Dismiss"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -671,6 +775,190 @@ export default function SubmitPage() {
                       ))}
                     </select>
                   </div>
+                </div>
+
+                {/* Multi-location checkbox */}
+                <div style={{ marginTop: 4 }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      color: "#3a5a7a",
+                      userSelect: "none",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isMultiLocation}
+                      onChange={(e) => {
+                        setIsMultiLocation(e.target.checked);
+                        if (!e.target.checked) {
+                          setMultiLocationType(null);
+                          setExtraLocations([{ id: "loc-0", address: "", city: "", state: "" }]);
+                        }
+                      }}
+                      style={{ width: 16, height: 16, accentColor: "#FFD86B", cursor: "pointer" }}
+                    />
+                    This business has more than one location
+                  </label>
+
+                  {isMultiLocation && (
+                    <div style={{ marginTop: 14, paddingLeft: 2 }}>
+                      <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0d2a4a", marginBottom: 10 }}>
+                        Are the locations independently owned/stewarded (like a franchise), or run by the same team?
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "0.88rem", color: "#3a5a7a" }}>
+                          <input
+                            type="radio"
+                            name="submitMultiLocType"
+                            checked={multiLocationType === "independent"}
+                            onChange={() => {
+                              setMultiLocationType("independent");
+                              setExtraLocations([{ id: "loc-0", address: "", city: "", state: "" }]);
+                            }}
+                            style={{ accentColor: "#FFD86B" }}
+                          />
+                          Independently owned / stewarded (like a franchise)
+                        </label>
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "0.88rem", color: "#3a5a7a" }}>
+                          <input
+                            type="radio"
+                            name="submitMultiLocType"
+                            checked={multiLocationType === "same_team"}
+                            onChange={() => setMultiLocationType("same_team")}
+                            style={{ accentColor: "#FFD86B" }}
+                          />
+                          Same team / steward across all locations
+                        </label>
+                      </div>
+
+                      {multiLocationType === "independent" && (
+                        <div
+                          style={{
+                            marginTop: 12,
+                            padding: "11px 15px",
+                            borderRadius: 10,
+                            background: "rgba(255,248,230,0.7)",
+                            border: "1px solid rgba(255,200,80,0.25)",
+                            fontSize: "0.87rem",
+                            color: "#7a5a00",
+                          }}
+                        >
+                          Please list each location as its own listing.
+                        </div>
+                      )}
+
+                      {multiLocationType === "same_team" && (
+                        <div style={{ marginTop: 14 }}>
+                          <p style={{ fontSize: "0.85rem", color: "#3a5a7a", fontStyle: "italic", marginBottom: 12 }}>
+                            Add each additional location below. All will appear as separate pins, linked to this listing.
+                          </p>
+                          {extraLocations.map((loc, idx) => (
+                            <div
+                              key={loc.id}
+                              style={{
+                                marginBottom: 14,
+                                padding: "14px 16px",
+                                borderRadius: 12,
+                                border: "1px solid rgba(100,150,220,0.2)",
+                                background: "rgba(255,255,255,0.55)",
+                              }}
+                            >
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0d2a4a" }}>
+                                  Location {idx + 2}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setExtraLocations((cur) => cur.filter((_, i) => i !== idx))}
+                                  style={{ background: "none", border: "none", color: "#c0392b", fontSize: "0.82rem", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <input
+                                  type="text"
+                                  placeholder="Street address (optional)"
+                                  value={loc.address}
+                                  onChange={(e) =>
+                                    setExtraLocations((cur) =>
+                                      cur.map((l, i) => i === idx ? { ...l, address: e.target.value } : l)
+                                    )
+                                  }
+                                  style={inputStyle}
+                                />
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                                  <input
+                                    type="text"
+                                    placeholder="City *"
+                                    value={loc.city}
+                                    onChange={(e) =>
+                                      setExtraLocations((cur) =>
+                                        cur.map((l, i) => i === idx ? { ...l, city: e.target.value } : l)
+                                      )
+                                    }
+                                    style={inputStyle}
+                                  />
+                                  <select
+                                    value={loc.state}
+                                    onChange={(e) =>
+                                      setExtraLocations((cur) =>
+                                        cur.map((l, i) => i === idx ? { ...l, state: e.target.value } : l)
+                                      )
+                                    }
+                                    style={{ ...inputStyle, appearance: "none" }}
+                                  >
+                                    <option value="">State *</option>
+                                    {[
+                                      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+                                      "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+                                      "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+                                      "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+                                      "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+                                      "New Hampshire", "New Jersey", "New Mexico", "New York",
+                                      "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+                                      "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+                                      "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+                                      "West Virginia", "Wisconsin", "Wyoming", "District of Columbia",
+                                    ].map((s) => (
+                                      <option key={s} value={s}>{s}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExtraLocations((cur) => [
+                                ...cur,
+                                { id: `loc-${Date.now()}`, address: "", city: "", state: "" },
+                              ])
+                            }
+                            style={{
+                              background: "none",
+                              border: "1px dashed rgba(100,150,220,0.4)",
+                              borderRadius: 10,
+                              padding: "8px 16px",
+                              fontSize: "0.87rem",
+                              color: "#3a5a7a",
+                              cursor: "pointer",
+                              width: "100%",
+                              marginTop: 2,
+                            }}
+                          >
+                            + Add another location
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div
