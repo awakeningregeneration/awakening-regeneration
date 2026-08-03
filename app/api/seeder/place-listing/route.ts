@@ -71,8 +71,14 @@ async function geocodeLocation(params: {
     throw new Error("Mapbox token is not configured.");
   }
 
+  // Strip PO Box addresses before geocoding — Mapbox misinterprets box numbers
+  // as street numbers and can pin to a wrong city. Geocode city+state only instead.
+  const PO_BOX_RE = /\bP\.?O\.?\s*Box\b|\bPost\s+Office\s+Box\b/i;
+  const safeAddress =
+    params.address && PO_BOX_RE.test(params.address) ? undefined : params.address;
+
   const parts = [
-    params.address?.trim(),
+    safeAddress?.trim(),
     params.city?.trim(),
     params.state?.trim(),
     "USA",
