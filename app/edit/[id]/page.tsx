@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -24,6 +24,7 @@ type Listing = {
   outreach_methods?: string[] | null;
   outreach_notes?: string | null;
   manual_outreach_at?: string | null;
+  locations?: Array<{ id: string; address?: string | null; city: string; state: string }> | null;
 };
 
 const CATEGORIES = [
@@ -185,6 +186,13 @@ function EditListingContent({ params }: Props) {
   const [existingNotes, setExistingNotes] = useState<string | null>(null);
   const [manualOutreachAt, setManualOutreachAt] = useState<string | null>(null);
 
+  // ── Multi-location ──
+  const [isMultiLocation, setIsMultiLocation] = useState(false);
+  const [multiLocationType, setMultiLocationType] = useState<"independent" | "same_team" | null>(null);
+  const [extraLocations, setExtraLocations] = useState<Array<{ id: string; address: string; city: string; state: string }>>([
+    { id: "loc-0", address: "", city: "", state: "" },
+  ]);
+
   // Outreach logging form state
   const [showOutreachLog, setShowOutreachLog] = useState(false);
   const [outreachMethods, setOutreachMethods] = useState<string[]>([]);
@@ -271,6 +279,20 @@ function EditListingContent({ params }: Props) {
         setExistingNotes(found.outreach_notes || null);
         setManualOutreachAt(found.manual_outreach_at || null);
 
+        // Pre-populate multi-location state if listing already has location rows
+        if (Array.isArray(found.locations) && found.locations.length > 1) {
+          setIsMultiLocation(true);
+          setMultiLocationType("same_team");
+          setExtraLocations(
+            found.locations.map((loc: { id: string; address?: string | null; city: string; state: string }) => ({
+              id: loc.id,
+              address: loc.address || "",
+              city: loc.city || "",
+              state: loc.state || "",
+            }))
+          );
+        }
+
         // Determine edit mode — seeder check first, then stewardship state
 
         // 1. Check if the current user is the seeder who placed this listing
@@ -345,6 +367,15 @@ function EditListingContent({ params }: Props) {
           state: suggestedState,
           county: suggestedCounty,
           steward_email: suggestedStewardEmail,
+          ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
+            ? {
+                locations: extraLocations.map((l) => ({
+                  address: l.address.trim() || undefined,
+                  city: l.city.trim(),
+                  state: l.state.trim(),
+                })),
+              }
+            : {}),
         }),
       });
 
@@ -382,6 +413,15 @@ function EditListingContent({ params }: Props) {
           county: suggestedCounty,
           steward_email: stewardEmail,
           steward_display_name: stewardDisplayName,
+          ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
+            ? {
+                locations: extraLocations.map((l) => ({
+                  address: l.address.trim() || undefined,
+                  city: l.city.trim(),
+                  state: l.state.trim(),
+                })),
+              }
+            : {}),
         }),
       });
 
@@ -938,18 +978,196 @@ function EditListingContent({ params }: Props) {
         <span style={labelStyle}>Address</span>
         <input style={inputStyle} value={suggestedAddress} onChange={(e) => setSuggestedAddress(e.target.value)} />
       </label>
-      <label style={fieldStyle}>
-        <span style={labelStyle}>City</span>
-        <input style={inputStyle} value={suggestedCity} onChange={(e) => setSuggestedCity(e.target.value)} />
-      </label>
-      <label style={fieldStyle}>
-        <span style={labelStyle}>State</span>
-        <input style={inputStyle} value={suggestedState} onChange={(e) => setSuggestedState(e.target.value)} />
-      </label>
-      <label style={fieldStyle}>
-        <span style={labelStyle}>County</span>
-        <input style={inputStyle} value={suggestedCounty} onChange={(e) => setSuggestedCounty(e.target.value)} />
-      </label>
+
+      {/* Multi-location checkbox — shown when user can directly save (seeder/steward) */}
+      <div style={{ marginTop: 2 }}>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: "#3a5a7a",
+            userSelect: "none",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={isMultiLocation}
+            onChange={(e) => {
+              setIsMultiLocation(e.target.checked);
+              if (!e.target.checked) {
+                setMultiLocationType(null);
+                setExtraLocations([{ id: "loc-0", address: "", city: "", state: "" }]);
+              }
+            }}
+            style={{ width: 16, height: 16, accentColor: "#FFD86B", cursor: "pointer" }}
+          />
+          This business has more than one location
+        </label>
+
+        {isMultiLocation && (
+          <div style={{ marginTop: 14, paddingLeft: 2 }}>
+            <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0d2a4a", marginBottom: 10 }}>
+              Are the locations independently owned/stewarded (like a franchise), or run by the same team?
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "0.88rem", color: "#3a5a7a" }}>
+                <input
+                  type="radio"
+                  name="editMultiLocType"
+                  checked={multiLocationType === "independent"}
+                  onChange={() => {
+                    setMultiLocationType("independent");
+                    setExtraLocations([{ id: "loc-0", address: "", city: "", state: "" }]);
+                  }}
+                  style={{ accentColor: "#FFD86B" }}
+                />
+                Independently owned / stewarded (like a franchise)
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "0.88rem", color: "#3a5a7a" }}>
+                <input
+                  type="radio"
+                  name="editMultiLocType"
+                  checked={multiLocationType === "same_team"}
+                  onChange={() => setMultiLocationType("same_team")}
+                  style={{ accentColor: "#FFD86B" }}
+                />
+                Same team / steward across all locations
+              </label>
+            </div>
+
+            {multiLocationType === "independent" && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: "11px 15px",
+                  borderRadius: 10,
+                  background: "rgba(255,248,230,0.7)",
+                  border: "1px solid rgba(255,200,80,0.25)",
+                  fontSize: "0.87rem",
+                  color: "#7a5a00",
+                }}
+              >
+                Please list each location as its own listing.
+              </div>
+            )}
+
+            {multiLocationType === "same_team" && (
+              <div style={{ marginTop: 14 }}>
+                <p style={{ fontSize: "0.85rem", color: "#3a5a7a", fontStyle: "italic", marginBottom: 12 }}>
+                  Add each location below. All will appear as separate pins, linked to this listing.
+                </p>
+                {extraLocations.map((loc, idx) => (
+                  <div
+                    key={loc.id}
+                    style={{
+                      marginBottom: 14,
+                      padding: "14px 16px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(100,150,220,0.2)",
+                      background: "rgba(255,255,255,0.55)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0d2a4a" }}>
+                        Location {idx + 1}
+                      </span>
+                      {extraLocations.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => setExtraLocations((cur) => cur.filter((_, i) => i !== idx))}
+                          style={{ background: "none", border: "none", color: "#c0392b", fontSize: "0.82rem", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ display: "grid", gap: 10 }}>
+                      <input
+                        type="text"
+                        placeholder="Street address (optional)"
+                        value={loc.address}
+                        onChange={(e) =>
+                          setExtraLocations((cur) =>
+                            cur.map((l, i) => i === idx ? { ...l, address: e.target.value } : l)
+                          )
+                        }
+                        style={inputStyle}
+                      />
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                        <input
+                          type="text"
+                          placeholder="City *"
+                          value={loc.city}
+                          onChange={(e) =>
+                            setExtraLocations((cur) =>
+                              cur.map((l, i) => i === idx ? { ...l, city: e.target.value } : l)
+                            )
+                          }
+                          style={inputStyle}
+                        />
+                        <input
+                          type="text"
+                          placeholder="State *"
+                          value={loc.state}
+                          onChange={(e) =>
+                            setExtraLocations((cur) =>
+                              cur.map((l, i) => i === idx ? { ...l, state: e.target.value } : l)
+                            )
+                          }
+                          style={inputStyle}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExtraLocations((cur) => [
+                      ...cur,
+                      { id: `loc-${Date.now()}`, address: "", city: "", state: "" },
+                    ])
+                  }
+                  style={{
+                    background: "none",
+                    border: "1px dashed rgba(100,150,220,0.4)",
+                    borderRadius: 10,
+                    padding: "8px 16px",
+                    fontSize: "0.87rem",
+                    color: "#3a5a7a",
+                    cursor: "pointer",
+                    width: "100%",
+                    marginTop: 2,
+                  }}
+                >
+                  + Add another location
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Single-location city/state/county — hidden when same_team multi-location is active */}
+      {!(isMultiLocation && multiLocationType === "same_team") && (
+        <>
+          <label style={fieldStyle}>
+            <span style={labelStyle}>City</span>
+            <input style={inputStyle} value={suggestedCity} onChange={(e) => setSuggestedCity(e.target.value)} />
+          </label>
+          <label style={fieldStyle}>
+            <span style={labelStyle}>State</span>
+            <input style={inputStyle} value={suggestedState} onChange={(e) => setSuggestedState(e.target.value)} />
+          </label>
+          <label style={fieldStyle}>
+            <span style={labelStyle}>County</span>
+            <input style={inputStyle} value={suggestedCounty} onChange={(e) => setSuggestedCounty(e.target.value)} />
+          </label>
+        </>
+      )}
     </>
   );
 

@@ -5,6 +5,19 @@ import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normal
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
 
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+async function geocodeForEdit(city: string, state: string): Promise<{ lat: number; lng: number }> {
+  if (!mapboxToken) throw new Error("No Mapbox token");
+  const query = encodeURIComponent(`${city}, ${state}, USA`);
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${mapboxToken}&limit=1`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const center = data?.features?.[0]?.center;
+  if (!center) throw new Error(`Could not geocode ${city}, ${state}`);
+  return { lng: center[0], lat: center[1] };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -101,6 +114,31 @@ export async function POST(request: Request) {
           { error: updateErr.message },
           { status: 500 }
         );
+      }
+    }
+
+    // ── Update listing_locations for multi-location listings ──
+    const locationsPayload = body.locations;
+    if (Array.isArray(locationsPayload) && locationsPayload.length > 1) {
+      try {
+        // Geocode all locations first — if any fail, we abort before touching the DB
+        const inserts = await Promise.all(
+          locationsPayload.map(async (loc: { address?: string; city?: string; state?: string }) => {
+            const coords = await geocodeForEdit(loc.city?.trim() || "", loc.state?.trim() || "");
+            return {
+              listing_id: listingId,
+              address: loc.address?.trim() || null,
+              city: loc.city?.trim() || "",
+              state: loc.state?.trim() || "",
+              lat: coords.lat,
+              lng: coords.lng,
+            };
+          })
+        );
+        await supabaseAdmin.from("listing_locations").delete().eq("listing_id", listingId);
+        await supabaseAdmin.from("listing_locations").insert(inserts);
+      } catch (locErr) {
+        console.error("listing_locations update failed (non-blocking):", locErr);
       }
     }
 
