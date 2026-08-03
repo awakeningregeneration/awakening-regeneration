@@ -224,8 +224,8 @@ export default function HomePage() {
           {/* Hero phrases — in flow, between ABOUT nav and state selector */}
           <p
             style={{
-              margin: "0 auto 68px",
-              fontSize: "clamp(2.2rem, 3.4vw, 3.4rem)",
+              margin: "0 auto 48px",
+              fontSize: "clamp(2.6rem, 4vw, 4rem)",
               fontWeight: 800,
               letterSpacing: "0.12em",
               color: "#fffcf0",
@@ -235,22 +235,23 @@ export default function HomePage() {
               lineHeight: 1.15,
             }}
           >
-            YOU CARE.
+            YOU CARE
           </p>
           <p
             style={{
-              margin: "0 auto 52px",
-              fontSize: "clamp(2.2rem, 3.4vw, 3.4rem)",
-              fontWeight: 800,
-              letterSpacing: "0.12em",
+              margin: "0 auto 20px",
+              marginTop: "4.4rem",
+              fontSize: "clamp(1.15rem, 1.7vw, 1.45rem)",
+              fontWeight: 500,
+              letterSpacing: "0.04em",
               color: "#fffcf0",
               textShadow:
-                "0 0 20px rgba(255,248,230,0.5), 0 0 40px rgba(255,248,230,0.22), 0 2px 5px rgba(10,20,40,0.8)",
+                "0 0 12px rgba(255,248,230,0.3), 0 1px 3px rgba(10,20,40,0.7)",
               textAlign: "center",
-              lineHeight: 1.15,
+              lineHeight: 1.4,
             }}
           >
-            LET&apos;S FIND IT.
+            See where good is rising, near and far.
           </p>
           <div
             style={{
