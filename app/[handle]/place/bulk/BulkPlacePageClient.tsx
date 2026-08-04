@@ -206,12 +206,26 @@ export default function BulkPlacePageClient({
       }
 
       const items: ListingDraft[] = parsed.map((raw) => {
-        const cat = (Array.isArray(raw.category)
-          ? raw.category.filter((c: string) => typeof c === "string")
+        // Resolve a raw category string to a canonical CATEGORIES value.
+        // Tries exact match first, then case-insensitive + trimmed fallback.
+        // Values that don't match either way are dropped rather than guessed.
+        function resolveCategory(c: unknown): string | null {
+          if (typeof c !== "string") return null;
+          const trimmed = c.trim();
+          if (CATEGORIES.includes(trimmed)) return trimmed;
+          const lower = trimmed.toLowerCase();
+          return CATEGORIES.find((cat) => cat.toLowerCase() === lower) ?? null;
+        }
+
+        const rawCats: unknown[] = Array.isArray(raw.category)
+          ? raw.category
           : typeof raw.category === "string"
-            ? [raw.category]
-            : []
-        ).filter((c: string) => CATEGORIES.includes(c));
+          ? [raw.category]
+          : [];
+        const cat = rawCats
+          .map(resolveCategory)
+          .filter((c): c is string => c !== null)
+          .slice(0, 5);
         const prac = (Array.isArray(raw.practices)
           ? raw.practices.filter((p: string) => typeof p === "string")
           : []
