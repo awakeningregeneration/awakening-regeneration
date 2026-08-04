@@ -27,6 +27,7 @@ placement pipeline at `/api/seeder/place-listing`.
 | `steward_email` | string | If present and non-empty, Email 1 fires on placement (unless no_public_email is true) |
 | `practices` | string[] | Must be from the canonical list below. Non-matching values are silently stripped at parse time. |
 | `no_public_email` | boolean | If true, listing is marked as contact-form-only. Email 1 will not fire even if steward_email is populated. Default: false. |
+| `locations` | array | **Not supported in bulk placement.** Any `locations` array in the JSON is parsed and then silently ignored. Bulk placement only supports single-location businesses. For businesses with multiple physical locations, use the single-listing seeder form at `/[handle]/place` instead. |
 
 ---
 
@@ -172,3 +173,10 @@ Justice-Oriented
 - **state should be the full name** (e.g., "Oregon"), not the
   abbreviation ("OR"). The API normalizes abbreviations but
   the full name is preferred.
+
+- **Multi-location businesses are not supported in bulk placement.**
+  A `locations` array field in the JSON is silently ignored — the
+  listing is placed as a single-location entry using the top-level
+  `city`, `state`, and `address` fields. To place a business with
+  multiple physical storefronts, use the single-listing seeder form
+  at `/[handle]/place`, which has the multi-location UI.
