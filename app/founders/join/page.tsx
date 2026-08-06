@@ -744,6 +744,26 @@ function JoinContent() {
             Read a letter from the founder
           </a>
         </p>
+
+        <p
+          style={{
+            marginTop: 10,
+            fontSize: "0.82rem",
+            textAlign: "center",
+            color: "rgba(159,184,216,0.52)",
+          }}
+        >
+          <a
+            href="/bridge-the-commons"
+            style={{
+              color: "rgba(159,184,216,0.52)",
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+            }}
+          >
+            To go deeper on the call for stewardship, read the full narrative →
+          </a>
+        </p>
       </div>
     </main>
   );
