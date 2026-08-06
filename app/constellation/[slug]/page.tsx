@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import ConstellationAtmosphere from "../ConstellationAtmosphere";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

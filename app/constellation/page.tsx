@@ -3,6 +3,8 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import ConstellationAtmosphere from "./ConstellationAtmosphere";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Constellation — Canary Commons",
   description:
