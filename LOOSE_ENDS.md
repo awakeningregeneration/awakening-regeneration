@@ -8,6 +8,20 @@
 
 ---
 
+- [ ] **Bridge the Commons PDF** — plan is fully designed, ready to build after one final review pass of the live `/bridge-the-commons` page. Steps:
+  1. Do a fresh sweep of the live page at `/bridge-the-commons` — make any last visual/copy adjustments first
+  2. Then ask Claude to build the PDF using the plan below (copy-paste as the prompt if needed)
+
+  **PDF build plan (preset instructions for Claude):**
+  > Build a print-optimized page at `/bridge-the-commons/print` — one new file `app/bridge-the-commons/print/page.tsx`, no new dependencies.
+  > - Pages 1–13: one page per slide. Each page: `<img src="/bridge/slideN.jpg">` at ~55% page height, headline (Box 0 lines) as `<h2>`, subtitle (Box 1 lines, italic `<p>`) if present, full body paragraphs from `bridgeSections[n].body`, quote as `<blockquote>` if present. `page-break-after: always` on each.
+  > - Page 14: no image. Two closing sections from `bridgeClosing` — "A Note About Business Structure and Stewardship" and "Why Stewardship?" — with a `✦ ✦ ✦ ✦ ✦` gold star row separator between them, matching the styling on the live page.
+  > - CSS: `@page { size: letter portrait; margin: 0.75in; }`. All nav/header hidden in print via `@media print`.
+  > - Pull `bridgeSections` and `bridgeClosing` directly from `./content` — no retyping.
+  > - Portrait, letter size, real page breaks, dark navy background with gold/cream text matching site palette.
+  > - Add a quiet "Print / Save as PDF →" link on the main `/bridge-the-commons` page (screen-only, not shown in print) pointing to `/bridge-the-commons/print`.
+  > - Also restore the commented-out PDF download link in `page.tsx` (search: "PDF link — hidden") but point `href` to `/bridge-the-commons/print` instead of `/BridgeTheCommons.pdf`.
+
 - [ ] Revisit client-side affiliate filter approach if affiliate_resources crosses ~150 records
 - [ ] State-level "All counties" search — different feature, separate design
 - [ ] Synonym data shape — current flat string[] in synonym_groups.terms may evolve to weighted associations if needed; getSynonyms signature is the stable interface
