@@ -263,7 +263,7 @@ export default function HomePage() {
               flexWrap: "wrap",
               justifyContent: "center",
               alignItems: "center",
-              marginBottom: 44,
+              marginBottom: 6,
             }}
           >
             <select
@@ -319,14 +319,32 @@ export default function HomePage() {
             </button>
           </div>
 
+          {/* Reflective copy — tucked under dropdown, related to search */}
+          <p
+            style={{
+              textAlign: "center",
+              fontFamily: "var(--font-caveat)",
+              fontSize: "clamp(1.4rem, 1.8vw, 1.7rem)",
+              lineHeight: 1.5,
+              color: "rgba(255,252,230,0.95)",
+              margin: "0 0 28px",
+            }}
+          >
+            Still spreading beneath the surface — every place you add helps more come to light.
+          </p>
+
           {/* Tend the commons — founders door */}
           <div style={{ textAlign: "center" }}>
             <div className="flex justify-center">
               <Link
                 href="/founders"
                 className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+                style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}
               >
-                Stewardship
+                <span>Stewardship</span>
+                <span style={{ fontFamily: "var(--font-caveat)", fontSize: "1rem", fontWeight: 400, color: "rgba(30,20,5,0.72)", marginTop: 2 }}>
+                  What feeds the roots.
+                </span>
               </Link>
             </div>
           </div>
