@@ -129,7 +129,7 @@ export default function SlideHero({
                     : "'Calibri', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif",
                 // fontSizeRatio × containerWidth reproduces original deck proportions
                 // at any rendered container width.
-                fontSize: `${box.fontSizeRatio * (box.adjustments?.fontSizeMultiplier ?? 1) * Math.max(containerWidth, 500)}px`,
+                fontSize: `${box.fontSizeRatio * (box.adjustments?.fontSizeMultiplier ?? 1) * Math.max(containerWidth, 460)}px`,
                 fontWeight: box.bold ? 700 : 400,
                 fontStyle: box.italic ? "italic" : "normal",
                 color: "#ffffff",
