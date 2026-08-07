@@ -249,7 +249,7 @@ export default function HomePage() {
               letterSpacing: "0.04em",
               color: "#fffcf0",
               textShadow:
-                "0 0 12px rgba(255,248,230,0.3), 0 1px 3px rgba(10,20,40,0.7)",
+                "0 0 4px rgba(5,10,25,0.98), 0 0 10px rgba(5,10,25,0.82), 0 1px 5px rgba(5,10,25,0.92), 0 0 20px rgba(255,248,230,0.35), 0 0 40px rgba(255,248,230,0.14)",
               textAlign: "center",
               lineHeight: 1.4,
             }}
