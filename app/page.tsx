@@ -232,7 +232,7 @@ export default function HomePage() {
               letterSpacing: "0.06em",
               color: "#fffcf0",
               textShadow:
-                "0 0 20px rgba(255,248,230,0.5), 0 0 40px rgba(255,248,230,0.22), 0 2px 5px rgba(10,20,40,0.8)",
+                "0 0 5px rgba(5,10,25,0.98), 0 0 12px rgba(5,10,25,0.85), 0 2px 6px rgba(5,10,25,0.95), 0 0 28px rgba(255,248,230,0.45), 0 0 50px rgba(255,248,230,0.18)",
               textAlign: "center",
               lineHeight: 1.15,
             }}
