@@ -225,6 +225,8 @@ export default function HomePage() {
           <p
             style={{
               margin: "0 auto 48px",
+              position: "relative",
+              top: "-0.5em",
               fontSize: "clamp(1.6rem, 2.4vw, 2.4rem)",
               fontWeight: 800,
               letterSpacing: "0.06em",
@@ -235,7 +237,7 @@ export default function HomePage() {
               lineHeight: 1.15,
             }}
           >
-            <span style={{ display: "block", marginBottom: "0.28em" }}>MAKE A DIFFERENCE</span>
+            <span style={{ display: "block", marginBottom: "0.42em" }}>MAKE A DIFFERENCE</span>
             <span style={{ display: "block" }}>WITH EVERY CHOICE</span>
           </p>
           <p
