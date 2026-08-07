@@ -225,9 +225,9 @@ export default function HomePage() {
           <p
             style={{
               margin: "0 auto 48px",
-              fontSize: "clamp(2.6rem, 4vw, 4rem)",
+              fontSize: "clamp(1.6rem, 2.4vw, 2.4rem)",
               fontWeight: 800,
-              letterSpacing: "0.12em",
+              letterSpacing: "0.06em",
               color: "#fffcf0",
               textShadow:
                 "0 0 20px rgba(255,248,230,0.5), 0 0 40px rgba(255,248,230,0.22), 0 2px 5px rgba(10,20,40,0.8)",
@@ -235,7 +235,7 @@ export default function HomePage() {
               lineHeight: 1.15,
             }}
           >
-            YOU CARE
+            MAKING A DIFFERENCE WITH EVERY CHOICE
           </p>
           <p
             style={{
@@ -251,7 +251,7 @@ export default function HomePage() {
               lineHeight: 1.4,
             }}
           >
-            See where good is rising, near and far.
+            See what's rising around you, near and far.
           </p>
           <div
             style={{
