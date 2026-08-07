@@ -705,6 +705,14 @@ function JoinContent() {
           >
             Bridge the Commons →
           </Link>
+          <p style={{ margin: "14px 0 0", fontSize: "1.02rem", lineHeight: 1.6, color: "rgba(211,227,247,0.72)" }}>
+            <a
+              href="/bridge-the-commons"
+              style={{ color: "rgba(211,227,247,0.72)", textDecoration: "underline", textUnderlineOffset: 2 }}
+            >
+              To go deeper on the call for stewardship, read the full narrative →
+            </a>
+          </p>
         </div>
 
         {/* ── FOOTER ── */}
@@ -727,41 +735,22 @@ function JoinContent() {
 
         <p
           style={{
-            marginTop: 20,
-            fontSize: "0.82rem",
+            marginTop: 32,
+            fontSize: "0.92rem",
             textAlign: "center",
-            color: "rgba(159,184,216,0.52)",
+            color: "rgba(211,227,247,0.75)",
           }}
         >
           <a
             href="/letter"
             style={{
-              color: "rgba(159,184,216,0.52)",
+              color: "rgba(255,216,107,0.75)",
               textDecoration: "underline",
-              textUnderlineOffset: 2,
+              textDecorationColor: "rgba(255,216,107,0.4)",
+              textUnderlineOffset: 3,
             }}
           >
             Read a letter from the founder
-          </a>
-        </p>
-
-        <p
-          style={{
-            marginTop: 10,
-            fontSize: "0.82rem",
-            textAlign: "center",
-            color: "rgba(159,184,216,0.52)",
-          }}
-        >
-          <a
-            href="/bridge-the-commons"
-            style={{
-              color: "rgba(159,184,216,0.52)",
-              textDecoration: "underline",
-              textUnderlineOffset: 2,
-            }}
-          >
-            To go deeper on the call for stewardship, read the full narrative →
           </a>
         </p>
       </div>
