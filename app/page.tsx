@@ -235,7 +235,7 @@ export default function HomePage() {
               lineHeight: 1.15,
             }}
           >
-            MAKING A DIFFERENCE WITH EVERY CHOICE
+            MAKE A DIFFERENCE<br />WITH EVERY CHOICE
           </p>
           <p
             style={{
