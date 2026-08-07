@@ -566,9 +566,9 @@ export default function NorthStarNav() {
       </div>
 
       {/* ── Compass caption bubble ── */}
-      {(pathname === "/" || pathname === "/about") && (
+      {(pathname === "/" || pathname === "/about" || pathname === "/bridge-the-commons") && (
         <CompassCaption
-          mode={pathname === "/" ? "homepage-timed" : "about-permanent"}
+          mode={pathname === "/about" ? "about-permanent" : "homepage-timed"}
           isDropdownOpen={open}
         />
       )}
