@@ -235,7 +235,8 @@ export default function HomePage() {
               lineHeight: 1.15,
             }}
           >
-            MAKE A DIFFERENCE<br />WITH EVERY CHOICE
+            <span style={{ display: "block", marginBottom: "0.28em" }}>MAKE A DIFFERENCE</span>
+            <span style={{ display: "block" }}>WITH EVERY CHOICE</span>
           </p>
           <p
             style={{
