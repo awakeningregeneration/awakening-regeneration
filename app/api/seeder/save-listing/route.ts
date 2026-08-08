@@ -67,12 +67,14 @@ export async function POST(req: Request) {
       .eq("id", listingId)
       .single();
 
-    if (!listing || listing.placed_by_seeder_id !== session.seeder_id) {
+    if (!listing) {
       return NextResponse.json(
-        { error: "You can only edit listings you placed." },
-        { status: 403 }
+        { error: "Listing not found." },
+        { status: 404 }
       );
     }
+    // Any authenticated seeder may edit any unclaimed listing.
+    // placed_by_seeder_id is never overwritten — attribution stays with the original seeder.
 
     // ── Build update from allowed fields only ──
     const update: Record<string, unknown> = {};
@@ -152,15 +154,17 @@ export async function POST(req: Request) {
       effectiveEmail &&
       !effectiveNoPublicEmail &&
       !listing.last_outreach_at &&
-      listing.removal_token
+      listing.removal_token &&
+      listing.placed_by_seeder_id  // need original seeder for attribution
     ) {
-      // Non-blocking — save already succeeded; email failure is logged, not surfaced
+      // Non-blocking — save already succeeded; email failure is logged, not surfaced.
+      // Always attribute to the placing seeder, regardless of who performed this edit.
       sendEmail1({
         listingId,
         businessName: (update.title as string | undefined) ?? "",
         stewardEmail: effectiveEmail,
         removalToken: listing.removal_token,
-        seederId: session.seeder_id,
+        seederId: listing.placed_by_seeder_id,
       }).catch((err) =>
         console.error("Auto Email 1 failed for listing", listingId, err)
       );

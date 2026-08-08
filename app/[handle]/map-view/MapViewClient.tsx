@@ -382,18 +382,21 @@ export default function MapViewClient({
                   >
                     {/* Title + metadata */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
+                      <Link
+                        href={`/edit/${p.id}?return=/${handle}/map-view`}
                         style={{
+                          display: "block",
                           fontWeight: 650,
-                          color: "#0d2a4a",
+                          color: "#1a4a8a",
                           fontSize: "0.95rem",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          textDecoration: "none",
                         }}
                       >
-                        {p.title}
-                      </div>
+                        {p.title} →
+                      </Link>
                       {metaParts.length > 0 && (
                         <div
                           style={{

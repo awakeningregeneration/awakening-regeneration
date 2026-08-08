@@ -446,6 +446,22 @@ export default function DashboardClient({
             >
               Copy outreach message
             </button>
+            <Link
+              href={`/${handle}/map-view`}
+              style={{
+                display: "inline-block",
+                padding: "10px 18px",
+                borderRadius: 999,
+                border: "1px solid rgba(138,109,42,0.2)",
+                background: "rgba(255,248,230,0.35)",
+                color: "rgba(138,109,42,0.7)",
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                textDecoration: "none",
+              }}
+            >
+              Browse by county
+            </Link>
           </div>
 
           {/* ── (b) STATUS SUMMARY ── */}

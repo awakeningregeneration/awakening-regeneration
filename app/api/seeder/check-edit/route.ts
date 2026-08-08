@@ -6,7 +6,9 @@ import { getSeederSession } from "@/app/lib/seederAuth";
  * GET /api/seeder/check-edit?listing_id=xxx
  *
  * Checks whether the current user (via cc_seeder_session cookie)
- * is the seeder who placed this listing AND no steward has claimed it.
+ * is an authenticated seeder AND no steward has claimed this listing.
+ * Any seeder may edit any unclaimed listing — the placing seeder
+ * (placed_by_seeder_id) is preserved and never overwritten.
  * Once a steward claims, the seeder yields edit access — the tending
  * shifts to the steward. Used by the edit page to grant seeder_edit mode.
  */
@@ -30,7 +32,7 @@ export async function GET(req: Request) {
     .eq("id", listingId)
     .single();
 
-  if (!listing || listing.placed_by_seeder_id !== session.seeder_id) {
+  if (!listing) {
     return NextResponse.json({ isPlacingSeeder: false });
   }
 
