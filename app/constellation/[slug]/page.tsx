@@ -25,21 +25,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-type ConstellationLink = {
-  id: string;
-  topic_id: string;
-  title: string;
-  url: string;
-  summary: string;
-  favicon_url: string | null;
-  created_at: string;
-};
-
 type Topic = {
   id: string;
   slug: string;
   title: string;
   subheader: string;
+};
+
+type ConstellationExample = {
+  id: string;
+  title: string;
+  url: string;
+  summary: string;
+  favicon_url: string | null;
+};
+
+type ExampleApproachJoin = {
+  sort_order: number;
+  constellation_examples: ConstellationExample | null;
+};
+
+type Approach = {
+  id: string;
+  name: string;
+  description: string;
+  sort_order: number;
+  constellation_example_approaches: ExampleApproachJoin[];
 };
 
 const GOLD = "#FFD86B";
@@ -55,13 +66,19 @@ export default async function ConstellationTopicPage({ params }: Props) {
 
   if (!topic) notFound();
 
-  const { data: links } = await supabaseAdmin
-    .from("constellation_links")
-    .select("*")
+  const { data: approachRows } = await supabaseAdmin
+    .from("constellation_approaches")
+    .select(`
+      id, name, description, sort_order,
+      constellation_example_approaches (
+        sort_order,
+        constellation_examples ( id, title, url, summary, favicon_url )
+      )
+    `)
     .eq("topic_id", topic.id)
-    .order("created_at", { ascending: true });
+    .order("sort_order", { ascending: true });
 
-  const linkList: ConstellationLink[] = links ?? [];
+  const approaches: Approach[] = (approachRows ?? []) as unknown as Approach[];
 
   return (
     <main
@@ -159,8 +176,8 @@ export default async function ConstellationTopicPage({ params }: Props) {
           }}
         />
 
-        {/* Link cards */}
-        {linkList.length === 0 ? (
+        {/* Approaches or empty state */}
+        {approaches.length === 0 ? (
           <p
             style={{
               color: "rgba(211,227,247,0.4)",
@@ -168,19 +185,74 @@ export default async function ConstellationTopicPage({ params }: Props) {
               fontStyle: "italic",
             }}
           >
-            No links yet — check back soon.
+            Content coming soon.
           </p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {linkList.map((link) => (
-              <LinkCard
-                key={link.id}
-                url={link.url}
-                title={link.title}
-                summary={link.summary}
-                favicon_url={link.favicon_url}
-              />
-            ))}
+          <div>
+            {approaches.map((approach, idx) => {
+              // Sort examples by their join-table sort_order
+              const examples = [...approach.constellation_example_approaches]
+                .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+                .map((cea) => cea.constellation_examples)
+                .filter((ex): ex is ConstellationExample => ex !== null);
+
+              return (
+                <div key={approach.id}>
+                  {/* Approach name */}
+                  <h2
+                    style={{
+                      fontSize: "clamp(1.15rem, 2vw, 1.45rem)",
+                      fontWeight: 650,
+                      color: "rgba(255,216,107,0.85)",
+                      margin: "0 0 10px",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {approach.name}
+                  </h2>
+
+                  {/* Approach description */}
+                  {approach.description && (
+                    <p
+                      style={{
+                        fontSize: "0.95rem",
+                        lineHeight: 1.6,
+                        color: "rgba(211,227,247,0.55)",
+                        margin: "0 0 20px",
+                        maxWidth: 580,
+                      }}
+                    >
+                      {approach.description}
+                    </p>
+                  )}
+
+                  {/* Example LinkCards */}
+                  {examples.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
+                      {examples.map((ex) => (
+                        <LinkCard
+                          key={ex.id}
+                          url={ex.url}
+                          title={ex.title}
+                          summary={ex.summary}
+                          favicon_url={ex.favicon_url}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Thin divider between approaches, not after last */}
+                  {idx < approaches.length - 1 && (
+                    <div
+                      style={{
+                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        margin: "clamp(24px, 3vw, 36px) 0",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

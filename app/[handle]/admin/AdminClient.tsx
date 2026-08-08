@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ConstellationAdmin from "./ConstellationAdmin";
 
 type Seeder = {
   id: string;
@@ -54,6 +55,9 @@ export default function AdminClient({
   placementDetails,
 }: Props) {
   const router = useRouter();
+
+  // ── Tab state ──
+  const [activeTab, setActiveTab] = useState<"seeders" | "constellation">("seeders");
 
   // ── Form state ──
   const [name, setName] = useState("");
@@ -247,12 +251,50 @@ export default function AdminClient({
               lineHeight: 1.3,
               fontWeight: 650,
               color: "#8a6d2a",
-              margin: "0 0 28px",
+              margin: "0 0 20px",
               textAlign: "center",
             }}
           >
             Seeder Admin
           </h2>
+
+          {/* ── Tab bar ── */}
+          <div
+            style={{
+              display: "flex",
+              borderBottom: "1px solid rgba(100,150,220,0.15)",
+              marginBottom: 24,
+            }}
+          >
+            {(["seeders", "constellation"] as const).map((tab) => {
+              const active = activeTab === tab;
+              const label = tab === "seeders" ? "Seeders" : "Constellation";
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    background: active ? "rgba(255,216,107,0.2)" : "transparent",
+                    border: "none",
+                    borderBottom: active ? "2px solid #FFD86B" : "2px solid transparent",
+                    borderRadius: 0,
+                    padding: "8px 18px",
+                    fontSize: "0.9rem",
+                    fontWeight: active ? 700 : 400,
+                    color: active ? "#8a6d2a" : "#4a5d73",
+                    cursor: "pointer",
+                    marginBottom: -1,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          {activeTab === "constellation" && <ConstellationAdmin handle={handle} />}
+
+          {activeTab === "seeders" && (<>
 
           {/* ── Creation form ── */}
           <form onSubmit={handleCreate}>
@@ -675,6 +717,8 @@ export default function AdminClient({
               </>
             );
           })()}
+
+          </>)}
 
           {/* ── Footer ── */}
           <div style={{ textAlign: "center", marginTop: 28 }}>
