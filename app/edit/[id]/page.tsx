@@ -50,6 +50,8 @@ const PRACTICES = [
   "Indigenous Led", "Women Led", "Trauma-Informed", "Restorative",
   "Somatic", "Nonviolent", "Peer Supported", "Community Led",
   "Justice-Oriented",
+  "Natural Practices", "Non-GMO", "Grass-Fed",
+  "Ethically Sourced/Raised", "Free-Range", "Organic Options",
 ];
 
 const METHOD_LABELS: Record<string, string> = {

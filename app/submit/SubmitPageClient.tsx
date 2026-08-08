@@ -46,6 +46,12 @@ const PRACTICE_OPTIONS = [
   "Peer Supported",
   "Community Led",
   "Justice-Oriented",
+  "Natural Practices",
+  "Non-GMO",
+  "Grass-Fed",
+  "Ethically Sourced/Raised",
+  "Free-Range",
+  "Organic Options",
 ];
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [

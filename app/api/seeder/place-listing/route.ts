@@ -56,6 +56,12 @@ const VALID_PRACTICES = new Set([
   "Peer Supported",
   "Community Led",
   "Justice-Oriented",
+  "Natural Practices",
+  "Non-GMO",
+  "Grass-Fed",
+  "Ethically Sourced/Raised",
+  "Free-Range",
+  "Organic Options",
 ]);
 
 /**
