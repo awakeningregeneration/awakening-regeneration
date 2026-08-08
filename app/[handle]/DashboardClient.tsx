@@ -201,6 +201,37 @@ export default function DashboardClient({
     (p) => p.outreach_status === "claimed"
   ).length;
 
+  // Listings that have an email but the outreach letter was never sent
+  const pendingEmailCount = placements.filter(
+    (p) => p.steward_email && !p.no_public_email && !p.last_outreach_at && !p.steward_id
+  ).length;
+
+  const [triggeringAllPending, setTriggeringAllPending] = useState(false);
+  const [allPendingResult, setAllPendingResult] = useState<string | null>(null);
+
+  async function handleTriggerAllPending() {
+    if (!confirm(`Send the outreach letter to all ${pendingEmailCount} listing(s) with an email that haven't been contacted yet?`)) return;
+    setTriggeringAllPending(true);
+    setAllPendingResult(null);
+    try {
+      const res = await fetch("/api/seeder/trigger-all-pending-emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAllPendingResult(`Sent to ${data.sent} listing(s).${data.errors?.length ? ` ${data.errors.length} failed.` : ""}`);
+        setTimeout(() => { setAllPendingResult(null); router.refresh(); }, 3000);
+      } else {
+        setAllPendingResult(data.error || "Something went wrong.");
+      }
+    } catch {
+      setAllPendingResult("Network error.");
+    } finally {
+      setTriggeringAllPending(false);
+    }
+  }
+
   return (
     <main
       style={{
@@ -453,6 +484,37 @@ export default function DashboardClient({
               >
                 Your contribution to the commons.
               </p>
+
+              {/* Retroactive outreach trigger — visible when listings have email but no letter sent */}
+              {pendingEmailCount > 0 && (
+                <div style={{ marginTop: 14, textAlign: "center" }}>
+                  <button
+                    type="button"
+                    onClick={handleTriggerAllPending}
+                    disabled={triggeringAllPending}
+                    style={{
+                      padding: "8px 18px",
+                      borderRadius: 999,
+                      border: "1.5px solid rgba(255,216,107,0.6)",
+                      background: "rgba(255,216,107,0.10)",
+                      color: "#6b4f00",
+                      fontSize: "0.84rem",
+                      fontWeight: 600,
+                      cursor: triggeringAllPending ? "not-allowed" : "pointer",
+                      opacity: triggeringAllPending ? 0.7 : 1,
+                    }}
+                  >
+                    {triggeringAllPending
+                      ? "Sending…"
+                      : `Send outreach letter to ${pendingEmailCount} listing${pendingEmailCount === 1 ? "" : "s"} with email unsent`}
+                  </button>
+                  {allPendingResult && (
+                    <p style={{ fontSize: "0.82rem", color: "#2a5a2a", marginTop: 6 }}>
+                      {allPendingResult}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

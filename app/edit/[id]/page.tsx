@@ -24,6 +24,7 @@ type Listing = {
   outreach_methods?: string[] | null;
   outreach_notes?: string | null;
   manual_outreach_at?: string | null;
+  no_public_email?: boolean | null;
   locations?: Array<{ id: string; address?: string | null; city: string; state: string }> | null;
 };
 
@@ -182,6 +183,7 @@ function EditListingContent({ params }: Props) {
 
   // Seeder-specific fields
   const [suggestedStewardEmail, setSuggestedStewardEmail] = useState("");
+  const [noPublicEmail, setNoPublicEmail] = useState(false);
   const [outreachStatus, setOutreachStatus] = useState<string | null>(null);
   const [bounceInfo, setBounceInfo] = useState<string | null>(null);
   const [existingMethods, setExistingMethods] = useState<string[]>([]);
@@ -275,6 +277,7 @@ function EditListingContent({ params }: Props) {
         setSuggestedState(found.state || "");
         setSuggestedCounty(found.county || "");
         setSuggestedStewardEmail(found.steward_email || "");
+        setNoPublicEmail(found.no_public_email ?? false);
         setOutreachStatus(found.outreach_status || null);
         setBounceInfo(found.bounce_info || null);
         setExistingMethods(found.outreach_methods || []);
@@ -369,6 +372,7 @@ function EditListingContent({ params }: Props) {
           state: suggestedState,
           county: suggestedCounty,
           steward_email: suggestedStewardEmail,
+          no_public_email: noPublicEmail,
           ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
             ? {
                 locations: extraLocations.map((l) => ({
@@ -1424,6 +1428,23 @@ function EditListingContent({ params }: Props) {
                   onChange={(e) => setSuggestedStewardEmail(e.target.value)}
                   placeholder="e.g., hello@baycoffeeroasters.com"
                 />
+              </label>
+
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 8, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={noPublicEmail}
+                  onChange={(e) => setNoPublicEmail(e.target.checked)}
+                  style={{ width: 16, height: 16, marginTop: 2, accentColor: "#2563eb", flexShrink: 0 }}
+                />
+                <div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 500, color: "#0d2a4a" }}>
+                    Contact form only — no public email
+                  </div>
+                  <div style={{ fontSize: "0.78rem", color: "#6b7c94", marginTop: 2 }}>
+                    Check this if the business only accepts contact via a web form. Unchecking will allow the outreach letter to send if an email is present.
+                  </div>
+                </div>
               </label>
 
               {error ? <p style={errorStyle}>{error}</p> : null}

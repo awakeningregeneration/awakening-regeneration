@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
 import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normalize";
+import { sendEmail1 } from "@/app/lib/sendEmail1";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
     // ── Verify this seeder placed this listing ──
     const { data: listing } = await supabaseAdmin
       .from("listings")
-      .select("placed_by_seeder_id")
+      .select("placed_by_seeder_id, steward_email, no_public_email, last_outreach_at, removal_token")
       .eq("id", listingId)
       .single();
 
@@ -99,6 +100,10 @@ export async function POST(req: Request) {
       );
     }
 
+    if (body.no_public_email !== undefined) {
+      update.no_public_email = Boolean(body.no_public_email);
+    }
+
     if (body.category !== undefined) {
       update.category = Array.isArray(body.category)
         ? body.category.filter(
@@ -128,6 +133,36 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: updateErr.message },
         { status: 500 }
+      );
+    }
+
+    // ── Auto-trigger Email 1 if email is now present and letter was never sent ──
+    // Resolves the effective post-save email and no_public_email values.
+    const effectiveEmail = (
+      update.steward_email !== undefined
+        ? (update.steward_email as string | null)
+        : listing.steward_email
+    )?.trim();
+    const effectiveNoPublicEmail =
+      update.no_public_email !== undefined
+        ? Boolean(update.no_public_email)
+        : Boolean(listing.no_public_email);
+
+    if (
+      effectiveEmail &&
+      !effectiveNoPublicEmail &&
+      !listing.last_outreach_at &&
+      listing.removal_token
+    ) {
+      // Non-blocking — save already succeeded; email failure is logged, not surfaced
+      sendEmail1({
+        listingId,
+        businessName: (update.title as string | undefined) ?? "",
+        stewardEmail: effectiveEmail,
+        removalToken: listing.removal_token,
+        seederId: session.seeder_id,
+      }).catch((err) =>
+        console.error("Auto Email 1 failed for listing", listingId, err)
       );
     }
 
