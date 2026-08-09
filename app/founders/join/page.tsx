@@ -487,10 +487,10 @@ function JoinContent() {
             </p>
           )}
 
-          <p style={{ margin: "18px 0 0", fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(211,227,247,0.6)", textAlign: "center" }}>
+          <p style={{ margin: "18px 0 0", fontSize: "0.9rem", lineHeight: 1.6, textAlign: "center" }}>
             <a
               href="/bridge-the-commons"
-              style={{ color: "rgba(211,227,247,0.6)", textDecoration: "underline", textUnderlineOffset: 2 }}
+              style={{ color: "rgba(255,216,107,0.75)", textDecoration: "underline", textDecorationColor: "rgba(255,216,107,0.35)", textUnderlineOffset: 2 }}
             >
               To go deeper on the call for stewardship, read the full narrative →
             </a>
