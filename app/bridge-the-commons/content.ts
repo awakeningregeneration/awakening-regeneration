@@ -164,7 +164,7 @@ export const bridgeSections: BridgeSection[] = [
       {
         lines: [
           "Where our attention isn\u2019t, is as important as where it is.",
-          "We can take  back the power of our attention.",
+          "We can take back that power.",
         ],
         fontSizeRatio: 0.0375,
         bold: false,
@@ -174,9 +174,7 @@ export const bridgeSections: BridgeSection[] = [
       },
     ],
     title: "",
-    body: [
-      "What we cannot see, we cannot support. Where our attention isn\u2019t is as important as where it is. We can take that power back.",
-    ],
+    body: [],
   },
 
   // ── SLIDE 4 (continued) — The Cost of Invisibility ──────────────────────
