@@ -147,7 +147,7 @@ function JoinContent() {
   const ref = searchParams.get("ref") || "";
   const [selectedTier, setSelectedTier] = useState<string | null>("$18");
   const [oneTimeGift, setOneTimeGift] = useState("");
-  const [wantsMail, setWantsMail] = useState(true);
+  const [wantsMail] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -487,49 +487,14 @@ function JoinContent() {
             </p>
           )}
 
-          {/* Physical mail opt-in */}
-          <label
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 10,
-              marginTop: 18,
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={wantsMail}
-              onChange={(e) => setWantsMail(e.target.checked)}
-              style={{
-                width: 18,
-                height: 18,
-                marginTop: 2,
-                accentColor: "#FFD86B",
-                flexShrink: 0,
-              }}
-            />
-            <div>
-              <div
-                style={{
-                  fontSize: "0.95rem",
-                  fontWeight: 500,
-                  color: "rgba(224,238,255,0.92)",
-                }}
-              >
-                Send me physical mail
-              </div>
-              <div
-                style={{
-                  fontSize: "0.82rem",
-                  color: "rgba(190,210,235,0.65)",
-                  marginTop: 2,
-                }}
-              >
-                Physical mail ships within the US only.
-              </div>
-            </div>
-          </label>
+          <p style={{ margin: "18px 0 0", fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(211,227,247,0.6)", textAlign: "center" }}>
+            <a
+              href="/bridge-the-commons"
+              style={{ color: "rgba(211,227,247,0.6)", textDecoration: "underline", textUnderlineOffset: 2 }}
+            >
+              To go deeper on the call for stewardship, read the full narrative →
+            </a>
+          </p>
         </div>
 
         {/* ── PRIMARY CTA — routes on combined state ── */}
@@ -661,14 +626,6 @@ function JoinContent() {
           >
             Bridge the Commons →
           </Link>
-          <p style={{ margin: "14px 0 0", fontSize: "1.02rem", lineHeight: 1.6, color: "rgba(211,227,247,0.72)" }}>
-            <a
-              href="/bridge-the-commons"
-              style={{ color: "rgba(211,227,247,0.72)", textDecoration: "underline", textUnderlineOffset: 2 }}
-            >
-              To go deeper on the call for stewardship, read the full narrative →
-            </a>
-          </p>
         </div>
 
         {/* ── FOOTER ── */}
