@@ -373,6 +373,18 @@ export default function DashboardClient({
           }}
         >
           {/* ── (a) HEADER ── */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <Link
+              href={`/${handle}/admin`}
+              style={{
+                fontSize: "0.75rem",
+                color: "rgba(107,124,148,0.55)",
+                textDecoration: "none",
+              }}
+            >
+              Admin →
+            </Link>
+          </div>
           <h2
             style={{
               fontSize: "clamp(1.25rem, 2.5vw, 1.5rem)",
