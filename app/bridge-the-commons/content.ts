@@ -41,6 +41,7 @@ export interface BridgeSection {
   body: string[];
   quote?: string;
   scrim?: "left" | "bottom";  // directional gradient scrim layered on top of the base overlay
+  noHero?: boolean;            // skip the slide image (text-only interstitial section)
 }
 
 export interface ClosingSection {
@@ -112,7 +113,6 @@ export const bridgeSections: BridgeSection[] = [
       "A child flourishes because someone is present. A garden thrives because someone tends it. Friendships deepen because they\u2019re nourished. Communities grow resilient because people keep caring for them.",
       "Attention precedes participation. What we tend, grows. What we neglect, fades. If this is true of a child, a garden, a friendship \u2014 what might it mean for a civilization?",
     ],
-    quote: "Entire economies compete for our attention. It is mined, harvested, and directed toward what depletes the world we depend on.",
   },
 
   // ── SLIDE 3 ─────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ export const bridgeSections: BridgeSection[] = [
     ],
   },
 
-  // ── SLIDE 4 ─────────────────────────────────────────────────────────────
+  // ── SLIDE 4 — standalone ────────────────────────────────────────────────
   {
     num: 4,
     slideText: [
@@ -173,14 +173,25 @@ export const bridgeSections: BridgeSection[] = [
         top: 0.7453, left: -0.0108, width: 1.0001, height: 0.1733,
       },
     ],
+    title: "",
+    body: [
+      "What we cannot see, we cannot support. Where our attention isn\u2019t is as important as where it is. We can take that power back.",
+    ],
+  },
+
+  // ── SLIDE 4 (continued) — The Cost of Invisibility ──────────────────────
+  {
+    num: 4,
+    noHero: true,
+    slideText: [],
     title: "The Cost of Invisibility",
     body: [
-      "Attention is finite. Every place we look is also countless places we are not looking. Each act of attention is also an act of omission. What remains unseen rarely has the opportunity to be chosen, supported, or sustained.",
-      "Every year, thoughtful businesses, regenerative farms, neighborhood organizations, technologies that rewrite energy and health, and many a creative solution quietly disappear — not always because they failed, but because they never became visible enough to gather the support they needed.",
+      "Attention is finite. Every place we look is countless places we don\u2019t \u2014 each act of attention is also an act of omission. What remains unseen rarely gets chosen, supported, or sustained.",
+      "Every year, thoughtful businesses, regenerative farms, and quiet breakthroughs disappear \u2014 not because they failed, but because they never became visible enough to gather the support they needed.",
       "They did not lack value. They lacked visibility.",
-      "How many answers already exist beyond the edge of our awareness? How many people are quietly repairing the world without ever becoming visible enough for others to find them? How many possibilities disappear before they ever have the chance to mature?",
-      "Perhaps the greatest cost of the attention economy is not simply that some things receive too much attention. It is that so many life-giving things receive almost none.",
-      "What if the greatest resource we have been missing is not innovation... but visibility?",
+      "How many people are quietly repairing the world without ever being seen? How many possibilities disappear before they ever have the chance to mature?",
+      "Perhaps the greatest cost of the attention economy isn\u2019t that some things receive too much attention. It\u2019s that so many life-giving things receive almost none.",
+      "What if the resource we\u2019ve been missing isn\u2019t innovation\u2026 but visibility?",
     ],
   },
 

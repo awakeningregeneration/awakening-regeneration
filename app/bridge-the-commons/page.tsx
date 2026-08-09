@@ -117,7 +117,7 @@ export default function BridgeTheCommonsPage() {
         const isLast = idx === bridgeSections.length - 1;
 
         return (
-          <article key={section.num}>
+          <article key={idx}>
             {/* Reading column wrapper */}
             <div
               style={{
@@ -129,16 +129,19 @@ export default function BridgeTheCommonsPage() {
               {/* ── Section top spacing ── */}
               <div style={{ height: "clamp(56px, 7vw, 80px)" }} />
 
-              {/* ── Hero image ── */}
-              <SlideHero
-                num={section.num}
-                boxes={section.slideText}
-                title={section.title}
-                priority={section.num <= 2}
-                scrim={section.scrim}
-              />
+              {/* ── Hero image (skipped for noHero sections) ── */}
+              {!section.noHero && (
+                <SlideHero
+                  num={section.num}
+                  boxes={section.slideText}
+                  title={section.title}
+                  priority={section.num <= 2}
+                  scrim={section.scrim}
+                />
+              )}
 
-              {/* ── Section title ── */}
+              {/* ── Section title (omitted when empty) ── */}
+              {section.title && (
               <h2
                 style={{
                   fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)",
@@ -150,6 +153,7 @@ export default function BridgeTheCommonsPage() {
               >
                 {section.title}
               </h2>
+              )}
 
               {/* ── Body paragraphs ── */}
               {section.body.map((para, i) => (
