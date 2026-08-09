@@ -229,18 +229,6 @@ function JoinContent() {
         {/* ── THE THRESHOLD ── */}
         <div style={glassCard}>
           <p style={softBody}>
-            Help make an existing, life-giving world visible enough for others
-            to find, choose, and strengthen.
-          </p>
-          <p style={softBody}>
-            Become a Founding Steward during the season in which the living
-            commons is being revealed.
-          </p>
-          <p style={softBody}>
-            Many have forgotten how much power is already contained in a single
-            act of attention directed toward life.
-          </p>
-          <p style={softBody}>
             What we repeatedly attend becomes visible. What becomes visible
             becomes easier to choose. What we choose grows, and together those
             choices shape the world we inhabit.
@@ -288,14 +276,14 @@ function JoinContent() {
             }}
           >
             <li style={{ marginBottom: 10 }}>
-              Four thoughtfully crafted printed letters from the field each
-              year, sharing the people, places, and projects quietly shaping
-              another way of living.
+              Seasonal letters carrying the stories of people living into
+              possibility — expanding humanity&apos;s harmony, one place at a
+              time. Written to move you, and to show you what&apos;s possible.
             </li>
             <li style={{ marginBottom: 10 }}>
-              A monthly email highlighting new discoveries, meaningful places to
-              direct your attention, and updates as the commons continues to
-              grow.
+              A monthly re-direct: a chance to notice where you&apos;ve placed
+              your attention, and a few touch points pointing you toward what
+              else is possible.
             </li>
             <li style={{ marginBottom: 10 }}>
               A front-row seat as the living commons unfolds and becomes an
