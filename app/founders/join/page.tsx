@@ -310,28 +310,9 @@ function JoinContent() {
           <p style={softBody}>
             Founding Stewardship exists for a season.
           </p>
-          <p style={softBody}>
-            Its purpose is to help transform a working platform into a living
-            commons.
-          </p>
-          <p style={softBody}>
-            As the map matures into a trusted nationwide resource, Canary
-            gradually becomes sustained through carefully selected
-            mission-aligned online partnerships, allowing the commons to remain
-            open, independent, and free for everyone.
-          </p>
-          <p style={softBody}>Your membership is the bridge.</p>
-          <p style={softBody}>
-            Its destination is a commons that can sustainably stand on its own.
-          </p>
-          <p style={softBody}>
-            Together we are not creating the commons.
-          </p>
-          <p style={softBody}>
-            We are helping reveal the commons that already exists.
-          </p>
           <p style={{ ...softBody, marginBottom: 0 }}>
-            Together we strengthen what we wish to see grow.
+            Your membership is a bridge to a commons that can sustainably stand
+            on its own. Thank you.
           </p>
         </div>
 
@@ -392,19 +373,6 @@ function JoinContent() {
               );
             })}
           </div>
-
-          {/* Step-down line */}
-          <p
-            style={{
-              fontSize: "0.88rem",
-              lineHeight: 1.6,
-              color: "rgba(190,210,235,0.82)",
-              textAlign: "center",
-              margin: "16px 0 0",
-            }}
-          >
-            After twelve months, every subscription settles to a $12 base.
-          </p>
 
           {/* Soft divider */}
           <div
