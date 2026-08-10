@@ -15,104 +15,63 @@ export function seederOutreach3Email(options: {
   listingId: string;
   removalToken: string;
 }): { subject: string; html: string; text: string } {
-  const { businessName, listingId, removalToken } = options;
+  const { businessName, listingId } = options;
+
+  // removalToken accepted for interface consistency but not rendered in
+  // Email 3 — the closing gesture carries the release without a Remove button.
+  void options.removalToken;
 
   const claimUrl = `${SITE_URL}/edit/${listingId}`;
   const foundersUrl = `${SITE_URL}/founders`;
 
-  // removalToken accepted for interface consistency but not rendered
-  // in Email 3 — the closing gesture ("You won't hear from us again")
-  // carries the release without a Remove button.
-  void removalToken;
-
-  const subject = "Help strengthen what this is becoming";
+  const subject = "We\u2019re just beginning \u2014 join if it feels right";
 
   const html = `
 <div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#1a2a3a;padding:32px 24px;">
   ${getEmailHeader()}
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hello ${businessName},</p>
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hi ${businessName},</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    A last note from us. Canary Commons was built to make the things choosing
-    life forward &mdash; for ourselves and for those who come after &mdash; easier to
-    find, easier to trust, and easier to support.
+    A last note from us for now. Canary Commons is early &mdash; the map is still
+    filling in, still becoming what it&rsquo;s meant to be.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Not by asking communities to start from scratch &mdash; but by helping make
-    visible what is already being done, and making it easier for people to
-    find and strengthen it.
+    You&rsquo;re already part of it. From here, there are a few ways to go
+    further, if any of them feel right to you:
   </p>
 
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    The map is filling in. As it does, it becomes a downloadable app that
-    helps people find what cares for the long term &mdash; for the body, the
-    land, the community &mdash; wherever they are. The small places doing
-    meaningful work get reached by the people actively looking for them. The
-    seekers find what&rsquo;s been hard to find.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Your listing is part of that effort.</p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Some businesses simply stay visible here. Some refine their listing. Some
-    share their story. Some choose to help carry the work itself.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    If this feels aligned with the kind of future you&rsquo;re helping build,
-    there are a few ways to take part:
-  </p>
-  <ul style="font-size:16px;line-height:1.7;margin:0 0 16px;padding-left:24px;">
-    <li>claim and shape your listing</li>
-    <li>share your story</li>
-    <li>help carry forward what your community is choosing</li>
+  <ul style="font-size:16px;line-height:1.7;margin:0 0 20px;padding-left:24px;">
+    <li style="margin-bottom:6px;">Claim and shape your listing</li>
+    <li style="margin-bottom:6px;">Share your story</li>
+    <li style="margin-bottom:6px;">Help carry the work itself, as a <a href="${foundersUrl}" style="color:#1a2a3a;font-weight:700;text-decoration:underline;">founding steward</a></li>
   </ul>
 
-  <div style="text-align:center;margin:20px 0;">
+  <div style="text-align:center;margin:24px 0;">
     <a href="${claimUrl}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#FFD86B;color:#1a2a0e;font-weight:700;font-size:15px;text-decoration:none;">
       Choose How to Participate
     </a>
   </div>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Canary Commons is free to be part of, and your place here is not
-    contingent on contribution. Contribution does not buy placement,
-    priority, or reach. It helps carry a non-competitive public commons
-    through its early growth &mdash; a bridge until the work can be carried by the
-    communities it serves.
+    Canary Commons is grassroots-funded by people who see what it&rsquo;s
+    becoming and want to help it get there. That kind of support isn&rsquo;t
+    required, and it never changes how your listing appears &mdash; it just
+    helps the work keep going.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    This project is grass-roots-funded by people who recognize what it is. If
-    that feels like you, your help matters.
+    Whatever you choose, thank you for being part of what this is becoming.
   </p>
 
-  <div style="text-align:center;margin:20px 0;">
-    <a href="${foundersUrl}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#FFD86B;color:#1a2a0e;font-weight:700;font-size:15px;text-decoration:none;">
-      Help Carry the Commons
-    </a>
-  </div>
+  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+    &mdash; <a href="${SITE_URL}" style="color:#1a2a3a;text-decoration:none;font-weight:700;">Canary Commons</a>
+  </p>
 
   <p style="font-size:13px;line-height:1.6;color:#6a7a8a;margin:24px 0 16px;font-style:italic;">
-    This is the last of three emails. If you don&rsquo;t do anything at all,
-    your listing will remain on the map. You won&rsquo;t hear from us again
-    unless you choose to engage. You are always welcome to participate.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Thank you for contributing to the kind of world this project was built to
-    make easier to find.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    With thanks,<br/>
-    Canary Commons
-  </p>
-
-  <p style="font-size:14px;line-height:1.6;color:#6a7a8a;margin:0 0 16px;text-align:center;">
-    <a href="https://www.canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">www.canarycommons.org</a><br/>
-    <a href="mailto:founder@canarycommons.org" style="color:#6a7a8a;text-decoration:underline;">founder@canarycommons.org</a>
+    This is the last of three emails. Your listing will remain on the map.
+    You won&rsquo;t hear from us again unless you choose to engage.
+    You are always welcome to participate.
   </p>
 
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 8px;">
@@ -120,40 +79,28 @@ export function seederOutreach3Email(options: {
   </div>
 </div>`.trim();
 
-  const text = `Hello ${businessName},
+  const text = `Hi ${businessName},
 
-A last note from us. Canary Commons was built to make the things choosing life forward — for ourselves and for those who come after — easier to find, easier to trust, and easier to support.
+A last note from us for now. Canary Commons is early \u2014 the map is still filling in, still becoming what it\u2019s meant to be.
 
-Not by asking communities to start from scratch — but by helping make visible what is already being done, and making it easier for people to find and strengthen it.
+You\u2019re already part of it. From here, there are a few ways to go further, if any of them feel right to you:
 
-The map is filling in. As it does, it becomes a downloadable app that helps people find what cares for the long term — for the body, the land, the community — wherever they are. The small places doing meaningful work get reached by the people actively looking for them. The seekers find what's been hard to find.
+\u2014 Claim and shape your listing
+\u2014 Share your story
+\u2014 Help carry the work itself, as a founding steward
 
-Your listing is part of that effort.
+${claimUrl}
 
-Some businesses simply stay visible here. Some refine their listing. Some share their story. Some choose to help carry the work itself.
+Founding stewards: ${foundersUrl}
 
-If this feels aligned with the kind of future you're helping build, there are a few ways to take part:
-- claim and shape your listing
-- share your story
-- help carry forward what your community is choosing
+Canary Commons is grassroots-funded by people who see what it\u2019s becoming and want to help it get there. That kind of support isn\u2019t required, and it never changes how your listing appears \u2014 it just helps the work keep going.
 
-Choose How to Participate: ${claimUrl}
+Whatever you choose, thank you for being part of what this is becoming.
 
-Canary Commons is free to be part of, and your place here is not contingent on contribution. Contribution does not buy placement, priority, or reach. It helps carry a non-competitive public commons through its early growth — a bridge until the work can be carried by the communities it serves.
+\u2014 Canary Commons
+${SITE_URL}
 
-This project is grass-roots-funded by people who recognize what it is. If that feels like you, your help matters.
-
-Help Carry the Commons: ${foundersUrl}
-
-This is the last of three emails. If you don't do anything at all, your listing will remain on the map. You won't hear from us again unless you choose to engage. You are always welcome to participate.
-
-Thank you for contributing to the kind of world this project was built to make easier to find.
-
-With thanks,
-Canary Commons
-
-www.canarycommons.org
-founder@canarycommons.org`;
+This is the last of three emails. Your listing will remain on the map. You won\u2019t hear from us again unless you choose to engage. You are always welcome to participate.`;
 
   return { subject, html, text };
 }
