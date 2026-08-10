@@ -220,10 +220,10 @@ export const bridgeSections: BridgeSection[] = [
     title: "What If the Answers Already Exist?",
     body: [
       "The future is shaped not only by what we create, but by what we choose to notice, support, and strengthen.",
-      "What if many of the answers we are searching for already exist? What if new ways of restoring land, building community, producing energy, growing food, healing relationships, and creating healthier local economies are already quietly taking root?",
-      "Many of these answers are not hidden because they lack value. They are hidden because they lack visibility and an advertising budget.",
-      "Perhaps our greatest opportunity is not to invent an entirely new world, but to recognize, strengthen, and connect the one already engaged, innovative, and emerging around us.",
-      "If we wish to live in another world, we begin by giving the world we wish to live in, our attention.",
+      "What if many of the answers we\u2019re searching for already exist \u2014 new ways of restoring land, growing food, and building community already quietly taking root?",
+      "They are not hidden because they lack value. They are hidden because they lack visibility.",
+      "Perhaps our greatest opportunity is not to invent an entirely new world, but to recognize, strengthen, and connect the one already emerging around us.",
+      "If we wish to live in another world, we begin by giving our attention to the world we wish to live in.",
     ],
   },
 
@@ -254,11 +254,11 @@ export const bridgeSections: BridgeSection[] = [
     ],
     title: "A Forest Holds Many",
     body: [
-      "Healthy systems are not built on sameness. Nature has never depended upon one answer. A healthy forest is not sustained by a single species of tree. It is sustained by countless relationships between many different forms of life.",
-      "Remove that diversity, and what appears strong becomes fragile. A mono crop falls to a mono pest. Human communities are no different. The small and place-specific matter. The local matters. The specific and individual matters.",
-      "The ant opens the peony by chewing away the sap that seals the bud. Without countless small acts, living systems cease to function. Interdependence and complexity are the nature of the world we inhabit.",
-      "Resilience is created by diversity and complexity. Resilience is created by adaptability in time and place. There are countless people restoring soil, repairing things that would otherwise go to the landfill, teaching about the specifics of an ecosystem, and saving seeds that grow in a specific region.",
-      "No ONE changes the world, saves the world, or makes the difference. What if, added together, these things can make the difference, be the change, author the world into a place where peace and inhabitability collaborate?",
+      "Healthy systems are not built on sameness. A forest isn\u2019t sustained by a single species of tree \u2014 it\u2019s sustained by countless relationships between many forms of life.",
+      "Remove that diversity, and what looks strong becomes fragile. A mono crop falls to a mono pest. Human communities are no different \u2014 the small, the local, the specific and individual all matter.",
+      "The ant opens the peony by chewing away the sap that seals the bud. Without countless small acts, living systems cease to function.",
+      "Resilience comes from diversity, complexity, and adaptability to time and place. There are countless people restoring soil, rescuing what would otherwise go to landfill, teaching the specifics of an ecosystem, saving seeds bred for a particular region.",
+      "No one person changes the world. But added together, these things might just author it into a place where peace and life can thrive.",
     ],
   },
 
