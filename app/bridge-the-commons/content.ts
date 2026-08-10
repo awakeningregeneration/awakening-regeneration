@@ -42,6 +42,7 @@ export interface BridgeSection {
   quote?: string;
   scrim?: "left" | "bottom";  // directional gradient scrim layered on top of the base overlay
   noHero?: boolean;            // skip the slide image (text-only interstitial section)
+  staccato?: boolean;          // render body as punchy short lines rather than flowing paragraphs
 }
 
 export interface ClosingSection {
@@ -50,6 +51,22 @@ export interface ClosingSection {
 }
 
 export const bridgeSections: BridgeSection[] = [
+  // ── OPENING INTRO — text only, staccato ─────────────────────────────────
+  {
+    num: 1,
+    noHero: true,
+    staccato: true,
+    slideText: [],
+    title: "Canary Commons",
+    body: [
+      "A visibility infrastructure \u2014 bringing a world of good into view, and into reach.",
+      "A map, so you can find it wherever you are, wherever you go.",
+      "Resources, so you can support it even when it\u2019s not nearby.",
+      "Stories, carrying the wisdom and perspective of place.",
+      "A constellation, proof that the world is already solving its hardest questions.",
+    ],
+  },
+
   // ── SLIDE 1 ─────────────────────────────────────────────────────────────
   {
     num: 1,
@@ -372,12 +389,11 @@ export const bridgeSections: BridgeSection[] = [
     ],
     title: "The Scaffolding Now Exists",
     body: [
-      "Every thriving community depends upon forms of infrastructure we rarely notice. Roads carry people. Libraries organize knowledge. Trails guide us through forests. None of these are the destination. They simply make life possible.",
-      "Canary Commons is another kind of infrastructure. It does not create the good already present within a community. It reveals it.",
-      "The people were already here. The businesses were already here. The organizations, projects, farms, teachers, peace-makers, healers, and visionaries were already here.",
-      "What was missing was a place where they could be discovered together instead of remaining scattered and largely invisible.",
-      "That scaffolding now exists. The map exists. Stories have a home. Resources can be gathered. Communities can continue revealing the richness of their own place.",
-      "Visibility changes possibility. Once something can be seen, it can be found. Once it can be found, it can be supported. What is supported becomes more likely to endure, grow, inspire — and change the world.",
+      "Every thriving community depends on infrastructure we rarely notice. Roads carry people. Libraries organize knowledge. Trails guide us through forests. None of these are the destination \u2014 they simply make life possible.",
+      "Canary Commons is another kind of infrastructure. It doesn\u2019t create the good already present in a community. It reveals it.",
+      "The people were already here. The businesses, the organizations, the farms and teachers and healers and visionaries \u2014 all already here. What was missing was a place where they could be discovered together, instead of scattered and largely invisible.",
+      "That scaffolding now exists. The map exists. Stories have a home. Resources can be gathered \u2014 and communities can keep revealing the richness of their own place.",
+      "Visibility changes possibility. Once something can be seen, it can be found. Once found, it can be supported. What is supported endures, grows, inspires \u2014 and changes the world.",
     ],
   },
 
@@ -424,11 +440,11 @@ export const bridgeSections: BridgeSection[] = [
     ],
     title: "Participating in the Commons",
     body: [
-      "The Map helps you discover the people, places, businesses, organizations, and projects already taking care of life where you are — and wherever your travels take you. Every visit, every purchase, every conversation becomes a quiet act of strengthening the kind of world we hope to live in.",
-      "The Stories remind us that every place carries wisdom. They preserve experience, share possibility, and deepen our relationship with the places we call home — and the ones we are just beginning to discover.",
-      "Curated Resources extend the Commons beyond geography. When the answer isn't nearby, thoughtfully selected online resources allow us to continue supporting businesses whose values reflect the same care.",
-      "The Constellation reminds us we are not alone. Across the world, people are quietly proving that another way of living is not only possible — it is already happening.",
-      "Together these four spaces make it easier to discover what gives life, and participate in becoming stronger, feeding it through our ordinary daily choices.",
+      "The Map helps you discover the people, places, businesses, and organizations already caring for life where you are \u2014 and wherever your travels take you. Every visit, every purchase, every conversation becomes a quiet act of strengthening the world we hope to live in.",
+      "The Stories remind us that every place carries wisdom \u2014 preserving experience, sharing possibility, deepening our relationship with the places we call home, and the ones we\u2019re just beginning to discover.",
+      "Curated Resources extend the Commons beyond geography. When the answer isn\u2019t nearby, thoughtfully selected resources let us keep supporting businesses whose values reflect the same care.",
+      "The Constellation reminds us we are not alone. Across the world, people are quietly proving that another way of living isn\u2019t only possible \u2014 it\u2019s already happening.",
+      "Together, these four spaces make what gives life easier to find, and easier to strengthen \u2014 one ordinary choice at a time.",
     ],
   },
 
@@ -464,11 +480,11 @@ export const bridgeSections: BridgeSection[] = [
     ],
     title: "Why I Built Canary",
     body: [
-      "Canary Commons was born from my lived experience. While rebuilding an inn, I spent years searching for people whose work reflected extraordinary care — for the land, the materials they used, the people they served, and the communities they belonged to.",
-      "Again and again I discovered how remarkably difficult they were to find. Then I found them. Little by little, person by person, task by task, the search for the invisible many. I discovered a third-generation mold maker melting reclaimed metals into elegant wind turbines capable of powering a home. I discovered paint makers blending beautiful zero-VOC colors from natural pigments. I found a craftsman recovering century-old logs from the bottom of a local lake — reclaiming forgotten timber while restoring the waters they came from.",
-      "The effort it took to find these people, and the resources they had spent their careers, lives, and sometimes generations developing, was exceedingly difficult to find and breathtaking in their beauty, once found.",
-      "Canary Commons was the dream born of the desire to live in the world they were creating. It became my desire and vision to make it possible for those incredible individuals doing the amazing in their own particular ways, solutioning the impossible piece by piece, to be seen, supported, cherished, uplifted.",
-      "I believe we have the answers. We have the way. We have energy technology and we have people who have been able to de-escalate intense and large conflict. We have ways of growing things that do not harm. We have it all.",
+      "Canary Commons was born from lived experience. While rebuilding an inn, I spent years searching for people whose work reflected extraordinary care \u2014 for the land, the materials they used, the people they served, the communities they belonged to.",
+      "They were remarkably difficult to find. But little by little, person by person, I found them. A third-generation mold maker melting reclaimed metals into elegant wind turbines capable of powering a home. Paint makers blending zero-VOC colors from natural pigments. A craftsman recovering century-old logs from the bottom of a local lake \u2014 reclaiming forgotten timber while restoring the waters they came from.",
+      "The lives, careers, and sometimes generations these people had poured into their work were exceedingly hard to find \u2014 and breathtaking, once found.",
+      "Canary Commons was the dream born of wanting to live in the world they were already creating. My desire became simple: to make it possible for people doing the extraordinary, piece by piece, to be seen, supported, cherished, uplifted.",
+      "I believe we have the answers. We have energy technology. We have people who know how to de-escalate conflict, and ways of growing things that do no harm. We have it all.",
       "Can we see it? Can we choose it? That is why I built Canary Commons.",
     ],
   },
@@ -495,9 +511,21 @@ export const bridgeSections: BridgeSection[] = [
     title: "Hold the Bridge",
     body: [
       "The foundation has been built. The first communities are appearing. Businesses are beginning to claim their place. Contributors are beginning to add to the Commons.",
-      "The first signs of organic growth have begun. What the Commons needs now is time to mature: time to fill the map, time to gather stories, time to strengthen the technology, time to grow thoughtful partnerships, time for communities to make the Commons their own.",
+      "The first signs of organic growth have begun. What the Commons needs now is time to mature: time to fill the map, gather stories, strengthen the technology, grow thoughtful partnerships, and let communities make the Commons their own.",
       "Bridge capital creates that time. It allows the Commons to become the trusted public resource its infrastructure was designed to support.",
       "This is not funding an idea that might someday exist. It is carrying a bridge until the Commons can carry itself.",
+      "Canary Commons was never meant to be carried by one person. It was meant to be stewarded by many.",
+    ],
+  },
+
+  // ── SLIDE 12→13 CALLBACK — text only ────────────────────────────────────
+  {
+    num: 13,
+    noHero: true,
+    slideText: [],
+    title: "",
+    body: [
+      "A map to find it. Stories to understand it. Resources to reach it. A constellation to know you\u2019re not alone in wanting it.",
     ],
   },
 
@@ -535,11 +563,11 @@ export const bridgeSections: BridgeSection[] = [
     ],
     title: "Not by One",
     body: [
-      "A commons is never built by one person. It begins with a vision. It becomes real through the diversity of many lives, many gifts, and many hands.",
+      "A commons is never built by one person. It begins with a vision, but becomes real through the diversity of many lives, many gifts, many hands.",
       "The map will never be filled by one person. The stories cannot be written by one voice. No single organization can represent the wisdom of every community.",
-      "That is the nature of a commons. Each place reveals its own character. Each person contributes something different. Each act of care strengthens the whole.",
-      "Bridge stewardship exists for this season: to give Canary Commons the time to fill in with the many that it is built to make visible. The bridge creates the conditions for that future to emerge.",
-      "My hope is simple: that together we make it easier for people to find what gives life, and in doing so, bring all the power of our attention and the energy that follows our focus — to a world worth living in.",
+      "That is the nature of a commons. Each place reveals its own character. Each person contributes something different, and each act of care strengthens the whole.",
+      "Bridge stewardship exists for this season: to give Canary Commons the time to fill in with the many it was built to make visible. The bridge creates the conditions for that future to emerge.",
+      "My hope is simple: that together we make it easier for people to find what gives life \u2014 and in doing so, bring the full power of our attention to a world worth living in.",
     ],
     quote: "\u201CNever doubt that a small group of thoughtful, committed citizens can change the world; indeed, it's the only thing that ever has.\u201D — Margaret Mead",
   },
@@ -550,19 +578,19 @@ export const bridgeClosing: ClosingSection[] = [
     heading: "A Note About Business Structure and Stewardship",
     body: [
       "Canary Commons exists to answer a practical need: making the life-giving visible. To do that well, it needs to be responsive, adaptable, and capable of growing alongside the communities it serves.",
-      "Businesses exist because they answer real needs. Craigslist answered the need for people to find one another. Canary Commons answers the need for people to find the people, places, businesses, organizations, stories, and resources that help life flourish.",
+      "Businesses exist because they answer real needs. Etsy answered the need for makers to find the people who wanted what they made. Canary Commons answers the need for people to find the people, places, businesses, organizations, stories, and resources that help life flourish.",
       "Over time, I intend to deepen that public mission through B Corp certification and a companion foundation. But first, the infrastructure itself must exist, mature, and become sustainable.",
       "Today, what needs building is the bridge between a functioning platform and a trusted public resource used by thousands of people. That bridge is what stewardship makes possible.",
-      "Supporting Canary Commons is not a charitable donation in the tax sense. It is closer to backing a Kickstarter project, becoming a founding member of a museum, joining a CSA. It is helping a small business reach the point where it can sustainably serve the community it was built for. In return, founding stewards receive ongoing participation through letters from the field, recognition, and a window into what their support is helping bring into being.",
+      "Supporting Canary Commons is not a charitable donation in the tax sense. It is closer to backing a Kickstarter project, or joining a CSA \u2014 helping a small business reach the point where it can sustainably serve the community it was built for. In return, founding stewards receive ongoing participation through letters from the field, recognition, and a window into what their support is helping bring into being.",
       "Contributions are not tax-deductible because Canary Commons is currently a for-profit public benefit company in development. If a tax deduction is your primary goal, this may not be the right fit. If your goal is to help establish infrastructure you believe should exist, I would be honored to have your stewardship and your support. Honored. Deeply. It is a lot to carry vision into the world. I thank you.",
     ],
   },
   {
     heading: "Why Stewardship?",
     body: [
-      "Like many young ventures, Canary Commons doesn't simply need money — it needs time. Time to strengthen its wings and learn how to fly and carry weight.",
-      "From the beginning, I have imagined Canary Commons as something fundamentally grassroots: cross-pollinated by many people, many places, many ideas, and many acts of care. Like the healthy ecosystems it exists to reveal, its strength comes through diversity — not only in what it makes visible, but in the people who help carry it forward.",
-      "I don't want the Commons shaped by the priorities of a few — high dollars with an agenda. I hope it grows through the stewardship of many: people who believe this infrastructure should exist, who recognize its value, and who help give it the time to mature.",
+      "Like many young ventures, Canary Commons doesn\u2019t simply need money \u2014 it needs time. Time to strengthen its wings and learn to fly.",
+      "From the beginning, I have imagined Canary Commons as something fundamentally grassroots: cross-pollinated by many people, many places, many ideas, and many acts of care. Like the healthy ecosystems it exists to reveal, its strength comes through diversity \u2014 not only in what it makes visible, but in the people who help carry it forward.",
+      "I don\u2019t want the Commons shaped by the priorities of a few \u2014 high dollars with an agenda. I hope it grows through the stewardship of many: people who believe this infrastructure should exist, who recognize its value, and who help give it the time to mature.",
       "In that sense, stewardship is more than financial support for an individual business. It is participation in bringing into being a resource that belongs in the world, and helps us all see and access the best possible.",
     ],
   },

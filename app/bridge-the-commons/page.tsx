@@ -156,11 +156,33 @@ export default function BridgeTheCommonsPage() {
               )}
 
               {/* ── Body paragraphs ── */}
-              {section.body.map((para, i) => (
-                <p key={i} style={bodyStyle}>
-                  {para}
-                </p>
-              ))}
+              {section.staccato ? (
+                <>
+                  <p style={{ ...bodyStyle, fontStyle: "italic", marginBottom: "1.6em" }}>
+                    {section.body[0]}
+                  </p>
+                  {section.body.slice(1).map((line, i) => (
+                    <p
+                      key={i}
+                      style={{
+                        ...bodyStyle,
+                        margin: "0 0 0.55em",
+                        paddingLeft: "1.3em",
+                        textIndent: "-1.3em",
+                      }}
+                    >
+                      <span style={{ color: "rgba(255,216,107,0.6)", marginRight: "0.55em" }}>·</span>
+                      {line}
+                    </p>
+                  ))}
+                </>
+              ) : (
+                section.body.map((para, i) => (
+                  <p key={i} style={bodyStyle}>
+                    {para}
+                  </p>
+                ))
+              )}
 
               {/* ── Quote (when present) ── */}
               {section.quote && (
