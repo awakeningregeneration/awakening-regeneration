@@ -196,6 +196,11 @@ function EditListingContent({ params }: Props) {
   const [extraLocations, setExtraLocations] = useState<Array<{ id: string; address: string; city: string; state: string }>>([
     { id: "loc-0", address: "", city: "", state: "" },
   ]);
+  // True when location cards were seeded from existing listing_locations rows on load.
+  // In that case extraLocations already contains the primary location as its first card,
+  // so the save payload should send extraLocations as-is. For a fresh single→multi upgrade
+  // the primary must be prepended explicitly (mirrors the place-listing creation pattern).
+  const hadExistingLocationsRef = useRef(false);
 
   // Outreach logging form state
   const [showOutreachLog, setShowOutreachLog] = useState(false);
@@ -286,6 +291,7 @@ function EditListingContent({ params }: Props) {
 
         // Pre-populate multi-location state if listing already has location rows
         if (Array.isArray(found.locations) && found.locations.length > 1) {
+          hadExistingLocationsRef.current = true;
           setIsMultiLocation(true);
           setMultiLocationType("same_team");
           setExtraLocations(
@@ -375,11 +381,28 @@ function EditListingContent({ params }: Props) {
           no_public_email: noPublicEmail,
           ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
             ? {
-                locations: extraLocations.map((l) => ({
-                  address: l.address.trim() || undefined,
-                  city: l.city.trim(),
-                  state: l.state.trim(),
-                })),
+                // When location cards were pre-seeded from the DB (existing multi-location listing),
+                // extraLocations already contains all rows including the primary — send as-is.
+                // For a fresh single→multi upgrade, the primary must be prepended so the API's
+                // length > 1 guard passes and all locations (including primary) are written.
+                locations: hadExistingLocationsRef.current
+                  ? extraLocations.map((l) => ({
+                      address: l.address.trim() || undefined,
+                      city: l.city.trim(),
+                      state: l.state.trim(),
+                    }))
+                  : [
+                      {
+                        address: suggestedAddress.trim() || undefined,
+                        city: suggestedCity.trim(),
+                        state: suggestedState,
+                      },
+                      ...extraLocations.map((l) => ({
+                        address: l.address.trim() || undefined,
+                        city: l.city.trim(),
+                        state: l.state.trim(),
+                      })),
+                    ],
               }
             : {}),
         }),
@@ -421,11 +444,24 @@ function EditListingContent({ params }: Props) {
           steward_display_name: stewardDisplayName,
           ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
             ? {
-                locations: extraLocations.map((l) => ({
-                  address: l.address.trim() || undefined,
-                  city: l.city.trim(),
-                  state: l.state.trim(),
-                })),
+                locations: hadExistingLocationsRef.current
+                  ? extraLocations.map((l) => ({
+                      address: l.address.trim() || undefined,
+                      city: l.city.trim(),
+                      state: l.state.trim(),
+                    }))
+                  : [
+                      {
+                        address: suggestedAddress.trim() || undefined,
+                        city: suggestedCity.trim(),
+                        state: suggestedState,
+                      },
+                      ...extraLocations.map((l) => ({
+                        address: l.address.trim() || undefined,
+                        city: l.city.trim(),
+                        state: l.state.trim(),
+                      })),
+                    ],
               }
             : {}),
         }),
@@ -1080,7 +1116,7 @@ function EditListingContent({ params }: Props) {
                       <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0d2a4a" }}>
                         Location {idx + 1}
                       </span>
-                      {extraLocations.length > 2 && (
+                      {extraLocations.length > 1 && (
                         <button
                           type="button"
                           onClick={() => setExtraLocations((cur) => cur.filter((_, i) => i !== idx))}
