@@ -328,7 +328,7 @@ export const bridgeSections: BridgeSection[] = [
         // Box A spans a large vertical range; text top-aligns within it,
         // producing natural space between the two title lines and Box B.
         // Leading space on " Canary Commons" is preserved from config.
-        lines: [" Canary Commons", "\u00A0", "A Visibility infrastructure "],
+        lines: [" Canary Commons", "\u00A0", "A Visibility Infrastructure "],
         fontSizeRatio: 0.04583,
         bold: true,
         italic: false,

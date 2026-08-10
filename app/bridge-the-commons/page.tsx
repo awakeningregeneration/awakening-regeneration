@@ -174,7 +174,7 @@ export default function BridgeTheCommonsPage() {
                       fontWeight: 650,
                       letterSpacing: "0.01em",
                       color: GOLD,
-                      margin: "28px 0 20px",
+                      margin: section.noHero ? "0 0 20px" : "28px 0 20px",
                     }}
                   >
                     {section.title}
@@ -202,14 +202,14 @@ export default function BridgeTheCommonsPage() {
                 </p>
               ) : section.staccato ? (
                 <>
-                  {/* Tagline — italic, slightly larger, full brightness */}
+                  {/* Tagline — italic, slightly larger, left-aligned */}
                   <p
                     style={{
                       ...bodyStyle,
                       fontStyle: "italic",
-                      fontSize: "clamp(1.05rem, 1.3vw, 1.18rem)",
-                      color: "rgba(255,248,224,0.88)",
-                      textAlign: "center",
+                      fontSize: "clamp(1.12rem, 1.45vw, 1.28rem)",
+                      color: "rgba(255,248,224,0.92)",
+                      textAlign: "left",
                       marginBottom: "1.8em",
                     }}
                   >
