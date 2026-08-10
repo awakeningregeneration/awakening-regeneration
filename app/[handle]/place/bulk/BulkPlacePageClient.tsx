@@ -45,6 +45,15 @@ const PRACTICES = [
   "Ethically Sourced/Raised", "Free-Range", "Organic Options",
 ];
 
+type ExtraLocation = {
+  id: string;
+  address: string;
+  city: string;
+  state: string;
+  venue_name?: string;
+  zip?: string;
+};
+
 type ListingDraft = {
   id: string;
   business_name: string;
@@ -59,6 +68,9 @@ type ListingDraft = {
   website: string;
   steward_email: string;
   no_public_email: boolean;
+  isMultiLocation: boolean;
+  multiLocationType: "independent" | "same_team" | null;
+  extraLocations: ExtraLocation[];
   status: "pending" | "placing" | "placed" | "skipped" | "error";
   error?: string;
   listingId?: string;
@@ -235,20 +247,54 @@ export default function BulkPlacePageClient({
           : []
         ).filter((p: string) => PRACTICES.includes(p));
 
+        // Detect multi-location entries (locations array with > 1 items)
+        let primaryCity = String(raw.city || "").trim();
+        let primaryState = normalizeState(String(raw.state || ""));
+        let primaryAddress = String(raw.address || "").trim();
+        let primaryVenueName = raw.venue_name ? String(raw.venue_name).trim() : undefined;
+        let primaryZip = raw.zip ? String(raw.zip).trim() : undefined;
+        let isMultiLocation = false;
+        let multiLocationType: "independent" | "same_team" | null = null;
+        let extraLocations: ExtraLocation[] = [];
+
+        if (Array.isArray(raw.locations) && raw.locations.length > 1) {
+          isMultiLocation = true;
+          multiLocationType = "same_team";
+          const [first, ...rest] = raw.locations as Record<string, unknown>[];
+          if (first) {
+            primaryCity = String(first.city || "").trim() || primaryCity;
+            primaryState = normalizeState(String(first.state || "")) || primaryState;
+            primaryAddress = String(first.address || "").trim() || primaryAddress;
+            primaryVenueName = first.venue_name ? String(first.venue_name).trim() : primaryVenueName;
+            primaryZip = first.zip ? String(first.zip).trim() : primaryZip;
+          }
+          extraLocations = rest.map((loc) => ({
+            id: `loc-${nextId++}`,
+            address: String(loc.address || "").trim(),
+            city: String(loc.city || "").trim(),
+            state: normalizeState(String(loc.state || "")),
+            venue_name: loc.venue_name ? String(loc.venue_name).trim() : undefined,
+            zip: loc.zip ? String(loc.zip).trim() : undefined,
+          }));
+        }
+
         return {
           id: `draft-${nextId++}`,
           business_name: String(raw.business_name || raw.title || "").trim(),
           description: String(raw.description || "").trim(),
           category: cat,
           practices: prac,
-          city: String(raw.city || "").trim(),
-          state: normalizeState(String(raw.state || "")),
-          venue_name: raw.venue_name ? String(raw.venue_name).trim() : undefined,
-          address: String(raw.address || "").trim(),
-          zip: raw.zip ? String(raw.zip).trim() : undefined,
+          city: primaryCity,
+          state: primaryState,
+          venue_name: primaryVenueName,
+          address: primaryAddress,
+          zip: primaryZip,
           website: String(raw.website || "").trim(),
           steward_email: String(raw.steward_email || "").trim(),
           no_public_email: raw.no_public_email === true,
+          isMultiLocation,
+          multiLocationType,
+          extraLocations,
           status: "pending" as const,
         };
       });
@@ -305,6 +351,47 @@ export default function BulkPlacePageClient({
     );
   }
 
+  function addExtraLocation(draftId: string) {
+    setDrafts((prev) =>
+      prev.map((d) =>
+        d.id !== draftId
+          ? d
+          : {
+              ...d,
+              extraLocations: [
+                ...d.extraLocations,
+                { id: `loc-${nextId++}`, address: "", city: "", state: "", venue_name: undefined, zip: undefined },
+              ],
+            }
+      )
+    );
+  }
+
+  function removeExtraLocation(draftId: string, locId: string) {
+    setDrafts((prev) =>
+      prev.map((d) =>
+        d.id !== draftId
+          ? d
+          : { ...d, extraLocations: d.extraLocations.filter((l) => l.id !== locId) }
+      )
+    );
+  }
+
+  function updateExtraLocation(draftId: string, locId: string, field: keyof ExtraLocation, value: string) {
+    setDrafts((prev) =>
+      prev.map((d) =>
+        d.id !== draftId
+          ? d
+          : {
+              ...d,
+              extraLocations: d.extraLocations.map((l) =>
+                l.id !== locId ? l : { ...l, [field]: value }
+              ),
+            }
+      )
+    );
+  }
+
   function skipDraft(id: string) {
     updateDraft(id, "status", "skipped");
   }
@@ -317,6 +404,27 @@ export default function BulkPlacePageClient({
     updateDraft(id, "error", undefined);
 
     try {
+      // Build locations payload for same-team multi-location cards
+      const locationsPayload =
+        draft.isMultiLocation && draft.multiLocationType === "same_team"
+          ? [
+              {
+                address: draft.address.trim() || undefined,
+                city: draft.city.trim(),
+                state: draft.state.trim(),
+                venue_name: draft.venue_name || undefined,
+                zip: draft.zip || undefined,
+              },
+              ...draft.extraLocations.map((l) => ({
+                address: l.address.trim() || undefined,
+                city: l.city.trim(),
+                state: l.state.trim(),
+                venue_name: l.venue_name || undefined,
+                zip: l.zip || undefined,
+              })),
+            ]
+          : undefined;
+
       const res = await fetch("/api/seeder/place-listing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -333,6 +441,7 @@ export default function BulkPlacePageClient({
           website: draft.website,
           steward_email: draft.steward_email || undefined,
           no_public_email: draft.no_public_email,
+          ...(locationsPayload ? { locations: locationsPayload } : {}),
         }),
       });
 
@@ -568,11 +677,22 @@ export default function BulkPlacePageClient({
                   const isPlacing = draft.status === "placing";
                   const isError = draft.status === "error";
                   const canPlace =
-                    draft.business_name.trim() &&
-                    draft.city.trim() &&
-                    draft.state.trim() &&
-                    draft.address.trim() &&
-                    draft.category.length > 0;
+                    draft.isMultiLocation && draft.multiLocationType === "same_team"
+                      ? !!(
+                          draft.business_name.trim() &&
+                          draft.city.trim() &&
+                          draft.state.trim() &&
+                          draft.category.length > 0 &&
+                          draft.extraLocations.length > 0 &&
+                          draft.extraLocations.every((l) => l.city.trim() && l.state.trim())
+                        )
+                      : !!(
+                          draft.business_name.trim() &&
+                          draft.city.trim() &&
+                          draft.state.trim() &&
+                          draft.address.trim() &&
+                          draft.category.length > 0
+                        );
 
                   return (
                     <div
@@ -794,6 +914,233 @@ export default function BulkPlacePageClient({
                                 placeholder="e.g., 97498"
                               />
                             </div>
+
+                            {/* Multi-location checkbox */}
+                            <div>
+                              <label
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  fontSize: "0.82rem",
+                                  color: "#0d2a4a",
+                                  cursor: isPlacing ? "default" : "pointer",
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={draft.isMultiLocation}
+                                  onChange={() => {
+                                    const next = !draft.isMultiLocation;
+                                    setDrafts((prev) =>
+                                      prev.map((d) =>
+                                        d.id !== draft.id
+                                          ? d
+                                          : {
+                                              ...d,
+                                              isMultiLocation: next,
+                                              multiLocationType: next ? "same_team" : null,
+                                              extraLocations:
+                                                next && d.extraLocations.length === 0
+                                                  ? [{ id: `loc-${nextId++}`, address: "", city: "", state: "" }]
+                                                  : d.extraLocations,
+                                            }
+                                      )
+                                    );
+                                  }}
+                                  disabled={isPlacing}
+                                />
+                                This business has more than one location
+                              </label>
+                            </div>
+
+                            {draft.isMultiLocation && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingLeft: 4 }}>
+                                {/* Branching radios */}
+                                <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 20 }}>
+                                  <label
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 8,
+                                      fontSize: "0.82rem",
+                                      color: "#0d2a4a",
+                                      cursor: isPlacing ? "default" : "pointer",
+                                    }}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`multiLocationType-${draft.id}`}
+                                      value="same_team"
+                                      checked={draft.multiLocationType === "same_team"}
+                                      onChange={() => updateDraft(draft.id, "multiLocationType", "same_team")}
+                                      disabled={isPlacing}
+                                    />
+                                    Same steward — one listing, multiple locations
+                                  </label>
+                                  <label
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 8,
+                                      fontSize: "0.82rem",
+                                      color: "#0d2a4a",
+                                      cursor: isPlacing ? "default" : "pointer",
+                                    }}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`multiLocationType-${draft.id}`}
+                                      value="independent"
+                                      checked={draft.multiLocationType === "independent"}
+                                      onChange={() => updateDraft(draft.id, "multiLocationType", "independent")}
+                                      disabled={isPlacing}
+                                    />
+                                    Independently owned — place as separate listings
+                                  </label>
+                                </div>
+
+                                {draft.multiLocationType === "independent" && (
+                                  <p style={{ fontSize: "0.78rem", color: "#6b7c94", margin: "0 0 0 20px", fontStyle: "italic" }}>
+                                    Add each location as its own card in the batch instead.
+                                  </p>
+                                )}
+
+                                {draft.multiLocationType === "same_team" && (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a" }}>
+                                      Additional locations
+                                    </div>
+                                    {draft.extraLocations.map((loc, locIdx) => (
+                                      <div
+                                        key={loc.id}
+                                        style={{
+                                          padding: "12px 14px",
+                                          borderRadius: 10,
+                                          border: "1px solid rgba(100,150,220,0.2)",
+                                          background: "rgba(255,255,255,0.55)",
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            marginBottom: 8,
+                                          }}
+                                        >
+                                          <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7c94" }}>
+                                            Location {locIdx + 2}
+                                          </span>
+                                          {draft.extraLocations.length > 1 && (
+                                            <button
+                                              type="button"
+                                              onClick={() => removeExtraLocation(draft.id, loc.id)}
+                                              disabled={isPlacing}
+                                              style={{
+                                                background: "none",
+                                                border: "none",
+                                                color: "#9b5a5a",
+                                                cursor: isPlacing ? "default" : "pointer",
+                                                fontSize: "0.78rem",
+                                              }}
+                                            >
+                                              Remove
+                                            </button>
+                                          )}
+                                        </div>
+                                        <div style={{ display: "grid", gap: 8 }}>
+                                          <div>
+                                            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 3 }}>
+                                              Venue / location name{" "}
+                                              <span style={{ fontWeight: 400, color: "#6b7c94" }}>(optional)</span>
+                                            </label>
+                                            <input
+                                              style={inputStyle}
+                                              value={loc.venue_name || ""}
+                                              onChange={(e) => updateExtraLocation(draft.id, loc.id, "venue_name", e.target.value)}
+                                              disabled={isPlacing}
+                                              placeholder="e.g., Yachats Commons"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 3 }}>
+                                              Address{" "}
+                                              <span style={{ fontWeight: 400, color: "#6b7c94" }}>(optional)</span>
+                                            </label>
+                                            <input
+                                              style={inputStyle}
+                                              value={loc.address}
+                                              onChange={(e) => updateExtraLocation(draft.id, loc.id, "address", e.target.value)}
+                                              disabled={isPlacing}
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                            <div>
+                                              <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 3 }}>
+                                                City <span style={{ color: "#9b2222" }}>*</span>
+                                              </label>
+                                              <input
+                                                style={inputStyle}
+                                                value={loc.city}
+                                                onChange={(e) => updateExtraLocation(draft.id, loc.id, "city", e.target.value)}
+                                                disabled={isPlacing}
+                                              />
+                                            </div>
+                                            <div>
+                                              <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 3 }}>
+                                                State <span style={{ color: "#9b2222" }}>*</span>
+                                              </label>
+                                              <select
+                                                style={{ ...inputStyle, appearance: "none" }}
+                                                value={STATES.includes(loc.state) ? loc.state : ""}
+                                                onChange={(e) => updateExtraLocation(draft.id, loc.id, "state", e.target.value)}
+                                                disabled={isPlacing}
+                                              >
+                                                <option value="">Select</option>
+                                                {STATES.map((s) => (
+                                                  <option key={s} value={s}>{s}</option>
+                                                ))}
+                                              </select>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 3 }}>
+                                              ZIP{" "}
+                                              <span style={{ fontWeight: 400, color: "#6b7c94" }}>(optional)</span>
+                                            </label>
+                                            <input
+                                              style={{ ...inputStyle, maxWidth: 120 }}
+                                              value={loc.zip || ""}
+                                              onChange={(e) => updateExtraLocation(draft.id, loc.id, "zip", e.target.value)}
+                                              disabled={isPlacing}
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    <button
+                                      type="button"
+                                      onClick={() => addExtraLocation(draft.id)}
+                                      disabled={isPlacing}
+                                      style={{
+                                        alignSelf: "flex-start",
+                                        padding: "7px 14px",
+                                        borderRadius: 999,
+                                        border: "1px dashed rgba(100,150,220,0.4)",
+                                        background: "rgba(255,255,255,0.5)",
+                                        color: "#3a5a7a",
+                                        fontSize: "0.8rem",
+                                        cursor: isPlacing ? "default" : "pointer",
+                                      }}
+                                    >
+                                      + Add location
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                               <div>
                                 <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Website</label>

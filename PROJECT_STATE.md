@@ -4,7 +4,7 @@
 
 *For architectural reference (stack, routes, components, schema), see PROJECT_MAP.md.*
 
-*Last updated: July 3, 2026*
+*Last updated: August 10, 2026*
 
 ---
 
@@ -42,6 +42,18 @@ Canary Commons now operates in two visual registers:
 ---
 
 ## Done (recent)
+
+- **Aug 10** — Seeder outreach email sequence fully rewritten (all three templates). Email 1 "You've been added to Canary Commons" — stripped to essentials, no funding ask. Email 2 "What Canary Commons actually is" — four ✦ star-bulleted pillars (Map / Resources / Stories / Constellation). Email 3 "We're just beginning — join if it feels right" — founding steward link wired to /founders, remove button dropped from all three. Funding ask moved to Email 3 only. "Canary Commons" sign-off is a clickable homepage link in every email. Cadence unchanged: Email 1 immediate, Email 2 day 7, Email 3 day 21. Motivated by low claim-through rate on old templates.
+
+- **Aug 10** — Geocoding reliability fix. Root cause: free-text address field containing venue names (e.g. "Yachats Commons") caused Mapbox to resolve wrong coordinates and county, silently. Real incident: Yachats Farmers Market geocoded to Wasco County instead of Lincoln County — listing disappeared from Lincoln County view. Fix: (1) Address fields split into venue/location name (display-only, never geocoded) + street address + ZIP across /submit, seeder single form, and seeder bulk form. (2) `geocodeLocation` in both API routes now extracts geocoded state from Mapbox `region.*` context and validates it against submitted state — mismatch returns HTTP 422 with inline error instead of silently saving bad data. (3) New public `/api/geocode-preview` endpoint (no auth, no writes) for client-side location confirmation before save. (4) Seeder single form: pre-submit geocode preview → confirm step showing resolved county/state before listing is written. (5) Public submit: pre-review geocode preview with inline error on mismatch. (6) Bulk form: venue_name + zip fields on cards; server-side mismatch surfaces as card error. One-time audit of 300 seeder-placed listings: one borderline case (Wild Woods Gypsy, Port Orford, Curry County) confirmed legitimate. Yachats Farmers Market patched manually: county corrected from "Wasco County" → "Lincoln County", coordinates corrected.
+
+- **Aug 10** — Bridge narrative (`/bridge-the-commons`) full copy-tightening pass across all 13 sections and both closing sections (Business Structure, Why Stewardship). New staccato opening section added: Canary Commons logo + large glowing gold heading + four ✦ star-bulleted product pillars, appearing before slide 1. New callback line between slides 12 and 13 echoing the four pillars before the final "Become the bridge…" slide. `staccato` and `callout` boolean flags added to `BridgeSection` interface; page.tsx renders each differently (stars + tight spacing vs. large centered gold text). Craigslist → Etsy in Business Structure section. Slide 8 "A Visibility Infrastructure" capitalization fixed.
+
+- **Aug 10** — Constellation redesign shipped. Full topic → approach → example hierarchy built and live. Tables: `constellation_approaches`, `constellation_examples`, `constellation_example_approaches`. Admin dashboard at `/ren/admin` — tab switcher replaced with direct Constellation tab + "← Dashboard" link; seeder dashboard gets "Admin →" link. Fire Wise topic populated with 3 approaches and 4 real examples. Public pages at `/constellation/[slug]` render correctly.
+
+- **Aug 10** — Multi-storefront support and inline duplicate detection shipped across /submit, seeder single-listing form, and seeder bulk form. Bulk-place category auto-populate bug fixed (case-insensitive/trimmed matching against canonical category list).
+
+- **Aug 10** — Homepage tagline updated: "Making a difference with every choice — see what's rising around you, near and far."
 
 - **Aug 5** — `/bridge-the-commons` page built and fully tuned. Long-form companion narrative to the stewardship deck: 13 slide hero images (extracted from `CanaryCommons_Stewardship_Deck_v2.pptx` in Documents/Awakening Regeneration) paired with written sections and a closing CTA. Images live at `public/bridge/slide1–13.jpg` (untracked by git — these are binary assets). Slide text overlays extracted from v2 pptx XML and hardcoded in `app/bridge-the-commons/content.ts`. Slide 12 image replaced with correct v2 seedlings photo (was showing a stone bridge placeholder). Key components: `SlideHero.tsx` (client component, ResizeObserver-based proportional font sizing so text matches deck layout at any viewport width), `content.ts` (SlideBox interface with `adjustments` override system for per-box `topOffsetPct`, `horizontalPaddingPct`, `fontSizeMultiplier`, `lineHeight`), `page.tsx` (server component, passes `scrim` prop for directional gradient overlays). Per-slide tuning applied to all 13 slides: font sizes, vertical positioning, line spacing, two-box layouts split from single-box originals (slides 10, 11). Visual treatments: gold accent words (`accentWords` field on SlideBox, renders specific words in `#FFD86B`), left-side scrim on slide 12, subtle star field across page background, gold star row separator (`✦ ✦ ✦ ✦ ✦`) between slides and closing sections, enlarged closing section headers with gold glow. Margaret Mead quote font and color lifted for legibility. `bridge-the-commons` added to `PUBLIC_ROUTES` in NorthStarNav. Cross-link added to `/founders/join` pointing to this page. PDF download link (`/BridgeTheCommons.pdf`) is present in the code but commented out — `public/BridgeTheCommons.pdf` does not exist yet. To restore: remove the comment wrapper around the link block in `page.tsx` (search "PDF link — hidden"). PDF should be a browser print-to-PDF of the live page or an export of the v2 `.pptx`.
 
@@ -239,48 +251,35 @@ Seeder payout tracking, admin reporting, seeder-facing earnings view.
 
 ## In Motion
 
-- **Steward verification — first successful end-to-end claim pending.** Fresh 72h verification links sent to Rebekah (Takubeh) and Jill (Asana Yoga) on Jun 10. Awaiting their click to confirm the first successful steward verification on the platform. Other pages not yet tested on narrow viewports.
+### Oregon county crawl — bulk listing progress
 
----
+10 of 36 counties populated: **Clatsop, Curry, Deschutes, Douglas, Jackson, Josephine, Lane, Klamath, Tillamook, Lincoln.**
 
-## Next: Homepage restructure
-
-Decided June 15. Simplify the homepage, pulling it off the concept-about-concept register. Remove the "connected we dawn brighter" line / DawningBrighter concept-line from the hero entirely.
-
-### New structure, top to bottom
-
-1. **Canary Commons logo**
-2. **About**
-3. **Hero line** (exact copy, preserve verbatim): "There's a constellation of small and diverse solutions being created and tended everywhere, beneath the noise. Diversity sustains. Our attention is the fuel."
-4. **"explore the commons"** — moves up the visual field, leads into the state directory / region selector (already-built explore door, slight rename)
-5. **"tend the commons"** — the contribution / founders door
-6. **Closing line** (exact copy, preserve verbatim): "your participation makes a difference"
-
-### Design notes
-
-- Hero deliberately ends on "our attention is the fuel." No "return your attention" / CTA line in the hero — the two buttons complete the gesture, so the line would be redundant. Less is more.
-- "explore" = receive posture; "tend" = give posture. Receive-then-give breath, top to bottom.
-- The closing line is the last thing on the page. Do not add a supporting line beneath it — the white space is intentional.
-
-### Related context (in progress, not finalized — feel-revisit, not tasks)
-
-- **Founders page reframing** into two sections: "what you receive" (explore the commons) and "what you contribute" (tend the commons).
-- **Founders monthly model** moving toward analog correspondence: a quarterly physical "Evidence from the Field" letter as the centerpiece, with a lighter monthly digital signal between. One-time gift gets seed packet + welcome letter. Year-one elevated contribution steps down to base subscription after 12 months, stated openly. Product framing: orientation/witness, not "positive news."
-- **"tend"** is the shared verb for the giving posture across both homepage and founders page.
+Most recently added: Klamath County, Tillamook County, Lincoln County (Yachats/Newport area). Each researched and placed in batches via the seeder bulk form.
 
 ---
 
 ## Open
 
+### Placement forms
+- **Multi-location checkbox missing on edit page** — no multi-location checkbox on the existing-listing edit page (`/edit/[id]`), only on the creation forms. Central Oregon Locavore is the known affected listing. Still needs building.
+- **Bulk-place multi-location support** — deferred as out of scope during the multi-storefront build. Single-listing form supports it; bulk does not.
+
+### Founders / contribution
+- **$12 Stripe step-down price** — Stripe Price object created (see Jun 23 entry), display copy in place ("After twelve months, every subscription settles to a $12 base"), but the actual mechanic is not wired up.
+
+### Bridge the Commons inquiry follow-up automation
+The inquiry form was shipped (Jul 22 — saves to `bridge_inquiries`, emails Ren on submit). Still not built:
+- 24hr automated reminder if inquiry status stays `new`
+- Auto-response email to donor with ACH/transfer instructions (instructions must come from Supabase row or env var, never hardcoded in the template)
+- SMS via Twilio (requires Twilio account + phone number + auth token in env before this can be wired)
+
 ### Stewardship
 - Step 6: grace-period auto-activation cron — not yet built
 - Step 7: full dispute flow (notifications, resolution, admin review) — not yet built
-- Steps 4 and 5 live-test verification — built but not yet live-tested
-- Code-level audit of stewardship app-side: tables exist and are empty; need to confirm app code reads/writes to them correctly
 
 ### Seeder pathway
-- First seeder assignment (Lucia handles manually for now) — someone is waiting
-- Seeder relational entry arc design — how someone brought in by a seeder experiences arrival (orientation before ask, "invitation from [name]" warmth, pacing, where the Founders ask lives in flow). Bigger than /founders fix.
+- Seeder relational entry arc design — how someone brought in by a seeder experiences arrival (orientation before ask, "invitation from [name]" warmth, pacing, where the Founders ask lives in flow).
 - QR code per seeder
 
 ### Content / service categories
@@ -288,8 +287,8 @@ Decided June 15. Simplify the homepage, pulling it off the concept-about-concept
 
 ### Code hygiene
 - Hydration error pattern: several SSR/CSR mismatches surfaced during Apr 24 work. Most resolved via moving inline <style> to globals.css or clearing stale build cache. Consider a future audit pass to convert remaining isMobile-driven inline style switches to CSS media queries where possible.
-- Taxonomy arrays (practices + categories) are duplicated across 4 files rather than centralized. Intentionally held — the four layers (general listings, support/affiliate, contributor, constellation) may want to diverge as the platform's shape clarifies. Reconsider extraction (e.g. app/lib/taxonomy.ts) when layer-specific taxonomies stabilize.
-- Ghost tables in Supabase (support_resources, affiliate_partners): confirmed empty and unused by code as of Apr 25. Held in observation mode — watch real data flow before deciding to drop.
+- Taxonomy arrays (practices + categories) are duplicated across 4 files rather than centralized. Intentionally held — the four layers may want to diverge as the platform's shape clarifies. Reconsider extraction (e.g. app/lib/taxonomy.ts) when layer-specific taxonomies stabilize.
+- Ghost tables in Supabase (support_resources, affiliate_partners): confirmed empty and unused by code as of Apr 25. Held in observation mode.
 
 ### Polish
 - Prose polish pass across the site
@@ -306,16 +305,11 @@ Decided June 15. Simplify the homepage, pulling it off the concept-about-concept
 
 ### Bridge the Commons — large-gift inquiry system
 
-**Trigger:** Currently ~10 large-donation inquiries and growing via manual outreach; time to build once volume justifies the setup.
+**Shipped (Jul 22):** Inquiry form at `/founders/bridge`, API at `/api/bridge`, `bridge_inquiries` table live in production, email notification to Ren on submit. 1 existing inquiry in the table.
 
-**Planned shape:**
-
-- New "Bridge the Commons" button/link alongside the existing $18/$28/$42 tiers (not replacing them) — for donors wanting to give in a larger way.
-- Simple inquiry form: gift range ($500–1k / $1k–5k / $5k+), name, email, message. No Stripe/payment step — this path exists specifically to avoid Stripe fees on large gifts.
-- Submissions save to a new `bridge_inquiries` table (name, email, range, message, timestamp, status) AND trigger an immediate email notification.
-- Status field tracks: `new` / `responded` / `gift received` — so nothing silently falls through.
-- Daily scheduled check (Netlify scheduled function): anything still `new` after 24 hours triggers a reminder — email at minimum, with SMS via Twilio as a stretch goal once that account/number is set up (not yet in the stack; requires a Twilio account, phone number, and secure storage of the auth token before this piece can be wired).
-- The auto-response email to the donor should include Ren's transfer/ACH instructions so they have everything needed to send a direct deposit without a manual back-and-forth. **IMPORTANT:** bank/ACH details must NOT be hardcoded into the email template file — store them as an admin-editable setting (Supabase row or env variable) that the template references, so the info lives in one controlled place and isn't sitting in git history.
+**Still to build:**
+- Daily scheduled check (Netlify scheduled function): anything still `new` after 24 hours triggers a reminder email, with SMS via Twilio as a stretch goal (requires Twilio account + phone number + auth token before this can be wired).
+- Auto-response email to the donor with transfer/ACH instructions. **IMPORTANT:** bank/ACH details must NOT be hardcoded into the email template — store as a Supabase row or env variable so the info lives in one controlled place and isn't in git history.
 
 ---
 
