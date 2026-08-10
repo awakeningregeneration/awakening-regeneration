@@ -43,6 +43,7 @@ export interface BridgeSection {
   scrim?: "left" | "bottom";  // directional gradient scrim layered on top of the base overlay
   noHero?: boolean;            // skip the slide image (text-only interstitial section)
   staccato?: boolean;          // render body as punchy short lines rather than flowing paragraphs
+  callout?: boolean;           // render single body line as large centered gold highlight
 }
 
 export interface ClosingSection {
@@ -522,6 +523,7 @@ export const bridgeSections: BridgeSection[] = [
   {
     num: 13,
     noHero: true,
+    callout: true,
     slideText: [],
     title: "",
     body: [

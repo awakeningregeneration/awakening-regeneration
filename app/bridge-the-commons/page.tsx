@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { bridgeSections, bridgeClosing } from "./content";
 import SlideHero from "./SlideHero";
@@ -142,36 +143,99 @@ export default function BridgeTheCommonsPage() {
 
               {/* ── Section title (omitted when empty) ── */}
               {section.title && (
-              <h2
-                style={{
-                  fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)",
-                  fontWeight: 650,
-                  letterSpacing: "0.01em",
-                  color: GOLD,
-                  margin: "28px 0 20px",
-                }}
-              >
-                {section.title}
-              </h2>
+                section.staccato ? (
+                  /* Branded opener — logo + large gold heading */
+                  <div style={{ textAlign: "center", margin: "0 0 32px" }}>
+                    <Image
+                      src="/canary-logo-new.png"
+                      alt="Canary Commons"
+                      width={68}
+                      height={68}
+                      style={{ margin: "0 auto 18px", display: "block", opacity: 0.88 }}
+                    />
+                    <h2
+                      style={{
+                        fontSize: "clamp(1.7rem, 3vw, 2.2rem)",
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        color: GOLD,
+                        margin: 0,
+                        textShadow:
+                          "0 0 40px rgba(255,216,107,0.4), 0 0 80px rgba(255,200,80,0.18)",
+                      }}
+                    >
+                      {section.title}
+                    </h2>
+                  </div>
+                ) : (
+                  <h2
+                    style={{
+                      fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)",
+                      fontWeight: 650,
+                      letterSpacing: "0.01em",
+                      color: GOLD,
+                      margin: "28px 0 20px",
+                    }}
+                  >
+                    {section.title}
+                  </h2>
+                )
               )}
 
               {/* ── Body paragraphs ── */}
-              {section.staccato ? (
+              {section.callout ? (
+                /* Standout callback line — large, centered, gold glow */
+                <p
+                  style={{
+                    fontSize: "clamp(1.15rem, 1.7vw, 1.35rem)",
+                    lineHeight: 1.6,
+                    color: GOLD,
+                    textAlign: "center",
+                    fontStyle: "italic",
+                    letterSpacing: "0.01em",
+                    textShadow:
+                      "0 0 32px rgba(255,216,107,0.35), 0 0 64px rgba(255,200,80,0.18)",
+                    margin: 0,
+                  }}
+                >
+                  {section.body[0]}
+                </p>
+              ) : section.staccato ? (
                 <>
-                  <p style={{ ...bodyStyle, fontStyle: "italic", marginBottom: "1.6em" }}>
+                  {/* Tagline — italic, slightly larger, full brightness */}
+                  <p
+                    style={{
+                      ...bodyStyle,
+                      fontStyle: "italic",
+                      fontSize: "clamp(1.05rem, 1.3vw, 1.18rem)",
+                      color: "rgba(255,248,224,0.88)",
+                      textAlign: "center",
+                      marginBottom: "1.8em",
+                    }}
+                  >
                     {section.body[0]}
                   </p>
+                  {/* Star-bulleted lines */}
                   {section.body.slice(1).map((line, i) => (
                     <p
                       key={i}
                       style={{
                         ...bodyStyle,
-                        margin: "0 0 0.55em",
-                        paddingLeft: "1.3em",
-                        textIndent: "-1.3em",
+                        margin: "0 0 0.6em",
+                        paddingLeft: "1.5em",
+                        textIndent: "-1.5em",
+                        fontSize: "clamp(1rem, 1.2vw, 1.12rem)",
                       }}
                     >
-                      <span style={{ color: "rgba(255,216,107,0.6)", marginRight: "0.55em" }}>·</span>
+                      <span
+                        style={{
+                          color: GOLD,
+                          marginRight: "0.6em",
+                          textShadow: "0 0 12px rgba(255,216,107,0.5)",
+                        }}
+                      >
+                        ✦
+                      </span>
                       {line}
                     </p>
                   ))}
