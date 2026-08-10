@@ -149,9 +149,9 @@ export default function BridgeTheCommonsPage() {
                     <Image
                       src="/canary-logo-new.png"
                       alt="Canary Commons"
-                      width={68}
-                      height={68}
-                      style={{ margin: "0 auto 18px", display: "block", opacity: 0.88 }}
+                      width={140}
+                      height={140}
+                      style={{ margin: "0 auto 20px", display: "block", opacity: 0.92 }}
                     />
                     <h2
                       style={{
