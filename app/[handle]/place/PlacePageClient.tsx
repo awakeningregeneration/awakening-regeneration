@@ -9,7 +9,7 @@ type Props = {
   seederName: string;
 };
 
-type ViewState = "form" | "override" | "duplicate" | "success";
+type ViewState = "form" | "override" | "duplicate" | "confirm" | "success";
 
 type OverrideData = {
   title: string;
@@ -135,10 +135,20 @@ export default function PlacePageClient({ handle, seederName }: Props) {
   const [practices, setPractices] = useState<string[]>([]);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [venueName, setVenueName] = useState("");
   const [address, setAddress] = useState("");
+  const [zip, setZip] = useState("");
   const [website, setWebsite] = useState("");
   const [stewardEmail, setStewardEmail] = useState("");
   const [showOutreachSection, setShowOutreachSection] = useState(false);
+
+  // ── Geocode preview ──
+  const [geocodePreview, setGeocodePreview] = useState<{
+    county: string;
+    geocodedState: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   // ── Submission state ──
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -202,7 +212,9 @@ export default function PlacePageClient({ handle, seederName }: Props) {
     setPractices([]);
     setCity("");
     setState("");
+    setVenueName("");
     setAddress("");
+    setZip("");
     setWebsite("");
     setStewardEmail("");
     setErrorMessage("");
@@ -212,70 +224,27 @@ export default function PlacePageClient({ handle, seederName }: Props) {
     setExtraLocations([{ id: "loc-0", address: "", city: "", state: "" }]);
     setDupMatch(null);
     setDupDismissed(false);
+    setGeocodePreview(null);
   }
 
-  async function submitPlacement(overrideDoNotList: boolean) {
-    setIsSubmitting(true);
-    setErrorMessage("");
-
-    // Client-side pre-validation
-    if (!title.trim() || title.trim().length < 2) {
-      setErrorMessage("Please add a name for the business (at least 2 characters).");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!description.trim() || description.trim().length < 10) {
-      setErrorMessage("Please add a description (at least 10 characters).");
-      setIsSubmitting(false);
-      return;
-    }
-    if (category.length === 0) {
-      setErrorMessage("Please choose a category.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (practices.length === 0) {
-      setErrorMessage("Please select at least one practice.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!city.trim()) {
-      setErrorMessage("Please enter a city.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!state) {
-      setErrorMessage("Please select a state.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (isMultiLocation && multiLocationType === "same_team") {
-      for (let i = 0; i < extraLocations.length; i++) {
-        const loc = extraLocations[i];
-        if (!loc.city.trim() || !loc.state) {
-          setErrorMessage(`Please add city and state for location ${i + 2}.`);
-          setIsSubmitting(false);
-          return;
-        }
-      }
-    }
-
-    const payload = {
+  function buildPayload(overrideDoNotList: boolean) {
+    return {
       title: title.trim(),
       description: description.trim(),
       category,
       practices,
       city: city.trim(),
       state,
+      venue_name: venueName.trim() || undefined,
       address: address.trim() || undefined,
+      zip: zip.trim() || undefined,
       website: website.trim() || undefined,
       steward_email: stewardEmail.trim() || undefined,
       override_do_not_list: overrideDoNotList,
       ...(isMultiLocation && multiLocationType === "same_team" && extraLocations.length > 0
         ? {
             locations: [
-              { address: address.trim() || undefined, city: city.trim(), state },
+              { address: address.trim() || undefined, city: city.trim(), state, zip: zip.trim() || undefined },
               ...extraLocations.map((l) => ({
                 address: l.address.trim() || undefined,
                 city: l.city.trim(),
@@ -285,7 +254,99 @@ export default function PlacePageClient({ handle, seederName }: Props) {
           }
         : {}),
     };
+  }
 
+  function validateClientSide(): boolean {
+    if (!title.trim() || title.trim().length < 2) {
+      setErrorMessage("Please add a name for the business (at least 2 characters).");
+      return false;
+    }
+    if (!description.trim() || description.trim().length < 10) {
+      setErrorMessage("Please add a description (at least 10 characters).");
+      return false;
+    }
+    if (category.length === 0) {
+      setErrorMessage("Please choose a category.");
+      return false;
+    }
+    if (practices.length === 0) {
+      setErrorMessage("Please select at least one practice.");
+      return false;
+    }
+    if (!city.trim()) {
+      setErrorMessage("Please enter a city.");
+      return false;
+    }
+    if (!state) {
+      setErrorMessage("Please select a state.");
+      return false;
+    }
+    if (isMultiLocation && multiLocationType === "same_team") {
+      for (let i = 0; i < extraLocations.length; i++) {
+        const loc = extraLocations[i];
+        if (!loc.city.trim() || !loc.state) {
+          setErrorMessage(`Please add city and state for location ${i + 2}.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  // Called when the form is first submitted — runs geocode-preview, then shows confirm view
+  async function handleFormSubmit() {
+    setErrorMessage("");
+    if (!validateClientSide()) return;
+
+    setIsSubmitting(true);
+    try {
+      const previewRes = await fetch("/api/geocode-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: address.trim() || undefined,
+          city: city.trim(),
+          state,
+          zip: zip.trim() || undefined,
+        }),
+      });
+      const previewData = await previewRes.json();
+
+      if (!previewRes.ok) {
+        setErrorMessage(previewData.error || "Could not verify location. Please try again.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      if (previewData.stateMatches === false) {
+        setErrorMessage(
+          `Address appears to be in ${previewData.geocodedState}, not ${state}. Please double-check the street address, city, and state — or remove the street address and try again.`
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      setGeocodePreview({
+        county: previewData.county,
+        geocodedState: previewData.geocodedState,
+        lat: previewData.lat,
+        lng: previewData.lng,
+      });
+      setView("confirm");
+    } catch {
+      setErrorMessage("Something went wrong verifying location. Please try again.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  // Called from confirm view or override/duplicate views — actually places the listing
+  async function submitPlacement(overrideDoNotList: boolean) {
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    const payload = buildPayload(overrideDoNotList);
     setSavedFormData(payload);
 
     try {
@@ -463,7 +524,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  submitPlacement(false);
+                  handleFormSubmit();
                 }}
                 style={{ display: "grid", gap: 18 }}
               >
@@ -695,7 +756,28 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                   </div>
                 )}
 
-                {/* 6. Address (optional) */}
+                {/* 6. Venue name + Address + ZIP (optional) */}
+                <div>
+                  <label style={labelStyle}>
+                    Venue / location name{" "}
+                    <span style={{ fontWeight: 400, color: "#6b7c94" }}>
+                      (optional)
+                    </span>
+                  </label>
+                  <p style={helperStyle}>
+                    e.g. Yachats Commons, Lincoln Center — never sent to the map engine
+                  </p>
+                  <input
+                    type="text"
+                    value={venueName}
+                    onChange={(e) => {
+                      setVenueName(e.target.value);
+                      setErrorMessage("");
+                    }}
+                    placeholder="e.g., Yachats Commons"
+                    style={inputStyle}
+                  />
+                </div>
                 <div>
                   <label style={labelStyle}>
                     Street address{" "}
@@ -715,6 +797,24 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                     }}
                     placeholder="e.g., 237 E Main St"
                     style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>
+                    ZIP code{" "}
+                    <span style={{ fontWeight: 400, color: "#6b7c94" }}>
+                      (optional, improves map accuracy)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={zip}
+                    onChange={(e) => {
+                      setZip(e.target.value);
+                      setErrorMessage("");
+                    }}
+                    placeholder="e.g., 97498"
+                    style={{ ...inputStyle, maxWidth: 160 }}
                   />
 
                   {/* Multi-location checkbox */}
@@ -1240,6 +1340,114 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                   {isSubmitting
                     ? "Placing..."
                     : "Different business — place anyway"}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ── CONFIRM VIEW ── */}
+          {view === "confirm" && geocodePreview && (
+            <>
+              <h2
+                style={{
+                  fontSize: "clamp(1.25rem, 2.5vw, 1.5rem)",
+                  lineHeight: 1.3,
+                  fontWeight: 650,
+                  color: "#8a6d2a",
+                  margin: "0 0 16px",
+                  textAlign: "center",
+                }}
+              >
+                Confirm placement location
+              </h2>
+
+              <div
+                style={{
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  background: "rgba(220,240,255,0.3)",
+                  border: "1px solid rgba(100,150,220,0.2)",
+                  marginBottom: 20,
+                  fontSize: "0.95rem",
+                  lineHeight: 1.6,
+                  color: "#2a3a4a",
+                }}
+              >
+                <p style={{ margin: "0 0 8px" }}>
+                  This listing will be placed in:
+                </p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: "1.05rem", color: "#0d2a4a" }}>
+                  {geocodePreview.county || "(county not found)"},{" "}
+                  {geocodePreview.geocodedState || state}
+                </p>
+              </div>
+
+              {errorMessage && (
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    background: "rgba(180,35,24,0.06)",
+                    border: "1px solid rgba(180,35,24,0.15)",
+                    color: "#b42318",
+                    fontSize: "0.9rem",
+                    lineHeight: 1.5,
+                    marginBottom: 18,
+                  }}
+                >
+                  {errorMessage}
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setView("form");
+                    setGeocodePreview(null);
+                    setErrorMessage("");
+                  }}
+                  style={{
+                    padding: "13px 24px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(13,42,74,0.18)",
+                    background: "rgba(255,255,255,0.55)",
+                    color: "#0d2a4a",
+                    fontWeight: 600,
+                    fontSize: "0.95rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  ← Go back
+                </button>
+                <button
+                  onClick={() => submitPlacement(false)}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: "13px 24px",
+                    borderRadius: 999,
+                    border: "none",
+                    background: isSubmitting
+                      ? "rgba(255,216,107,0.5)"
+                      : "#FFD86B",
+                    color: isSubmitting
+                      ? "rgba(26,42,14,0.5)"
+                      : "#1a2a0e",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    boxShadow: isSubmitting
+                      ? "none"
+                      : "0 0 20px rgba(255,216,107,0.25)",
+                  }}
+                >
+                  {isSubmitting ? "Placing..." : "Looks right — Confirm & Place"}
                 </button>
               </div>
             </>

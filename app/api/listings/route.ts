@@ -18,7 +18,8 @@ async function geocodeLocation(params: {
   city?: string;
   county?: string;
   state?: string;
-}) {
+  zip?: string;
+}): Promise<{ lng: number; lat: number; geocodedState: string }> {
   // Strip PO Box addresses before geocoding — Mapbox misinterprets box numbers
   // as street numbers and can pin to a wrong city. Geocode city+state only instead.
   const PO_BOX_RE = /\bP\.?O\.?\s*Box\b|\bPost\s+Office\s+Box\b/i;
@@ -30,6 +31,7 @@ async function geocodeLocation(params: {
     params.city?.trim(),
     params.county?.trim(),
     params.state?.trim(),
+    params.zip?.trim(),
     "USA",
   ].filter(Boolean);
 
@@ -60,7 +62,20 @@ async function geocodeLocation(params: {
 
   const [lng, lat] = center;
 
-  return { lng, lat };
+  // Extract state from Mapbox context (region.* entries)
+  let geocodedStateName = "";
+  for (const ctx of feature.context ?? []) {
+    if (ctx.id?.startsWith("region.")) {
+      geocodedStateName = ctx.text ?? "";
+      break;
+    }
+  }
+  // Also check if feature itself is a region
+  if (!geocodedStateName && feature.place_type?.includes("region")) {
+    geocodedStateName = feature.text ?? "";
+  }
+
+  return { lng, lat, geocodedState: geocodedStateName };
 }
 
 // GET
@@ -113,6 +128,8 @@ export async function POST(req: Request) {
       description,
       website,
       address,
+      venue_name,
+      zip,
       city,
       state,
       county,
@@ -144,12 +161,27 @@ export async function POST(req: Request) {
           .filter(Boolean)
       : [];
 
-    const { lng, lat } = await geocodeLocation({
+    const geocodeResult = await geocodeLocation({
       address,
       city: normalizedCity,
       county: normalizedCounty,
       state: normalizedState,
+      zip,
     });
+    const { lng, lat } = geocodeResult;
+
+    // Validate geocoded state matches submitted state
+    const normalizedSubmittedState = normalizeState(body.state);
+    const normalizedGeocodedState = normalizeState(geocodeResult.geocodedState);
+    if (normalizedGeocodedState && normalizedGeocodedState !== normalizedSubmittedState) {
+      return NextResponse.json(
+        {
+          error: `Address appears to be in ${geocodeResult.geocodedState}, not ${body.state}. Please double-check the address or remove it and rely on city/state only.`,
+          code: "geocode_state_mismatch",
+        },
+        { status: 422 }
+      );
+    }
 
     // ── Universal block check (do_not_list_level = 'universal') ──
     // Prevents re-submission of a listing that a steward has permanently removed.
@@ -206,7 +238,7 @@ export async function POST(req: Request) {
           title: title?.trim() || "",
           description: description?.trim() || "",
           website: website?.trim() || null,
-          address: address?.trim() || null,
+          address: [venue_name?.trim(), address?.trim()].filter(Boolean).join(", ") || null,
           city: normalizedCity || null,
           state: normalizedState || null,
           county: normalizedCounty || null,

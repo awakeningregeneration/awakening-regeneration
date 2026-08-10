@@ -53,7 +53,9 @@ type ListingDraft = {
   practices: string[];
   city: string;
   state: string;
+  venue_name?: string;
   address: string;
+  zip?: string;
   website: string;
   steward_email: string;
   no_public_email: boolean;
@@ -241,7 +243,9 @@ export default function BulkPlacePageClient({
           practices: prac,
           city: String(raw.city || "").trim(),
           state: normalizeState(String(raw.state || "")),
+          venue_name: raw.venue_name ? String(raw.venue_name).trim() : undefined,
           address: String(raw.address || "").trim(),
+          zip: raw.zip ? String(raw.zip).trim() : undefined,
           website: String(raw.website || "").trim(),
           steward_email: String(raw.steward_email || "").trim(),
           no_public_email: raw.no_public_email === true,
@@ -323,7 +327,9 @@ export default function BulkPlacePageClient({
           practices: draft.practices,
           city: draft.city,
           state: draft.state,
+          venue_name: draft.venue_name || undefined,
           address: draft.address,
+          zip: draft.zip || undefined,
           website: draft.website,
           steward_email: draft.steward_email || undefined,
           no_public_email: draft.no_public_email,
@@ -754,8 +760,39 @@ export default function BulkPlacePageClient({
                               </div>
                             </div>
                             <div>
+                              {draft.venue_name && (
+                                <div style={{ fontSize: "0.72rem", color: "#6b7c94", marginBottom: 4, fontStyle: "italic" }}>
+                                  Venue: {draft.venue_name}
+                                </div>
+                              )}
+                              <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>
+                                Venue / location name{" "}
+                                <span style={{ fontWeight: 400, color: "#6b7c94" }}>(optional)</span>
+                              </label>
+                              <input
+                                style={inputStyle}
+                                value={draft.venue_name || ""}
+                                onChange={(e) => updateDraft(draft.id, "venue_name", e.target.value)}
+                                disabled={isPlacing}
+                                placeholder="e.g., Yachats Commons — never sent to map engine"
+                              />
+                            </div>
+                            <div>
                               <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>Address <span style={{ fontWeight: 400, color: "#9b2222" }}>(required)</span></label>
                               <input style={inputStyle} value={draft.address} onChange={(e) => updateDraft(draft.id, "address", e.target.value)} disabled={isPlacing} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0d2a4a", display: "block", marginBottom: 4 }}>
+                                ZIP{" "}
+                                <span style={{ fontWeight: 400, color: "#6b7c94" }}>(optional)</span>
+                              </label>
+                              <input
+                                style={{ ...inputStyle, maxWidth: 140 }}
+                                value={draft.zip || ""}
+                                onChange={(e) => updateDraft(draft.id, "zip", e.target.value)}
+                                disabled={isPlacing}
+                                placeholder="e.g., 97498"
+                              />
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                               <div>

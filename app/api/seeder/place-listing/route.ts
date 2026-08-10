@@ -65,14 +65,16 @@ const VALID_PRACTICES = new Set([
 ]);
 
 /**
- * Geocode via Mapbox and extract county from the response context.
- * Returns { lng, lat, county } where county is auto-derived, not user-input.
+ * Geocode via Mapbox and extract county + state from the response context.
+ * Returns { lng, lat, county, geocodedState } where county and geocodedState
+ * are auto-derived from Mapbox context, not user-input.
  */
 async function geocodeLocation(params: {
   address?: string;
   city?: string;
   state?: string;
-}): Promise<{ lng: number; lat: number; county: string }> {
+  zip?: string;
+}): Promise<{ lng: number; lat: number; county: string; geocodedState: string }> {
   if (!mapboxToken) {
     throw new Error("Mapbox token is not configured.");
   }
@@ -83,14 +85,9 @@ async function geocodeLocation(params: {
   const safeAddress =
     params.address && PO_BOX_RE.test(params.address) ? undefined : params.address;
 
-  const parts = [
-    safeAddress?.trim(),
-    params.city?.trim(),
-    params.state?.trim(),
-    "USA",
-  ].filter(Boolean);
-
-  const query = parts.join(", ");
+  const query = [safeAddress?.trim(), params.city?.trim(), params.state?.trim(), params.zip?.trim(), "USA"]
+    .filter(Boolean)
+    .join(", ");
   if (!query) throw new Error("No location information provided for geocoding.");
 
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=1`;
@@ -122,7 +119,20 @@ async function geocodeLocation(params: {
   // Strip trailing " County" if Mapbox included it, then re-normalize
   county = county.replace(/\s+County$/i, "").trim();
 
-  return { lng: center[0], lat: center[1], county };
+  // Extract state from Mapbox context (region.* entries)
+  let geocodedStateName = "";
+  for (const ctx of feature.context ?? []) {
+    if (ctx.id?.startsWith("region.")) {
+      geocodedStateName = ctx.text ?? "";
+      break;
+    }
+  }
+  // Also check if feature itself is a region
+  if (!geocodedStateName && feature.place_type?.includes("region")) {
+    geocodedStateName = feature.text ?? "";
+  }
+
+  return { lng: center[0], lat: center[1], county, geocodedState: geocodedStateName };
 }
 
 export async function POST(req: Request) {
@@ -146,6 +156,8 @@ export async function POST(req: Request) {
     city,
     state,
     address,
+    venue_name,
+    zip,
     website,
     steward_email,
     override_do_not_list,
@@ -240,17 +252,33 @@ export async function POST(req: Request) {
   const normalizedCity = normalizeCity(city);
   const normalizedState = normalizeState(state);
 
-  let coords: { lng: number; lat: number; county: string };
+  let coords: { lng: number; lat: number; county: string; geocodedState: string };
   try {
     coords = await geocodeLocation({
       address: address?.trim(),
       city: normalizedCity,
       state: normalizedState,
+      zip: zip?.trim(),
     });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Geocoding failed." },
       { status: 400 }
+    );
+  }
+
+  // Validate geocoded state matches submitted state
+  const normalizedSubmitted = normalizeState(state);
+  const normalizedGeocoded = normalizeState(coords.geocodedState);
+  if (normalizedGeocoded && normalizedGeocoded !== normalizedSubmitted) {
+    return NextResponse.json(
+      {
+        error: `Address appears to be in ${coords.geocodedState}, not ${state}. Please double-check the street address, city, and state — or remove the street address and try again.`,
+        code: "geocode_state_mismatch",
+        geocodedState: coords.geocodedState,
+        geocodedCounty: coords.county,
+      },
+      { status: 422 }
     );
   }
 
@@ -297,7 +325,7 @@ export async function POST(req: Request) {
         city: normalizedCity || null,
         state: normalizedState || null,
         county: normalizedCounty || null,
-        address: address?.trim() || null,
+        address: [venue_name?.trim(), address?.trim()].filter(Boolean).join(", ") || null,
         website: website?.trim() || null,
         steward_email: steward_email?.trim() || null,
         lng: coords.lng,

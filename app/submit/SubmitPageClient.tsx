@@ -191,7 +191,9 @@ export default function SubmitPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
+  const [venueName, setVenueName] = useState("");
   const [address, setAddress] = useState("");
+  const [zip, setZip] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState(prefilledState);
   const [county, setCounty] = useState(prefilledCounty);
@@ -206,6 +208,7 @@ export default function SubmitPage() {
 
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [stewardshipPending, setStewardshipPending] = useState(false);
@@ -318,11 +321,40 @@ export default function SubmitPage() {
     return true;
   }
 
-  function handleReview() {
+  async function handleReview() {
     setErrorMessage("");
     setSuccessMessage("");
 
     if (!validateForm()) return;
+
+    // If an address was provided, verify it resolves to the correct state before showing review
+    if (address.trim() || city.trim()) {
+      setIsGeocoding(true);
+      try {
+        const previewRes = await fetch("/api/geocode-preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address: address.trim() || undefined,
+            city: city.trim() || undefined,
+            state: state.trim() || undefined,
+            zip: zip.trim() || undefined,
+          }),
+        });
+        const previewData = await previewRes.json();
+        if (previewRes.ok && previewData.stateMatches === false) {
+          setErrorMessage(
+            `Address appears to be in ${previewData.geocodedState}, not ${state}. Please double-check the address or remove it and rely on city/state only.`
+          );
+          setIsGeocoding(false);
+          return;
+        }
+      } catch {
+        // Non-blocking — if geocode-preview fails, proceed to review anyway
+      } finally {
+        setIsGeocoding(false);
+      }
+    }
 
     setIsReviewing(true);
   }
@@ -344,7 +376,9 @@ export default function SubmitPage() {
         title: title.trim(),
         description: description.trim(),
         website: website.trim(),
+        venue_name: venueName.trim() || undefined,
         address: address.trim(),
+        zip: zip.trim() || undefined,
         city: city.trim(),
         state: state.trim(),
         county: county.trim(),
@@ -418,7 +452,9 @@ export default function SubmitPage() {
       setTitle("");
       setDescription("");
       setWebsite("");
+      setVenueName("");
       setAddress("");
+      setZip("");
       setCity("");
       setState(prefilledState);
       setCounty(prefilledCounty);
@@ -721,12 +757,41 @@ export default function SubmitPage() {
                 </div>
 
                 <div>
+                  <label style={labelStyle}>
+                    Venue / location name{" "}
+                    <span style={{ fontWeight: 400, color: "#6b7c94", fontSize: "0.88em" }}>(optional)</span>
+                  </label>
+                  <p style={{ ...helperStyle, fontStyle: "italic" }}>
+                    e.g. Yachats Commons, Lincoln Center — never sent to the map engine
+                  </p>
+                  <input
+                    value={venueName}
+                    onChange={(e) => setVenueName(e.target.value)}
+                    placeholder="e.g., Yachats Commons"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
                   <label style={labelStyle}>Street address</label>
                   <input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Optional, but helpful for mapping"
                     style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    ZIP code{" "}
+                    <span style={{ fontWeight: 400, color: "#6b7c94", fontSize: "0.88em" }}>(optional, improves map accuracy)</span>
+                  </label>
+                  <input
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    placeholder="e.g., 97498"
+                    style={{ ...inputStyle, maxWidth: 180 }}
                   />
                 </div>
 
@@ -1138,9 +1203,14 @@ export default function SubmitPage() {
                 <button
                   type="button"
                   onClick={handleReview}
-                  style={goldButtonStyle}
+                  disabled={isGeocoding}
+                  style={{
+                    ...goldButtonStyle,
+                    opacity: isGeocoding ? 0.6 : 1,
+                    cursor: isGeocoding ? "not-allowed" : "pointer",
+                  }}
                 >
-                  Review listing
+                  {isGeocoding ? "Checking location..." : "Review listing"}
                 </button>
 
                 <Link href="/map" style={ghostButtonStyle}>
