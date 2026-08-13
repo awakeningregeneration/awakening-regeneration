@@ -266,7 +266,6 @@ export default function AdminClient({
               marginBottom: 24,
             }}
           >
-            {/* "Seeders" navigates back to the seeder dashboard */}
             <Link
               href={`/${handle}`}
               style={{
@@ -283,24 +282,30 @@ export default function AdminClient({
             >
               ← Dashboard
             </Link>
-            {/* "Constellation" is the in-page tab */}
-            <button
-              onClick={() => setActiveTab("constellation")}
-              style={{
-                background: "rgba(255,216,107,0.2)",
-                border: "none",
-                borderBottom: "2px solid #FFD86B",
-                borderRadius: 0,
-                padding: "8px 18px",
-                fontSize: "0.9rem",
-                fontWeight: 700,
-                color: "#8a6d2a",
-                cursor: "pointer",
-                marginBottom: -1,
-              }}
-            >
-              Constellation
-            </button>
+            {(["seeders", "constellation"] as const).map((tab) => {
+              const active = activeTab === tab;
+              const label = tab === "seeders" ? "Seeders" : "Constellation";
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    background: active ? "rgba(255,216,107,0.2)" : "transparent",
+                    border: "none",
+                    borderBottom: active ? "2px solid #FFD86B" : "2px solid transparent",
+                    borderRadius: 0,
+                    padding: "8px 18px",
+                    fontSize: "0.9rem",
+                    fontWeight: active ? 700 : 400,
+                    color: active ? "#8a6d2a" : "#4a5d73",
+                    cursor: "pointer",
+                    marginBottom: -1,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {activeTab === "constellation" && <ConstellationAdmin handle={handle} />}
