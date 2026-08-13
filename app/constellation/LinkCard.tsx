@@ -82,7 +82,7 @@ export default function LinkCard({ url, title, summary, favicon_url }: Props) {
             style={{
               fontSize: "0.88rem",
               lineHeight: 1.6,
-              color: "rgba(211,227,247,0.58)",
+              color: "rgba(211,227,247,0.82)",
             }}
           >
             {summary}
@@ -94,7 +94,7 @@ export default function LinkCard({ url, title, summary, favicon_url }: Props) {
           style={{
             flexShrink: 0,
             fontSize: "0.85rem",
-            color: "rgba(255,216,107,0.4)",
+            color: "rgba(255,216,107,0.65)",
             marginTop: 3,
           }}
         >

@@ -49,7 +49,7 @@ export default function TopicCard({ slug, title, subheader }: Props) {
             margin: 0,
             fontSize: "0.88rem",
             lineHeight: 1.6,
-            color: "rgba(211,227,247,0.58)",
+            color: "rgba(211,227,247,0.82)",
           }}
         >
           {subheader}

@@ -5,21 +5,21 @@ import { useRouter } from "next/navigation";
 import ThresholdMap from "@/app/components/ThresholdMap";
 import Link from "next/link";
 
-// Orb positions: interior US heartland only — left 36–65%, top 29–53%
-// Far from all coastlines and well clear of Pacific, Atlantic, and Gulf.
+// Orb positions: distributed across full viewport so they read as scattered
+// lights at any screen size (desktop or mobile).
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
-  { left: "36%", top: "31%", size: 5, opacity: 0.6 },   // Montana / North Dakota
-  { left: "52%", top: "29%", size: 3, opacity: 0.45 },  // Minnesota / Wisconsin
-  { left: "62%", top: "32%", size: 6, opacity: 0.65 },  // Wisconsin / Michigan UP
-  { left: "38%", top: "40%", size: 4, opacity: 0.5 },   // Wyoming / Colorado
-  { left: "46%", top: "37%", size: 7, opacity: 0.7 },   // Nebraska / Iowa
-  { left: "58%", top: "38%", size: 4, opacity: 0.55 },  // Illinois / Indiana
-  { left: "65%", top: "40%", size: 6, opacity: 0.65 },  // Ohio
-  { left: "42%", top: "46%", size: 3, opacity: 0.4 },   // Kansas
-  { left: "54%", top: "44%", size: 8, opacity: 0.7 },   // Missouri / Kentucky
-  { left: "40%", top: "53%", size: 5, opacity: 0.55 },  // Oklahoma interior
-  { left: "52%", top: "52%", size: 4, opacity: 0.5 },   // Tennessee
-  { left: "61%", top: "48%", size: 6, opacity: 0.6 },   // West Virginia
+  { left: "8%",  top: "12%", size: 4, opacity: 0.5 },
+  { left: "22%", top: "7%",  size: 6, opacity: 0.6 },
+  { left: "42%", top: "10%", size: 3, opacity: 0.45 },
+  { left: "68%", top: "8%",  size: 5, opacity: 0.55 },
+  { left: "85%", top: "14%", size: 7, opacity: 0.65 },
+  { left: "12%", top: "32%", size: 5, opacity: 0.6 },
+  { left: "33%", top: "28%", size: 4, opacity: 0.5 },
+  { left: "55%", top: "25%", size: 8, opacity: 0.7 },
+  { left: "78%", top: "30%", size: 4, opacity: 0.55 },
+  { left: "90%", top: "42%", size: 6, opacity: 0.6 },
+  { left: "6%",  top: "55%", size: 3, opacity: 0.4 },
+  { left: "72%", top: "58%", size: 5, opacity: 0.5 },
 ];
 
 const STATES = [

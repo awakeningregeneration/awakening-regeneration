@@ -80,7 +80,7 @@ export default async function ConstellationPage() {
               fontSize: "0.78rem",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "rgba(255,216,107,0.55)",
+              color: "rgba(255,216,107,0.75)",
               margin: "0 0 14px",
             }}
           >
@@ -103,7 +103,7 @@ export default async function ConstellationPage() {
             style={{
               fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
               lineHeight: 1.65,
-              color: "rgba(211,227,247,0.72)",
+              color: "rgba(211,227,247,0.88)",
               margin: 0,
             }}
           >

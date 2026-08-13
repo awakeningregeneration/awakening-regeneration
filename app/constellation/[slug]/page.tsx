@@ -121,7 +121,7 @@ export default async function ConstellationTopicPage({ params }: Props) {
             href="/constellation"
             style={{
               fontSize: "0.85rem",
-              color: "rgba(211,227,247,0.5)",
+              color: "rgba(211,227,247,0.72)",
               textDecoration: "none",
             }}
           >
@@ -136,7 +136,7 @@ export default async function ConstellationTopicPage({ params }: Props) {
               fontSize: "0.78rem",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "rgba(255,216,107,0.5)",
+              color: "rgba(255,216,107,0.75)",
               margin: "0 0 14px",
             }}
           >
@@ -159,7 +159,7 @@ export default async function ConstellationTopicPage({ params }: Props) {
             style={{
               fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
               lineHeight: 1.65,
-              color: "rgba(211,227,247,0.65)",
+              color: "rgba(211,227,247,0.88)",
               margin: 0,
               maxWidth: 580,
             }}
@@ -217,7 +217,7 @@ export default async function ConstellationTopicPage({ params }: Props) {
                       style={{
                         fontSize: "0.95rem",
                         lineHeight: 1.6,
-                        color: "rgba(211,227,247,0.55)",
+                        color: "rgba(211,227,247,0.82)",
                         margin: "0 0 20px",
                         maxWidth: 580,
                       }}
@@ -262,7 +262,7 @@ export default async function ConstellationTopicPage({ params }: Props) {
             href={`/constellation/submit?topic=${topic.id}`}
             style={{
               fontSize: "0.85rem",
-              color: "rgba(211,227,247,0.42)",
+              color: "rgba(211,227,247,0.65)",
               textDecoration: "none",
             }}
           >
