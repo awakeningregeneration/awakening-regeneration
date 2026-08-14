@@ -715,17 +715,18 @@ function ApproachDetailView({
   onBack: () => void;
 }) {
   const [attached, setAttached] = useState<Example[]>([]);
-  const [allInTopic, setAllInTopic] = useState<Example[]>([]);
+  const [topicApproaches, setTopicApproaches] = useState<Approach[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
   // Remove state
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  // Attach existing state
-  const [attachingId, setAttachingId] = useState<string | null>(null);
-  const [attachOk, setAttachOk] = useState<string | null>(null);
-  const [attachErr, setAttachErr] = useState<string | null>(null);
+  // "+" picker state — which example has its picker open
+  const [pickerExampleId, setPickerExampleId] = useState<string | null>(null);
+  const [attachingToApproachId, setAttachingToApproachId] = useState<string | null>(null);
+  const [pickerOk, setPickerOk] = useState<Record<string, string>>({});
+  const [pickerErr, setPickerErr] = useState<string | null>(null);
 
   // Add new example form
   const [newTitle, setNewTitle] = useState("");
@@ -740,16 +741,17 @@ function ApproachDetailView({
     setErr(null);
     const [r1, r2] = await Promise.all([
       fetch(`/api/admin/constellation/examples?approach_id=${approach.id}`),
-      fetch(`/api/admin/constellation/examples?topic_id=${topic.id}&all=1`),
+      fetch(`/api/admin/constellation/approaches?topic_id=${topic.id}`),
     ]);
     if (!r1.ok || !r2.ok) {
       setErr("Failed to load examples.");
       setLoading(false);
       return;
     }
-    const [att, all] = await Promise.all([r1.json(), r2.json()]);
+    const [att, approaches] = await Promise.all([r1.json(), r2.json()]);
     setAttached(att);
-    setAllInTopic(all);
+    // Exclude the current approach from the picker list
+    setTopicApproaches((approaches as Approach[]).filter((a) => a.id !== approach.id));
     setLoading(false);
   }, [approach.id, topic.id]);
 
@@ -766,24 +768,26 @@ function ApproachDetailView({
     await load();
   }
 
-  async function handleAttach(example_id: string) {
-    setAttachingId(example_id);
-    setAttachErr(null);
-    setAttachOk(null);
+  async function handleAttachToApproach(example_id: string, target_approach_id: string) {
+    setAttachingToApproachId(target_approach_id);
+    setPickerErr(null);
     const res = await fetch("/api/admin/constellation/example-approaches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ example_id, approach_id: approach.id }),
+      body: JSON.stringify({ example_id, approach_id: target_approach_id }),
     });
     if (!res.ok) {
       const d = await res.json();
-      setAttachErr(d.error || "Attach failed.");
+      setPickerErr(d.error || "Attach failed.");
     } else {
-      setAttachOk("Attached.");
-      setTimeout(() => setAttachOk(null), 3000);
-      await load();
+      const targetName = topicApproaches.find((a) => a.id === target_approach_id)?.name ?? "approach";
+      setPickerOk((prev) => ({ ...prev, [example_id]: `Added to "${targetName}"` }));
+      setTimeout(() => {
+        setPickerOk((prev) => { const n = { ...prev }; delete n[example_id]; return n; });
+        setPickerExampleId(null);
+      }, 2000);
     }
-    setAttachingId(null);
+    setAttachingToApproachId(null);
   }
 
   async function handleAddNew(e: React.FormEvent) {
@@ -814,10 +818,6 @@ function ApproachDetailView({
     }
     setAdding(false);
   }
-
-  // Examples in topic not yet attached to this approach
-  const attachedIds = new Set(attached.map((e) => e.id));
-  const unattached = allInTopic.filter((e) => !attachedIds.has(e.id));
 
   return (
     <div>
@@ -861,57 +861,123 @@ function ApproachDetailView({
                 No examples attached yet.
               </p>
             )}
-            {attached.map((ex) => (
-              <div
-                key={ex.id}
-                style={{
-                  ...cardStyle,
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                }}
-              >
-                {/* Favicon */}
-                {ex.favicon_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={ex.favicon_url}
-                    alt=""
-                    width={16}
-                    height={16}
-                    style={{ marginTop: 3, flexShrink: 0, borderRadius: 3 }}
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
-                  />
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 650, color: "#0d2a4a", fontSize: "0.9rem" }}>
-                    {ex.title}
+            {attached.map((ex) => {
+              const pickerOpen = pickerExampleId === ex.id;
+              const okMsg = pickerOk[ex.id];
+              return (
+                <div key={ex.id} style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 0 }}>
+                  {/* Example row */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    {/* Favicon */}
+                    {ex.favicon_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={ex.favicon_url}
+                        alt=""
+                        width={16}
+                        height={16}
+                        style={{ marginTop: 3, flexShrink: 0, borderRadius: 3 }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 650, color: "#0d2a4a", fontSize: "0.9rem" }}>
+                        {ex.title}
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "#4a5d73", marginTop: 2 }}>
+                        {ex.url}
+                      </div>
+                      {ex.summary && (
+                        <div style={{ fontSize: "0.8rem", color: "#4a5d73", marginTop: 3 }}>
+                          {ex.summary}
+                        </div>
+                      )}
+                    </div>
+                    {/* Action buttons */}
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      {/* "+" — also add to another approach */}
+                      {topicApproaches.length > 0 && (
+                        <button
+                          style={{
+                            ...smallBtn,
+                            fontWeight: 700,
+                            padding: "4px 9px",
+                            color: pickerOpen ? "#8a6d2a" : "#4a5d73",
+                            borderColor: pickerOpen ? "rgba(138,109,42,0.35)" : "rgba(100,150,220,0.2)",
+                            background: pickerOpen ? "rgba(255,216,107,0.12)" : "none",
+                          }}
+                          onClick={() => {
+                            setPickerExampleId(pickerOpen ? null : ex.id);
+                            setPickerErr(null);
+                          }}
+                          title="Also add to another approach in this topic"
+                        >
+                          +
+                        </button>
+                      )}
+                      <button
+                        style={{ ...smallBtn, color: "#a04040", borderColor: "rgba(160,64,64,0.2)" }}
+                        onClick={() => handleRemove(ex.id)}
+                        disabled={removingId === ex.id}
+                      >
+                        {removingId === ex.id ? "…" : "Remove"}
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: "0.78rem", color: "#4a5d73", marginTop: 2 }}>
-                    {ex.url}
-                  </div>
-                  {ex.summary && (
-                    <div style={{ fontSize: "0.8rem", color: "#4a5d73", marginTop: 3 }}>
-                      {ex.summary}
+
+                  {/* Inline approach picker */}
+                  {pickerOpen && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        paddingTop: 10,
+                        borderTop: "1px solid rgba(100,150,220,0.12)",
+                      }}
+                    >
+                      <p style={{ ...sectionHeading, margin: "0 0 8px" }}>
+                        Also add to…
+                      </p>
+                      {pickerErr && <ErrMsg msg={pickerErr} />}
+                      {okMsg && <OkMsg msg={okMsg} />}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {topicApproaches.map((a) => (
+                          <div
+                            key={a.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "7px 10px",
+                              borderRadius: 8,
+                              border: "1px solid rgba(100,150,220,0.12)",
+                              background: "rgba(255,255,255,0.4)",
+                            }}
+                          >
+                            <span style={{ flex: 1, fontSize: "0.88rem", color: "#0d2a4a" }}>
+                              {a.name}
+                            </span>
+                            <button
+                              style={{ ...smallBtn, flexShrink: 0 }}
+                              onClick={() => handleAttachToApproach(ex.id, a.id)}
+                              disabled={attachingToApproachId === a.id}
+                            >
+                              {attachingToApproachId === a.id ? "…" : "Add →"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
-                <button
-                  style={{ ...smallBtn, flexShrink: 0, color: "#a04040", borderColor: "rgba(160,64,64,0.2)" }}
-                  onClick={() => handleRemove(ex.id)}
-                  disabled={removingId === ex.id}
-                >
-                  {removingId === ex.id ? "…" : "Remove"}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div style={divider} />
 
           {/* ── Section 2: Add new example ── */}
           <p style={sectionHeading}>Add new example</p>
-          <form onSubmit={handleAddNew} style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+          <form onSubmit={handleAddNew} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <input
               style={inputStyle}
               placeholder="Title"
@@ -945,60 +1011,6 @@ function ApproachDetailView({
             {addErr && <ErrMsg msg={addErr} />}
             {addOk && <OkMsg msg={addOk} />}
           </form>
-
-          <div style={divider} />
-
-          {/* ── Section 3: Attach existing ── */}
-          <p style={sectionHeading}>
-            Attach existing ({unattached.length} in topic, not yet attached)
-          </p>
-          {attachErr && <ErrMsg msg={attachErr} />}
-          {attachOk && <OkMsg msg={attachOk} />}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {unattached.length === 0 && (
-              <p style={{ fontSize: "0.9rem", color: "#4a5d73", fontStyle: "italic" }}>
-                No unattached examples in this topic.
-              </p>
-            )}
-            {unattached.map((ex) => (
-              <div
-                key={ex.id}
-                style={{
-                  ...cardStyle,
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                }}
-              >
-                {ex.favicon_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={ex.favicon_url}
-                    alt=""
-                    width={16}
-                    height={16}
-                    style={{ marginTop: 3, flexShrink: 0, borderRadius: 3 }}
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
-                  />
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 650, color: "#0d2a4a", fontSize: "0.9rem" }}>
-                    {ex.title}
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "#4a5d73", marginTop: 2 }}>
-                    {ex.url}
-                  </div>
-                </div>
-                <button
-                  style={{ ...smallBtn, flexShrink: 0 }}
-                  onClick={() => handleAttach(ex.id)}
-                  disabled={attachingId === ex.id}
-                >
-                  {attachingId === ex.id ? "…" : "Attach"}
-                </button>
-              </div>
-            ))}
-          </div>
         </>
       )}
     </div>
