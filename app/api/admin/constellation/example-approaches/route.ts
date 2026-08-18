@@ -69,6 +69,61 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 
+export async function PATCH(req: Request) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return auth.error;
+
+  let body: { example_id?: string; approach_id?: string; direction?: "up" | "down" };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { example_id, approach_id, direction } = body;
+  if (!example_id || !approach_id || !direction)
+    return NextResponse.json({ error: "example_id, approach_id, and direction are required" }, { status: 400 });
+
+  // Get current sort_order
+  const { data: current } = await supabaseAdmin
+    .from("constellation_example_approaches")
+    .select("sort_order")
+    .eq("example_id", example_id)
+    .eq("approach_id", approach_id)
+    .single();
+
+  if (!current) return NextResponse.json({ error: "Join row not found" }, { status: 404 });
+
+  const currentOrder = current.sort_order;
+
+  // Find adjacent row within this approach
+  const { data: adjacent } = await supabaseAdmin
+    .from("constellation_example_approaches")
+    .select("example_id, sort_order")
+    .eq("approach_id", approach_id)
+    .filter("sort_order", direction === "up" ? "lt" : "gt", currentOrder)
+    .order("sort_order", { ascending: direction !== "up" })
+    .limit(1)
+    .maybeSingle();
+
+  if (!adjacent) return NextResponse.json({ ok: true }); // Already at edge
+
+  // Swap sort_orders
+  await supabaseAdmin
+    .from("constellation_example_approaches")
+    .update({ sort_order: adjacent.sort_order })
+    .eq("example_id", example_id)
+    .eq("approach_id", approach_id);
+
+  await supabaseAdmin
+    .from("constellation_example_approaches")
+    .update({ sort_order: currentOrder })
+    .eq("example_id", adjacent.example_id)
+    .eq("approach_id", approach_id);
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(req: Request) {
   const auth = await requireAdmin();
   if ("error" in auth) return auth.error;

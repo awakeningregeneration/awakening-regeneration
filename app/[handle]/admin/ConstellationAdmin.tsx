@@ -776,6 +776,15 @@ function ApproachDetailView({
     await load();
   }
 
+  async function handleReorderExample(example_id: string, direction: "up" | "down") {
+    await fetch("/api/admin/constellation/example-approaches", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ example_id, approach_id: approach.id, direction }),
+    });
+    await load();
+  }
+
   function startEditExample(ex: Example) {
     setEditingExampleId(ex.id);
     setEditTitle(ex.title);
@@ -901,7 +910,7 @@ function ApproachDetailView({
                 No examples attached yet.
               </p>
             )}
-            {attached.map((ex) => {
+            {attached.map((ex, idx) => {
               const pickerOpen = pickerExampleId === ex.id;
               const isEditing = editingExampleId === ex.id;
               const okMsg = pickerOk[ex.id];
@@ -949,6 +958,23 @@ function ApproachDetailView({
                     /* ── Read view ── */
                     <>
                       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        {/* Reorder buttons */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0, marginTop: 1 }}>
+                          <button
+                            style={{ ...reorderBtn, opacity: idx === 0 ? 0.3 : 1 }}
+                            disabled={idx === 0}
+                            onClick={() => handleReorderExample(ex.id, "up")}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            style={{ ...reorderBtn, opacity: idx === attached.length - 1 ? 0.3 : 1 }}
+                            disabled={idx === attached.length - 1}
+                            onClick={() => handleReorderExample(ex.id, "down")}
+                          >
+                            ↓
+                          </button>
+                        </div>
                         {/* Favicon */}
                         {ex.favicon_url && (
                           // eslint-disable-next-line @next/next/no-img-element
