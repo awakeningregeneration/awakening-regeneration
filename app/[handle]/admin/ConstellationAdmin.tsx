@@ -859,11 +859,12 @@ function ApproachDetailView({
       const d = await res.json();
       setAddErr(d.error || "Failed to add example.");
     } else {
-      setAddOk("Example added and attached.");
       setNewTitle("");
       setNewUrl("");
       setNewSummary("");
       await load();
+      setAddOk("Added ✓");
+      setTimeout(() => setAddOk(null), 2500);
     }
     setAdding(false);
   }
