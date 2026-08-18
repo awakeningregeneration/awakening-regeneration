@@ -172,6 +172,42 @@ export async function POST(req: Request) {
   return NextResponse.json(example, { status: 201 });
 }
 
+export async function PATCH(req: Request) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return auth.error;
+
+  let body: { id?: string; title?: string; url?: string; summary?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { id, title, url, summary } = body;
+  if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
+
+  const updates: Record<string, string | null> = {};
+  if (title !== undefined) updates.title = title;
+  if (url !== undefined) {
+    updates.url = url;
+    updates.favicon_url = faviconUrl(url) || null;
+  }
+  if (summary !== undefined) updates.summary = summary;
+
+  if (Object.keys(updates).length === 0)
+    return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+
+  const { data, error } = await supabaseAdmin
+    .from("constellation_examples")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
+
 export async function DELETE(req: Request) {
   const auth = await requireAdmin();
   if ("error" in auth) return auth.error;

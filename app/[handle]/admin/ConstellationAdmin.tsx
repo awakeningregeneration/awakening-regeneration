@@ -722,6 +722,14 @@ function ApproachDetailView({
   // Remove state
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  // Inline edit state
+  const [editingExampleId, setEditingExampleId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [savingExampleId, setSavingExampleId] = useState<string | null>(null);
+  const [editExampleErr, setEditExampleErr] = useState<string | null>(null);
+
   // "+" picker state — which example has its picker open
   const [pickerExampleId, setPickerExampleId] = useState<string | null>(null);
   const [attachingToApproachId, setAttachingToApproachId] = useState<string | null>(null);
@@ -766,6 +774,38 @@ function ApproachDetailView({
     });
     setRemovingId(null);
     await load();
+  }
+
+  function startEditExample(ex: Example) {
+    setEditingExampleId(ex.id);
+    setEditTitle(ex.title);
+    setEditUrl(ex.url);
+    setEditSummary(ex.summary ?? "");
+    setEditExampleErr(null);
+    setPickerExampleId(null);
+  }
+
+  function cancelEditExample() {
+    setEditingExampleId(null);
+    setEditExampleErr(null);
+  }
+
+  async function saveEditExample(id: string) {
+    setSavingExampleId(id);
+    setEditExampleErr(null);
+    const res = await fetch("/api/admin/constellation/examples", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, title: editTitle.trim(), url: editUrl.trim(), summary: editSummary.trim() }),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      setEditExampleErr(d.error || "Save failed.");
+    } else {
+      setEditingExampleId(null);
+      await load();
+    }
+    setSavingExampleId(null);
   }
 
   async function handleAttachToApproach(example_id: string, target_approach_id: string) {
@@ -863,110 +903,159 @@ function ApproachDetailView({
             )}
             {attached.map((ex) => {
               const pickerOpen = pickerExampleId === ex.id;
+              const isEditing = editingExampleId === ex.id;
               const okMsg = pickerOk[ex.id];
               return (
                 <div key={ex.id} style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 0 }}>
-                  {/* Example row */}
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    {/* Favicon */}
-                    {ex.favicon_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={ex.favicon_url}
-                        alt=""
-                        width={16}
-                        height={16}
-                        style={{ marginTop: 3, flexShrink: 0, borderRadius: 3 }}
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                  {isEditing ? (
+                    /* ── Inline edit form ── */
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <input
+                        style={inputStyle}
+                        placeholder="Title"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
                       />
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 650, color: "#0d2a4a", fontSize: "0.9rem" }}>
-                        {ex.title}
-                      </div>
-                      <div style={{ fontSize: "0.78rem", color: "#4a5d73", marginTop: 2 }}>
-                        {ex.url}
-                      </div>
-                      {ex.summary && (
-                        <div style={{ fontSize: "0.8rem", color: "#4a5d73", marginTop: 3 }}>
-                          {ex.summary}
-                        </div>
-                      )}
-                    </div>
-                    {/* Action buttons */}
-                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                      {/* "+" — also add to another approach */}
-                      {topicApproaches.length > 0 && (
+                      <input
+                        style={inputStyle}
+                        placeholder="URL (https://…)"
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                      />
+                      <textarea
+                        style={textareaStyle}
+                        placeholder="Summary (optional)"
+                        value={editSummary}
+                        onChange={(e) => setEditSummary(e.target.value)}
+                      />
+                      <div style={{ display: "flex", gap: 8 }}>
                         <button
                           style={{
-                            ...smallBtn,
-                            fontWeight: 700,
-                            padding: "4px 9px",
-                            color: pickerOpen ? "#8a6d2a" : "#4a5d73",
-                            borderColor: pickerOpen ? "rgba(138,109,42,0.35)" : "rgba(100,150,220,0.2)",
-                            background: pickerOpen ? "rgba(255,216,107,0.12)" : "none",
+                            ...goldBtn,
+                            fontSize: "0.85rem",
+                            padding: "8px 16px",
+                            opacity: savingExampleId === ex.id || !editTitle.trim() || !editUrl.trim() ? 0.6 : 1,
                           }}
-                          onClick={() => {
-                            setPickerExampleId(pickerOpen ? null : ex.id);
-                            setPickerErr(null);
-                          }}
-                          title="Also add to another approach in this topic"
+                          onClick={() => saveEditExample(ex.id)}
+                          disabled={savingExampleId === ex.id || !editTitle.trim() || !editUrl.trim()}
                         >
-                          +
+                          {savingExampleId === ex.id ? "Saving…" : "Save"}
                         </button>
-                      )}
-                      <button
-                        style={{ ...smallBtn, color: "#a04040", borderColor: "rgba(160,64,64,0.2)" }}
-                        onClick={() => handleRemove(ex.id)}
-                        disabled={removingId === ex.id}
-                      >
-                        {removingId === ex.id ? "…" : "Remove"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Inline approach picker */}
-                  {pickerOpen && (
-                    <div
-                      style={{
-                        marginTop: 10,
-                        paddingTop: 10,
-                        borderTop: "1px solid rgba(100,150,220,0.12)",
-                      }}
-                    >
-                      <p style={{ ...sectionHeading, margin: "0 0 8px" }}>
-                        Also add to…
-                      </p>
-                      {pickerErr && <ErrMsg msg={pickerErr} />}
-                      {okMsg && <OkMsg msg={okMsg} />}
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        {topicApproaches.map((a) => (
-                          <div
-                            key={a.id}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                              padding: "7px 10px",
-                              borderRadius: 8,
-                              border: "1px solid rgba(100,150,220,0.12)",
-                              background: "rgba(255,255,255,0.4)",
-                            }}
-                          >
-                            <span style={{ flex: 1, fontSize: "0.88rem", color: "#0d2a4a" }}>
-                              {a.name}
-                            </span>
-                            <button
-                              style={{ ...smallBtn, flexShrink: 0 }}
-                              onClick={() => handleAttachToApproach(ex.id, a.id)}
-                              disabled={attachingToApproachId === a.id}
-                            >
-                              {attachingToApproachId === a.id ? "…" : "Add →"}
-                            </button>
-                          </div>
-                        ))}
+                        <button style={smallBtn} onClick={cancelEditExample}>Cancel</button>
                       </div>
+                      {editExampleErr && <ErrMsg msg={editExampleErr} />}
                     </div>
+                  ) : (
+                    /* ── Read view ── */
+                    <>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        {/* Favicon */}
+                        {ex.favicon_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={ex.favicon_url}
+                            alt=""
+                            width={16}
+                            height={16}
+                            style={{ marginTop: 3, flexShrink: 0, borderRadius: 3 }}
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 650, color: "#0d2a4a", fontSize: "0.9rem" }}>
+                            {ex.title}
+                          </div>
+                          <div style={{ fontSize: "0.78rem", color: "#4a5d73", marginTop: 2 }}>
+                            {ex.url}
+                          </div>
+                          {ex.summary && (
+                            <div style={{ fontSize: "0.8rem", color: "#4a5d73", marginTop: 3 }}>
+                              {ex.summary}
+                            </div>
+                          )}
+                        </div>
+                        {/* Action buttons */}
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                          <button
+                            style={smallBtn}
+                            onClick={() => startEditExample(ex)}
+                          >
+                            Edit
+                          </button>
+                          {/* "+" — also add to another approach */}
+                          {topicApproaches.length > 0 && (
+                            <button
+                              style={{
+                                ...smallBtn,
+                                fontWeight: 700,
+                                padding: "4px 9px",
+                                color: pickerOpen ? "#8a6d2a" : "#4a5d73",
+                                borderColor: pickerOpen ? "rgba(138,109,42,0.35)" : "rgba(100,150,220,0.2)",
+                                background: pickerOpen ? "rgba(255,216,107,0.12)" : "none",
+                              }}
+                              onClick={() => {
+                                setPickerExampleId(pickerOpen ? null : ex.id);
+                                setPickerErr(null);
+                              }}
+                              title="Also add to another approach in this topic"
+                            >
+                              +
+                            </button>
+                          )}
+                          <button
+                            style={{ ...smallBtn, color: "#a04040", borderColor: "rgba(160,64,64,0.2)" }}
+                            onClick={() => handleRemove(ex.id)}
+                            disabled={removingId === ex.id}
+                          >
+                            {removingId === ex.id ? "…" : "Remove"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Inline approach picker */}
+                      {pickerOpen && (
+                        <div
+                          style={{
+                            marginTop: 10,
+                            paddingTop: 10,
+                            borderTop: "1px solid rgba(100,150,220,0.12)",
+                          }}
+                        >
+                          <p style={{ ...sectionHeading, margin: "0 0 8px" }}>
+                            Also add to…
+                          </p>
+                          {pickerErr && <ErrMsg msg={pickerErr} />}
+                          {okMsg && <OkMsg msg={okMsg} />}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            {topicApproaches.map((a) => (
+                              <div
+                                key={a.id}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 10,
+                                  padding: "7px 10px",
+                                  borderRadius: 8,
+                                  border: "1px solid rgba(100,150,220,0.12)",
+                                  background: "rgba(255,255,255,0.4)",
+                                }}
+                              >
+                                <span style={{ flex: 1, fontSize: "0.88rem", color: "#0d2a4a" }}>
+                                  {a.name}
+                                </span>
+                                <button
+                                  style={{ ...smallBtn, flexShrink: 0 }}
+                                  onClick={() => handleAttachToApproach(ex.id, a.id)}
+                                  disabled={attachingToApproachId === a.id}
+                                >
+                                  {attachingToApproachId === a.id ? "…" : "Add →"}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               );
