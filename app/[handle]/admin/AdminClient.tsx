@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ConstellationAdmin from "./ConstellationAdmin";
+import AffiliatesAdmin from "./AffiliatesAdmin";
 
 type Seeder = {
   id: string;
@@ -57,7 +58,7 @@ export default function AdminClient({
   const router = useRouter();
 
   // ── Tab state ──
-  const [activeTab, setActiveTab] = useState<"seeders" | "constellation">("constellation");
+  const [activeTab, setActiveTab] = useState<"seeders" | "constellation" | "affiliates">("constellation");
 
   // ── Form state ──
   const [name, setName] = useState("");
@@ -282,9 +283,9 @@ export default function AdminClient({
             >
               ← Dashboard
             </Link>
-            {(["seeders", "constellation"] as const).map((tab) => {
+            {(["seeders", "constellation", "affiliates"] as const).map((tab) => {
               const active = activeTab === tab;
-              const label = tab === "seeders" ? "Seeders" : "Constellation";
+              const label = tab === "seeders" ? "Seeders" : tab === "constellation" ? "Constellation" : "Affiliates";
               return (
                 <button
                   key={tab}
@@ -309,6 +310,7 @@ export default function AdminClient({
           </div>
 
           {activeTab === "constellation" && <ConstellationAdmin handle={handle} />}
+          {activeTab === "affiliates" && <AffiliatesAdmin />}
 
           {activeTab === "seeders" && (<>
 
