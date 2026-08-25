@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import NorthStarNav from "@/app/components/NorthStarNav";
@@ -46,6 +46,17 @@ export const metadata: Metadata = {
       "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
     images: ["/opengraph-image"],
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Canary",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#FFD86B",
 };
 
 export default function RootLayout({
