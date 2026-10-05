@@ -9,10 +9,95 @@ const DIM_COLOR = "rgba(255,248,224,0.6)";
 
 const glassCard: React.CSSProperties = {
   borderRadius: 20,
-  border: "1px solid rgba(255,255,255,0.09)",
-  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.06)",
   padding: "28px 24px",
 };
+
+const orbs: { left: string; top: string; size: number; opacity: number }[] = [
+  { left: "10%", top: "6%", size: 9, opacity: 0.78 },
+  { left: "22%", top: "14%", size: 5, opacity: 0.68 },
+  { left: "35%", top: "4%", size: 13, opacity: 0.58 },
+  { left: "48%", top: "11%", size: 6, opacity: 0.75 },
+  { left: "62%", top: "6%", size: 10, opacity: 0.72 },
+  { left: "75%", top: "13%", size: 5, opacity: 0.62 },
+  { left: "88%", top: "5%", size: 8, opacity: 0.72 },
+  { left: "15%", top: "26%", size: 6, opacity: 0.62 },
+  { left: "40%", top: "22%", size: 12, opacity: 0.52 },
+  { left: "68%", top: "24%", size: 7, opacity: 0.65 },
+  { left: "85%", top: "20%", size: 5, opacity: 0.58 },
+  { left: "8%", top: "42%", size: 5, opacity: 0.55 },
+  { left: "30%", top: "38%", size: 9, opacity: 0.5 },
+  { left: "55%", top: "36%", size: 6, opacity: 0.6 },
+  { left: "78%", top: "40%", size: 11, opacity: 0.5 },
+  { left: "18%", top: "62%", size: 7, opacity: 0.55 },
+  { left: "45%", top: "60%", size: 5, opacity: 0.5 },
+  { left: "70%", top: "64%", size: 9, opacity: 0.55 },
+  { left: "12%", top: "82%", size: 6, opacity: 0.55 },
+  { left: "60%", top: "84%", size: 7, opacity: 0.5 },
+  { left: "85%", top: "80%", size: 5, opacity: 0.5 },
+];
+
+function Atmosphere() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(55,115,190,0.4) 0%, rgba(13,30,52,1) 70%)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 20% 15%, rgba(60,120,200,0.22) 0%, transparent 40%), radial-gradient(circle at 80% 12%, rgba(60,120,200,0.18) 0%, transparent 42%)",
+        }}
+      />
+      {orbs.map((orb, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: `calc(${orb.left} - ${orb.size}px)`,
+            top: `calc(${orb.top} - ${orb.size}px)`,
+            width: orb.size * 3,
+            height: orb.size * 3,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: `radial-gradient(circle, rgba(255,222,150,${
+              orb.opacity * 0.14
+            }) 0%, transparent 70%)`,
+          }}
+        >
+          <div
+            style={{
+              width: orb.size,
+              height: orb.size,
+              borderRadius: "50%",
+              background: "rgba(255,240,195,0.8)",
+              opacity: orb.opacity,
+              boxShadow: `0 0 ${orb.size * 1.7}px ${
+                orb.size * 0.4
+              }px rgba(255,220,150,0.22), 0 0 ${orb.size * 4.2}px ${
+                orb.size * 0.9
+              }px rgba(255,200,110,0.08)`,
+              filter: `blur(${orb.size * 0.15}px)`,
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function switchButtonStyle(active: boolean): React.CSSProperties {
   return {
@@ -125,13 +210,18 @@ export default function InstallPage() {
   return (
     <main
       style={{
+        position: "relative",
         minHeight: "100vh",
-        background: "#08192d",
+        background: "#0d1e34",
         color: BODY_COLOR,
+        overflow: "hidden",
       }}
     >
+      <Atmosphere />
       <div
         style={{
+          position: "relative",
+          zIndex: 1,
           maxWidth: 480,
           margin: "0 auto",
           padding: "56px 24px 80px",
