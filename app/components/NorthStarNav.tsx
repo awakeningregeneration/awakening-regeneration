@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import CompassCaption from "./CompassCaption";
+import { useInstallPrompt } from "./useInstallPrompt";
 
 const GOLD = "#FFD86B";
 const GOLD_LIGHT = "#FFE8A3";
@@ -115,8 +116,9 @@ const CompassRose = () => (
 // Any path whose first segment is not in this set is a seeder route.
 const PUBLIC_ROUTES = new Set([
   "", "about", "api", "bridge-the-commons", "components", "constellation",
-  "contributor", "edit", "founders", "lib", "map", "steward", "stories",
-  "submit", "support", "types", "letter", "privacy", "terms", "contact",
+  "contributor", "edit", "founders", "install", "lib", "map", "steward",
+  "stories", "submit", "support", "types", "letter", "privacy", "terms",
+  "contact",
 ]);
 
 export default function NorthStarNav() {
@@ -126,6 +128,7 @@ export default function NorthStarNav() {
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const { isStandalone } = useInstallPrompt();
 
   useEffect(() => {
     setMounted(true);
@@ -235,6 +238,10 @@ export default function NorthStarNav() {
   }
 
   const WELL_SIZE = 62;
+
+  const items = isStandalone
+    ? NAV_ITEMS
+    : [...NAV_ITEMS, { label: "+ Add Canary App", href: "/install" }];
 
   return (
     <div
@@ -446,7 +453,7 @@ export default function NorthStarNav() {
           }}
         />
 
-        {NAV_ITEMS.map((item, i) => {
+        {items.map((item, i) => {
           const current = isCurrentPage(item.href);
           const shared: React.CSSProperties = {
             position: "relative",
