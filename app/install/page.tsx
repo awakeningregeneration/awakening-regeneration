@@ -162,7 +162,7 @@ function Step({
 }
 
 export default function InstallPage() {
-  const { isIOS, isAndroid, isSafari, isChromeFamily, canInstall, promptInstall } =
+  const { isIOS, isAndroid, isChromeFamily, canInstall, promptInstall } =
     useInstallPrompt();
   const [platformOverride, setPlatformOverride] = useState<
     "ios" | "android" | null
@@ -268,31 +268,13 @@ export default function InstallPage() {
                   Add Canary to your iPhone or iPad
                 </h1>
 
-                {isIOS && !isSafari && (
-                  <p
-                    style={{
-                      fontSize: 14,
-                      textAlign: "center",
-                      color: BODY_COLOR,
-                      background: "rgba(255,216,107,0.08)",
-                      border: "1px solid rgba(255,216,107,0.25)",
-                      borderRadius: 12,
-                      padding: "10px 14px",
-                      margin: "0 0 22px",
-                    }}
-                  >
-                    Using another browser? Open canarycommons.org in Safari
-                    for the simplest iPhone installation.
-                  </p>
-                )}
-
-                <Step number={1}>Tap the ••• in the corner of Safari.</Step>
+                <Step number={1}>Tap ••• in the lower corner of Safari.</Step>
                 <Step number={2}>
-                  If you don’t see “Add to Home Screen,” tap ••• / More
-                  again.
+                  Tap “Share” — the square with the upward arrow.
                 </Step>
-                <Step number={3}>Tap “Add to Home Screen.”</Step>
-                <Step number={4}>Tap “Add.”</Step>
+                <Step number={3}>Tap “View More.”</Step>
+                <Step number={4}>Tap “Add to Home Screen.”</Step>
+                <Step number={5}>Tap “Add.”</Step>
 
                 <p
                   style={{

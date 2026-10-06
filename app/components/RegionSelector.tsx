@@ -19,7 +19,7 @@ const homeActionStyle: React.CSSProperties = {
   background: "none",
   border: "none",
   padding: 0,
-  color: "rgba(255,216,107,0.75)",
+  color: "inherit",
   fontSize: 11.5,
   fontWeight: 600,
   cursor: "pointer",
