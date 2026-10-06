@@ -8,6 +8,7 @@ import MapClient from "@/app/components/MapClient";
 import { normalizeState as normalizeStateStr, normalizeCounty as normalizeCountyStr } from "@/app/lib/normalize";
 import ListingCard from "../components/ListingCard";
 import RegionSelector from "../components/RegionSelector";
+import { useHomeLocation, readHomeLocation } from "../components/useHomeLocation";
 import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
@@ -105,6 +106,7 @@ export default function MapPage() {
   const [onlineResources, setOnlineResources] = useState<OnlineResource[]>([]);
   const [synonymsCache, setSynonymsCache] = useState<string[]>([]);
   const searchLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { home, setHome } = useHomeLocation();
 
   const isMobile = useIsMobile();
 
@@ -132,6 +134,21 @@ export default function MapPage() {
     if (county && county !== "All") params.set("county", county);
     const qs = params.toString();
     router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
+  }
+
+  /** Save the current state/county as the one remembered home location */
+  function handleMakeHome() {
+    if (selectedCounty === "All") return;
+    setHome(selectedState, selectedCounty);
+  }
+
+  /** Return the map to the saved home location */
+  function handleGoHome() {
+    if (!home) return;
+    setSelectedState(home.state);
+    setSelectedCounty(home.county);
+    setSelectedId(null);
+    updateMapUrl(home.state, home.county);
   }
 
   /** Called when a map pin is clicked — re-anchors county/state to match the listing */
@@ -234,6 +251,14 @@ export default function MapPage() {
 
     if (stateFromUrl || countyFromUrl) {
       setSelectedId(null);
+    } else {
+      // Bare /map visit, no URL params — fall back to a saved home, if any.
+      const savedHome = readHomeLocation();
+      if (savedHome) {
+        setSelectedState(savedHome.state);
+        setSelectedCounty(savedHome.county);
+        setSelectedId(null);
+      }
     }
   }, [searchParams]);
 
@@ -1244,6 +1269,9 @@ const countyListings = useMemo(() => {
               setSelectedId(null);
               updateMapUrl(selectedState, newCounty);
             }}
+            home={home}
+            onMakeHome={handleMakeHome}
+            onGoHome={handleGoHome}
           />
 
           {/* County search — only when a county is selected */}
@@ -1591,6 +1619,9 @@ const countyListings = useMemo(() => {
             setSelectedId(null);
             updateMapUrl(selectedState, newCounty);
           }}
+          home={home}
+          onMakeHome={handleMakeHome}
+          onGoHome={handleGoHome}
         />
 
         <div

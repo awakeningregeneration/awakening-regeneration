@@ -113,42 +113,6 @@ function switchButtonStyle(active: boolean): React.CSSProperties {
   };
 }
 
-function ShareIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      style={{ verticalAlign: "middle", marginLeft: 6, flexShrink: 0 }}
-    >
-      <path
-        d="M12 2v12"
-        stroke={GOLD}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 6l4-4 4 4"
-        stroke={GOLD}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <rect
-        x="4.5"
-        y="10"
-        width="15"
-        height="11"
-        rx="3"
-        stroke={GOLD}
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
 function Step({
   number,
   children,
@@ -322,14 +286,12 @@ export default function InstallPage() {
                   </p>
                 )}
 
-                <Step number={1}>Open Canary in Safari.</Step>
+                <Step number={1}>Tap the ••• in the corner of Safari.</Step>
                 <Step number={2}>
-                  Tap the Share button
-                  <ShareIcon />
+                  If you don’t see “Add to Home Screen,” tap ••• / More
+                  again.
                 </Step>
-                <Step number={3}>
-                  Choose “Add to Home Screen.”
-                </Step>
+                <Step number={3}>Tap “Add to Home Screen.”</Step>
                 <Step number={4}>Tap “Add.”</Step>
 
                 <p

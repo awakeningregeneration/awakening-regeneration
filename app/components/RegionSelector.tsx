@@ -1,5 +1,7 @@
 "use client";
 
+import type { HomeLocation } from "./useHomeLocation";
+
 type RegionSelectorProps = {
   selectedState: string;
   selectedCounty: string;
@@ -8,6 +10,21 @@ type RegionSelectorProps = {
   hasStateSelection: boolean;
   onStateChange: (newState: string) => void;
   onCountyChange: (newCounty: string) => void;
+  home: HomeLocation | null;
+  onMakeHome: () => void;
+  onGoHome: () => void;
+};
+
+const homeActionStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: 0,
+  color: "rgba(255,216,107,0.75)",
+  fontSize: 11.5,
+  fontWeight: 600,
+  cursor: "pointer",
+  textDecoration: "underline",
+  textUnderlineOffset: 2,
 };
 
 export default function RegionSelector({
@@ -18,7 +35,18 @@ export default function RegionSelector({
   hasStateSelection,
   onStateChange,
   onCountyChange,
+  home,
+  onMakeHome,
+  onGoHome,
 }: RegionSelectorProps) {
+  const hasCountySelection = selectedCounty !== "All";
+  const isSavedHome =
+    !!home &&
+    home.state.toLowerCase() === selectedState.toLowerCase() &&
+    home.county.toLowerCase() === selectedCounty.toLowerCase();
+  const showMakeHome = hasCountySelection && !isSavedHome;
+  const showGoHome = !!home && !isSavedHome;
+
   return (
     <section
       style={{
@@ -82,6 +110,28 @@ export default function RegionSelector({
           </option>
         ))}
       </select>
+
+      {(showMakeHome || showGoHome) && (
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            marginTop: -4,
+            marginBottom: 10,
+          }}
+        >
+          {showMakeHome && (
+            <button type="button" onClick={onMakeHome} style={homeActionStyle}>
+              ⌂ Make this home
+            </button>
+          )}
+          {showGoHome && (
+            <button type="button" onClick={onGoHome} style={homeActionStyle}>
+              ⌂ Home
+            </button>
+          )}
+        </div>
+      )}
 
       <label
         style={{

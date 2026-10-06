@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Canary",
     description:
       "A constellation of sustainable, life-supporting places and projects across North America and beyond.",
-    start_url: "/",
+    start_url: "/map",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#FFD86B",
