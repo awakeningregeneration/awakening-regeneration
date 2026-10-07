@@ -1,0 +1,355 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import ThresholdMap from "@/app/components/ThresholdMap";
+import Link from "next/link";
+
+// Orb positions: distributed across full viewport so they read as scattered
+// lights at any screen size (desktop or mobile).
+const orbs: { left: string; top: string; size: number; opacity: number }[] = [
+  { left: "8%",  top: "12%", size: 4, opacity: 0.5 },
+  { left: "22%", top: "7%",  size: 6, opacity: 0.6 },
+  { left: "42%", top: "10%", size: 3, opacity: 0.45 },
+  { left: "68%", top: "8%",  size: 5, opacity: 0.55 },
+  { left: "85%", top: "14%", size: 7, opacity: 0.65 },
+  { left: "12%", top: "32%", size: 5, opacity: 0.6 },
+  { left: "33%", top: "28%", size: 4, opacity: 0.5 },
+  { left: "55%", top: "25%", size: 8, opacity: 0.7 },
+  { left: "78%", top: "30%", size: 4, opacity: 0.55 },
+  { left: "90%", top: "42%", size: 6, opacity: 0.6 },
+  { left: "6%",  top: "55%", size: 3, opacity: 0.4 },
+  { left: "72%", top: "58%", size: 5, opacity: 0.5 },
+];
+
+const STATES = [
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
+  "District of Columbia",
+];
+
+export default function HomePage() {
+  const router = useRouter();
+  const [selectedState, setSelectedState] = useState("");
+
+  function handleEnterPlace() {
+    if (!selectedState) return;
+    router.push(`/map?state=${encodeURIComponent(selectedState)}`);
+  }
+
+  return (
+    <main
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        overflow: "hidden",
+        color: "white",
+      }}
+    >
+      {/* Sky Layer 1 — Primary morning sky gradient */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(180,210,255,0.9) 0%, rgba(120,170,230,0.85) 25%, rgba(70,120,200,0.9) 60%, rgba(61,72,120,1) 100%)",
+        }}
+      />
+
+      {/* Sky Layer 2 — Soft white glow at center */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.18) 0%, transparent 58%)",
+        }}
+      />
+
+      {/* Sky Layer 3 — Warm gold orbs */}
+      {orbs.map((orb, i) => (
+        <div
+          key={i}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            left: orb.left,
+            top: orb.top,
+            width: orb.size,
+            height: orb.size,
+            borderRadius: "50%",
+            background: "rgba(255,244,200,0.65)",
+            opacity: orb.opacity,
+            boxShadow:
+              "0 0 8px 3px rgba(255,220,140,0.18), 0 0 20px 5px rgba(255,200,100,0.08)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      ))}
+
+      {/* Map + gold light points — z2 */}
+      <ThresholdMap />
+
+      {/* Content — logo, headline, thesis, CTAs — z3 */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 3,
+          padding: "0 28px 32px",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 900,
+            margin: "0 auto",
+            textAlign: "center",
+          }}
+        >
+          {/* Canary logo */}
+          <img
+            src="/canary-logo-new.png"
+            alt="Canary Commons"
+            style={{
+              width: "clamp(280px, 40vw, 460px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto -10px",
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.3))",
+              position: "relative",
+              zIndex: 3,
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 760,
+            margin: "0 auto",
+            textAlign: "center",
+            paddingBottom: "clamp(20px, 3vh, 36px)",
+          }}
+        >
+          {/* About link */}
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: 48,
+            }}
+          >
+            <Link
+              href="/about"
+              style={{
+                color: "#fff8e0",
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
+                textDecoration: "none",
+                borderBottom: "3.5px solid #FFD86B",
+                paddingBottom: 4,
+                paddingLeft: 6,
+                paddingRight: 6,
+                textShadow: "0 0 8px rgba(0,0,0,0.3)",
+                transition: "border-color 0.2s, color 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottomColor = "#ffe6a0";
+                e.currentTarget.style.color = "#ffffff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottomColor = "#FFD86B";
+                e.currentTarget.style.color = "#fff8e0";
+              }}
+            >
+              ABOUT
+            </Link>
+          </div>
+
+          {/* Hero phrases — in flow, between ABOUT nav and state selector */}
+          <p
+            style={{
+              margin: "0 auto 48px",
+              position: "relative",
+              top: "-0.5em",
+              fontSize: "clamp(1.6rem, 2.4vw, 2.4rem)",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              color: "#fffcf0",
+              textShadow:
+                "0 0 5px rgba(5,10,25,0.98), 0 0 12px rgba(5,10,25,0.85), 0 2px 6px rgba(5,10,25,0.95), 0 0 28px rgba(255,248,230,0.45), 0 0 50px rgba(255,248,230,0.18)",
+              textAlign: "center",
+              lineHeight: 1.15,
+            }}
+          >
+            <span style={{ display: "block", marginBottom: "0.42em" }}>MAKE A DIFFERENCE</span>
+            <span style={{ display: "block" }}>WITH EVERY CHOICE</span>
+          </p>
+          <p
+            style={{
+              margin: "0 auto 20px",
+              marginTop: "4.4rem",
+              fontSize: "clamp(1.15rem, 1.7vw, 1.45rem)",
+              fontWeight: 500,
+              letterSpacing: "0.04em",
+              color: "#fffcf0",
+              textShadow:
+                "0 0 4px rgba(5,10,25,0.98), 0 0 10px rgba(5,10,25,0.82), 0 1px 5px rgba(5,10,25,0.92), 0 0 20px rgba(255,248,230,0.35), 0 0 40px rgba(255,248,230,0.14)",
+              textAlign: "center",
+              lineHeight: 1.4,
+            }}
+          >
+            See what's rising around you, near and far.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 6,
+            }}
+          >
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              style={{
+                flex: 1,
+                minWidth: 250,
+                maxWidth: 360,
+                padding: "13px 15px",
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(20,42,92,0.34)",
+                color: "white",
+                fontSize: 16,
+                outline: "none",
+                backdropFilter: "blur(6px)",
+                boxShadow: "0 8px 24px rgba(10,24,60,0.16)",
+              }}
+            >
+              <option value="">Choose a state</option>
+              {STATES.map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={handleEnterPlace}
+              disabled={!selectedState}
+              style={{
+                padding: "13px 20px",
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: selectedState
+                  ? "rgba(255,216,107,0.14)"
+                  : "rgba(255,255,255,0.05)",
+                color: selectedState
+                  ? "#FFE08A"
+                  : "rgba(255,255,255,0.44)",
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: selectedState ? "pointer" : "not-allowed",
+                backdropFilter: "blur(6px)",
+                boxShadow: selectedState
+                  ? "0 0 20px rgba(255,216,107,0.12)"
+                  : "none",
+              }}
+            >
+              Enter
+            </button>
+          </div>
+
+          {/* Reflective copy — tucked under dropdown, related to search */}
+          <p
+            style={{
+              textAlign: "center",
+              fontFamily: "var(--font-caveat)",
+              fontSize: "clamp(1.4rem, 1.8vw, 1.7rem)",
+              lineHeight: 1.5,
+              color: "rgba(255,252,230,0.95)",
+              margin: "0 0 28px",
+            }}
+          >
+            Still spreading beneath the surface — every place you add helps more come to light.
+          </p>
+
+          {/* Tend the commons — founders door */}
+          <div style={{ textAlign: "center" }}>
+            <div className="flex justify-center">
+              <Link
+                href="/founders"
+                className="rounded-xl bg-amber-300 px-5 py-3 font-medium text-slate-900 shadow-sm transition hover:opacity-90"
+                style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}
+              >
+                <span>Stewardship</span>
+                <span style={{ fontFamily: "var(--font-caveat)", fontSize: "1rem", fontWeight: 400, color: "rgba(30,20,5,0.72)", marginTop: 2 }}>
+                  What feeds the roots.
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
