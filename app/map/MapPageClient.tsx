@@ -9,6 +9,8 @@ import { normalizeState as normalizeStateStr, normalizeCounty as normalizeCounty
 import ListingCard from "../components/ListingCard";
 import RegionSelector from "../components/RegionSelector";
 import { useHomeLocation, readHomeLocation } from "../components/useHomeLocation";
+import FollowCampaignIntro from "../components/FollowCampaignIntro";
+import { useLightsCount } from "../components/useLightsCount";
 import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
@@ -25,6 +27,15 @@ type OnlineResource = {
   affiliate_url: string | null;
   slug: string | null;
 };
+
+// Camera-only override for the "Follow the Canary" campaign entry
+// (/map?follow=1) — centers the initial view over Oregon, where the
+// current concentration of listings is, so the campaign panel's claim
+// has visible proof behind it. Does not filter/select Oregon as a
+// region — normal map data and navigation are untouched. Intentionally
+// static (not computed from live listing density) for this launch pass.
+const FOLLOW_CAMPAIGN_CENTER: [number, number] = [-122.95, 44.1];
+const FOLLOW_CAMPAIGN_ZOOM = 6.1;
 
 const sidebarLights = [
   { left: "8%", top: "4%", size: 7, opacity: 0.55 },
@@ -107,6 +118,9 @@ export default function MapPage() {
   const [synonymsCache, setSynonymsCache] = useState<string[]>([]);
   const searchLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { home, setHome } = useHomeLocation();
+  // Seeded from the map's own listings fetch, then kept fresh via a
+  // count-only poll — see useLightsCount for the full behavior.
+  const lightsCount = useLightsCount(allListings.length);
 
   const isMobile = useIsMobile();
 
@@ -126,6 +140,28 @@ export default function MapPage() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Launch-weekend campaign intro — only shown when arriving via the
+  // "Follow the Canary" homepage CTA (/map?follow=1). Normal navigation
+  // to /map never sets this. Read once at mount so there's no flash of
+  // the bare map before it appears.
+  const [showFollowIntro, setShowFollowIntro] = useState(
+    () => searchParams.get("follow") === "1",
+  );
+
+  // Whether this page load originated from the campaign route — captured
+  // once and kept stable even after the panel is dismissed, so the map's
+  // camera (not its data/filters) can open over Oregon for the campaign
+  // without affecting normal /map visits.
+  const isFollowEntryRef = useRef(searchParams.get("follow") === "1");
+
+  function handleDismissFollowIntro() {
+    setShowFollowIntro(false);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("follow");
+    const qs = params.toString();
+    router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
+  }
 
   /** Push current region selection into the URL (without adding history) */
   function updateMapUrl(state: string, county: string) {
@@ -1180,6 +1216,14 @@ const countyListings = useMemo(() => {
           overflow: "hidden",
         }}
       >
+        {showFollowIntro && (
+          <FollowCampaignIntro
+            onDismiss={handleDismissFollowIntro}
+            lightsCount={lightsCount}
+            isMobile
+          />
+        )}
+
         {/* Map — full bleed, always visible */}
         <div
           style={{
@@ -1199,6 +1243,12 @@ const countyListings = useMemo(() => {
             highlightState={hasStateSelection ? effectiveState : ""}
             visible={true}
             isMobile={true}
+            defaultCenter={
+              isFollowEntryRef.current ? FOLLOW_CAMPAIGN_CENTER : undefined
+            }
+            defaultZoom={
+              isFollowEntryRef.current ? FOLLOW_CAMPAIGN_ZOOM : undefined
+            }
           />
         </div>
 
@@ -1235,7 +1285,11 @@ const countyListings = useMemo(() => {
           }
         `}</style>
 
-        {/* Floating top bar — region selector + search */}
+        {/* Floating top bar — region selector + search. Hidden (not
+            removed) while the campaign intro covers the screen, so it
+            doesn't visually compete with it; restored immediately on
+            dismiss. Normal /map (no ?follow=1) is unaffected since
+            showFollowIntro is always false there. */}
         <div
           className="mobile-day-bar"
           style={{
@@ -1250,6 +1304,9 @@ const countyListings = useMemo(() => {
             backdropFilter: "blur(8px)",
             color: "#0a2540",
             textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+            opacity: showFollowIntro ? 0 : 1,
+            pointerEvents: showFollowIntro ? "none" : "auto",
+            transition: "opacity 0.2s ease",
           }}
         >
           <RegionSelector
@@ -1554,6 +1611,13 @@ const countyListings = useMemo(() => {
         width: "100%",
       }}
     >
+      {showFollowIntro && (
+        <FollowCampaignIntro
+          onDismiss={handleDismissFollowIntro}
+          lightsCount={lightsCount}
+        />
+      )}
+
       {/* Sidebar */}
       <div
         style={{
@@ -1651,6 +1715,12 @@ const countyListings = useMemo(() => {
           highlightCounty={hasCountySelection ? effectiveCounty : ""}
           highlightState={hasStateSelection ? effectiveState : ""}
           visible={true}
+          defaultCenter={
+            isFollowEntryRef.current ? FOLLOW_CAMPAIGN_CENTER : undefined
+          }
+          defaultZoom={
+            isFollowEntryRef.current ? FOLLOW_CAMPAIGN_ZOOM : undefined
+          }
         />
       </div>
     </main>

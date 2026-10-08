@@ -22,7 +22,15 @@ type Props = {
   highlightState?: string;
   visible?: boolean;
   isMobile?: boolean;
+  /** Camera-only override for the unfiltered/default view (does not affect
+   * which listings are loaded or displayed). Falls back to the national
+   * view when omitted. */
+  defaultCenter?: [number, number];
+  defaultZoom?: number;
 };
+
+const NATIONAL_CENTER: [number, number] = [-98.5795, 39.8283];
+const NATIONAL_ZOOM = 4;
 
 const FLAG_REASON_OPTIONS = [
   "Incorrect information",
@@ -146,6 +154,8 @@ export default function MapClient({
   highlightState,
   visible = true,
   isMobile = false,
+  defaultCenter = NATIONAL_CENTER,
+  defaultZoom = NATIONAL_ZOOM,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -437,8 +447,8 @@ export default function MapClient({
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [-98.5795, 39.8283],
-      zoom: 4,
+      center: defaultCenter,
+      zoom: defaultZoom,
     });
 
     mapRef.current = map;
@@ -709,7 +719,7 @@ export default function MapClient({
       map.remove();
       mapRef.current = null;
     };
-  }, [onRegionChange, onSelect]);
+  }, [onRegionChange, onSelect, defaultCenter, defaultZoom]);
 
   /* ── Update GeoJSON source when listings change ── */
   useEffect(() => {
@@ -760,16 +770,16 @@ export default function MapClient({
     prevSelectedRef.current = selectedId;
   }, [selectedId]);
 
-  /* ── Return to national view when filters clear ── */
+  /* ── Return to default view when filters clear ── */
   useEffect(() => {
     if (!isFiltered && mapRef.current) {
       mapRef.current.flyTo({
-        center: [-98.5795, 39.8283],
-        zoom: 4,
+        center: defaultCenter,
+        zoom: defaultZoom,
         duration: 900,
       });
     }
-  }, [isFiltered]);
+  }, [isFiltered, defaultCenter, defaultZoom]);
 
   /* ── Visible prop → map.resize() for mobile ── */
   useEffect(() => {
