@@ -13,7 +13,6 @@ const GOLD_DARK = "#E6B84A";
 const NAV_ITEMS = [
   { label: "About", href: "/about" },
   { label: "Map", href: "/map" },
-  { label: "Story of Place", href: "/stories" },
   { label: "Online Resources", href: "/support" },
   { label: "The Constellation", href: "/constellation" },
   { label: "Stewardship", href: "/founders" },

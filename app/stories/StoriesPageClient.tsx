@@ -16,6 +16,13 @@ type Story = {
   link?: string | null;
 };
 
+const FLAG_REASON_OPTIONS = [
+  "Spam or promotional",
+  "Not about this place",
+  "Harmful or inappropriate",
+  "Other",
+];
+
 const STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
   "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -84,15 +91,100 @@ const lightPoints: {
 export default function StoriesPageClient({
   initialState,
   initialCounty,
+  initialListingId,
 }: {
   initialState: string;
   initialCounty: string;
+  initialListingId?: string;
 }) {
   const router = useRouter();
   const [selectedState, setSelectedState] = useState(initialState);
   const [selectedCounty, setSelectedCounty] = useState(initialCounty);
+  // Set only when arriving from a specific listing's "Read its story" link.
+  // Narrows the stories shown to that listing while the state/county
+  // picker above still frames it as part of that place's Story of Place.
+  const [listingId, setListingId] = useState(initialListingId || "");
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [flagStoryId, setFlagStoryId] = useState<string | null>(null);
+  const [flagReason, setFlagReason] = useState("");
+  const [flagDetails, setFlagDetails] = useState("");
+  const [flagError, setFlagError] = useState("");
+  const [flagSuccess, setFlagSuccess] = useState("");
+  const [isFlagSubmitting, setIsFlagSubmitting] = useState(false);
+
+  function openFlagModal(storyId: string) {
+    setFlagStoryId(storyId);
+    setFlagReason("");
+    setFlagDetails("");
+    setFlagError("");
+    setFlagSuccess("");
+    setIsFlagSubmitting(false);
+  }
+
+  function closeFlagModal() {
+    if (isFlagSubmitting) return;
+    setFlagStoryId(null);
+    setFlagReason("");
+    setFlagDetails("");
+    setFlagError("");
+    setFlagSuccess("");
+  }
+
+  async function handleSubmitFlag() {
+    if (!flagStoryId) return;
+
+    if (!flagReason.trim()) {
+      setFlagError("Please choose a reason.");
+      return;
+    }
+
+    setFlagError("");
+    setFlagSuccess("");
+    setIsFlagSubmitting(true);
+
+    try {
+      const response = await fetch("/api/stories/flag", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storyId: flagStoryId,
+          reason: flagReason.trim(),
+          details: flagDetails.trim(),
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to flag story.");
+      }
+
+      if (data?.result?.status === "duplicate") {
+        setFlagError("You already flagged this story.");
+        return;
+      }
+
+      if (data?.result?.status === "hidden") {
+        setFlagSuccess(
+          "This story has reached the community flag limit and is now hidden."
+        );
+        setStories((prev) => prev.filter((s) => s.id !== flagStoryId));
+        window.setTimeout(() => closeFlagModal(), 1200);
+        return;
+      }
+
+      setFlagSuccess("Flag received.");
+      window.setTimeout(() => closeFlagModal(), 1000);
+    } catch (error) {
+      setFlagError(
+        error instanceof Error ? error.message : "Failed to flag story."
+      );
+    } finally {
+      setIsFlagSubmitting(false);
+    }
+  }
 
   const hasPlace = selectedState !== "" && selectedCounty !== "";
 
@@ -121,44 +213,50 @@ export default function StoriesPageClient({
     return qs ? `/stories/submit?${qs}` : "/stories/submit";
   }, [selectedState, selectedCounty]);
 
-  const fetchStories = useCallback(async (state: string, county: string) => {
-    if (!state || !county) {
-      setStories([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("state", state);
-      params.set("county", county);
-      const res = await fetch(`/api/stories?${params.toString()}`);
-      if (res.ok) {
-        setStories(await res.json());
-      } else {
+  const fetchStories = useCallback(
+    async (state: string, county: string, forListingId?: string) => {
+      if (!state || !county) {
         setStories([]);
+        return;
       }
-    } catch {
-      setStories([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("state", state);
+        params.set("county", county);
+        if (forListingId) params.set("listingId", forListingId);
+        const res = await fetch(`/api/stories?${params.toString()}`);
+        if (res.ok) {
+          setStories(await res.json());
+        } else {
+          setStories([]);
+        }
+      } catch {
+        setStories([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   // Fetch on mount if arriving with place params
   useEffect(() => {
     if (initialState && initialCounty) {
-      fetchStories(initialState, initialCounty);
+      fetchStories(initialState, initialCounty, initialListingId);
     }
-  }, [initialState, initialCounty, fetchStories]);
+  }, [initialState, initialCounty, initialListingId, fetchStories]);
 
   function handleStateChange(newState: string) {
     setSelectedState(newState);
     setSelectedCounty("");
+    setListingId("");
     setStories([]);
   }
 
   function handleCountyChange(newCounty: string) {
     setSelectedCounty(newCounty);
+    setListingId("");
     if (selectedState && newCounty) {
       const params = new URLSearchParams();
       params.set("state", selectedState);
@@ -166,6 +264,16 @@ export default function StoriesPageClient({
       router.replace(`/stories?${params.toString()}`, { scroll: false });
       fetchStories(selectedState, newCounty);
     }
+  }
+
+  function clearListingFilter() {
+    setListingId("");
+    const params = new URLSearchParams();
+    if (selectedState) params.set("state", selectedState);
+    if (selectedCounty) params.set("county", selectedCounty);
+    const qs = params.toString();
+    router.replace(qs ? `/stories?${qs}` : "/stories", { scroll: false });
+    fetchStories(selectedState, selectedCounty);
   }
 
   const cardStyle: React.CSSProperties = {
@@ -456,6 +564,41 @@ export default function StoriesPageClient({
         {/* ── STORIES / EMPTY STATE — only when place is chosen ── */}
         {hasPlace && !loading && (
           <>
+            {listingId && (
+              <div
+                style={{
+                  ...cardStyle,
+                  marginBottom: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                <span style={{ ...bodyTextStyle, fontSize: 13 }}>
+                  Showing the story for this listing.
+                </span>
+                <button
+                  type="button"
+                  onClick={clearListingFilter}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    color: "#FFD86B",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                    cursor: "pointer",
+                  }}
+                >
+                  See all stories from {placeLabel}
+                </button>
+              </div>
+            )}
+
             {stories.length > 0 ? (
               <section style={cardStyle}>
                 <div
@@ -528,6 +671,25 @@ export default function StoriesPageClient({
                           </a>
                         </div>
                       )}
+
+                      <div style={{ marginTop: 10 }}>
+                        <button
+                          type="button"
+                          onClick={() => openFlagModal(story.id)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            color: "rgba(159,184,216,0.55)",
+                            fontSize: 12,
+                            textDecoration: "underline",
+                            textUnderlineOffset: 2,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Flag this story
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>
@@ -625,6 +787,109 @@ export default function StoriesPageClient({
           </>
         )}
       </div>
+
+      {flagStoryId && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(5,16,31,0.7)",
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 420,
+              borderRadius: 18,
+              padding: "24px 22px",
+              background: "#15264a",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "white",
+            }}
+          >
+            <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 12 }}>
+              Flag this story
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <select
+                value={flagReason}
+                onChange={(e) => setFlagReason(e.target.value)}
+                style={{ ...selectStyle, marginBottom: 10 }}
+              >
+                <option value="">Choose a reason</option>
+                {FLAG_REASON_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+
+              <textarea
+                value={flagDetails}
+                onChange={(e) => setFlagDetails(e.target.value)}
+                placeholder="Optional note"
+                rows={3}
+                style={{
+                  ...selectStyle,
+                  resize: "vertical",
+                  lineHeight: 1.5,
+                }}
+              />
+            </div>
+
+            {flagError && (
+              <div style={{ color: "#ff9d8a", fontSize: 13, marginBottom: 10 }}>
+                {flagError}
+              </div>
+            )}
+            {flagSuccess && (
+              <div style={{ color: "#9df0b8", fontSize: 13, marginBottom: 10 }}>
+                {flagSuccess}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={closeFlagModal}
+                disabled={isFlagSubmitting}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: 999,
+                  padding: "9px 18px",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitFlag}
+                disabled={isFlagSubmitting}
+                style={{
+                  background: "#FFD86B",
+                  border: "none",
+                  borderRadius: 999,
+                  padding: "9px 18px",
+                  color: "#1a2a0e",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                {isFlagSubmitting ? "Submitting…" : "Submit flag"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

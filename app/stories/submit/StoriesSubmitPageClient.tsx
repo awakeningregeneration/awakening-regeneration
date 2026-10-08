@@ -1,12 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 function clean(s: string | null) {
   return (s || "").trim();
 }
+
+const TITLE_MAX = 120;
+const BODY_MAX = 3000;
+const LINK_MAX = 500;
 
 const orbs: { left: string; top: string; size: number; opacity: number }[] = [
   { left: "6%", top: "8%", size: 5, opacity: 0.6 },
@@ -74,12 +78,52 @@ export default function SubmitStoryPage() {
 
   const prefillState = clean(sp.get("state"));
   const prefillCounty = clean(sp.get("county"));
+  const requestedListingId = clean(sp.get("listingId"));
 
   const [state, setState] = useState(prefillState);
   const [county, setCounty] = useState(prefillCounty);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [link, setLink] = useState("");
+
+  // listingId in the URL is a data association only — it is NOT proof the
+  // visitor owns or claimed this listing. It just tells us which place a
+  // story is about, the same way state/county does. Anyone can construct
+  // this URL with any listing id; that's acceptable here since Story of
+  // Place submission itself is open to anyone, not restricted to owners.
+  const [resolvedListingId, setResolvedListingId] = useState<string | null>(null);
+  const [resolvedListingTitle, setResolvedListingTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!requestedListingId) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/listings");
+        if (!res.ok) return;
+        const listings = await res.json();
+        const match = Array.isArray(listings)
+          ? listings.find((l: { id: string }) => l.id === requestedListingId)
+          : null;
+
+        if (cancelled || !match) return;
+
+        setResolvedListingId(match.id);
+        setResolvedListingTitle(match.title || null);
+        if (match.state) setState(match.state);
+        if (match.county) setCounty(match.county);
+      } catch {
+        // Couldn't resolve the listing — fall back to normal manual entry,
+        // no listing association attached.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [requestedListingId]);
 
   const storiesViewHref = useMemo(() => {
     const params = new URLSearchParams();
@@ -98,13 +142,12 @@ export default function SubmitStoryPage() {
     }
 
     const payload = {
-      id: `local_${Date.now()}`,
-      createdAt: new Date().toISOString().slice(0, 10),
       state: state.trim(),
       county: county.trim(),
       title: title.trim(),
       body: body.trim(),
       link: link.trim(),
+      listingId: resolvedListingId || undefined,
     };
 
     try {
@@ -116,20 +159,22 @@ export default function SubmitStoryPage() {
         body: JSON.stringify(payload),
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        throw new Error("Failed to save story");
+        throw new Error(data?.error || "Failed to save story");
       }
 
       alert("Story saved.");
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong saving the story.");
-    }
 
-    // light reset (keep region)
-    setTitle("");
-    setBody("");
-    setLink("");
+      // light reset (keep region) — only on success, so a rejected
+      // submission (e.g. over the length limit) never loses the user's text
+      setTitle("");
+      setBody("");
+      setLink("");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Something went wrong saving the story.");
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -209,6 +254,18 @@ export default function SubmitStoryPage() {
             <br />
             A few paragraphs is welcome.
           </div>
+          {resolvedListingTitle && (
+            <div
+              style={{
+                marginTop: 12,
+                fontSize: "0.85rem",
+                color: "#FFD86B",
+                fontWeight: 600,
+              }}
+            >
+              Sharing a story about: {resolvedListingTitle}
+            </div>
+          )}
           <div style={{ marginTop: 14, fontSize: "0.9rem" }}>
             <Link
               href={storiesViewHref}
@@ -245,7 +302,11 @@ export default function SubmitStoryPage() {
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="CA"
-                style={inputStyle}
+                disabled={!!resolvedListingTitle}
+                style={{
+                  ...inputStyle,
+                  ...(resolvedListingTitle ? { opacity: 0.65, cursor: "not-allowed" } : {}),
+                }}
               />
             </div>
 
@@ -255,7 +316,11 @@ export default function SubmitStoryPage() {
                 value={county}
                 onChange={(e) => setCounty(e.target.value)}
                 placeholder="Mendocino"
-                style={inputStyle}
+                disabled={!!resolvedListingTitle}
+                style={{
+                  ...inputStyle,
+                  ...(resolvedListingTitle ? { opacity: 0.65, cursor: "not-allowed" } : {}),
+                }}
               />
             </div>
           </div>
@@ -263,30 +328,43 @@ export default function SubmitStoryPage() {
           <label style={labelStyle}>Title (optional)</label>
           <input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))}
             placeholder="A short headline"
+            maxLength={TITLE_MAX}
             style={{ ...inputStyle, marginBottom: 14 }}
           />
 
           <label style={labelStyle}>Story</label>
           <textarea
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => setBody(e.target.value.slice(0, BODY_MAX))}
             placeholder="Tell the story of this place. What is happening here? What is being tended, restored, protected, or made possible? Why does it matter in this community?"
             rows={12}
+            maxLength={BODY_MAX}
             style={{
               ...inputStyle,
-              marginBottom: 14,
+              marginBottom: 4,
               resize: "vertical",
               lineHeight: 1.55,
             }}
           />
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: "0.78rem",
+              color: body.length >= BODY_MAX ? "#b0402a" : "#5a7797",
+              marginBottom: 14,
+            }}
+          >
+            {body.length.toLocaleString()} / {BODY_MAX.toLocaleString()}
+          </div>
 
           <label style={labelStyle}>Link (optional)</label>
           <input
             value={link}
-            onChange={(e) => setLink(e.target.value)}
+            onChange={(e) => setLink(e.target.value.slice(0, LINK_MAX))}
             placeholder="https://"
+            maxLength={LINK_MAX}
             style={{ ...inputStyle, marginBottom: 18 }}
           />
 

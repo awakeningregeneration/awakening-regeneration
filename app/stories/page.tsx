@@ -5,6 +5,7 @@ type StoriesPageProps = {
   searchParams?: Promise<{
     state?: string;
     county?: string;
+    listingId?: string;
   }>;
 };
 
@@ -15,6 +16,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
       <StoriesPageClient
         initialState={params.state ?? ""}
         initialCounty={params.county ?? ""}
+        initialListingId={params.listingId ?? ""}
       />
     </Suspense>
   );

@@ -18,7 +18,7 @@ export function stewardClaimConfirmationEmail(options: {
   const greeting = stewardName ? `Hi ${stewardName},` : "Hi there,";
   const listingUrl = `${SITE_URL}/edit/${listingId}`;
   const submitUrl = `${SITE_URL}/submit`;
-  const storiesUrl = `${SITE_URL}/stories/submit`;
+  const storiesUrl = `${SITE_URL}/stories/submit?listingId=${listingId}`;
 
   const subject = `You're the steward of ${listingTitle} on Canary Commons`;
 
@@ -94,7 +94,7 @@ While you're here — two invitations, no pressure on either:
 
 If you know of another place that belongs on this map, you can add it directly: canarycommons.org/submit
 
-And if you'd ever like to share a story — of how ${listingTitle} came to be, or of something else in your area that's making the world a little more whole — there's a place for that too: canarycommons.org/stories/submit
+And if you'd ever like to share a story — of how ${listingTitle} came to be, or of something else in your area that's making the world a little more whole — there's a place for that too: ${storiesUrl}
 
 This map exists because people like you are doing something worth noticing. We're glad it found you.
 

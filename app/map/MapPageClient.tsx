@@ -113,6 +113,7 @@ export default function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapRegion, setMapRegion] = useState<PropsRegion>({});
   const [storyCount, setStoryCount] = useState<number>(0);
+  const [listingIdsWithStories, setListingIdsWithStories] = useState<Set<string>>(new Set());
   const [countySearchQuery, setCountySearchQuery] = useState("");
   const [onlineResources, setOnlineResources] = useState<OnlineResource[]>([]);
   const [synonymsCache, setSynonymsCache] = useState<string[]>([]);
@@ -474,6 +475,7 @@ const countyListings = useMemo(() => {
     async function loadStories() {
       if (!hasCountySelection || !effectiveState || !effectiveCounty) {
         setStoryCount(0);
+        setListingIdsWithStories(new Set());
         return;
       }
 
@@ -486,10 +488,22 @@ const countyListings = useMemo(() => {
         if (!res.ok) throw new Error("Failed to fetch stories");
 
         const data = await res.json();
-        setStoryCount(Array.isArray(data) ? data.length : 0);
+        const list = Array.isArray(data) ? data : [];
+        setStoryCount(list.length);
+        // Derived from the same single county-scoped fetch above — no
+        // additional request per listing (avoids an N+1 pattern as the
+        // number of listings on screen grows).
+        setListingIdsWithStories(
+          new Set(
+            list
+              .map((s: { listing_id?: string | null }) => s.listing_id)
+              .filter((id: string | null | undefined): id is string => !!id)
+          )
+        );
       } catch (error) {
         console.error("Failed to load story count:", error);
         setStoryCount(0);
+        setListingIdsWithStories(new Set());
       }
     }
 
@@ -870,7 +884,7 @@ const countyListings = useMemo(() => {
                         Direct Hits
                       </div>
                       {directHits.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} hasStory={listingIdsWithStories.has(listing.id)} storiesViewHref={storiesViewHref} />
                       ))}
                     </div>
                   )}
@@ -882,7 +896,7 @@ const countyListings = useMemo(() => {
                         Related Nearby
                       </div>
                       {relatedNearby.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} hasStory={listingIdsWithStories.has(listing.id)} storiesViewHref={storiesViewHref} />
                       ))}
                     </div>
                   )}
@@ -944,7 +958,7 @@ const countyListings = useMemo(() => {
                   {countyLightCount > 0 ? (
                     <div style={{ marginTop: 12 }}>
                       {countyListings.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} />
+                        <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} hasStory={listingIdsWithStories.has(listing.id)} storiesViewHref={storiesViewHref} />
                       ))}
                     </div>
                   ) : (
@@ -955,6 +969,7 @@ const countyListings = useMemo(() => {
                 </>
               )}
 
+{storyCount > 0 && (
 <div
   style={{
     marginTop: 16,
@@ -1009,6 +1024,7 @@ const countyListings = useMemo(() => {
     </Link>
   </div>
 </div>
+)}
 
               {/* Action buttons — same as state-level view */}
               {opts.showActionButtons && (

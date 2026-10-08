@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ListingImageTile from "./ListingImageTile";
 import ElementalSeat from "./ElementalSeat";
 import { getListingImage } from "../../lib/getListingImage";
@@ -8,6 +9,12 @@ type ListingCardProps = {
   isSelected: boolean;
   fallbackLocation: string;
   onSelect: (id: string) => void;
+  /** Whether this listing has at least one published story — Story of
+   * Place only surfaces at the listing level once that's true. */
+  hasStory?: boolean;
+  /** The current county's story view, reused as-is (stories stay
+   * state/county-scoped — there's no separate per-listing story page). */
+  storiesViewHref?: string;
 };
 
 export default function ListingCard({
@@ -15,6 +22,8 @@ export default function ListingCard({
   isSelected,
   fallbackLocation,
   onSelect,
+  hasStory,
+  storiesViewHref,
 }: ListingCardProps) {
   const locationParts = [listing.city, listing.state].filter(Boolean) as string[];
   const imageUrl = getListingImage(listing.image_url, listing.website);
@@ -34,31 +43,64 @@ export default function ListingCard({
         background: isSelected
           ? "rgba(255,216,107,0.2)"
           : "rgba(224,240,255,0.14)",
-        display: "flex",
-        gap: 10,
-        alignItems: "center",
         transition: "all 0.15s ease",
         boxShadow: isSelected
           ? "0 2px 12px rgba(255,216,107,0.2)"
           : "0 1px 4px rgba(8,25,45,0.06)",
       }}
     >
-      <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>
-          {listing.name}
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <ListingImageTile imageUrl={imageUrl} name={listing.name} size="sm" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, color: "#e8f4ff", fontSize: 15 }}>
+            {listing.name}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: "rgba(148,196,236,0.8)",
+              marginTop: 2,
+            }}
+          >
+            {locationParts.join(", ") || fallbackLocation}
+          </div>
         </div>
+        <ElementalSeat element="spirit" size="sm" />
+      </div>
+
+      {hasStory && (
         <div
+          onClick={(e) => e.stopPropagation()}
           style={{
+            marginTop: 8,
+            paddingTop: 8,
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            gap: 12,
             fontSize: 12,
-            color: "rgba(148,196,236,0.8)",
-            marginTop: 2,
           }}
         >
-          {locationParts.join(", ") || fallbackLocation}
+          {storiesViewHref && (
+            <Link
+              href={`${storiesViewHref}&listingId=${listing.id}`}
+              style={{ color: "#FFD86B", fontWeight: 600, textDecoration: "none" }}
+            >
+              Read its story
+            </Link>
+          )}
+          <Link
+            href={`/stories/submit?listingId=${listing.id}`}
+            style={{
+              color: "rgba(224,240,255,0.75)",
+              fontWeight: 500,
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+            }}
+          >
+            Add your own
+          </Link>
         </div>
-      </div>
-      <ElementalSeat element="spirit" size="sm" />
+      )}
     </div>
   );
 }
