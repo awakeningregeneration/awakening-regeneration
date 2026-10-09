@@ -126,7 +126,14 @@ export default function SubmitSupportPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [practices, setPractices] = useState<string[]>([]);
+  const [contactEmail, setContactEmail] = useState("");
+  const [alignmentNote, setAlignmentNote] = useState("");
+  const [partnershipPath, setPartnershipPath] = useState<"has_program" | "wants_direct" | "">("");
+  const [programName, setProgramName] = useState("");
+  const [programUrl, setProgramUrl] = useState("");
+  const [companyFax, setCompanyFax] = useState(""); // honeypot — real applicants never see this field
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   function togglePractice(practice: string) {
     setPractices((current) =>
@@ -138,6 +145,13 @@ export default function SubmitSupportPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError("");
+
+    if (!partnershipPath) {
+      setSubmitError("Please choose a partnership option.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -153,17 +167,24 @@ export default function SubmitSupportPage() {
           image_url: imageUrl,
           description,
           practices,
+          contact_email: contactEmail,
+          alignment_note: alignmentNote,
+          partnership_path: partnershipPath,
+          program_name: programName,
+          program_url: programUrl,
+          company_fax: companyFax,
         }),
       });
 
       if (res.ok) {
         router.push("/support");
       } else {
-        alert("Something went wrong.");
+        const data = await res.json().catch(() => null);
+        setSubmitError(data?.error || "Something went wrong. Please try again.");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong.");
+      setSubmitError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -248,8 +269,37 @@ export default function SubmitSupportPage() {
               color: "#0d2a4a",
             }}
           >
-            Submit an Online Resource
+            Bring your work to the Commons.
           </h1>
+
+          <p
+            style={{
+              marginTop: 0,
+              marginBottom: 16,
+              color: "#3a5a7a",
+              lineHeight: 1.65,
+              fontSize: "0.98rem",
+            }}
+          >
+            Canary connects people with businesses building pieces of a
+            world where canaries thrive. Partnership brings your work to
+            people looking for better options — and when they choose you
+            through Canary, your participation helps sustain the Commons.
+          </p>
+
+          <p
+            style={{
+              marginTop: 0,
+              marginBottom: 16,
+              color: "#3a5a7a",
+              lineHeight: 1.65,
+              fontSize: "0.98rem",
+            }}
+          >
+            It&rsquo;s a reciprocal model: Canary helps aligned businesses
+            grow, and our Online Resource partners help keep Canary free
+            for local businesses and for the people who use it.
+          </p>
 
           <p
             style={{
@@ -260,8 +310,9 @@ export default function SubmitSupportPage() {
               fontSize: "0.98rem",
             }}
           >
-            Submissions come in for review before being added to the Online
-            Resources directory.
+            If your work belongs here, we&rsquo;d love to hear from you.
+            Already have an affiliate or referral program? Wonderful. New
+            to partnership? That&rsquo;s welcome too.
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
@@ -361,6 +412,111 @@ export default function SubmitSupportPage() {
                 })}
               </div>
             </div>
+
+            <div>
+              <label style={labelStyle}>
+                How does your work help life move forward?
+              </label>
+              <p style={helperStyle}>A sentence or two is enough.</p>
+              <textarea
+                placeholder="What you do and why it fits here"
+                value={alignmentNote}
+                onChange={(e) => setAlignmentNote(e.target.value.slice(0, 600))}
+                required
+                maxLength={600}
+                rows={3}
+                style={{ ...inputStyle, resize: "vertical" }}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Contact email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                required
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Partnership</label>
+              <p style={helperStyle}>
+                Either path is welcome — alignment comes first either way.
+              </p>
+              <div style={{ display: "grid", gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setPartnershipPath("has_program")}
+                  style={{
+                    textAlign: "left",
+                    borderRadius: 12,
+                    border: partnershipPath === "has_program" ? "1px solid rgba(255,200,80,0.45)" : "1px solid rgba(100,150,220,0.22)",
+                    padding: "12px 14px",
+                    fontSize: "0.92rem",
+                    cursor: "pointer",
+                    background: partnershipPath === "has_program" ? "rgba(255,216,107,0.18)" : "rgba(255,255,255,0.7)",
+                    color: partnershipPath === "has_program" ? "#7a4f00" : "#3a5a7a",
+                  }}
+                >
+                  We already have an affiliate/referral program
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPartnershipPath("wants_direct")}
+                  style={{
+                    textAlign: "left",
+                    borderRadius: 12,
+                    border: partnershipPath === "wants_direct" ? "1px solid rgba(255,200,80,0.45)" : "1px solid rgba(100,150,220,0.22)",
+                    padding: "12px 14px",
+                    fontSize: "0.92rem",
+                    cursor: "pointer",
+                    background: partnershipPath === "wants_direct" ? "rgba(255,216,107,0.18)" : "rgba(255,255,255,0.7)",
+                    color: partnershipPath === "wants_direct" ? "#7a4f00" : "#3a5a7a",
+                  }}
+                >
+                  We don&apos;t have one yet, but we&apos;d like to explore partnering directly with Canary
+                </button>
+              </div>
+            </div>
+
+            {partnershipPath === "has_program" && (
+              <div>
+                <label style={labelStyle}>Program / network name or URL</label>
+                <p style={helperStyle}>At least one of these.</p>
+                <input
+                  placeholder="Program or network name"
+                  value={programName}
+                  onChange={(e) => setProgramName(e.target.value)}
+                  style={{ ...inputStyle, marginBottom: 10 }}
+                />
+                <input
+                  placeholder="https://example.com/affiliate-program"
+                  value={programUrl}
+                  onChange={(e) => setProgramUrl(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+            )}
+
+            {/* Honeypot — invisible to real applicants, left blank by them.
+                A bot that fills every field will fill this one too. */}
+            <input
+              type="text"
+              name="company_fax"
+              value={companyFax}
+              onChange={(e) => setCompanyFax(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+            />
+
+            {submitError && (
+              <p style={{ color: "#a04040", fontSize: "0.9rem", margin: 0 }}>{submitError}</p>
+            )}
 
             <button
               type="submit"

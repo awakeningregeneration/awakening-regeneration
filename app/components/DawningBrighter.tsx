@@ -9,16 +9,22 @@
  * Extracted from the existing Morning Sky field (founders/confirmation,
  * support/submit, stories/submit). Tunable via three props:
  *
- *   lift:     "calm" | "balanced" | "bright" — how far the gradient lifts toward light
+ *   lift:     "calm" | "balanced" | "bright" | "dawn" — how far the gradient lifts toward light
  *   density:  "sparse" | "moderate" | "full" — how many orbs render
  *   glow:     "dim" | "soft" | "bright" — orb brightness/halo intensity
  *
  * Defaults reproduce the current Morning Sky field exactly when
  * called with no props (<DawningBrighter /> = safe drop-in).
+ *
+ * "dawn" is a separate, additive preset (first-light preview for the
+ * public Commons pages, distinct from the blue-only Morning Sky lifts
+ * above) — deep navy retained at the outer field, through clearer
+ * morning blue, to a restrained warm gold/cream core. Not full
+ * daylight, and not the homepage/Constellation's night sky.
  */
 
 type Props = {
-  lift?: "calm" | "balanced" | "bright";
+  lift?: "calm" | "balanced" | "bright" | "dawn";
   density?: "sparse" | "moderate" | "full";
   glow?: "dim" | "soft" | "bright";
 };
@@ -75,6 +81,17 @@ const GRADIENTS: Record<
     sky: "radial-gradient(ellipse at 50% 0%, rgba(200,225,255,0.95) 0%, rgba(150,195,245,0.9) 25%, rgba(90,145,220,0.9) 60%, rgba(40,85,165,1) 100%)",
     bloom:
       "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.25) 0%, transparent 58%)",
+  },
+  dawn: {
+    // Morning blue stays dominant across almost the whole field — no
+    // warm stops in the base sky at all now. The horizon glow lives
+    // entirely in `bloom`, below: a narrow band at the very bottom
+    // whose opacity drops off quickly moving upward, so it reads as
+    // a thin band of first light fading into distance, not a region
+    // of blue blended into a region of gold.
+    sky: "linear-gradient(to bottom, rgba(40,65,120,1) 0%, rgba(48,72,128,1) 45%, rgba(58,82,138,1) 100%)",
+    bloom:
+      "linear-gradient(to top, rgba(255,226,170,0.35) 0%, rgba(255,226,170,0.15) 10%, rgba(255,226,170,0.04) 22%, transparent 32%)",
   },
 };
 

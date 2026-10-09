@@ -108,7 +108,10 @@ export async function PATCH(req: Request) {
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
   const updates: Record<string, unknown> = {};
-  const textFields = ["name", "url", "affiliate_url", "description", "why_it_matters", "logo_url", "status"] as const;
+  const textFields = [
+    "name", "url", "affiliate_url", "description", "why_it_matters", "logo_url", "status",
+    "contact_email", "alignment_note", "partnership_path", "program_name", "program_url",
+  ] as const;
   for (const f of textFields) {
     if (rest[f] !== undefined) {
       updates[f] = typeof rest[f] === "string" ? (rest[f] as string).trim() || null : rest[f];

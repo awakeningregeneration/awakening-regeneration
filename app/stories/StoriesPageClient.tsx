@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { californiaCounties } from "@/data/californiaCounties";
 import { allCounties } from "@/data/allCounties";
+import DawningBrighter from "@/app/components/DawningBrighter";
 
 type Story = {
   id: string;
@@ -327,39 +328,8 @@ export default function StoriesPageClient({
         padding: "32px 20px 48px",
       }}
     >
-      {/* Atmosphere layer 1 */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 0%, rgba(60,130,220,0.45) 0%, rgba(5,16,31,1) 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Atmosphere layer 2 */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 45%, rgba(80,140,230,0.28) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Atmosphere layer 3 */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0.06) 0%, transparent 50%)",
-          pointerEvents: "none",
-        }}
-      />
+      {/* Dawn atmosphere — approved treatment from /about, reused as-is */}
+      <DawningBrighter lift="dawn" />
 
       {/* Gold light points */}
       {lightPoints.map((p, i) => {

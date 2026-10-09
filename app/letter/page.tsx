@@ -1,3 +1,5 @@
+import DawningBrighter from "@/app/components/DawningBrighter";
+
 const GOLD = "#FFD86B";
 const BODY_COLOR = "#fff8e0";
 
@@ -54,36 +56,8 @@ const orbs: { left: string; top: string; size: number; opacity: number }[] = [
 function Atmosphere() {
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 0%, rgba(26,72,130,0.32) 0%, rgba(5,16,31,1) 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(circle at 18% 14%, rgba(40,90,160,0.18) 0%, transparent 38%), radial-gradient(circle at 82% 12%, rgba(40,90,160,0.14) 0%, transparent 40%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 45%, rgba(60,110,200,0.11) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
+      {/* Dawn atmosphere — approved treatment from /about, reused as-is */}
+      <DawningBrighter lift="dawn" />
       <div
         style={{
           position: "absolute",

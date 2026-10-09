@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import SupportIntroOverlay from "./SupportIntroOverlay";
+import DawningBrighter from "@/app/components/DawningBrighter";
 
 type OnlineResource = {
   id: string | number;
@@ -79,39 +80,8 @@ const lightPoints: {
 function Atmosphere() {
   return (
     <>
-      {/* Deep sky base gradient */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 0%, rgba(26,72,130,0.32) 0%, rgba(5,16,31,1) 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Side blue glows */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(circle at 20% 40%, rgba(40,90,160,0.18) 0%, transparent 40%), radial-gradient(circle at 78% 55%, rgba(40,90,160,0.14) 0%, transparent 42%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Luminous center bloom */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          background:
-            "radial-gradient(ellipse at 50% 45%, rgba(60,110,200,0.11) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
+      {/* Dawn atmosphere — approved treatment from /about, reused as-is */}
+      <DawningBrighter lift="dawn" />
       {/* Warm gold light points scattered full page — emission halo pattern */}
       <div
         style={{
@@ -556,7 +526,7 @@ export default function SupportPageClient({
               color: "rgba(255,255,255,0.98)",
             }}
           >
-            Support what is already life-giving
+            Look local first.
           </h1>
           <p
             style={{
@@ -567,9 +537,10 @@ export default function SupportPageClient({
               marginBottom: 36,
             }}
           >
-            Sometimes the local light is not visible yet. This space helps you
-            find aligned options you can support from anywhere — while the
-            constellation continues to grow.
+            When what you need isn&rsquo;t available locally, look here.
+            These Online Resource partners help sustain Canary — choosing
+            them through Canary helps keep the Commons free for local
+            businesses and free for everyone who uses it.
           </p>
         </div>
 

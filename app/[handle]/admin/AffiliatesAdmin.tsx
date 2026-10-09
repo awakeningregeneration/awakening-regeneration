@@ -33,6 +33,11 @@ type AffiliateResource = {
   contributor_id: string | null;
   contributor_name: string | null;
   created_at: string;
+  contact_email: string | null;
+  alignment_note: string | null;
+  partnership_path: string | null;
+  program_name: string | null;
+  program_url: string | null;
 };
 
 type Contributor = {
@@ -115,6 +120,11 @@ export default function AffiliatesAdmin() {
   const [editCategory, setEditCategory] = useState<string[]>([]);
   const [editPractices, setEditPractices] = useState<string[]>([]);
   const [editStatus, setEditStatus] = useState("approved");
+  const [editContactEmail, setEditContactEmail] = useState("");
+  const [editAlignmentNote, setEditAlignmentNote] = useState("");
+  const [editPartnershipPath, setEditPartnershipPath] = useState("");
+  const [editProgramName, setEditProgramName] = useState("");
+  const [editProgramUrl, setEditProgramUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [editErr, setEditErr] = useState<string | null>(null);
 
@@ -189,6 +199,11 @@ export default function AffiliatesAdmin() {
     setEditCategory(r.category ?? []);
     setEditPractices(r.practices ?? []);
     setEditStatus(r.status || "approved");
+    setEditContactEmail(r.contact_email || "");
+    setEditAlignmentNote(r.alignment_note || "");
+    setEditPartnershipPath(r.partnership_path || "");
+    setEditProgramName(r.program_name || "");
+    setEditProgramUrl(r.program_url || "");
     setEditErr(null);
     setDeleteConfirmId(null);
   }
@@ -200,7 +215,13 @@ export default function AffiliatesAdmin() {
       const res = await fetch("/api/admin/affiliates", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, name: editName, url: editUrl, affiliate_url: editAffiliateUrl, description: editDescription, why_it_matters: editWhyItMatters, logo_url: editLogoUrl, category: editCategory, practices: editPractices, status: editStatus }),
+        body: JSON.stringify({
+          id, name: editName, url: editUrl, affiliate_url: editAffiliateUrl,
+          description: editDescription, why_it_matters: editWhyItMatters, logo_url: editLogoUrl,
+          category: editCategory, practices: editPractices, status: editStatus,
+          contact_email: editContactEmail, alignment_note: editAlignmentNote,
+          partnership_path: editPartnershipPath, program_name: editProgramName, program_url: editProgramUrl,
+        }),
       });
       if (res.ok) {
         setEditingId(null);
@@ -341,6 +362,40 @@ export default function AffiliatesAdmin() {
                       <label style={labelStyle}>Practices</label>
                       <PracticePicker selected={editPractices} onChange={setEditPractices} />
                     </div>
+
+                    <div style={{ borderTop: "1px solid rgba(100,150,220,0.15)", paddingTop: 12, marginTop: 4 }}>
+                      <label style={{ ...labelStyle, color: "#8a6d2a" }}>Applicant info</label>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                        <div>
+                          <label style={labelStyle}>Contact email</label>
+                          <input style={inputStyle} value={editContactEmail} onChange={e => setEditContactEmail(e.target.value)} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Partnership path</label>
+                          <select style={inputStyle} value={editPartnershipPath} onChange={e => setEditPartnershipPath(e.target.value)}>
+                            <option value="">—</option>
+                            <option value="has_program">Has affiliate/referral program</option>
+                            <option value="wants_direct">Wants to explore direct partnership</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: 10 }}>
+                        <label style={labelStyle}>How does their work help life move forward?</label>
+                        <textarea style={{ ...inputStyle, resize: "vertical" }} rows={2} value={editAlignmentNote} onChange={e => setEditAlignmentNote(e.target.value)} />
+                      </div>
+                      {editPartnershipPath === "has_program" && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                          <div>
+                            <label style={labelStyle}>Program/network name</label>
+                            <input style={inputStyle} value={editProgramName} onChange={e => setEditProgramName(e.target.value)} />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Program/application URL</label>
+                            <input style={inputStyle} value={editProgramUrl} onChange={e => setEditProgramUrl(e.target.value)} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {editErr && <p style={{ color: "#a04040", fontSize: "0.82rem", margin: "0 0 10px" }}>{editErr}</p>}
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -374,6 +429,23 @@ export default function AffiliatesAdmin() {
                         truncate(r.url, 40),
                       ].filter(Boolean).join(" · ")}
                     </div>
+                    {(r.contact_email || r.partnership_path) && (
+                      <div style={{ fontSize: "0.78rem", color: "#8a6d2a", marginTop: 4 }}>
+                        {[
+                          r.contact_email ? `applicant: ${r.contact_email}` : null,
+                          r.partnership_path === "has_program"
+                            ? `has program${r.program_name ? ` (${r.program_name})` : ""}`
+                            : r.partnership_path === "wants_direct"
+                              ? "wants direct partnership"
+                              : null,
+                        ].filter(Boolean).join(" · ")}
+                      </div>
+                    )}
+                    {r.alignment_note && (
+                      <div style={{ fontSize: "0.8rem", color: "#3a5a7a", marginTop: 4, fontStyle: "italic" }}>
+                        &ldquo;{truncate(r.alignment_note, 140)}&rdquo;
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                     <button type="button" onClick={() => startEdit(r)} style={{ padding: "4px 10px", borderRadius: 999, border: "1px solid rgba(100,150,220,0.2)", background: "rgba(255,255,255,0.6)", color: "#3a5a7a", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}>Edit</button>
