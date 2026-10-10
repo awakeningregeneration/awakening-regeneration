@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { isDomainMatch } from "@/app/lib/domainMatch";
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
+import { getClientIp, hashIp, createRateLimiter } from "@/app/lib/rateLimit";
 
 import { normalizeState, normalizeCounty, normalizeCity, normalizeName } from "@/app/lib/normalize";
 
@@ -12,6 +13,24 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Human-scale generous, machine-scale blocking: a real person adding
+// several real businesses in one sitting (one every few minutes) will
+// never come close to this. A script hammering the endpoint cannot
+// exceed it. Seeder bulk/single placement uses its own separate,
+// session-authenticated endpoints — unaffected by this limit.
+const LISTINGS_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const LISTINGS_RATE_LIMIT_MAX = 20;
+const isListingsRateLimited = createRateLimiter(
+  LISTINGS_RATE_LIMIT_WINDOW_MS,
+  LISTINGS_RATE_LIMIT_MAX
+);
+
+// A legitimate multi-location business (franchise, same-team locations)
+// realistically has a handful of locations, not hundreds. This caps the
+// damage a single crafted request could do via unbounded per-location
+// geocoding, without touching the normal "add a location" flow at all.
+const MAX_LOCATIONS_PER_SUBMISSION = 10;
 
 async function geocodeLocation(params: {
   address?: string;
@@ -113,8 +132,32 @@ export async function GET() {
 
 // POST
 export async function POST(req: Request) {
+  const ipHash = hashIp(getClientIp(req));
+  if (isListingsRateLimited(ipHash)) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
+
+    // Cap BEFORE any geocoding is attempted — a crafted request with an
+    // oversized locations array must never be able to trigger unbounded
+    // paid geocoding calls. Legitimate multi-location submissions (a
+    // handful of real locations) are well under this.
+    if (
+      Array.isArray(body.locations) &&
+      body.locations.length > MAX_LOCATIONS_PER_SUBMISSION
+    ) {
+      return NextResponse.json(
+        {
+          error: `A single submission can include up to ${MAX_LOCATIONS_PER_SUBMISSION} locations.`,
+        },
+        { status: 400 }
+      );
+    }
 
     console.log("POST /api/listings body:", JSON.stringify({
       claim_stewardship: body.claim_stewardship,

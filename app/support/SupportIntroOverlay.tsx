@@ -171,11 +171,20 @@ export default function SupportIntroOverlay({
               margin: "0 0 16px",
             }}
           >
-            Canary Commons is free, and non-competitive with the local
-            businesses on the map. Its life support comes from this curated
-            set of online businesses whose values align with ours — when you
-            make a purchase through one of these links, a small portion comes
-            back to sustain the commons.
+            Canary Commons is free — for the local businesses on the map
+            and for everyone who uses it.
+          </p>
+          <p
+            style={{
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              color: "rgba(211,227,247,0.78)",
+              margin: "0 0 16px",
+            }}
+          >
+            Online Resource partnerships help make that possible. When you
+            make a purchase through a participating resource, a small
+            portion may come back to sustain the Commons.
           </p>
           <p
             style={{
@@ -185,10 +194,12 @@ export default function SupportIntroOverlay({
               margin: 0,
             }}
           >
-            <span style={{ color: "#FFD86B", fontSize: "1.1em" }}>✦ ✦</span>
-            {" "}If you use an ad blocker, you may see a notice when you click
-            through the resource link. By clicking proceed, you support Canary
-            Commons. Thank you.
+            <span style={{ color: "#FFD86B", fontSize: "1.1em" }}>✦</span>
+            {" "}A note about ad blockers: Some privacy and ad-blocking
+            systems recognize affiliate tracking links as advertising and
+            may show a warning when you click a resource. If that happens,
+            you can choose to continue through the warning to reach the
+            resource and support Canary.
           </p>
           <p
             style={{

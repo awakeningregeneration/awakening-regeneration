@@ -3,8 +3,28 @@ import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { isDomainMatch } from "@/app/lib/domainMatch";
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
+import { getClientIp, hashIp, createRateLimiter } from "@/app/lib/rateLimit";
+
+// This endpoint sends a real email to an address the requester supplies
+// — the same abuse shape as /api/affiliates, so it gets the same limit.
+// A legitimate person claims at most a handful of listings (their own
+// businesses) and will never notice this.
+const CLAIM_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const CLAIM_RATE_LIMIT_MAX = 5;
+const isClaimRateLimited = createRateLimiter(
+  CLAIM_RATE_LIMIT_WINDOW_MS,
+  CLAIM_RATE_LIMIT_MAX
+);
 
 export async function POST(request: Request) {
+  const ipHash = hashIp(getClientIp(request));
+  if (isClaimRateLimited(ipHash)) {
+    return NextResponse.json(
+      { error: "Too many claim attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const listingId = body.listing_id?.trim();

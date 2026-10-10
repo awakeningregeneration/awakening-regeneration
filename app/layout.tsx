@@ -19,14 +19,14 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Canary Commons",
+  title: "Follow the Canary | Canary Commons",
   description:
-    "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
+    "Turns out, another way is already here. Find the lights. Follow the Canary.",
   metadataBase: new URL("https://www.canarycommons.org"),
   openGraph: {
-    title: "Canary Commons",
+    title: "Follow the Canary | Canary Commons",
     description:
-      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
+      "Turns out, another way is already here. Find the lights. Follow the Canary.",
     url: "https://www.canarycommons.org",
     siteName: "Canary Commons",
     type: "website",
@@ -35,15 +35,15 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Canary Commons — A constellation of sustainable, life-supporting places and projects across North America and beyond.",
+        alt: "The Canary, formed from a night sky of lights — Canary Commons, Follow the Canary.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Canary Commons",
+    title: "Follow the Canary | Canary Commons",
     description:
-      "A constellation of sustainable, life-supporting places and projects across North America and beyond. Diversity sustains us. What we give our attention to grows.",
+      "Turns out, another way is already here. Find the lights. Follow the Canary.",
     images: ["/opengraph-image"],
   },
   appleWebApp: {

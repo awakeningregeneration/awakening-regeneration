@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import SupportIntroOverlay from "./SupportIntroOverlay";
 import DawningBrighter from "@/app/components/DawningBrighter";
+import { useIsMobile } from "@/app/lib/useIsMobile";
 
 type OnlineResource = {
   id: string | number;
@@ -208,6 +209,10 @@ function ResourceVisual({
 
 function ResourceCard({ resource }: { resource: OnlineResource }) {
   const visitUrl = resource.slug ? `/resource/${resource.slug}` : resource.affiliate_url || resource.url || "#";
+  // Only resources with an actual affiliate_url go through tracking —
+  // a slug alone just routes through /resource/[slug], which falls back
+  // to the plain url when no affiliate_url is set.
+  const usesAffiliateLink = !!resource.affiliate_url;
 
   return (
     <article
@@ -316,7 +321,7 @@ function ResourceCard({ resource }: { resource: OnlineResource }) {
             background: "rgba(255,216,107,0.1)",
           }}
         >
-          Visit Resource
+          Visit Resource{usesAffiliateLink ? "*" : ""}
         </a>
       </div>
     </article>
@@ -336,6 +341,20 @@ export default function SupportPageClient({
   const [unmetNeed, setUnmetNeed] = useState("");
   const [unmetSubmitted, setUnmetSubmitted] = useState(false);
   const [unmetSubmitting, setUnmetSubmitting] = useState(false);
+
+  // Browse carousel for "A few lights to get us started" — independent
+  // of search/filter, which continues to run across all resources and
+  // render separately (unchanged below).
+  const isMobile = useIsMobile();
+  const [carouselStart, setCarouselStart] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+
+  // Reset to the first page when the breakpoint (and therefore page
+  // size) changes, so a stale start index from the other layout can't
+  // produce a misaligned page.
+  useEffect(() => {
+    setCarouselStart(0);
+  }, [isMobile]);
 
   // Intro overlay state
   const [overlayOpen, setOverlayOpen] = useState(!introAcknowledged);
@@ -369,7 +388,62 @@ export default function SupportPageClient({
     load();
   }, []);
 
-  const featured = seededShuffle(resources, dateSeed()).slice(0, 3);
+  // Same deterministic daily shuffle as before, now exposing the full
+  // approved collection (not just the first 3) so the carousel can
+  // browse through all of it.
+  const carouselPool = seededShuffle(resources, dateSeed());
+  const carouselTotal = carouselPool.length;
+  const visibleCount = isMobile ? 1 : 3;
+  const showCarouselNav = carouselTotal > visibleCount;
+  // Non-overlapping pages of visibleCount — the last page may be
+  // shorter than visibleCount rather than wrapping in extra items to
+  // pad it out, which is what keeps "10 of 10" meaningful instead of
+  // reading as a padded "10–12 of 10".
+  const visibleResources = carouselPool.slice(
+    carouselStart,
+    carouselStart + visibleCount
+  );
+  const lastPageStart =
+    carouselTotal === 0
+      ? 0
+      : Math.floor((carouselTotal - 1) / visibleCount) * visibleCount;
+  const rangeStart = carouselStart + 1;
+  const rangeEnd = Math.min(carouselStart + visibleCount, carouselTotal);
+  const carouselPositionLabel =
+    rangeStart === rangeEnd
+      ? `${rangeStart} of ${carouselTotal}`
+      : `${rangeStart}–${rangeEnd} of ${carouselTotal}`;
+
+  function goToPrevCard() {
+    if (carouselTotal === 0) return;
+    setCarouselStart(
+      carouselStart - visibleCount < 0 ? lastPageStart : carouselStart - visibleCount
+    );
+  }
+
+  function goToNextCard() {
+    if (carouselTotal === 0) return;
+    setCarouselStart(
+      carouselStart + visibleCount >= carouselTotal ? 0 : carouselStart + visibleCount
+    );
+  }
+
+  function handleCarouselTouchStart(e: React.TouchEvent) {
+    touchStartXRef.current = e.touches[0].clientX;
+  }
+
+  function handleCarouselTouchEnd(e: React.TouchEvent) {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (startX === null) return;
+    const deltaX = e.changedTouches[0].clientX - startX;
+    if (Math.abs(deltaX) < 40) return; // treat small movement as a tap, not a swipe
+    if (deltaX < 0) {
+      goToNextCard();
+    } else {
+      goToPrevCard();
+    }
+  }
 
   const filteredResources = resources.filter((r) => {
     const matchesCategory =
@@ -479,41 +553,6 @@ export default function SupportPageClient({
           />
         </div>
 
-        {/* Gratitude line (visible when overlay is not open) */}
-        {!overlayOpen && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "8px 0 16px",
-              cursor: "pointer",
-            }}
-            onClick={() => setOverlayOpen(true)}
-          >
-            <span
-              className="support-gratitude-line"
-              style={{
-                fontSize: "0.88rem",
-                color: "rgba(211,227,247,0.78)",
-                borderBottom: "1px solid rgba(255,216,107,0.35)",
-                paddingBottom: 2,
-                transition: "color 0.2s, border-color 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.color = "rgba(211,227,247,0.95)";
-                el.style.borderBottomColor = "rgba(255,216,107,0.7)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.color = "rgba(211,227,247,0.78)";
-                el.style.borderBottomColor = "rgba(255,216,107,0.35)";
-              }}
-            >
-              CC is supported by this curated list. Thank you.
-            </span>
-          </div>
-        )}
-
         {/* Header */}
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
           <h1
@@ -533,102 +572,320 @@ export default function SupportPageClient({
               fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
               lineHeight: 1.7,
               color: "rgba(211,227,247,0.82)",
+              margin: "0 0 16px",
+            }}
+          >
+            When what you need isn&rsquo;t available locally, look here.
+          </p>
+          <p
+            style={{
+              fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
+              lineHeight: 1.7,
+              color: "rgba(211,227,247,0.82)",
+              margin: "0 0 16px",
+            }}
+          >
+            Canary&rsquo;s Online Resources are growing into a collection of
+            life-supporting options for the things we use every day — from
+            what we eat and wear to how we care for our homes, our bodies,
+            and one another.
+          </p>
+          <p
+            style={{
+              fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
+              lineHeight: 1.7,
+              color: "rgba(211,227,247,0.82)",
+              margin: "0 0 16px",
+            }}
+          >
+            We&rsquo;re just getting started. The resources below are a
+            small sample of what&rsquo;s to come. Our goal is to make it
+            easier to find Canary-friendly alternatives for the things you
+            need, wherever you live.
+          </p>
+          <p
+            style={{
+              fontSize: "clamp(1.05rem, 1.8vw, 1.3rem)",
+              lineHeight: 1.7,
+              color: "rgba(211,227,247,0.82)",
               margin: 0,
               marginBottom: 36,
             }}
           >
-            When what you need isn&rsquo;t available locally, look here.
-            These Online Resource partners help sustain Canary — choosing
-            them through Canary helps keep the Commons free for local
-            businesses and free for everyone who uses it.
+            And when you choose an Online Resource through Canary,
+            participating partners help sustain the Commons — keeping
+            local listings free and Canary free for everyone.
           </p>
         </div>
 
-        {/* Featured */}
-        {!loading && featured.length > 0 && (
+        {/* Browse carousel — "A few lights to get us started".
+            Independent of search below, which still runs over all
+            approved resources and renders its own results normally. */}
+        {!loading && carouselTotal > 0 && (
           <div style={{ marginBottom: 44 }}>
-            <h2
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: 600,
-                color: "rgba(159,184,216,0.75)",
-                margin: 0,
-                marginBottom: 18,
-                letterSpacing: "0.04em",
-              }}
-            >
-              Featured today
-            </h2>
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 24,
-                alignItems: "start",
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 8,
+                marginBottom: 18,
               }}
             >
-              {featured.map((r) => (
-                <ResourceCard key={String(r.id)} resource={r} />
-              ))}
+              <h2
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  color: "rgba(159,184,216,0.75)",
+                  margin: 0,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                A few lights to get us started
+              </h2>
+              {showCarouselNav && (
+                <span
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "rgba(211,227,247,0.55)",
+                  }}
+                >
+                  {carouselPositionLabel}
+                </span>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                maxWidth: "100%",
+                overflow: "hidden",
+              }}
+            >
+              {showCarouselNav && (
+                <button
+                  type="button"
+                  onClick={goToPrevCard}
+                  aria-label="Previous Online Resources"
+                  style={{
+                    flexShrink: 0,
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: "1px solid rgba(255,216,107,0.55)",
+                    background: "rgba(255,216,107,0.12)",
+                    color: "#FFD86B",
+                    fontSize: "1.1rem",
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    boxShadow: "0 0 10px rgba(255,216,107,0.18)",
+                  }}
+                >
+                  ‹
+                </button>
+              )}
+
+              <div
+                onTouchStart={handleCarouselTouchStart}
+                onTouchEnd={handleCarouselTouchEnd}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${visibleResources.length}, 1fr)`,
+                  gap: 24,
+                  alignItems: "start",
+                }}
+              >
+                {visibleResources.map((r) => (
+                  <ResourceCard key={String(r.id)} resource={r} />
+                ))}
+              </div>
+
+              {showCarouselNav && (
+                <button
+                  type="button"
+                  onClick={goToNextCard}
+                  aria-label="Next Online Resources"
+                  style={{
+                    flexShrink: 0,
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: "1px solid rgba(255,216,107,0.55)",
+                    background: "rgba(255,216,107,0.12)",
+                    color: "#FFD86B",
+                    fontSize: "1.1rem",
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    boxShadow: "0 0 10px rgba(255,216,107,0.18)",
+                  }}
+                >
+                  ›
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* Search & Filter */}
+        {/* Persistent affiliate-link note — moved here, immediately
+            below the visible resource cards and before Search, since a
+            visitor may click a card without ever searching. Always
+            visible (not tied to the 90-day popup). A quiet divider, not
+            a box. Copy/hierarchy unchanged from the approved version. */}
         <div
           style={{
-            maxWidth: 760,
-            marginBottom: 36,
-            padding: 18,
-            border: "1px solid rgba(255,255,255,0.09)",
-            borderRadius: 20,
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(8px)",
+            maxWidth: 600,
+            margin: "0 auto 40px",
+            paddingTop: 24,
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            textAlign: "center",
           }}
         >
-          <form onSubmit={handleSearch} style={{ display: "grid", gap: 14 }}>
-            <input
-              type="text"
-              placeholder="Search by name, description, or practices"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={darkInputStyle}
-            />
+          <div
+            style={{
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              color: "#FFD86B",
+              marginBottom: 10,
+            }}
+          >
+            ✦ A NOTE ABOUT AFFILIATE LINKS
+          </div>
+          <p
+            style={{
+              fontSize: "0.98rem",
+              lineHeight: 1.65,
+              color: "rgba(224,238,255,0.88)",
+              margin: "0 0 18px",
+            }}
+          >
+            Some ad blockers flag affiliate tracking links. If your
+            blocker flags a Canary affiliate link, you can continue to
+            the resource. That link lets the business know Canary
+            brought you — and allows part of your purchase to come back
+            to the Commons.
+          </p>
+          <p
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 700,
+              lineHeight: 1.4,
+              color: "#FFD86B",
+              margin: 0,
+            }}
+          >
+            Nobody pays to be seen on Canary. Canary can be paid when it
+            helps something worth seeing be chosen.
+          </p>
+        </div>
 
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              style={{ ...darkInputStyle, appearance: "none" }}
-            >
-              {categories.map((cat) => (
-                <option
-                  key={cat}
-                  value={cat}
-                  style={{ background: "#08192d", color: "white" }}
-                >
-                  {cat === "All" ? "All categories" : cat}
-                </option>
-              ))}
-            </select>
+        {/* Search & Filter, with a small secondary business invitation
+            alongside it — wraps to stack cleanly on narrow screens.
+            Search remains visually primary; the partner invitation is
+            a smaller, subordinate doorway, not a competing CTA. */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 24,
+            alignItems: "flex-start",
+            marginBottom: 36,
+          }}
+        >
+          <div
+            style={{
+              flex: "1 1 400px",
+              maxWidth: 760,
+              padding: 18,
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 20,
+              background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <form onSubmit={handleSearch} style={{ display: "grid", gap: 14 }}>
+              <input
+                type="text"
+                placeholder="Search by name, description, or practices"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={darkInputStyle}
+              />
 
-            <button
-              type="submit"
+              <select
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                style={{ ...darkInputStyle, appearance: "none" }}
+              >
+                {categories.map((cat) => (
+                  <option
+                    key={cat}
+                    value={cat}
+                    style={{ background: "#08192d", color: "white" }}
+                  >
+                    {cat === "All" ? "All categories" : cat}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="submit"
+                style={{
+                  width: "fit-content",
+                  padding: "13px 22px",
+                  borderRadius: 999,
+                  border: "none",
+                  background: "#FFD86B",
+                  color: "#1a2a0e",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow:
+                    "0 0 28px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                }}
+              >
+                Search
+              </button>
+            </form>
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 260px",
+              maxWidth: 320,
+              padding: 18,
+            }}
+          >
+            <div
               style={{
-                width: "fit-content",
-                padding: "13px 22px",
-                borderRadius: 999,
-                border: "none",
-                background: "#FFD86B",
-                color: "#1a2a0e",
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow:
-                  "0 0 28px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                fontSize: "0.95rem",
+                color: "rgba(224,238,255,0.82)",
+                marginBottom: 12,
               }}
             >
-              Search
-            </button>
-          </form>
+              Have a business that belongs here?
+            </div>
+            <Link
+              href="/support/submit"
+              style={{
+                display: "inline-block",
+                padding: "10px 20px",
+                borderRadius: 999,
+                border: "1.5px solid rgba(255,216,107,0.5)",
+                background: "rgba(255,216,107,0.08)",
+                color: "#FFD86B",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                textDecoration: "none",
+              }}
+            >
+              Become an Online Resource Partner →
+            </Link>
+          </div>
         </div>
 
         {/* Results area */}
@@ -735,37 +992,25 @@ export default function SupportPageClient({
           </div>
         )}
 
-        {/* Footer CTA */}
-        <div
-          style={{
-            marginTop: 52,
-            textAlign: "center",
-            color: "rgba(211,227,247,0.82)",
-            fontSize: "1.05rem",
-            lineHeight: 1.7,
-          }}
-        >
-          <p style={{ marginBottom: 18 }}>
-            Know something that helps life move forward that others should be
-            able to find?
-          </p>
-          <Link
-            href="/support/submit"
+        {/* Quiet re-open link for the disclosure/ad-blocker popup —
+            reuses the existing overlay state/cookie mechanism as-is. */}
+        <div style={{ textAlign: "center", marginTop: 28 }}>
+          <button
+            type="button"
+            onClick={() => setOverlayOpen(true)}
             style={{
-              display: "inline-block",
-              padding: "14px 26px",
-              borderRadius: 999,
+              background: "none",
               border: "none",
-              background: "#FFD86B",
-              color: "#1a2a0e",
-              fontWeight: 700,
-              textDecoration: "none",
-              boxShadow:
-                "0 0 28px rgba(255,216,107,0.30), 0 4px 14px rgba(255,200,80,0.2)",
+              padding: 0,
+              fontSize: "0.82rem",
+              color: "rgba(211,227,247,0.5)",
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+              cursor: "pointer",
             }}
           >
-            Add an Online Resource
-          </Link>
+            How Online Resource partnerships support Canary
+          </button>
         </div>
       </section>
     </main>

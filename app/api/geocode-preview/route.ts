@@ -1,12 +1,34 @@
 import { NextResponse } from "next/server";
 import { normalizeState, normalizeCounty } from "@/app/lib/normalize";
+import { getClientIp, hashIp, createRateLimiter } from "@/app/lib/rateLimit";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+// This is a direct, unauthenticated proxy to paid Mapbox geocoding — the
+// single cheapest thing in the app to abuse (no write even has to
+// succeed). A real person previewing their address during submission
+// calls this once per "Review" click, plus the occasional retry after
+// fixing a typo — a handful of calls per session at most. This limit is
+// generous enough that no legitimate user will ever notice it.
+const GEOCODE_PREVIEW_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const GEOCODE_PREVIEW_RATE_LIMIT_MAX = 30;
+const isGeocodePreviewRateLimited = createRateLimiter(
+  GEOCODE_PREVIEW_RATE_LIMIT_WINDOW_MS,
+  GEOCODE_PREVIEW_RATE_LIMIT_MAX
+);
 
 // POST /api/geocode-preview — no auth, no writes
 // Body: { address?: string; city: string; state: string; zip?: string }
 // Returns: { county: string; geocodedState: string; lat: number; lng: number; stateMatches: boolean }
 export async function POST(req: Request) {
+  const ipHash = hashIp(getClientIp(req));
+  if (isGeocodePreviewRateLimited(ipHash)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   if (!mapboxToken) {
     return NextResponse.json({ error: "Mapbox token is not configured." }, { status: 500 });
   }

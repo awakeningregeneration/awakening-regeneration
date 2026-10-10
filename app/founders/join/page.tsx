@@ -212,21 +212,28 @@ function JoinContent() {
             endeavors already living in ways that are regenerative, sustainable,
             and life-affirming.
           </p>
-          <p style={softBody}>The platform has been built.</p>
+          <p style={softBody}>The Commons is alive.</p>
           <p style={softBody}>
-            What comes next is revealing the living landscape itself.
+            Hundreds of lights are already on the map, with more waiting to
+            be found. Stories of Place can carry what communities are
+            learning. The Greater Constellation gathers answers people are
+            already finding around the world. And Online Resources are
+            beginning to build the economic backbone that can sustain the
+            Commons over time.
           </p>
           <p style={softBody}>
-            As a Founding Steward, your membership provides the bridge that
-            allows Canary Commons to discover, verify, and make visible
-            thousands of remarkable people, places, and projects already helping
-            life flourish.
+            Founding Stewardship is the bridge between here and there.
           </p>
           <p style={softBody}>
-            Every light added to the map becomes easier to find.
+            Your stewardship helps Canary find more lights, tend the
+            technology, gather and carry stories, and grow into a trusted
+            public resource that can ultimately sustain itself.
+          </p>
+          <p style={softBody}>
+            Every light made visible becomes easier to find.
           </p>
           <p style={softBody}>Easier to choose.</p>
-          <p style={softBody}>Easier to support.</p>
+          <p style={softBody}>Easier to strengthen.</p>
 
           <h2
             style={{
@@ -237,7 +244,7 @@ function JoinContent() {
               textAlign: "center",
             }}
           >
-            As a Founding Steward you will receive
+            As a Founding Steward, you&apos;ll stay close to the work
           </h2>
           <ul
             style={{
@@ -284,8 +291,8 @@ function JoinContent() {
             Founding Stewardship exists for a season.
           </p>
           <p style={{ ...softBody, marginBottom: 0 }}>
-            Your membership is a bridge to a commons that can sustainably stand
-            on its own. Thank you.
+            Your stewardship is a bridge to a Commons that can sustainably
+            stand on its own. Thank you.
           </p>
         </div>
 
@@ -578,9 +585,9 @@ function JoinContent() {
               margin: "0 0 12px",
             }}
           >
-            Giving $500 or more? Bridge the Commons keeps more of your
-            gift going directly to the work — no transaction fees, just a
-            personal conversation with Ren.
+            Want to help carry the Commons in a larger way? Bridge the
+            Commons keeps more of your gift going directly to the work —
+            no transaction fees, just a personal conversation with Ren.
           </p>
           <Link
             href="/founders/bridge"

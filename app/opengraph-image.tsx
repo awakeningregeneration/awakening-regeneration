@@ -1,12 +1,59 @@
 import { ImageResponse } from "next/og";
+import constellationData from "@/data/canaryConstellationPoints.json";
 
 export const runtime = "edge";
 export const alt =
-  "Canary Commons — A constellation of sustainable, life-supporting places and projects across North America and beyond.";
+  "The Canary, formed from a night sky of lights — Canary Commons, Follow the Canary.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Deterministic PRNG (mulberry32) — same approach the homepage hero uses,
+// so the background star scatter is stable across regenerations rather
+// than different on every request.
+function mulberry32(seed: number) {
+  let a = seed;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 export default async function Image() {
+  const rnd = mulberry32(20261008);
+
+  // Plain background starfield — same spirit as the homepage's night
+  // sky, kept simple and sparse so it reads clearly at social-preview
+  // size without competing with the bird.
+  const backgroundStars = Array.from({ length: 70 }, () => {
+    const b = rnd();
+    const size = b > 0.85 ? 3.2 : b > 0.5 ? 2 : 1.2;
+    const opacity = 0.25 + b * 0.55;
+    return {
+      left: rnd() * 100,
+      top: rnd() * 100,
+      size,
+      opacity,
+    };
+  });
+
+  // The actual Canary — the same ~3,100-point constellation dataset and
+  // the same x/y → bird-rectangle mapping the homepage hero uses for its
+  // settled (fully-formed) state. Downsampled evenly for a fast, static
+  // render while keeping the exact shape and proportions. (box-shadow
+  // per element is very expensive to rasterize at this element count —
+  // a touch of extra radius on the brightest points stands in for glow
+  // instead, to keep this rendering in a reasonable time.)
+  const birdPoints = constellationData.points.filter((_, i) => i % 3 === 0);
+
+  // Scaled down slightly (same aspect ratio, same point mapping, same
+  // pose) from the original full-bleed sizing, purely to open clean,
+  // uncrowded space beneath the bird for the identity line below.
+  const birdRect = { x: 345, y: 44, w: 510, h: 444 };
+  const RADIUS_SCALE = 1.15;
+
   return new ImageResponse(
     (
       <div
@@ -14,109 +61,86 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background:
-            "radial-gradient(ellipse at 50% 30%, #0f2d52 0%, #0a2440 40%, #08192d 100%)",
           position: "relative",
           overflow: "hidden",
+          background:
+            "radial-gradient(ellipse at 50% 32%, #15325a 0%, #0a1f38 45%, #050e1a 100%)",
         }}
       >
-        {/* Subtle gold glow behind center */}
-        <div
-          style={{
-            position: "absolute",
-            top: "10%",
-            left: "30%",
-            width: "40%",
-            height: "50%",
-            background:
-              "radial-gradient(ellipse, rgba(255,216,107,0.12) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Scattered gold dots suggesting listing lights */}
-        {[
-          { l: 80, t: 120, s: 4 },
-          { l: 180, t: 200, s: 3 },
-          { l: 320, t: 80, s: 5 },
-          { l: 450, t: 180, s: 3 },
-          { l: 750, t: 100, s: 4 },
-          { l: 880, t: 160, s: 6 },
-          { l: 1020, t: 90, s: 3 },
-          { l: 1100, t: 200, s: 4 },
-          { l: 140, t: 480, s: 3 },
-          { l: 300, t: 520, s: 4 },
-          { l: 500, t: 560, s: 3 },
-          { l: 700, t: 500, s: 5 },
-          { l: 900, t: 540, s: 3 },
-          { l: 1060, t: 490, s: 4 },
-          { l: 60, t: 350, s: 3 },
-          { l: 1140, t: 380, s: 3 },
-        ].map((dot, i) => (
+        {backgroundStars.map((s, i) => (
           <div
-            key={i}
+            key={`bg-${i}`}
             style={{
               position: "absolute",
-              left: dot.l,
-              top: dot.t,
-              width: dot.s,
-              height: dot.s,
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+              width: s.size,
+              height: s.size,
               borderRadius: "50%",
-              background: "rgba(255,244,200,0.85)",
-              boxShadow: `0 0 ${dot.s * 2}px rgba(255,216,107,0.4)`,
+              background: "rgba(225,235,255,1)",
+              opacity: s.opacity,
             }}
           />
         ))}
 
-        {/* Logo */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="https://www.canarycommons.org/canary-commons-logo.png"
-          alt=""
-          width={280}
-          height={280}
-          style={{ marginTop: -20, marginBottom: -10 }}
-        />
+        {birdPoints.map((p, i) => {
+          const cx = birdRect.x + p.x * birdRect.w;
+          const cy = birdRect.y + p.y * birdRect.h;
+          // Brighter points get a touch more size instead of a glow —
+          // box-shadow at this element count is too slow to rasterize.
+          const r = p.r * RADIUS_SCALE * (p.peak > 0.8 ? 1.35 : 1);
+          return (
+            <div
+              key={`bird-${i}`}
+              style={{
+                position: "absolute",
+                left: cx - r,
+                top: cy - r,
+                width: r * 2,
+                height: r * 2,
+                borderRadius: "50%",
+                background: "rgba(255,244,200,0.95)",
+                opacity: p.peak,
+              }}
+            />
+          );
+        })}
 
-        {/* Headline */}
+        {/* Identity — so the image reads as Canary Commons on its own in
+            a text/message/social preview. Centered, restrained, warm
+            gold/cream, well clear of the bird. */}
         <div
           style={{
-            color: "white",
-            fontSize: 42,
-            fontWeight: 600,
-            textAlign: "center",
-            lineHeight: 1.15,
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 528,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          Sustainable, life-supporting places —
-        </div>
-        <div
-          style={{
-            color: "#FFD86B",
-            fontSize: 72,
-            fontWeight: 700,
-            textAlign: "center",
-            lineHeight: 1.0,
-            marginTop: 12,
-            textShadow: "0 0 40px rgba(255,216,107,0.4)",
-          }}
-        >
-          made visible.
-        </div>
-
-        {/* Subtitle */}
-        <div
-          style={{
-            color: "rgba(255,248,230,0.8)",
-            fontSize: 26,
-            textAlign: "center",
-            marginTop: 28,
-            fontStyle: "italic",
-          }}
-        >
-          canarycommons.org
+          <div
+            style={{
+              fontSize: 34,
+              fontWeight: 600,
+              color: "#FFD86B",
+              textShadow: "0 0 18px rgba(255,216,107,0.3)",
+            }}
+          >
+            Canary Commons
+          </div>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 15,
+              fontWeight: 700,
+              letterSpacing: "0.16em",
+              color: "rgba(255,248,230,0.72)",
+            }}
+          >
+            FOLLOW THE CANARY
+          </div>
         </div>
       </div>
     ),
