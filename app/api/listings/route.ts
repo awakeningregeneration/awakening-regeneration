@@ -97,12 +97,27 @@ async function geocodeLocation(params: {
   return { lng, lat, geocodedState: geocodedStateName };
 }
 
+// Public fields only — matches what the map, edit, and story-submission
+// clients actually read from this endpoint. Deliberately excludes
+// removal_token (a capability secret, never consumed by any public client)
+// and other internal-only columns (source, placed_by_seeder_id, do_not_list*,
+// normalized_name/address, outreach_started_at, last_outreach_at, created_at)
+// that no public client path reads.
+const PUBLIC_LISTING_FIELDS =
+  "id, title, description, website, address, city, state, county, " +
+  "category, practices, lng, lat, focus, invitation, status, flag_count, " +
+  "image_url, steward_id, steward_email, no_public_email, outreach_status, " +
+  "bounce_info, outreach_methods, outreach_notes, manual_outreach_at";
+
 // GET
 export async function GET() {
-  const { data, error } = await supabase
+  const { data, error } = (await supabase
     .from("listings")
-    .select("*")
-    .eq("status", "active");
+    .select(PUBLIC_LISTING_FIELDS)
+    .eq("status", "active")) as {
+    data: Record<string, unknown>[] | null;
+    error: { message: string } | null;
+  };
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -127,7 +142,11 @@ export async function GET() {
     ...l,
     locations: locationsMap[l.id as string] ?? [],
   }));
-  return NextResponse.json(enriched);
+  return NextResponse.json(enriched, {
+    headers: {
+      "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+    },
+  });
 }
 
 // POST
