@@ -7,15 +7,18 @@ import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerificati
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+// Result is stored long-term (listing_locations.lat/lng) — Mapbox's
+// Temporary Geocoding tier (the default) prohibits storing results for
+// future use, so this call must use the v6 endpoint with permanent=true.
 async function geocodeForEdit(city: string, state: string): Promise<{ lat: number; lng: number }> {
   if (!mapboxToken) throw new Error("No Mapbox token");
   const query = encodeURIComponent(`${city}, ${state}, USA`);
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${mapboxToken}&limit=1`;
+  const url = `https://api.mapbox.com/search/geocode/v6/forward?q=${query}&access_token=${mapboxToken}&limit=1&permanent=true`;
   const res = await fetch(url);
   const data = await res.json();
-  const center = data?.features?.[0]?.center;
-  if (!center) throw new Error(`Could not geocode ${city}, ${state}`);
-  return { lng: center[0], lat: center[1] };
+  const coordinates = data?.features?.[0]?.geometry?.coordinates;
+  if (!coordinates) throw new Error(`Could not geocode ${city}, ${state}`);
+  return { lng: coordinates[0], lat: coordinates[1] };
 }
 
 export async function POST(request: Request) {

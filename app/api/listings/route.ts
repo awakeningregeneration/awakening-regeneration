@@ -60,9 +60,12 @@ async function geocodeLocation(params: {
     throw new Error("No location information provided for geocoding.");
   }
 
+  // Results are stored long-term (listings.lng/lat) — Mapbox's Temporary
+  // Geocoding tier (the default) prohibits storing results for future use,
+  // so this call must use the v6 endpoint with permanent=true.
   const url =
-    `https://api.mapbox.com/geocoding/v5/mapbox.places/` +
-    `${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=1`;
+    `https://api.mapbox.com/search/geocode/v6/forward?` +
+    `q=${encodeURIComponent(query)}&access_token=${mapboxToken}&limit=1&permanent=true`;
 
   const response = await fetch(url);
 
@@ -73,26 +76,16 @@ async function geocodeLocation(params: {
   const data = await response.json();
 
   const feature = data?.features?.[0];
-  const center = feature?.center;
+  const coordinates = feature?.geometry?.coordinates;
 
-  if (!center || center.length < 2) {
+  if (!coordinates || coordinates.length < 2) {
     throw new Error("Could not determine map coordinates.");
   }
 
-  const [lng, lat] = center;
+  const [lng, lat] = coordinates;
 
-  // Extract state from Mapbox context (region.* entries)
-  let geocodedStateName = "";
-  for (const ctx of feature.context ?? []) {
-    if (ctx.id?.startsWith("region.")) {
-      geocodedStateName = ctx.text ?? "";
-      break;
-    }
-  }
-  // Also check if feature itself is a region
-  if (!geocodedStateName && feature.place_type?.includes("region")) {
-    geocodedStateName = feature.text ?? "";
-  }
+  // Extract state from v6's named context object
+  const geocodedStateName: string = feature.properties?.context?.region?.name ?? "";
 
   return { lng, lat, geocodedState: geocodedStateName };
 }

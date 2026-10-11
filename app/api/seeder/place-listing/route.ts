@@ -90,49 +90,25 @@ async function geocodeLocation(params: {
     .join(", ");
   if (!query) throw new Error("No location information provided for geocoding.");
 
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=1`;
+  // Results are stored long-term (listings.lng/lat) — Mapbox's Temporary
+  // Geocoding tier (the default) prohibits storing results for future use,
+  // so this call must use the v6 endpoint with permanent=true.
+  const url = `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(query)}&access_token=${mapboxToken}&limit=1&permanent=true`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to geocode location.");
 
   const data = await response.json();
   const feature = data?.features?.[0];
-  const center = feature?.center;
-  if (!center || center.length < 2) throw new Error("Could not determine map coordinates.");
+  const coordinates = feature?.geometry?.coordinates;
+  if (!coordinates || coordinates.length < 2) throw new Error("Could not determine map coordinates.");
 
-  // Extract county from Mapbox context (same pattern as MapClient.tsx moveend handler)
-  let county = "";
-
-  // The feature itself might be a district (county)
-  if (feature?.place_type?.includes("district")) {
-    county = feature.text || "";
-  }
-
-  // Or county appears in the context array
-  const ctx = feature?.context || [];
-  for (const item of ctx) {
-    if (typeof item?.id === "string" && item.id.startsWith("district.")) {
-      county = item.text || "";
-      break;
-    }
-  }
-
-  // Strip trailing " County" if Mapbox included it, then re-normalize
+  // Extract county/state from v6's named context object
+  let county = feature.properties?.context?.district?.name || "";
   county = county.replace(/\s+County$/i, "").trim();
 
-  // Extract state from Mapbox context (region.* entries)
-  let geocodedStateName = "";
-  for (const ctx of feature.context ?? []) {
-    if (ctx.id?.startsWith("region.")) {
-      geocodedStateName = ctx.text ?? "";
-      break;
-    }
-  }
-  // Also check if feature itself is a region
-  if (!geocodedStateName && feature.place_type?.includes("region")) {
-    geocodedStateName = feature.text ?? "";
-  }
+  const geocodedStateName: string = feature.properties?.context?.region?.name ?? "";
 
-  return { lng: center[0], lat: center[1], county, geocodedState: geocodedStateName };
+  return { lng: coordinates[0], lat: coordinates[1], county, geocodedState: geocodedStateName };
 }
 
 export async function POST(req: Request) {
