@@ -1,21 +1,28 @@
 import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
 
 /**
  * Daily seeder outreach cadence — runs at 6am Pacific (13:00 UTC).
  *
  * Queries for listings due for Email 2 (7 days after Email 1) and
- * Email 3 (14 days after Email 2). Sends via Resend, updates
- * outreach_status and last_outreach_at on success.
+ * Email 3 (14 days after Email 2), and queues them into email_queue
+ * (email-queue-worker.mts sends them within Resend's capacity — this
+ * function no longer calls Resend directly).
  *
- * Each query is capped at 50 results to throttle burst sends after
- * a cron outage. The system catches up across multiple daily runs
- * rather than sending a large backlog in one burst.
+ * outreach_status only advances when the worker actually sends the
+ * email, not when it's queued here — so a listing stays a candidate
+ * for this same query across multiple daily runs until it's genuinely
+ * sent, and the (listing_id, email_type) unique constraint on
+ * email_queue means re-finding the same candidate tomorrow is a safe
+ * no-op rather than a duplicate queue row.
+ *
+ * Each query is still capped at 50 results per run — now just to keep
+ * this function's own work bounded, since the worker is what actually
+ * throttles real send volume against live Resend capacity.
  *
  * Mirrors the pattern from netlify/functions/synonym-digest.mts:
- * creates its own Supabase and Resend clients (Netlify Functions
- * run in a different context than Next.js).
+ * creates its own Supabase client (Netlify Functions run in a
+ * different context than Next.js).
  */
 
 const supabase = createClient(
@@ -23,25 +30,38 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
-const FROM_EMAIL = "Ren at Canary Commons <founder@canarycommons.org>";
-
 type OutreachCandidate = {
   id: string;
-  title: string;
-  steward_email: string;
-  removal_token: string;
-  placed_by_seeder_id: string;
 };
+
+async function enqueue(
+  emailType: "email_2" | "email_3",
+  candidates: OutreachCandidate[]
+): Promise<{ queued: number; failed: number }> {
+  let queued = 0;
+  let failed = 0;
+  for (const listing of candidates) {
+    const { error } = await supabase.from("email_queue").upsert(
+      { listing_id: listing.id, email_type: emailType },
+      { onConflict: "listing_id,email_type", ignoreDuplicates: true }
+    );
+    if (error) {
+      failed++;
+      console.error(`[seeder-outreach] Failed to queue ${emailType} for ${listing.id}:`, error.message);
+    } else {
+      queued++;
+    }
+  }
+  return { queued, failed };
+}
 
 export default async function handler() {
   const now = new Date();
   console.log(`[seeder-outreach] Running at ${now.toISOString()}`);
 
-  let email2Sent = 0;
+  let email2Queued = 0;
   let email2Failed = 0;
-  let email3Sent = 0;
+  let email3Queued = 0;
   let email3Failed = 0;
 
   // ── Email 2 candidates: email_1_sent AND 28+ days since outreach started ──
@@ -51,7 +71,7 @@ export default async function handler() {
 
   const { data: email2Candidates, error: e2Err } = await supabase
     .from("listings")
-    .select("id, title, steward_email, removal_token, placed_by_seeder_id")
+    .select("id")
     .eq("source", "seeder_placed")
     .not("placed_by_seeder_id", "is", null)
     .eq("status", "active")
@@ -65,41 +85,9 @@ export default async function handler() {
   }
 
   if (email2Candidates && email2Candidates.length > 0) {
-    const { seederOutreach2Email } = await import(
-      "../../app/lib/emails/seederOutreach2Visibility.js"
-    );
-
-    for (const listing of email2Candidates as OutreachCandidate[]) {
-      try {
-        const emailContent = seederOutreach2Email({
-          businessName: listing.title,
-          listingId: listing.id,
-          removalToken: listing.removal_token,
-        });
-
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: listing.steward_email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        });
-
-        await supabase
-          .from("listings")
-          .update({
-            outreach_status: "email_2_sent",
-            last_outreach_at: now.toISOString(),
-          })
-          .eq("id", listing.id);
-
-        email2Sent++;
-        console.log(`[seeder-outreach] Email 2 sent: ${listing.title} (${listing.steward_email})`);
-      } catch (err) {
-        email2Failed++;
-        console.error(`[seeder-outreach] Email 2 failed for ${listing.title}:`, err);
-      }
-    }
+    const result = await enqueue("email_2", email2Candidates as OutreachCandidate[]);
+    email2Queued = result.queued;
+    email2Failed = result.failed;
   }
 
   // ── Email 3 candidates: email_2_sent AND 14+ days since last outreach ──
@@ -108,7 +96,7 @@ export default async function handler() {
 
   const { data: email3Candidates, error: e3Err } = await supabase
     .from("listings")
-    .select("id, title, steward_email, removal_token, placed_by_seeder_id")
+    .select("id")
     .eq("source", "seeder_placed")
     .not("placed_by_seeder_id", "is", null)
     .eq("status", "active")
@@ -122,48 +110,16 @@ export default async function handler() {
   }
 
   if (email3Candidates && email3Candidates.length > 0) {
-    const { seederOutreach3Email } = await import(
-      "../../app/lib/emails/seederOutreach3Stewardship.js"
-    );
-
-    for (const listing of email3Candidates as OutreachCandidate[]) {
-      try {
-        const emailContent = seederOutreach3Email({
-          businessName: listing.title,
-          listingId: listing.id,
-          removalToken: listing.removal_token,
-        });
-
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: listing.steward_email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        });
-
-        await supabase
-          .from("listings")
-          .update({
-            outreach_status: "email_3_sent",
-            last_outreach_at: now.toISOString(),
-          })
-          .eq("id", listing.id);
-
-        email3Sent++;
-        console.log(`[seeder-outreach] Email 3 sent: ${listing.title} (${listing.steward_email})`);
-      } catch (err) {
-        email3Failed++;
-        console.error(`[seeder-outreach] Email 3 failed for ${listing.title}:`, err);
-      }
-    }
+    const result = await enqueue("email_3", email3Candidates as OutreachCandidate[]);
+    email3Queued = result.queued;
+    email3Failed = result.failed;
   }
 
   const summary = {
     run_at: now.toISOString(),
-    email_2_sent: email2Sent,
+    email_2_queued: email2Queued,
     email_2_failed: email2Failed,
-    email_3_sent: email3Sent,
+    email_3_queued: email3Queued,
     email_3_failed: email3Failed,
   };
 

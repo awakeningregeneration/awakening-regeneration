@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
-import { sendEmail1 } from "@/app/lib/sendEmail1";
 
 /**
  * POST /api/seeder/trigger-all-pending-emails
  *
- * Sends Email 1 to every listing placed by this seeder that:
+ * Queues Email 1 for every listing placed by this seeder that:
  *   - has a steward_email set
  *   - has no_public_email = false (or null)
  *   - has never received an outreach email (last_outreach_at IS NULL)
- *   - has a removal_token (required by sendEmail1)
+ *   - has a removal_token (required to build the email)
+ *
+ * Enqueues into email_queue rather than sending directly — the hourly
+ * worker drains it within Resend's capacity. This is exactly the call
+ * site that used to be able to exhaust a day's Resend quota in one
+ * request when many listings were placed in a batch; queuing removes
+ * that risk entirely since enqueuing never talks to Resend.
  *
  * Intended for retroactive backfill when emails were added via edit
- * but the send was never triggered. Safe to call multiple times —
- * the last_outreach_at guard prevents duplicates.
+ * but the send was never triggered. Safe to call multiple times — the
+ * (listing_id, email_type) unique constraint on email_queue prevents
+ * duplicate queue rows.
  *
- * Returns { sent: number, skipped: number, errors: string[] }
+ * Returns { queued: number, skipped: number, errors: string[] }
  */
 
 export async function POST(req: Request) {
@@ -45,29 +51,26 @@ export async function POST(req: Request) {
       (l) => l.steward_email?.trim() && !l.no_public_email
     );
 
-    let sent = 0;
+    let queued = 0;
     let skipped = 0;
     const errors: string[] = [];
 
     for (const listing of eligible) {
-      try {
-        await sendEmail1({
-          listingId: listing.id,
-          businessName: listing.title,
-          stewardEmail: listing.steward_email.trim(),
-          removalToken: listing.removal_token,
-          seederId: session.seeder_id,
-        });
-        sent++;
-      } catch (err) {
-        errors.push(
-          `${listing.title}: ${err instanceof Error ? err.message : "unknown error"}`
+      const { error: queueErr } = await supabaseAdmin
+        .from("email_queue")
+        .upsert(
+          { listing_id: listing.id, email_type: "email_1" },
+          { onConflict: "listing_id,email_type", ignoreDuplicates: true }
         );
+      if (queueErr) {
+        errors.push(`${listing.title}: ${queueErr.message}`);
         skipped++;
+      } else {
+        queued++;
       }
     }
 
-    return NextResponse.json({ sent, skipped, total_eligible: eligible.length, errors });
+    return NextResponse.json({ queued, skipped, total_eligible: eligible.length, errors });
   } catch (err) {
     console.error("trigger-all-pending-emails error:", err);
     return NextResponse.json(

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
-import { sendEmail1 } from "@/app/lib/sendEmail1";
 
 /**
  * POST /api/seeder/trigger-email-1
@@ -81,19 +80,23 @@ export async function POST(req: Request) {
       );
     }
 
-    // Send Email 1 — throws on Resend failure
-    await sendEmail1({
-      listingId: listing.id,
-      businessName: listing.title,
-      stewardEmail: listing.steward_email.trim(),
-      removalToken: listing.removal_token,
-      seederId: session.seeder_id,
-    });
+    // Queue Email 1 — the hourly worker sends it within Resend's
+    // capacity. ignoreDuplicates makes this safe to call more than once.
+    const { error: queueErr } = await supabaseAdmin
+      .from("email_queue")
+      .upsert(
+        { listing_id: listing.id, email_type: "email_1" },
+        { onConflict: "listing_id,email_type", ignoreDuplicates: true }
+      );
+
+    if (queueErr) {
+      return NextResponse.json({ error: queueErr.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
       listing_id: listing.id,
-      sent_to: listing.steward_email,
+      queued_for: listing.steward_email,
     });
   } catch (err) {
     console.error("Trigger Email 1 failed:", err);

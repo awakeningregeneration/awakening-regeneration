@@ -141,7 +141,7 @@ export default function DashboardClient({
       });
       const data = await res.json();
       if (res.ok) {
-        setEmail1Result((prev) => ({ ...prev, [listingId]: "Sent!" }));
+        setEmail1Result((prev) => ({ ...prev, [listingId]: "Queued!" }));
         setTimeout(() => {
           setEmail1Result((prev) => {
             const next = { ...prev };
@@ -220,7 +220,7 @@ export default function DashboardClient({
       });
       const data = await res.json();
       if (res.ok) {
-        setAllPendingResult(`Sent to ${data.sent} listing(s).${data.errors?.length ? ` ${data.errors.length} failed.` : ""}`);
+        setAllPendingResult(`Queued for ${data.queued} listing(s).${data.errors?.length ? ` ${data.errors.length} failed.` : ""}`);
         setTimeout(() => { setAllPendingResult(null); router.refresh(); }, 3000);
       } else {
         setAllPendingResult(data.error || "Something went wrong.");

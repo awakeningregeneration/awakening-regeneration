@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
-import { sendEmail1 } from "@/app/lib/sendEmail1";
 import { toTitleCase, normalizeState, normalizeCounty, normalizeCity, normalizeName } from "@/app/lib/normalize";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -364,23 +363,26 @@ export async function POST(req: Request) {
     // Non-blocking — placement succeeded regardless
   }
 
-  // ── Send Email 1 if steward_email is provided ──
+  // ── Queue Email 1 if steward_email is provided ──
+  // Enqueued, not sent inline — the hourly email-queue-worker sends it,
+  // respecting Resend's daily/monthly capacity. Keeps bulk placement fast
+  // and never blocked by Resend's quota. ignoreDuplicates on the
+  // (listing_id, email_type) unique constraint makes this safe to call
+  // more than once for the same listing.
 
   let emailSent = false;
 
   if (steward_email?.trim() && !no_public_email) {
-    try {
-      await sendEmail1({
-        listingId: listing.id,
-        businessName: title.trim(),
-        stewardEmail: steward_email.trim(),
-        removalToken,
-        seederId: session.seeder_id,
-      });
+    const { error: queueErr } = await supabaseAdmin
+      .from("email_queue")
+      .upsert(
+        { listing_id: listing.id, email_type: "email_1" },
+        { onConflict: "listing_id,email_type", ignoreDuplicates: true }
+      );
+    if (queueErr) {
+      console.error("Failed to queue Email 1:", queueErr.message);
+    } else {
       emailSent = true;
-    } catch (emailErr) {
-      console.error("Email 1 failed to send:", emailErr);
-      // Listing is still created — email failure is non-blocking
     }
   }
 

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { getSeederSession } from "@/app/lib/seederAuth";
 import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normalize";
-import { sendEmail1 } from "@/app/lib/sendEmail1";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -160,17 +159,19 @@ export async function POST(req: Request) {
       listing.removal_token &&
       listing.placed_by_seeder_id  // need original seeder for attribution
     ) {
-      // Non-blocking — save already succeeded; email failure is logged, not surfaced.
-      // Always attribute to the placing seeder, regardless of who performed this edit.
-      sendEmail1({
-        listingId,
-        businessName: (update.title as string | undefined) ?? "",
-        stewardEmail: effectiveEmail,
-        removalToken: listing.removal_token,
-        seederId: listing.placed_by_seeder_id,
-      }).catch((err) =>
-        console.error("Auto Email 1 failed for listing", listingId, err)
-      );
+      // Non-blocking — save already succeeded; queue failure is logged, not
+      // surfaced. Queued, not sent inline — the hourly worker sends it within
+      // Resend's capacity. ignoreDuplicates makes this safe even if this
+      // auto-trigger condition is somehow reached twice for the same listing.
+      supabaseAdmin
+        .from("email_queue")
+        .upsert(
+          { listing_id: listingId, email_type: "email_1" },
+          { onConflict: "listing_id,email_type", ignoreDuplicates: true }
+        )
+        .then(({ error }) => {
+          if (error) console.error("Auto Email 1 queue failed for listing", listingId, error.message);
+        });
     }
 
     // ── Update listing_locations for multi-location listings ──

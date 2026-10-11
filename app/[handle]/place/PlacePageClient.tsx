@@ -1489,7 +1489,7 @@ export default function PlacePageClient({ handle, seederName }: Props) {
                 }}
               >
                 {successData.emailSent
-                  ? "Email 1 has been sent."
+                  ? "Email 1 has been queued to send."
                   : "No steward email was provided, so no outreach email was sent."}
               </p>
 
