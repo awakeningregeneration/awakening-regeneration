@@ -76,7 +76,11 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data, {
+    headers: {
+      "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+    },
+  });
 }
 
 export async function POST(req: Request) {
