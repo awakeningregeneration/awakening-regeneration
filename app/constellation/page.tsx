@@ -32,6 +32,36 @@ export default async function ConstellationPage() {
 
   const list: Topic[] = topics ?? [];
 
+  // A topic "has content" when at least one of its approaches has at
+  // least one linked example — i.e. a real curated resource actually
+  // renders on the topic page. An approach row existing on its own
+  // isn't enough: a placeholder approach (name duplicating the topic,
+  // description literally "Coming Soon", zero linked examples) still
+  // passes the individual topic page's approaches.length > 0 check and
+  // renders as a bare heading with no real content — exactly what
+  // happened with Water Scarcity. No hardcoded topic list — this reads
+  // live from the same join table the topic page itself renders from.
+  const { data: approaches } = await supabaseAdmin
+    .from("constellation_approaches")
+    .select("id, topic_id");
+
+  const { data: exampleLinks } = await supabaseAdmin
+    .from("constellation_example_approaches")
+    .select("approach_id");
+
+  const approachIdsWithExamples = new Set(
+    (exampleLinks ?? []).map((l) => l.approach_id as string)
+  );
+
+  const topicIdsWithContent = new Set(
+    (approaches ?? [])
+      .filter((a) => approachIdsWithExamples.has(a.id as string))
+      .map((a) => a.topic_id as string)
+  );
+
+  const liveTopics = list.filter((t) => topicIdsWithContent.has(t.id));
+  const horizonTopics = list.filter((t) => !topicIdsWithContent.has(t.id));
+
   return (
     <main
       style={{
@@ -112,7 +142,7 @@ export default async function ConstellationPage() {
           </p>
         </div>
 
-        {/* Topic grid */}
+        {/* Topic sections */}
         {list.length === 0 ? (
           <p
             style={{
@@ -125,22 +155,75 @@ export default async function ConstellationPage() {
             Topics coming soon.
           </p>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: 20,
-            }}
-          >
-            {list.map((topic) => (
-              <TopicCard
-                key={topic.id}
-                slug={topic.slug}
-                title={topic.title}
-                subheader={topic.subheader}
-              />
-            ))}
-          </div>
+          <>
+            {liveTopics.length > 0 && (
+              <div style={{ marginBottom: "clamp(48px, 6vw, 72px)" }}>
+                <p
+                  style={{
+                    fontSize: "0.78rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,216,107,0.75)",
+                    textAlign: "center",
+                    margin: "0 0 24px",
+                  }}
+                >
+                  Now in the Constellation
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                    gap: 20,
+                  }}
+                >
+                  {liveTopics.map((topic) => (
+                    <TopicCard
+                      key={topic.id}
+                      slug={topic.slug}
+                      title={topic.title}
+                      subheader={topic.subheader}
+                      hasContent
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {horizonTopics.length > 0 && (
+              <div>
+                <p
+                  style={{
+                    fontSize: "0.78rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "rgba(211,227,247,0.4)",
+                    textAlign: "center",
+                    margin: "0 0 24px",
+                  }}
+                >
+                  On the Horizon
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                    gap: 20,
+                  }}
+                >
+                  {horizonTopics.map((topic) => (
+                    <TopicCard
+                      key={topic.id}
+                      slug={topic.slug}
+                      title={topic.title}
+                      subheader={topic.subheader}
+                      hasContent={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Footer link */}

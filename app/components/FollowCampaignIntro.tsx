@@ -167,7 +167,7 @@ export default function FollowCampaignIntro({
             margin: `0 0 ${leadMarginBottom}px`,
           }}
         >
-          We quietly mapped Oregon.
+          Oregon has been quietly mapped.
         </p>
 
         <p
@@ -192,8 +192,35 @@ export default function FollowCampaignIntro({
             margin: `0 0 ${bodyMarginBottom1}px`,
           }}
         >
-          In thousands of places, people are already building pieces of a
-          world where canaries thrive.
+          We are living through a consequential moment. What we give our
+          attention to now matters.
+        </p>
+
+        <p
+          style={{
+            fontSize: 14.5,
+            lineHeight: bodyLineHeight,
+            color: NAVY_SOFT,
+            textShadow: TEXT_GLOW,
+            margin: `0 0 ${bodyMarginBottom1}px`,
+          }}
+        >
+          Everywhere, people are already building pieces of a world where
+          canaries thrive.
+        </p>
+
+        <p
+          style={{
+            fontSize: "clamp(1.05rem, 2vw, 1.22rem)",
+            fontWeight: 700,
+            lineHeight: thesisLineHeight,
+            color: GOLD_DEEP,
+            textShadow: TEXT_GLOW,
+            margin: `0 0 ${bodyMarginBottom1}px`,
+          }}
+        >
+          What happens if, together, we make another way impossible to
+          miss?
         </p>
 
         <p
@@ -205,8 +232,8 @@ export default function FollowCampaignIntro({
             margin: `0 0 ${bodyMarginBottom2}px`,
           }}
         >
-          Now we&rsquo;re following the Canary across the United States —
-          and inviting you to help us find the rest.
+          Let&rsquo;s follow the Canary across the United States — and
+          light up the world where canaries thrive.
         </p>
 
         <div
@@ -220,7 +247,7 @@ export default function FollowCampaignIntro({
             marginBottom: frameworkMarginBottom,
           }}
         >
-          Find 3 · Visit 1 · Add 1 · Tell Another
+          Find 3 · Visit 1 · Add 1 · Tell another
         </div>
 
         {lightsCount > 0 && (

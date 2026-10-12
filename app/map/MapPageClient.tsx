@@ -523,7 +523,10 @@ const countyListings = useMemo(() => {
     if (effectiveState) params.set("state", effectiveState);
     if (effectiveCounty) params.set("county", effectiveCounty);
     const qs = params.toString();
-    return qs ? `/stories?${qs}` : "/stories";
+    // Always end in "?" (even with no params) — ListingCard appends
+    // "&listingId=..." directly onto this value, which produced an
+    // invalid "/stories&listingId=..." URL when no county was selected.
+    return `/stories?${qs}`;
   }, [effectiveState, effectiveCounty]);
 
   const countyLightCount = countyListings.length;

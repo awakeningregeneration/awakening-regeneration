@@ -126,6 +126,74 @@ function ConfirmationContent() {
       "0 0 28px rgba(255,216,107,0.35), 0 4px 14px rgba(255,200,80,0.22)",
   };
 
+  // Arrived without a session_id (bookmarked/shared link, revisit, stale
+  // URL) — there's nothing to look up, so show a graceful message instead
+  // of waiting on checkoutMode forever. The successful-payment flow below
+  // is unchanged; this only covers the case where it never had a session
+  // to confirm in the first place.
+  if (!sessionId) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          color: "#0d2a4a",
+          position: "relative",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "clamp(44px, 7vw, 72px) 20px",
+        }}
+      >
+        <Atmosphere />
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            maxWidth: 600,
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "0.82rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.7)",
+              margin: 0,
+              marginBottom: 16,
+              textAlign: "center",
+            }}
+          >
+            Canary Commons
+          </p>
+          <div style={cardStyle}>
+            <h1
+              style={{
+                fontSize: "clamp(1.8rem, 4vw, 2.4rem)",
+                lineHeight: 1.15,
+                margin: 0,
+                marginBottom: 18,
+                fontWeight: 650,
+                color: "#0d2a4a",
+              }}
+            >
+              We couldn&apos;t find that confirmation.
+            </h1>
+            <p style={{ ...bodyStyle, marginBottom: 36 }}>
+              This link may be incomplete or already used. If you just made
+              a gift or joined as a Steward, check your email for a receipt
+              — or head back to pick up where you left off.
+            </p>
+            <Link href="/founders/join" style={mapLinkStyle}>
+              Back to Stewardship
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   // Show nothing while loading the mode
   if (checkoutMode === null) {
     return null;

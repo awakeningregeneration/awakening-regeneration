@@ -511,6 +511,19 @@ export default function AboutPage() {
             <h2 style={chapterHeadingStyle}>How the Commons works</h2>
 
             <p style={bodyStyle}>
+              <em>
+                Add something good and it appears. See something that
+                doesn&apos;t belong and flag it. The community curates the
+                Commons.
+              </em>
+            </p>
+
+            <p style={bodyStyle}>
+              Canary provides the map. The people who live there make it a
+              Commons.
+            </p>
+
+            <p style={bodyStyle}>
               <em>Visibility should not belong to the highest bidder.</em>
             </p>
 

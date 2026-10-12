@@ -145,9 +145,9 @@ export default function LetterPage() {
           {/* Body */}
           <p style={bodyStyle}>
             Canary Commons was born many years ago — some fifteen of
-            them — and had an initial run I was never able to carry all the
-            way forward. I tried to let it go and move on. The persistence of
-            the dream never let me go.
+            them — and had an early life before I was able to carry it all
+            the way forward. I tried to let it go and move on. The dream
+            never let me.
           </p>
 
           <p style={bodyStyle}>
@@ -162,13 +162,12 @@ export default function LetterPage() {
           </p>
 
           <p style={bodyStyle}>
-            Something else I know as essential: the forest grows strong when
-            diversity is its understory and the branches of plenty have many
-            offerings. This is true of life. Everywhere is different, and
-            sustainability looks different from different places.
-            Canary — and the songs leading us toward freedom and
-            possibility — sounds different depending on the geography. This map
-            is built to honor the local and be inspired by the global.
+            Something else I know as essential: a forest grows strong
+            through diversity. This is true of human life, too. Everywhere
+            is different, and what sustains life looks different in
+            different places. The song that leads toward possibility will
+            not sound the same everywhere. Canary is built to honor the
+            local and be inspired by the global.
           </p>
 
           <p style={bodyStyle}>
@@ -184,24 +183,23 @@ export default function LetterPage() {
           </p>
 
           <p style={bodyStyle}>
-            And then the deepest reason, underneath all the others. I became a
-            mother because that call was the clearest bell I have ever heard
-            ringing — and I knew, in that surrender, that I must bring through
-            what calls the pathways of peace forward. My life is a dedication to
-            that: to a world of kindness she can live in fully, and dream past
-            anything I&apos;m able to dream, because she&apos;s held by the
-            peaceful paths so many people are quietly weaving beneath all the
-            noise. I have always believed the overlooked are where the beauty is.
-            This map is my way of pulling toward that world with everything
-            I&apos;m worth.
+            And then the deepest reason, underneath all the others. Becoming
+            a mother made tomorrow personal. It clarified something I have
+            carried ever since: whatever work was mine to do, I wanted it
+            pointed toward the pathways of peace — toward kindness,
+            possibility, belonging, and the quiet work already underway to
+            create them. I have always believed the overlooked are where the
+            beauty is. Canary is my way of pulling toward that world with
+            everything I&apos;m worth.
           </p>
 
           <p style={bodyStyle}>
             So this is what Canary Commons is: a way to reveal, support, and
-            draw attention to the people making the difference every day — to
-            find them, learn about them, and take part in them. Not to name
-            what&apos;s broken; that story is told everywhere already. But to
-            lift what&apos;s alive, become it, and let the rest go.
+            draw attention to the people, places, practices, and
+            possibilities already making a difference — to find them, learn
+            from them, and take part. Not to name what&apos;s broken; that
+            story is told everywhere already. But to lift what&apos;s alive,
+            become it, and let the rest go.
           </p>
 
           <p style={bodyStyle}>
@@ -214,12 +212,14 @@ export default function LetterPage() {
           </p>
 
           <p style={bodyStyle}>
-            Together, we have this. We can, we will, we must — and it is
-            definitely time now.
+            Together, we have this.
+          </p>
+
+          <p style={bodyStyle}>
+            We are right on time. Tomorrow is shining on the horizon.
           </p>
 
           <p style={{ ...bodyStyle, marginBottom: 0 }}>
-            We are right on time. Tomorrow is shining on the horizon.
             Let&apos;s welcome it together.
           </p>
 
