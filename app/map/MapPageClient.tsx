@@ -188,6 +188,19 @@ export default function MapPage() {
     updateMapUrl(home.state, home.county);
   }
 
+  // Read inside handlePinSelect via refs (not as direct closure values) so
+  // that callback's identity stays stable across state/county changes.
+  // It's passed to MapClient as `onSelect`, which is itself a dependency
+  // of MapClient's map-initialization effect — letting this identity
+  // change on every region update was causing the entire Mapbox map
+  // (and any open listing popup) to be torn down and rebuilt on the
+  // same tap that opened it, whenever a marker's region differed from
+  // the current selection (i.e., on effectively every first pin tap).
+  const selectedStateRef = useRef(selectedState);
+  selectedStateRef.current = selectedState;
+  const selectedCountyRef = useRef(selectedCounty);
+  selectedCountyRef.current = selectedCounty;
+
   /** Called when a map pin is clicked — re-anchors county/state to match the listing */
   const handlePinSelect = useCallback(
     (id: string, context?: { county?: string; state?: string }) => {
@@ -200,10 +213,10 @@ export default function MapPage() {
         ? context.county.replace(/\s+County$/i, "").trim()
         : "";
 
-      const stateChanged = pinState !== selectedState;
+      const stateChanged = pinState !== selectedStateRef.current;
       const countyChanged = pinCounty
-        ? pinCounty.toLowerCase() !== selectedCounty.toLowerCase()
-        : selectedCounty !== "All";
+        ? pinCounty.toLowerCase() !== selectedCountyRef.current.toLowerCase()
+        : selectedCountyRef.current !== "All";
 
       if (stateChanged || countyChanged) {
         setSelectedState(pinState);
@@ -215,7 +228,7 @@ export default function MapPage() {
         router.push(`/map?${params.toString()}`, { scroll: false });
       }
     },
-    [selectedState, selectedCounty, router]
+    [router]
   );
 
   useEffect(() => {
