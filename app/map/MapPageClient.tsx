@@ -1392,7 +1392,7 @@ const countyListings = useMemo(() => {
             bottom: 0,
             left: 0,
             right: 0,
-            height: "85vh",
+            height: "85dvh",
             zIndex: 10,
             background: "rgba(245,249,255,0.15)",
             backdropFilter: "blur(8px)",
@@ -1407,8 +1407,8 @@ const countyListings = useMemo(() => {
               drawerSnap === "full"
                 ? "translateY(0px)"
                 : drawerSnap === "mid"
-                ? "translateY(40vh)"
-                : `translateY(calc(85vh - ${PEEK_HEIGHT}px))`,
+                ? "translateY(40dvh)"
+                : `translateY(calc(85dvh - ${PEEK_HEIGHT}px))`,
             transition: dragRef.current
               ? "none"
               : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
