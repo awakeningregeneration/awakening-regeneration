@@ -201,6 +201,16 @@ export default function MapPage() {
   const selectedCountyRef = useRef(selectedCounty);
   selectedCountyRef.current = selectedCounty;
 
+  // Set immediately before a pin-triggered router.push below, and read +
+  // unconditionally reset the moment the URL-sync effect (below) next
+  // runs — so it can only ever suppress that one, specific run (the one
+  // caused by this exact push), never any later, unrelated navigation.
+  // Without this, selecting a pin whose region differs from the current
+  // filter pushes a new URL, which the URL-sync effect then reacts to by
+  // clearing selectedId right back to null — closing the popup moments
+  // after the same tap opened it.
+  const pinRegionSyncRef = useRef(false);
+
   /** Called when a map pin is clicked — re-anchors county/state to match the listing */
   const handlePinSelect = useCallback(
     (id: string, context?: { county?: string; state?: string }) => {
@@ -219,6 +229,7 @@ export default function MapPage() {
         : selectedCountyRef.current !== "All";
 
       if (stateChanged || countyChanged) {
+        pinRegionSyncRef.current = true;
         setSelectedState(pinState);
         setSelectedCounty(pinCounty || "All");
 
@@ -286,6 +297,13 @@ export default function MapPage() {
   }, [countySearchQuery]);
 
   useEffect(() => {
+    // Consumed unconditionally, the instant this effect runs for ANY
+    // reason — so it can only ever affect this one run (specifically,
+    // the run caused by the pin-triggered push that set it), never a
+    // later, unrelated navigation.
+    const skipClearForPinSelection = pinRegionSyncRef.current;
+    pinRegionSyncRef.current = false;
+
     const stateFromUrl = searchParams.get("state");
     const countyFromUrl = searchParams.get("county");
 
@@ -300,7 +318,9 @@ export default function MapPage() {
     }
 
     if (stateFromUrl || countyFromUrl) {
-      setSelectedId(null);
+      if (!skipClearForPinSelection) {
+        setSelectedId(null);
+      }
     } else {
       // Bare /map visit, no URL params — fall back to a saved home, if any.
       const savedHome = readHomeLocation();

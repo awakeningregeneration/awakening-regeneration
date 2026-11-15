@@ -405,6 +405,11 @@ export default function MapClient({
         transform: none !important;
         max-width: 360px !important;
         z-index: 20 !important;
+        /* Mapbox's own base CSS sets this to none on .mapboxgl-popup
+           (only .mapboxgl-popup-content gets pointer-events:auto by
+           default) — restoring it here so the container itself, not
+           just its content, can receive clicks/taps. */
+        pointer-events: auto !important;
       }
       .mapboxgl-popup .mapboxgl-popup-content {
         max-width: 360px !important;
@@ -425,6 +430,12 @@ export default function MapClient({
           justify-content: center !important;
           background: rgba(8,25,45,0.5) !important;
           transform: none !important;
+          /* Without this, Mapbox's own default (pointer-events:none on
+             .mapboxgl-popup) makes this full-screen dark backdrop
+             untappable — taps pass straight through to the map below,
+             and the only working dismiss path is the small close
+             button inside the card. */
+          pointer-events: auto !important;
         }
         .mapboxgl-popup .mapboxgl-popup-content {
           max-width: min(340px, calc(100vw - 40px)) !important;
