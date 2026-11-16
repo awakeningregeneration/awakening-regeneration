@@ -142,58 +142,11 @@ export default function MapPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // TEMPORARY DIAGNOSTIC — ?debug=layers only. Colors/outlines the mobile
-  // sheet's layers so the cause of the reported dark obstruction can be
-  // identified visually on a real device. No effect for ordinary visitors.
-  // Revert this whole commit once the cause is identified.
-  const isDebugLayers = searchParams.get("debug") === "layers";
-
-  // TEMPORARY DIAGNOSTIC — state-transition + scroll/layout logging, same
-  // ?debug=layers gate. Purely observational: records values, never
-  // changes any behavior (scrollIntoView itself is untouched).
-  const [debugLog, setDebugLog] = useState<string[]>([]);
-  const [showDebugLog, setShowDebugLog] = useState(false);
-  const debugStartRef = useRef<number>(
-    typeof performance !== "undefined" ? performance.now() : Date.now()
-  );
+  // Ref to the mobile sheet's scrollable listings container — used to
+  // confine the selected-listing auto-scroll to this element only (see
+  // the effect below), rather than letting a native scrollIntoView()
+  // call walk up the ancestor chain.
   const scrollListRef = useRef<HTMLDivElement>(null);
-
-  function logDebug(line: string) {
-    if (!isDebugLayers) return;
-    const now =
-      typeof performance !== "undefined" ? performance.now() : Date.now();
-    const t = (now - debugStartRef.current).toFixed(0);
-    setDebugLog((prev) => [...prev.slice(-299), `[${t}ms] ${line}`]);
-  }
-
-  function captureSnapshot(label: string) {
-    if (!isDebugLayers) return;
-    const mainEl = document.querySelector("main");
-    const sheetEl = sheetRef.current;
-    const listEl = scrollListRef.current;
-    const mainRect = mainEl?.getBoundingClientRect();
-    const sheetRect = sheetEl?.getBoundingClientRect();
-    const transform = sheetEl ? getComputedStyle(sheetEl).transform : "n/a";
-    logDebug(
-      `${label} :: main.scrollTop=${mainEl?.scrollTop ?? "?"} ` +
-        `main.scrollLeft=${mainEl?.scrollLeft ?? "?"} ` +
-        `list.scrollTop=${listEl?.scrollTop ?? "?"} ` +
-        `sheet.transform=${transform} ` +
-        `main.rect=[top=${mainRect ? mainRect.top.toFixed(1) : "?"},bottom=${
-          mainRect ? mainRect.bottom.toFixed(1) : "?"
-        }] ` +
-        `sheet.rect=[top=${
-          sheetRect ? sheetRect.top.toFixed(1) : "?"
-        },bottom=${sheetRect ? sheetRect.bottom.toFixed(1) : "?"}]`
-    );
-  }
-
-  function copyDebugLog() {
-    const text = debugLog.join("\n");
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).catch(() => {});
-    }
-  }
 
   // Launch-weekend campaign intro — only shown when arriving via the
   // "Follow the Canary" homepage CTA (/map?follow=1). Normal navigation
@@ -222,7 +175,6 @@ export default function MapPage() {
     const params = new URLSearchParams();
     if (state && state !== "All") params.set("state", state);
     if (county && county !== "All") params.set("county", county);
-    if (isDebugLayers) params.set("debug", "layers");
     const qs = params.toString();
     router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
   }
@@ -254,8 +206,6 @@ export default function MapPage() {
   selectedStateRef.current = selectedState;
   const selectedCountyRef = useRef(selectedCounty);
   selectedCountyRef.current = selectedCounty;
-  const isDebugLayersRef = useRef(isDebugLayers);
-  isDebugLayersRef.current = isDebugLayers;
 
   // Set immediately before a pin-triggered router.push below, and read +
   // unconditionally reset the moment the URL-sync effect (below) next
@@ -292,7 +242,6 @@ export default function MapPage() {
         const params = new URLSearchParams();
         params.set("state", pinState);
         if (pinCounty) params.set("county", pinCounty);
-        if (isDebugLayersRef.current) params.set("debug", "layers");
         router.push(`/map?${params.toString()}`, { scroll: false });
       }
     },
@@ -444,25 +393,22 @@ const countyListings = useMemo(() => {
   // Scroll the selected listing card into view (works in both mobile drawer and desktop sidebar)
   useEffect(() => {
     if (!selectedId) return;
-    if (isDebugLayers) captureSnapshot(`selectedId-effect-start (id=${selectedId})`);
     // Small delay so the DOM has rendered the highlighted card
     const t = setTimeout(() => {
       const el = document.querySelector(`[data-listing-id="${selectedId}"]`);
-      if (isDebugLayers)
-        captureSnapshot(`before-scroll (id=${selectedId}, found=${!!el})`);
 
       const listEl = scrollListRef.current;
       if (listEl && el) {
-        // Mobile: confine the scroll to the list's own container. Logging
-        // (captureSnapshot above) measured el.scrollIntoView() walking
-        // past this container up to <main> itself — which qualifies as a
-        // scrollable box purely because of its overflow:hidden — leaving
-        // a stray main.scrollTop that nothing else in the app ever
-        // resets, misaligning the sheet relative to the viewport after a
-        // second selection. Defensively zero it first (scoped to this
-        // mobile branch only), then scroll only listEl, replicating
-        // block:"nearest" by moving just enough to bring the card fully
-        // into the list's own visible range, never more.
+        // Mobile: confine the scroll to the list's own container.
+        // el.scrollIntoView() was measured walking past this container up
+        // to <main> itself — which qualifies as a scrollable box purely
+        // because of its overflow:hidden — leaving a stray main.scrollTop
+        // that nothing else in the app ever resets, misaligning the sheet
+        // relative to the viewport after a second selection. Defensively
+        // zero it first (scoped to this mobile branch only), then scroll
+        // only listEl, replicating block:"nearest" by moving just enough
+        // to bring the card fully into the list's own visible range,
+        // never more.
         const mainEl = document.querySelector("main");
         if (mainEl) mainEl.scrollTop = 0;
 
@@ -481,59 +427,9 @@ const countyListings = useMemo(() => {
         // Desktop sidebar has no scrollListRef — unchanged behavior.
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
-
-      if (isDebugLayers) {
-        captureSnapshot(`immediately-after-scroll-call (id=${selectedId})`);
-        // Smooth scroll + layout settle aren't synchronous with the call
-        // above — capture again after they've had time to finish.
-        window.setTimeout(
-          () => captureSnapshot(`settled+400ms (id=${selectedId})`),
-          400
-        );
-        window.setTimeout(
-          () => captureSnapshot(`settled+1000ms (id=${selectedId})`),
-          1000
-        );
-      }
     }, 100);
     return () => clearTimeout(t);
-  }, [selectedId, isDebugLayers]);
-
-  // TEMPORARY DIAGNOSTIC — transition logging only, no behavior change.
-  // Separate refs from the ones handlePinSelect already uses, so this
-  // can never interact with that logic.
-  const prevSelectedIdForLogRef = useRef(selectedId);
-  useEffect(() => {
-    if (isDebugLayers && prevSelectedIdForLogRef.current !== selectedId) {
-      logDebug(`selectedId: ${prevSelectedIdForLogRef.current} -> ${selectedId}`);
-    }
-    prevSelectedIdForLogRef.current = selectedId;
-  }, [selectedId, isDebugLayers]);
-
-  const prevSelectedStateForLogRef = useRef(selectedState);
-  useEffect(() => {
-    if (isDebugLayers && prevSelectedStateForLogRef.current !== selectedState) {
-      logDebug(`selectedState: ${prevSelectedStateForLogRef.current} -> ${selectedState}`);
-    }
-    prevSelectedStateForLogRef.current = selectedState;
-  }, [selectedState, isDebugLayers]);
-
-  const prevSelectedCountyForLogRef = useRef(selectedCounty);
-  useEffect(() => {
-    if (isDebugLayers && prevSelectedCountyForLogRef.current !== selectedCounty) {
-      logDebug(`selectedCounty: ${prevSelectedCountyForLogRef.current} -> ${selectedCounty}`);
-    }
-    prevSelectedCountyForLogRef.current = selectedCounty;
-  }, [selectedCounty, isDebugLayers]);
-
-  const prevDrawerSnapForLogRef = useRef(drawerSnap);
-  useEffect(() => {
-    if (isDebugLayers && prevDrawerSnapForLogRef.current !== drawerSnap) {
-      logDebug(`drawerSnap: ${prevDrawerSnapForLogRef.current} -> ${drawerSnap}`);
-      captureSnapshot(`drawerSnap-changed (now=${drawerSnap})`);
-    }
-    prevDrawerSnapForLogRef.current = drawerSnap;
-  }, [drawerSnap, isDebugLayers]);
+  }, [selectedId]);
 
   // ── County search derivation ──
 
@@ -1420,9 +1316,7 @@ const countyListings = useMemo(() => {
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            background: isDebugLayers ? "#ff00ff" : "#08192d",
-            outline: isDebugLayers ? "4px solid yellow" : undefined,
-            outlineOffset: isDebugLayers ? "-4px" : undefined,
+            background: "#08192d",
           }}
           onClick={() => (document.activeElement as HTMLElement)?.blur?.()}
         >
@@ -1443,153 +1337,6 @@ const countyListings = useMemo(() => {
             }
           />
         </div>
-
-        {/* TEMPORARY DIAGNOSTIC LEGEND — ?debug=layers only. pointer-events:
-            none so it never blocks a tap underneath it, regardless of where
-            it visually sits. */}
-        {isDebugLayers && (
-          <div
-            aria-hidden="true"
-            style={{
-              position: "fixed",
-              top: 64,
-              left: 8,
-              zIndex: 999999,
-              pointerEvents: "none",
-              background: "rgba(0,0,0,0.8)",
-              color: "#fff",
-              fontSize: 10,
-              lineHeight: 1.5,
-              padding: "6px 8px",
-              borderRadius: 6,
-              maxWidth: 190,
-            }}
-          >
-            <div>yellow outline / magenta fill = map container</div>
-            <div>red outline = sheet outer (transform) wrapper</div>
-            <div>blue outline / orange fill = glass layer</div>
-            <div>lime outline = content/clip layer</div>
-            <div>cyan dashed outline = scrollable list box</div>
-            <div style={{ marginTop: 4, opacity: 0.8 }}>
-              If black stays black: not these recolored backgrounds — doesn&apos;t
-              identify the cause by itself. If cyan extends past lime: the
-              scroll box&apos;s own edge reaches beyond its clip boundary.
-            </div>
-          </div>
-        )}
-
-        {/* TEMPORARY DIAGNOSTIC LOG — ?debug=layers only. Collapsed by
-            default (a small tappable pill) so it never covers the sheet
-            or blocks a gesture during normal testing; only becomes a
-            larger panel when explicitly opened. */}
-        {isDebugLayers && !showDebugLog && (
-          <button
-            type="button"
-            onClick={() => setShowDebugLog(true)}
-            style={{
-              position: "fixed",
-              top: 64,
-              right: 8,
-              zIndex: 999999,
-              background: "rgba(0,0,0,0.85)",
-              color: "#0f0",
-              fontFamily: "monospace",
-              fontSize: 11,
-              padding: "6px 10px",
-              borderRadius: 6,
-              border: "1px solid #0f0",
-            }}
-          >
-            log ({debugLog.length}) — tap to view
-          </button>
-        )}
-
-        {isDebugLayers && showDebugLog && (
-          <div
-            style={{
-              position: "fixed",
-              top: 60,
-              left: 8,
-              right: 8,
-              bottom: 8,
-              zIndex: 999999,
-              background: "rgba(0,0,0,0.95)",
-              color: "#0f0",
-              fontFamily: "monospace",
-              fontSize: 10,
-              lineHeight: 1.4,
-              padding: 10,
-              borderRadius: 8,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div style={{ display: "flex", gap: 8, marginBottom: 8, flexShrink: 0 }}>
-              <button
-                type="button"
-                onClick={() => setShowDebugLog(false)}
-                style={{
-                  background: "#222",
-                  color: "#0f0",
-                  border: "1px solid #0f0",
-                  borderRadius: 6,
-                  padding: "6px 12px",
-                  fontFamily: "monospace",
-                  fontSize: 12,
-                }}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={copyDebugLog}
-                style={{
-                  background: "#222",
-                  color: "#0f0",
-                  border: "1px solid #0f0",
-                  borderRadius: 6,
-                  padding: "6px 12px",
-                  fontFamily: "monospace",
-                  fontSize: 12,
-                }}
-              >
-                Copy
-              </button>
-              <button
-                type="button"
-                onClick={() => setDebugLog([])}
-                style={{
-                  background: "#222",
-                  color: "#0f0",
-                  border: "1px solid #0f0",
-                  borderRadius: 6,
-                  padding: "6px 12px",
-                  fontFamily: "monospace",
-                  fontSize: 12,
-                }}
-              >
-                Clear
-              </button>
-              <div style={{ marginLeft: "auto", alignSelf: "center", opacity: 0.7 }}>
-                {debugLog.length} lines
-              </div>
-            </div>
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-                userSelect: "text",
-                WebkitUserSelect: "text",
-              }}
-            >
-              {debugLog.length === 0
-                ? "(no entries yet — interact with the map, then check back here)"
-                : debugLog.join("\n")}
-            </div>
-          </div>
-        )}
 
         {/* Scoped mobile day-mode overrides for RegionSelector dropdowns */}
         <style>{`
@@ -1735,8 +1482,6 @@ const countyListings = useMemo(() => {
               ? "none"
               : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
             willChange: "transform",
-            outline: isDebugLayers ? "4px solid red" : undefined,
-            outlineOffset: isDebugLayers ? "-4px" : undefined,
           }}
         >
           {/* Glass background — decorative only, never intercepts touch */}
@@ -1746,15 +1491,11 @@ const countyListings = useMemo(() => {
               position: "absolute",
               inset: 0,
               zIndex: 0,
-              background: isDebugLayers
-                ? "rgba(255,136,0,0.95)"
-                : "rgba(245,249,255,0.15)",
+              background: "rgba(245,249,255,0.15)",
               backdropFilter: "blur(8px)",
               borderTop: "1px solid rgba(138,96,16,0.25)",
               borderRadius: "18px 18px 0 0",
               pointerEvents: "none",
-              outline: isDebugLayers ? "4px solid blue" : undefined,
-              outlineOffset: isDebugLayers ? "-4px" : undefined,
             }}
           />
 
@@ -1771,8 +1512,6 @@ const countyListings = useMemo(() => {
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              outline: isDebugLayers ? "4px solid lime" : undefined,
-              outlineOffset: isDebugLayers ? "-8px" : undefined,
             }}
           >
           {/* HEADER — drag grip: handle + action doors */}
@@ -1970,8 +1709,6 @@ const countyListings = useMemo(() => {
               minHeight: 0,
               overflowY: "auto",
               padding: "0 14px 24px",
-              outline: isDebugLayers ? "4px dashed cyan" : undefined,
-              outlineOffset: isDebugLayers ? "-4px" : undefined,
             }}
           >
             <div style={{ position: "relative", zIndex: 1 }}>
