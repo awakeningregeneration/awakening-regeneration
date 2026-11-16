@@ -142,6 +142,12 @@ export default function MapPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // TEMPORARY DIAGNOSTIC — ?debug=layers only. Colors/outlines the mobile
+  // sheet's layers so the cause of the reported dark obstruction can be
+  // identified visually on a real device. No effect for ordinary visitors.
+  // Revert this whole commit once the cause is identified.
+  const isDebugLayers = searchParams.get("debug") === "layers";
+
   // Launch-weekend campaign intro — only shown when arriving via the
   // "Follow the Canary" homepage CTA (/map?follow=1). Normal navigation
   // to /map never sets this. Read once at mount so there's no flash of
@@ -169,6 +175,7 @@ export default function MapPage() {
     const params = new URLSearchParams();
     if (state && state !== "All") params.set("state", state);
     if (county && county !== "All") params.set("county", county);
+    if (isDebugLayers) params.set("debug", "layers");
     const qs = params.toString();
     router.replace(qs ? `/map?${qs}` : "/map", { scroll: false });
   }
@@ -200,6 +207,8 @@ export default function MapPage() {
   selectedStateRef.current = selectedState;
   const selectedCountyRef = useRef(selectedCounty);
   selectedCountyRef.current = selectedCounty;
+  const isDebugLayersRef = useRef(isDebugLayers);
+  isDebugLayersRef.current = isDebugLayers;
 
   // Set immediately before a pin-triggered router.push below, and read +
   // unconditionally reset the moment the URL-sync effect (below) next
@@ -236,6 +245,7 @@ export default function MapPage() {
         const params = new URLSearchParams();
         params.set("state", pinState);
         if (pinCounty) params.set("county", pinCounty);
+        if (isDebugLayersRef.current) params.set("debug", "layers");
         router.push(`/map?${params.toString()}`, { scroll: false });
       }
     },
@@ -1282,7 +1292,9 @@ const countyListings = useMemo(() => {
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            background: "#08192d",
+            background: isDebugLayers ? "#ff00ff" : "#08192d",
+            outline: isDebugLayers ? "4px solid yellow" : undefined,
+            outlineOffset: isDebugLayers ? "-4px" : undefined,
           }}
           onClick={() => (document.activeElement as HTMLElement)?.blur?.()}
         >
@@ -1303,6 +1315,40 @@ const countyListings = useMemo(() => {
             }
           />
         </div>
+
+        {/* TEMPORARY DIAGNOSTIC LEGEND — ?debug=layers only. pointer-events:
+            none so it never blocks a tap underneath it, regardless of where
+            it visually sits. */}
+        {isDebugLayers && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "fixed",
+              top: 64,
+              left: 8,
+              zIndex: 999999,
+              pointerEvents: "none",
+              background: "rgba(0,0,0,0.8)",
+              color: "#fff",
+              fontSize: 10,
+              lineHeight: 1.5,
+              padding: "6px 8px",
+              borderRadius: 6,
+              maxWidth: 190,
+            }}
+          >
+            <div>yellow outline / magenta fill = map container</div>
+            <div>red outline = sheet outer (transform) wrapper</div>
+            <div>blue outline / orange fill = glass layer</div>
+            <div>lime outline = content/clip layer</div>
+            <div>cyan dashed outline = scrollable list box</div>
+            <div style={{ marginTop: 4, opacity: 0.8 }}>
+              If black stays black: not these recolored backgrounds — doesn&apos;t
+              identify the cause by itself. If cyan extends past lime: the
+              scroll box&apos;s own edge reaches beyond its clip boundary.
+            </div>
+          </div>
+        )}
 
         {/* Scoped mobile day-mode overrides for RegionSelector dropdowns */}
         <style>{`
@@ -1448,6 +1494,8 @@ const countyListings = useMemo(() => {
               ? "none"
               : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
             willChange: "transform",
+            outline: isDebugLayers ? "4px solid red" : undefined,
+            outlineOffset: isDebugLayers ? "-4px" : undefined,
           }}
         >
           {/* Glass background — decorative only, never intercepts touch */}
@@ -1457,11 +1505,15 @@ const countyListings = useMemo(() => {
               position: "absolute",
               inset: 0,
               zIndex: 0,
-              background: "rgba(245,249,255,0.15)",
+              background: isDebugLayers
+                ? "rgba(255,136,0,0.95)"
+                : "rgba(245,249,255,0.15)",
               backdropFilter: "blur(8px)",
               borderTop: "1px solid rgba(138,96,16,0.25)",
               borderRadius: "18px 18px 0 0",
               pointerEvents: "none",
+              outline: isDebugLayers ? "4px solid blue" : undefined,
+              outlineOffset: isDebugLayers ? "-4px" : undefined,
             }}
           />
 
@@ -1478,6 +1530,8 @@ const countyListings = useMemo(() => {
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
+              outline: isDebugLayers ? "4px solid lime" : undefined,
+              outlineOffset: isDebugLayers ? "-8px" : undefined,
             }}
           >
           {/* HEADER — drag grip: handle + action doors */}
@@ -1674,6 +1728,8 @@ const countyListings = useMemo(() => {
               minHeight: 0,
               overflowY: "auto",
               padding: "0 14px 24px",
+              outline: isDebugLayers ? "4px dashed cyan" : undefined,
+              outlineOffset: isDebugLayers ? "-4px" : undefined,
             }}
           >
             <div style={{ position: "relative", zIndex: 1 }}>
