@@ -4,13 +4,19 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import ConstellationAtmosphere from "../ConstellationAtmosphere";
 import LinkCard from "../LinkCard";
+import ApproachRow from "../ApproachRow";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ approach?: string }>;
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { approach: approachId } = await searchParams;
+
   const { data: topic } = await supabaseAdmin
     .from("constellation_topics")
     .select("title, subheader")
@@ -18,6 +24,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
 
   if (!topic) return { title: "Constellation — Canary Commons" };
+
+  if (approachId) {
+    const { data: approach } = await supabaseAdmin
+      .from("constellation_approaches")
+      .select("name, description")
+      .eq("id", approachId)
+      .maybeSingle();
+
+    if (approach) {
+      return {
+        title: `${approach.name} — ${topic.title} — Constellation — Canary Commons`,
+        description: approach.description || topic.subheader,
+      };
+    }
+  }
 
   return {
     title: `${topic.title} — Constellation — Canary Commons`,
@@ -55,8 +76,9 @@ type Approach = {
 
 const GOLD = "#FFD86B";
 
-export default async function ConstellationTopicPage({ params }: Props) {
+export default async function ConstellationTopicPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { approach: approachId } = await searchParams;
 
   const { data: topic } = await supabaseAdmin
     .from("constellation_topics")
@@ -79,6 +101,24 @@ export default async function ConstellationTopicPage({ params }: Props) {
     .order("sort_order", { ascending: true });
 
   const approaches: Approach[] = (approachRows ?? []) as unknown as Approach[];
+
+  // Resolve each approach's examples once, in sort order, so both the
+  // list view (just needs a count) and the detail view (needs the full
+  // list) work from the same derived data.
+  const approachesWithExamples = approaches.map((approach) => ({
+    ...approach,
+    examples: [...approach.constellation_example_approaches]
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+      .map((cea) => cea.constellation_examples)
+      .filter((ex): ex is ConstellationExample => ex !== null),
+  }));
+
+  // Drill-down state lives in the URL (?approach=<id>) rather than client
+  // state, so a specific approach is a real, shareable, back-button-safe
+  // link. An unrecognized/missing id just falls back to the list view.
+  const selectedApproach = approachId
+    ? approachesWithExamples.find((a) => a.id === approachId) ?? null
+    : null;
 
   return (
     <main
@@ -115,17 +155,19 @@ export default async function ConstellationTopicPage({ params }: Props) {
           padding: "clamp(80px, 12vw, 120px) 24px clamp(60px, 8vw, 100px)",
         }}
       >
-        {/* Back link */}
+        {/* Back link — context-aware: from an approach's entries, go back
+            to this topic's approach list; from the approach list itself,
+            go back to all topics. */}
         <div style={{ marginBottom: 40 }}>
           <Link
-            href="/constellation"
+            href={selectedApproach ? `/constellation/${slug}` : "/constellation"}
             style={{
               fontSize: "0.85rem",
               color: "rgba(211,227,247,0.72)",
               textDecoration: "none",
             }}
           >
-            ← All topics
+            {selectedApproach ? `← Back to ${topic.title}` : "← All topics"}
           </Link>
         </div>
 
@@ -176,8 +218,8 @@ export default async function ConstellationTopicPage({ params }: Props) {
           }}
         />
 
-        {/* Approaches or empty state */}
-        {approaches.length === 0 ? (
+        {/* Approaches: empty state, scannable list, or one approach's entries */}
+        {approachesWithExamples.length === 0 ? (
           <p
             style={{
               color: "rgba(211,227,247,0.4)",
@@ -187,72 +229,70 @@ export default async function ConstellationTopicPage({ params }: Props) {
           >
             Content coming soon.
           </p>
-        ) : (
+        ) : selectedApproach ? (
+          /* ── Detail view: just this one approach's entries ── */
           <div>
-            {approaches.map((approach, idx) => {
-              // Sort examples by their join-table sort_order
-              const examples = [...approach.constellation_example_approaches]
-                .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-                .map((cea) => cea.constellation_examples)
-                .filter((ex): ex is ConstellationExample => ex !== null);
+            <h2
+              style={{
+                fontSize: "clamp(1.15rem, 2vw, 1.45rem)",
+                fontWeight: 650,
+                color: "rgba(255,216,107,0.85)",
+                margin: "0 0 10px",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {selectedApproach.name}
+            </h2>
 
-              return (
-                <div key={approach.id}>
-                  {/* Approach name */}
-                  <h2
-                    style={{
-                      fontSize: "clamp(1.15rem, 2vw, 1.45rem)",
-                      fontWeight: 650,
-                      color: "rgba(255,216,107,0.85)",
-                      margin: "0 0 10px",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {approach.name}
-                  </h2>
+            {selectedApproach.description && (
+              <p
+                style={{
+                  fontSize: "0.95rem",
+                  lineHeight: 1.6,
+                  color: "rgba(211,227,247,0.82)",
+                  margin: "0 0 28px",
+                  maxWidth: 580,
+                }}
+              >
+                {selectedApproach.description}
+              </p>
+            )}
 
-                  {/* Approach description */}
-                  {approach.description && (
-                    <p
-                      style={{
-                        fontSize: "0.95rem",
-                        lineHeight: 1.6,
-                        color: "rgba(211,227,247,0.82)",
-                        margin: "0 0 20px",
-                        maxWidth: 580,
-                      }}
-                    >
-                      {approach.description}
-                    </p>
-                  )}
-
-                  {/* Example LinkCards */}
-                  {examples.length > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
-                      {examples.map((ex) => (
-                        <LinkCard
-                          key={ex.id}
-                          url={ex.url}
-                          title={ex.title}
-                          summary={ex.summary}
-                          favicon_url={ex.favicon_url}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Thin divider between approaches, not after last */}
-                  {idx < approaches.length - 1 && (
-                    <div
-                      style={{
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
-                        margin: "clamp(24px, 3vw, 36px) 0",
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            })}
+            {selectedApproach.examples.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {selectedApproach.examples.map((ex) => (
+                  <LinkCard
+                    key={ex.id}
+                    url={ex.url}
+                    title={ex.title}
+                    summary={ex.summary}
+                    favicon_url={ex.favicon_url}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p
+                style={{
+                  color: "rgba(211,227,247,0.4)",
+                  fontSize: "0.95rem",
+                  fontStyle: "italic",
+                }}
+              >
+                No entries listed here yet.
+              </p>
+            )}
+          </div>
+        ) : (
+          /* ── List view: scan the approaches, then drill into one ── */
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {approachesWithExamples.map((approach) => (
+              <ApproachRow
+                key={approach.id}
+                href={`/constellation/${slug}?approach=${approach.id}`}
+                name={approach.name}
+                exampleCount={approach.examples.length}
+              />
+            ))}
           </div>
         )}
 
