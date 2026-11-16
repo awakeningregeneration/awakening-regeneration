@@ -449,12 +449,41 @@ const countyListings = useMemo(() => {
     const t = setTimeout(() => {
       const el = document.querySelector(`[data-listing-id="${selectedId}"]`);
       if (isDebugLayers)
-        captureSnapshot(`before-scrollIntoView (id=${selectedId}, found=${!!el})`);
-      if (el) {
+        captureSnapshot(`before-scroll (id=${selectedId}, found=${!!el})`);
+
+      const listEl = scrollListRef.current;
+      if (listEl && el) {
+        // Mobile: confine the scroll to the list's own container. Logging
+        // (captureSnapshot above) measured el.scrollIntoView() walking
+        // past this container up to <main> itself — which qualifies as a
+        // scrollable box purely because of its overflow:hidden — leaving
+        // a stray main.scrollTop that nothing else in the app ever
+        // resets, misaligning the sheet relative to the viewport after a
+        // second selection. Defensively zero it first (scoped to this
+        // mobile branch only), then scroll only listEl, replicating
+        // block:"nearest" by moving just enough to bring the card fully
+        // into the list's own visible range, never more.
+        const mainEl = document.querySelector("main");
+        if (mainEl) mainEl.scrollTop = 0;
+
+        const listRect = listEl.getBoundingClientRect();
+        const cardRect = el.getBoundingClientRect();
+        let delta = 0;
+        if (cardRect.top < listRect.top) {
+          delta = cardRect.top - listRect.top;
+        } else if (cardRect.bottom > listRect.bottom) {
+          delta = cardRect.bottom - listRect.bottom;
+        }
+        if (delta !== 0) {
+          listEl.scrollTo({ top: listEl.scrollTop + delta, behavior: "smooth" });
+        }
+      } else if (el) {
+        // Desktop sidebar has no scrollListRef — unchanged behavior.
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
+
       if (isDebugLayers) {
-        captureSnapshot(`immediately-after-scrollIntoView-call (id=${selectedId})`);
+        captureSnapshot(`immediately-after-scroll-call (id=${selectedId})`);
         // Smooth scroll + layout settle aren't synchronous with the call
         // above — capture again after they've had time to finish.
         window.setTimeout(
