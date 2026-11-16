@@ -1416,10 +1416,21 @@ const countyListings = useMemo(() => {
           )}
         </div>
 
-        {/* Bottom drawer — slide-over sheet with snap positions */}
+        {/* Bottom drawer — slide-over sheet with snap positions.
+            Three layers, deliberately separated:
+            1. Outer wrapper (this ref) — position/size/transform only.
+               Nothing else lives on this element, so dragging it never
+               has to composite alongside a blur filter.
+            2. Glass layer — purely decorative, inset:0, no children, no
+               scroll — it always covers the sheet's full box regardless
+               of the list's scroll position, so it can't fall out of
+               sync the way a single shared box with scrolling content
+               inside it could.
+            3. Content layer — the header/list, unchanged internally,
+               sitting above the glass layer with its own clip (no
+               backdrop-filter or transform on this one). */}
         <div
           ref={sheetRef}
-          className="mobile-day-drawer"
           style={{
             position: "absolute",
             bottom: 0,
@@ -1427,15 +1438,6 @@ const countyListings = useMemo(() => {
             right: 0,
             height: "85dvh",
             zIndex: 10,
-            background: "rgba(245,249,255,0.15)",
-            backdropFilter: "blur(8px)",
-            borderTop: "1px solid rgba(138,96,16,0.25)",
-            borderRadius: "18px 18px 0 0",
-            color: "#0a2540",
-            textShadow: "0 1px 2px rgba(255,255,255,0.6)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
             transform:
               drawerSnap === "full"
                 ? "translateY(0px)"
@@ -1448,6 +1450,36 @@ const countyListings = useMemo(() => {
             willChange: "transform",
           }}
         >
+          {/* Glass background — decorative only, never intercepts touch */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              background: "rgba(245,249,255,0.15)",
+              backdropFilter: "blur(8px)",
+              borderTop: "1px solid rgba(138,96,16,0.25)",
+              borderRadius: "18px 18px 0 0",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Content — header + scrollable list, above the glass layer */}
+          <div
+            className="mobile-day-drawer"
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 1,
+              borderRadius: "18px 18px 0 0",
+              color: "#0a2540",
+              textShadow: "0 1px 2px rgba(255,255,255,0.6)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
           {/* HEADER — drag grip: handle + action doors */}
           <div
             style={{
@@ -1647,6 +1679,7 @@ const countyListings = useMemo(() => {
             <div style={{ position: "relative", zIndex: 1 }}>
               {renderSidebarContent({ showCountySearch: false, showActionButtons: false })}
             </div>
+          </div>
           </div>
         </div>
 
