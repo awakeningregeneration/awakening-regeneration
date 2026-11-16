@@ -148,6 +148,53 @@ export default function MapPage() {
   // Revert this whole commit once the cause is identified.
   const isDebugLayers = searchParams.get("debug") === "layers";
 
+  // TEMPORARY DIAGNOSTIC — state-transition + scroll/layout logging, same
+  // ?debug=layers gate. Purely observational: records values, never
+  // changes any behavior (scrollIntoView itself is untouched).
+  const [debugLog, setDebugLog] = useState<string[]>([]);
+  const [showDebugLog, setShowDebugLog] = useState(false);
+  const debugStartRef = useRef<number>(
+    typeof performance !== "undefined" ? performance.now() : Date.now()
+  );
+  const scrollListRef = useRef<HTMLDivElement>(null);
+
+  function logDebug(line: string) {
+    if (!isDebugLayers) return;
+    const now =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    const t = (now - debugStartRef.current).toFixed(0);
+    setDebugLog((prev) => [...prev.slice(-299), `[${t}ms] ${line}`]);
+  }
+
+  function captureSnapshot(label: string) {
+    if (!isDebugLayers) return;
+    const mainEl = document.querySelector("main");
+    const sheetEl = sheetRef.current;
+    const listEl = scrollListRef.current;
+    const mainRect = mainEl?.getBoundingClientRect();
+    const sheetRect = sheetEl?.getBoundingClientRect();
+    const transform = sheetEl ? getComputedStyle(sheetEl).transform : "n/a";
+    logDebug(
+      `${label} :: main.scrollTop=${mainEl?.scrollTop ?? "?"} ` +
+        `main.scrollLeft=${mainEl?.scrollLeft ?? "?"} ` +
+        `list.scrollTop=${listEl?.scrollTop ?? "?"} ` +
+        `sheet.transform=${transform} ` +
+        `main.rect=[top=${mainRect ? mainRect.top.toFixed(1) : "?"},bottom=${
+          mainRect ? mainRect.bottom.toFixed(1) : "?"
+        }] ` +
+        `sheet.rect=[top=${
+          sheetRect ? sheetRect.top.toFixed(1) : "?"
+        },bottom=${sheetRect ? sheetRect.bottom.toFixed(1) : "?"}]`
+    );
+  }
+
+  function copyDebugLog() {
+    const text = debugLog.join("\n");
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+  }
+
   // Launch-weekend campaign intro — only shown when arriving via the
   // "Follow the Canary" homepage CTA (/map?follow=1). Normal navigation
   // to /map never sets this. Read once at mount so there's no flash of
@@ -397,15 +444,67 @@ const countyListings = useMemo(() => {
   // Scroll the selected listing card into view (works in both mobile drawer and desktop sidebar)
   useEffect(() => {
     if (!selectedId) return;
+    if (isDebugLayers) captureSnapshot(`selectedId-effect-start (id=${selectedId})`);
     // Small delay so the DOM has rendered the highlighted card
     const t = setTimeout(() => {
       const el = document.querySelector(`[data-listing-id="${selectedId}"]`);
+      if (isDebugLayers)
+        captureSnapshot(`before-scrollIntoView (id=${selectedId}, found=${!!el})`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
+      if (isDebugLayers) {
+        captureSnapshot(`immediately-after-scrollIntoView-call (id=${selectedId})`);
+        // Smooth scroll + layout settle aren't synchronous with the call
+        // above — capture again after they've had time to finish.
+        window.setTimeout(
+          () => captureSnapshot(`settled+400ms (id=${selectedId})`),
+          400
+        );
+        window.setTimeout(
+          () => captureSnapshot(`settled+1000ms (id=${selectedId})`),
+          1000
+        );
+      }
     }, 100);
     return () => clearTimeout(t);
-  }, [selectedId]);
+  }, [selectedId, isDebugLayers]);
+
+  // TEMPORARY DIAGNOSTIC — transition logging only, no behavior change.
+  // Separate refs from the ones handlePinSelect already uses, so this
+  // can never interact with that logic.
+  const prevSelectedIdForLogRef = useRef(selectedId);
+  useEffect(() => {
+    if (isDebugLayers && prevSelectedIdForLogRef.current !== selectedId) {
+      logDebug(`selectedId: ${prevSelectedIdForLogRef.current} -> ${selectedId}`);
+    }
+    prevSelectedIdForLogRef.current = selectedId;
+  }, [selectedId, isDebugLayers]);
+
+  const prevSelectedStateForLogRef = useRef(selectedState);
+  useEffect(() => {
+    if (isDebugLayers && prevSelectedStateForLogRef.current !== selectedState) {
+      logDebug(`selectedState: ${prevSelectedStateForLogRef.current} -> ${selectedState}`);
+    }
+    prevSelectedStateForLogRef.current = selectedState;
+  }, [selectedState, isDebugLayers]);
+
+  const prevSelectedCountyForLogRef = useRef(selectedCounty);
+  useEffect(() => {
+    if (isDebugLayers && prevSelectedCountyForLogRef.current !== selectedCounty) {
+      logDebug(`selectedCounty: ${prevSelectedCountyForLogRef.current} -> ${selectedCounty}`);
+    }
+    prevSelectedCountyForLogRef.current = selectedCounty;
+  }, [selectedCounty, isDebugLayers]);
+
+  const prevDrawerSnapForLogRef = useRef(drawerSnap);
+  useEffect(() => {
+    if (isDebugLayers && prevDrawerSnapForLogRef.current !== drawerSnap) {
+      logDebug(`drawerSnap: ${prevDrawerSnapForLogRef.current} -> ${drawerSnap}`);
+      captureSnapshot(`drawerSnap-changed (now=${drawerSnap})`);
+    }
+    prevDrawerSnapForLogRef.current = drawerSnap;
+  }, [drawerSnap, isDebugLayers]);
 
   // ── County search derivation ──
 
@@ -1350,6 +1449,119 @@ const countyListings = useMemo(() => {
           </div>
         )}
 
+        {/* TEMPORARY DIAGNOSTIC LOG — ?debug=layers only. Collapsed by
+            default (a small tappable pill) so it never covers the sheet
+            or blocks a gesture during normal testing; only becomes a
+            larger panel when explicitly opened. */}
+        {isDebugLayers && !showDebugLog && (
+          <button
+            type="button"
+            onClick={() => setShowDebugLog(true)}
+            style={{
+              position: "fixed",
+              top: 64,
+              right: 8,
+              zIndex: 999999,
+              background: "rgba(0,0,0,0.85)",
+              color: "#0f0",
+              fontFamily: "monospace",
+              fontSize: 11,
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #0f0",
+            }}
+          >
+            log ({debugLog.length}) — tap to view
+          </button>
+        )}
+
+        {isDebugLayers && showDebugLog && (
+          <div
+            style={{
+              position: "fixed",
+              top: 60,
+              left: 8,
+              right: 8,
+              bottom: 8,
+              zIndex: 999999,
+              background: "rgba(0,0,0,0.95)",
+              color: "#0f0",
+              fontFamily: "monospace",
+              fontSize: 10,
+              lineHeight: 1.4,
+              padding: 10,
+              borderRadius: 8,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div style={{ display: "flex", gap: 8, marginBottom: 8, flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => setShowDebugLog(false)}
+                style={{
+                  background: "#222",
+                  color: "#0f0",
+                  border: "1px solid #0f0",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  fontFamily: "monospace",
+                  fontSize: 12,
+                }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={copyDebugLog}
+                style={{
+                  background: "#222",
+                  color: "#0f0",
+                  border: "1px solid #0f0",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  fontFamily: "monospace",
+                  fontSize: 12,
+                }}
+              >
+                Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => setDebugLog([])}
+                style={{
+                  background: "#222",
+                  color: "#0f0",
+                  border: "1px solid #0f0",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  fontFamily: "monospace",
+                  fontSize: 12,
+                }}
+              >
+                Clear
+              </button>
+              <div style={{ marginLeft: "auto", alignSelf: "center", opacity: 0.7 }}>
+                {debugLog.length} lines
+              </div>
+            </div>
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+                userSelect: "text",
+                WebkitUserSelect: "text",
+              }}
+            >
+              {debugLog.length === 0
+                ? "(no entries yet — interact with the map, then check back here)"
+                : debugLog.join("\n")}
+            </div>
+          </div>
+        )}
+
         {/* Scoped mobile day-mode overrides for RegionSelector dropdowns */}
         <style>{`
           .mobile-day-bar section {
@@ -1723,6 +1935,7 @@ const countyListings = useMemo(() => {
 
           {/* SCROLLABLE list region */}
           <div
+            ref={scrollListRef}
             style={{
               flex: 1,
               minHeight: 0,
