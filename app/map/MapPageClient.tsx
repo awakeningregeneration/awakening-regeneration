@@ -109,6 +109,10 @@ type PropsRegion = { state?: string; county?: string };
 
 export default function MapPage() {
   const [allListings, setAllListings] = useState<Listing[]>([]);
+  // Gates the "no lights mapped here yet" empty-state invitation — only
+  // meaningful once the initial listings fetch has actually resolved, so
+  // a region is never told it's empty while data is simply still loading.
+  const [listingsLoaded, setListingsLoaded] = useState(false);
   const [selectedState, setSelectedState] = useState<string>("All");
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -260,6 +264,7 @@ export default function MapPage() {
       }));
 
       setAllListings(normalized);
+      setListingsLoaded(true);
     }
 
     async function loadOnlineResources() {
@@ -722,16 +727,36 @@ const countyListings = useMemo(() => {
         </>
       ) : hasStateSelection && !hasCountySelection ? (
             <>
-              <div
-                style={{
-                  marginTop: 12,
-                  fontSize: 13,
-                  lineHeight: 1.55,
-                  opacity: 0.95,
-                }}
-              >
-                Pan around the state, or choose a county to focus more closely.
-              </div>
+              {stateListings.length === 0 && listingsLoaded ? (
+                <div style={{ textAlign: "center", padding: "20px 12px" }}>
+                  <div style={{ fontSize: 14, color: "rgba(211,227,247,0.82)", lineHeight: 1.6, marginBottom: 14 }}>
+                    No lights mapped here yet. Know one? Help light the map!
+                  </div>
+                  <Link
+                    href={submitListingHref}
+                    style={{
+                      display: "inline-block", padding: "10px 20px", borderRadius: 999,
+                      background: "#FFD86B", color: "#1a2a0e", fontWeight: 700, fontSize: 13,
+                      letterSpacing: "0.03em", textTransform: "uppercase",
+                      textDecoration: "none",
+                      boxShadow: "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                    }}
+                  >
+                    Add a light →
+                  </Link>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    marginTop: 12,
+                    fontSize: 13,
+                    lineHeight: 1.55,
+                    opacity: 0.95,
+                  }}
+                >
+                  Pan around the state, or choose a county to focus more closely.
+                </div>
+              )}
 
               {opts.showActionButtons && (
               <div
@@ -1032,11 +1057,25 @@ const countyListings = useMemo(() => {
                         <ListingCard key={listing.id} listing={listing} isSelected={selectedId === listing.id} fallbackLocation={effectiveState} onSelect={setSelectedId} hasStory={listingIdsWithStories.has(listing.id)} storiesViewHref={storiesViewHref} />
                       ))}
                     </div>
-                  ) : (
-                    <div style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.88 }}>
-                      This county is still waiting for its first light — you could add one.
+                  ) : listingsLoaded ? (
+                    <div style={{ textAlign: "center", padding: "20px 12px" }}>
+                      <div style={{ fontSize: 14, color: "rgba(211,227,247,0.82)", lineHeight: 1.6, marginBottom: 14 }}>
+                        No lights mapped here yet. Know one? Help light the map!
+                      </div>
+                      <Link
+                        href={submitListingHref}
+                        style={{
+                          display: "inline-block", padding: "10px 20px", borderRadius: 999,
+                          background: "#FFD86B", color: "#1a2a0e", fontWeight: 700, fontSize: 13,
+                          letterSpacing: "0.03em", textTransform: "uppercase",
+                          textDecoration: "none",
+                          boxShadow: "0 0 20px rgba(255,216,107,0.25), 0 4px 14px rgba(255,200,80,0.18)",
+                        }}
+                      >
+                        Add a light →
+                      </Link>
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
 

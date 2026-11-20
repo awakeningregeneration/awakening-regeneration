@@ -85,13 +85,19 @@ export default function FollowCampaignIntro({
   const closeFontSize = isMobile ? 19 : 17;
 
   // The pause is the opening line now — short top margin (panel padding
-  // already provides room), generous bottom margin before the
-  // invitations begin.
+  // already provides room), generous bottom margin straight into the
+  // invitations so that flow isn't interrupted.
   const pauseMarginTop = isMobile ? 6 : 10;
   const pauseMarginBottom = isMobile ? 30 : 42;
 
   const invitationGap = isMobile ? 14 : 18;
-  const invitationsMarginBottom = isMobile ? 26 : 34;
+  const invitationsMarginBottom = isMobile ? 22 : 28;
+
+  // The map-began-in-Oregon aside sits after SHARE, set apart by a small
+  // "***" mark rather than competing with the invitations above it for
+  // attention.
+  const asideMarkMarginBottom = isMobile ? 8 : 10;
+  const asideMarginBottom = isMobile ? 24 : 30;
 
   const thesisLineHeight = isMobile ? 1.35 : 1.45;
   const exploreCtaMarginTop = isMobile ? 22 : 30;
@@ -249,6 +255,39 @@ export default function FollowCampaignIntro({
             difference we make. Pass the map along.
           </p>
         </div>
+
+        {/* A quiet aside, not a fourth invitation — set apart by the
+            mark below so it doesn't compete with VISIT/ADD/SHARE for
+            attention, but still lands before the closing lines. */}
+        <p
+          aria-hidden="true"
+          style={{
+            fontSize: 13,
+            letterSpacing: "0.2em",
+            color: GOLD_DEEP,
+            opacity: 0.6,
+            textShadow: TEXT_GLOW,
+            margin: `0 0 ${asideMarkMarginBottom}px`,
+          }}
+        >
+          ***
+        </p>
+
+        <p
+          style={{
+            fontSize: 14.5,
+            lineHeight: 1.5,
+            color: NAVY_SOFT,
+            textShadow: TEXT_GLOW,
+            margin: `0 0 ${asideMarginBottom}px`,
+          }}
+        >
+          The map began in Oregon. There are lights everywhere waiting to
+          be seen.{" "}
+          <span style={{ fontWeight: 800, color: GOLD_DEEP }}>
+            Help light the map!
+          </span>
+        </p>
 
         <p
           style={{
