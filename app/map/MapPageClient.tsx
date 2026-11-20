@@ -10,6 +10,7 @@ import ListingCard from "../components/ListingCard";
 import RegionSelector from "../components/RegionSelector";
 import { useHomeLocation, readHomeLocation } from "../components/useHomeLocation";
 import FollowCampaignIntro from "../components/FollowCampaignIntro";
+import ShareMapButton from "../components/ShareMapButton";
 import { useLightsCount } from "../components/useLightsCount";
 import { useIsMobile } from "../lib/useIsMobile";
 import { californiaCounties } from "@/data/californiaCounties";
@@ -1310,6 +1311,8 @@ const countyListings = useMemo(() => {
           />
         )}
 
+        <ShareMapButton />
+
         {/* Map — full bleed, always visible */}
         <div
           style={{
@@ -1737,6 +1740,8 @@ const countyListings = useMemo(() => {
           lightsCount={lightsCount}
         />
       )}
+
+      <ShareMapButton />
 
       {/* Sidebar */}
       <div

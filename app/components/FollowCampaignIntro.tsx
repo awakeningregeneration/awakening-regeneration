@@ -8,8 +8,9 @@ const NAVY = "#122c4a";
 const NAVY_SOFT = "rgba(18,44,74,0.78)";
 
 // Soft light halo behind dark text — legibility insurance against
-// whatever map colors show through the now much more transparent panel,
-// without resorting to a dark scrim.
+// whatever map colors show through the deliberately light, translucent
+// panel, without resorting to a dark scrim. One consistent, modest glow
+// throughout — nothing on this panel gets a heavier shadow than this.
 const TEXT_GLOW =
   "0 1px 2px rgba(255,255,255,0.8), 0 1px 10px rgba(255,255,255,0.5)";
 
@@ -71,27 +72,44 @@ export default function FollowCampaignIntro({
   // enough on mobile to never reach into its footprint (14+62 = 76, +8
   // clearance = 84).
   const outerPadding = isMobile ? "84px 14px 16px" : 20;
-  const outerAlign = isMobile ? "flex-start" : "center";
+  const outerJustify = isMobile ? "flex-start" : "center";
+  const outerGap = isMobile ? 14 : 18;
 
   const panelMaxHeight = isMobile
     ? "calc(100vh - 100px)" // 84 top offset + 16 bottom padding
     : "calc(100vh - 40px)";
   const panelRadius = isMobile ? 28 : 36;
-  const panelPadding = isMobile ? "28px 22px 24px" : "44px 34px 38px";
+  const panelPadding = isMobile ? "26px 22px 24px" : "40px 34px 38px";
 
   const closeSize = isMobile ? 40 : 30;
   const closeFontSize = isMobile ? 19 : 17;
 
-  const leadMarginBottom = isMobile ? 12 : 16;
+  // The pause is the opening line now — short top margin (panel padding
+  // already provides room), generous bottom margin before the
+  // invitations begin.
+  const pauseMarginTop = isMobile ? 6 : 10;
+  const pauseMarginBottom = isMobile ? 30 : 42;
+
+  const invitationGap = isMobile ? 14 : 18;
+  const invitationsMarginBottom = isMobile ? 26 : 34;
+
   const thesisLineHeight = isMobile ? 1.35 : 1.45;
-  const thesisMarginBottom = isMobile ? 14 : 20;
-  const bodyLineHeight = isMobile ? 1.5 : 1.7;
-  const bodyMarginBottom1 = isMobile ? 12 : 18;
-  const bodyMarginBottom2 = isMobile ? 18 : 28;
-  const frameworkMarginBottom = isMobile ? 16 : 26;
-  const countMarginBottom = isMobile ? 4 : 6;
-  const subtextMarginBottom = isMobile ? 18 : 30;
-  const ctaPadding = isMobile ? "14px 28px" : "12px 26px";
+  const exploreCtaMarginTop = isMobile ? 22 : 30;
+  const ctaPadding = isMobile ? "16px 34px" : "13px 30px";
+
+  const invitationBodyStyle: React.CSSProperties = {
+    fontSize: 14,
+    lineHeight: 1.5,
+    color: NAVY_SOFT,
+    textShadow: TEXT_GLOW,
+    margin: 0,
+  };
+
+  const invitationLabelStyle: React.CSSProperties = {
+    fontWeight: 800,
+    color: GOLD_DEEP,
+    letterSpacing: "0.03em",
+  };
 
   return (
     <div
@@ -100,15 +118,43 @@ export default function FollowCampaignIntro({
         inset: 0,
         zIndex: 1000,
         display: "flex",
-        alignItems: outerAlign,
-        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: outerJustify,
+        gap: outerGap,
         padding: outerPadding,
         overflowY: isMobile ? "auto" : "visible",
       }}
     >
+      {/* Live count — deliberately outside the glass, as a stat the map
+          itself is surfacing rather than a line inside the invitation. */}
+      {lightsCount > 0 && (
+        <p
+          style={{
+            flexShrink: 0,
+            margin: 0,
+            padding: "8px 18px",
+            borderRadius: 999,
+            background:
+              "radial-gradient(ellipse at 50% 20%, rgba(255,253,248,0.4) 0%, rgba(248,250,253,0.28) 100%)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.45)",
+            boxShadow: "0 8px 24px rgba(20,40,75,0.14)",
+            fontSize: 14.5,
+            fontWeight: 700,
+            color: NAVY,
+            textShadow: TEXT_GLOW,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <AnimatedCount value={lightsCount} /> lights and counting
+        </p>
+      )}
+
       <div
         role="dialog"
-        aria-label="Follow the Canary this weekend"
+        aria-label="Follow the Canary"
         style={{
           position: "relative",
           width: "100%",
@@ -118,17 +164,18 @@ export default function FollowCampaignIntro({
           borderRadius: panelRadius,
           padding: panelPadding,
           background:
-            "radial-gradient(ellipse at 50% 10%, rgba(255,253,248,0.42) 0%, rgba(248,250,253,0.32) 55%, rgba(240,245,252,0.22) 100%)",
-          backdropFilter: "blur(18px) brightness(1.06) saturate(1.05)",
-          WebkitBackdropFilter: "blur(18px) brightness(1.06) saturate(1.05)",
-          border: "1px solid rgba(255,255,255,0.45)",
+            "radial-gradient(ellipse at 50% 10%, rgba(255,253,248,0.16) 0%, rgba(248,250,253,0.11) 55%, rgba(240,245,252,0.07) 100%)",
+          backdropFilter: "blur(6px) brightness(1.04) saturate(1.05)",
+          WebkitBackdropFilter: "blur(6px) brightness(1.04) saturate(1.05)",
+          border: "1px solid rgba(255,255,255,0.35)",
           boxShadow:
-            "0 30px 80px rgba(20,40,75,0.16), inset 0 1px 0 rgba(255,255,255,0.5)",
+            "0 30px 80px rgba(20,40,75,0.12), inset 0 1px 0 rgba(255,255,255,0.4)",
           color: NAVY,
           textAlign: "center",
         }}
       >
-        {/* Quiet dismiss — an alternate way out besides the CTA */}
+        {/* Quiet dismiss — an alternate way out besides EXPLORE THE MAP,
+            taking no action */}
         <button
           type="button"
           onClick={onDismiss}
@@ -156,137 +203,102 @@ export default function FollowCampaignIntro({
           ×
         </button>
 
+        {/* Emotional centerpiece — recognition and wonder, with no
+            attached action. Do not turn this into a CTA. */}
         <p
           style={{
-            fontSize: 12.5,
+            fontSize: "clamp(1.4rem, 3.6vw, 1.85rem)",
             fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: NAVY_SOFT,
+            lineHeight: 1.3,
+            color: GOLD_DEEP,
             textShadow: TEXT_GLOW,
-            margin: `0 0 ${leadMarginBottom}px`,
+            margin: `${pauseMarginTop}px 0 ${pauseMarginBottom}px`,
           }}
         >
-          Oregon has been quietly mapped.
+          How incredible we really are!
         </p>
+
+        {/* Participation section — plain, lightweight explanation of how
+            to take part once exploring the map, not a set of actions to
+            complete here. VISIT and ADD are already possible through the
+            map itself; SHARE lives permanently on the map (the share
+            control near the compass). Deliberately no buttons, arrows,
+            or links — this is explanatory text, not a second interface. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: invitationGap,
+            marginBottom: invitationsMarginBottom,
+          }}
+        >
+          <p style={invitationBodyStyle}>
+            <span style={invitationLabelStyle}>Visit</span> — The power to
+            make a difference is in your hands. Choose a place already
+            making one.
+          </p>
+
+          <p style={invitationBodyStyle}>
+            <span style={invitationLabelStyle}>Add</span> — Know a person,
+            place, or project that belongs here? Add them to the map.
+          </p>
+
+          <p style={invitationBodyStyle}>
+            <span style={invitationLabelStyle}>Share</span> — The more we
+            turn our attention to what makes a difference, the more
+            difference we make. Pass the map along.
+          </p>
+        </div>
 
         <p
           style={{
-            fontSize: "clamp(1.15rem, 2.4vw, 1.4rem)",
-            fontWeight: 600,
+            fontSize: "clamp(1rem, 1.8vw, 1.1rem)",
+            fontWeight: 700,
             lineHeight: thesisLineHeight,
             color: NAVY,
             textShadow: TEXT_GLOW,
-            margin: `0 0 ${thesisMarginBottom}px`,
+            margin: "0 0 8px",
           }}
         >
-          Turns out, another way is already here.
+          Together, let&rsquo;s light the path to the world we want to live
+          in.
         </p>
 
         <p
           style={{
-            fontSize: 14.5,
-            lineHeight: bodyLineHeight,
-            color: NAVY_SOFT,
-            textShadow: TEXT_GLOW,
-            margin: `0 0 ${bodyMarginBottom1}px`,
-          }}
-        >
-          We are living through a consequential moment. What we give our
-          attention to now matters.
-        </p>
-
-        <p
-          style={{
-            fontSize: 14.5,
-            lineHeight: bodyLineHeight,
-            color: NAVY_SOFT,
-            textShadow: TEXT_GLOW,
-            margin: `0 0 ${bodyMarginBottom1}px`,
-          }}
-        >
-          Everywhere, people are already building pieces of a world where
-          canaries thrive.
-        </p>
-
-        <p
-          style={{
-            fontSize: "clamp(1.05rem, 2vw, 1.22rem)",
-            fontWeight: 700,
-            lineHeight: thesisLineHeight,
-            color: GOLD_DEEP,
-            textShadow: TEXT_GLOW,
-            margin: `0 0 ${bodyMarginBottom1}px`,
-          }}
-        >
-          What happens if, together, we make another way impossible to
-          miss?
-        </p>
-
-        <p
-          style={{
-            fontSize: 14.5,
-            lineHeight: bodyLineHeight,
-            color: NAVY_SOFT,
-            textShadow: TEXT_GLOW,
-            margin: `0 0 ${bodyMarginBottom2}px`,
-          }}
-        >
-          Let&rsquo;s follow the Canary across the United States — and
-          light up the world where canaries thrive.
-        </p>
-
-        <div
-          style={{
-            fontSize: 11.5,
-            fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: GOLD_DEEP,
-            textShadow: TEXT_GLOW,
-            marginBottom: frameworkMarginBottom,
-          }}
-        >
-          Find 3 · Visit 1 · Add 1 · Tell another
-        </div>
-
-        {lightsCount > 0 && (
-          <p
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: NAVY,
-              textShadow: TEXT_GLOW,
-              margin: `0 0 ${countMarginBottom}px`,
-            }}
-          >
-            <AnimatedCount value={lightsCount} /> lights and counting
-          </p>
-        )}
-        <p
-          style={{
-            fontSize: 13,
+            fontSize: "clamp(1.05rem, 2vw, 1.2rem)",
             fontStyle: "italic",
-            color: NAVY_SOFT,
+            fontWeight: 650,
+            lineHeight: 1.3,
+            color: GOLD_DEEP,
             textShadow: TEXT_GLOW,
-            margin: `0 0 ${subtextMarginBottom}px`,
+            margin: 0,
           }}
         >
-          Every light makes another way easier to see.
+          Connected, we dawn brighter.
         </p>
 
+        {/* Future, optional: a quiet "Hear from the Founder" secondary
+            invitation (linking to a YouTube recording) would slot in
+            right here, between the tagline and the primary button —
+            same panel, same spacing rhythm, no restructuring needed.
+            Intentionally not added yet — no link exists. */}
+
+        {/* The one action this overlay asks for — everything else above
+            is invitation, not instruction. */}
         <button
           type="button"
           onClick={onDismiss}
           style={{
             display: "inline-block",
+            marginTop: exploreCtaMarginTop,
             padding: ctaPadding,
             borderRadius: 999,
             border: "none",
             background: GOLD,
             color: "#1a2a0e",
             fontWeight: 700,
-            fontSize: 14,
+            fontSize: 14.5,
             letterSpacing: "0.04em",
             textTransform: "uppercase",
             cursor: "pointer",
@@ -294,7 +306,7 @@ export default function FollowCampaignIntro({
               "0 0 20px rgba(255,216,107,0.3), 0 4px 14px rgba(255,200,80,0.22)",
           }}
         >
-          Find your three →
+          Explore the map →
         </button>
       </div>
     </div>
