@@ -90,7 +90,7 @@ export async function GET(request: Request) {
         if (!steward.confirmation_email_sent_at) {
           const { data: listing } = await supabaseAdmin
             .from("listings")
-            .select("title")
+            .select("title, state, county")
             .eq("id", steward.listing_id)
             .single();
 
@@ -98,6 +98,8 @@ export async function GET(request: Request) {
             stewardName: steward.display_name || "",
             listingTitle: listing?.title || "your listing",
             listingId: steward.listing_id,
+            state: listing?.state,
+            county: listing?.county,
           });
 
           await resend.emails.send({

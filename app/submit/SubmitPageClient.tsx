@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
+function editUrlWithReturn(match: { id: string; state?: string; county?: string }): string {
+  if (!match.state || !match.county) return `/edit/${match.id}`;
+  const returnParams = new URLSearchParams({
+    state: match.state,
+    county: match.county,
+    listingId: match.id,
+  });
+  return `/edit/${match.id}?return=${encodeURIComponent(`/map?${returnParams.toString()}`)}`;
+}
+
 const PRIMARY_CATEGORY_OPTIONS = [
   "Food & Nourishment",
   "Home & Shelter",
@@ -216,10 +226,12 @@ export default function SubmitPage() {
     id: string;
     title: string;
     city: string;
+    state?: string;
+    county?: string;
   } | null>(null);
 
   // ── Early duplicate detection ──
-  const [dupMatch, setDupMatch] = useState<{ id: string; title: string; city: string } | null>(null);
+  const [dupMatch, setDupMatch] = useState<{ id: string; title: string; city: string; state?: string; county?: string } | null>(null);
   const [dupDismissed, setDupDismissed] = useState(false);
   const dupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -622,7 +634,7 @@ export default function SubmitPage() {
                         <strong>{dupMatch.title}</strong> in{" "}
                         <strong>{dupMatch.city}</strong>.{" "}
                         <a
-                          href={`/edit/${dupMatch.id}`}
+                          href={editUrlWithReturn(dupMatch)}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ color: "#8a6d2a", fontWeight: 600, textDecoration: "underline" }}
@@ -1411,7 +1423,7 @@ export default function SubmitPage() {
                     <strong>{duplicateMatch.city}</strong> is already on the
                     map.{" "}
                     <a
-                      href={`/edit/${duplicateMatch.id}`}
+                      href={editUrlWithReturn(duplicateMatch)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

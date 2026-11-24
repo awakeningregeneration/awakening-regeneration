@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const PRIMARY_CATEGORY_OPTIONS = [
   "Food & Nourishment",
@@ -134,6 +135,13 @@ export default function SubmitSupportPage() {
   const [companyFax, setCompanyFax] = useState(""); // honeypot — real applicants never see this field
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
+
+  function handleBackClick(e: React.MouseEvent) {
+    if (isDirty && !window.confirm("Discard your unsaved changes?")) {
+      e.preventDefault();
+    }
+  }
 
   function togglePractice(practice: string) {
     setPractices((current) =>
@@ -250,6 +258,16 @@ export default function SubmitSupportPage() {
           Canary Commons
         </p>
 
+        <div style={{ marginBottom: 16, fontSize: "0.9rem" }}>
+          <Link
+            href="/support"
+            onClick={handleBackClick}
+            style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600, textDecoration: "none" }}
+          >
+            ← Back to Online Resources
+          </Link>
+        </div>
+
         <div
           style={{
             borderRadius: 22,
@@ -315,7 +333,7 @@ export default function SubmitSupportPage() {
             to partnership? That&rsquo;s welcome too.
           </p>
 
-          <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+          <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} style={{ display: "grid", gap: 16 }}>
             <input
               placeholder="Resource name"
               value={name}

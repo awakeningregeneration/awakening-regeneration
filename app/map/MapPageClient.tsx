@@ -9,6 +9,7 @@ import { normalizeState as normalizeStateStr, normalizeCounty as normalizeCounty
 import ListingCard from "../components/ListingCard";
 import RegionSelector from "../components/RegionSelector";
 import { useHomeLocation, readHomeLocation } from "../components/useHomeLocation";
+import { readLastRegion, writeLastRegion } from "../components/useLastRegion";
 import FollowCampaignIntro from "../components/FollowCampaignIntro";
 import ShareMapButton from "../components/ShareMapButton";
 import { useLightsCount } from "../components/useLightsCount";
@@ -169,6 +170,11 @@ export default function MapPage() {
   // behavior as tapping its marker.
   const listingIdParam = searchParams.get("listingId");
   const appliedListingIdParamRef = useRef<string | null>(null);
+
+  // Set true at the end of the URL-sync effect below, once URL params and
+  // any saved home/last-region have been resolved. Guards the last-region
+  // write effect so it can never fire against a pre-resolution default.
+  const urlSyncRanOnceRef = useRef(false);
 
   // Whether this page load originated from the campaign route — captured
   // once and kept stable even after the panel is dismissed, so the map's
@@ -343,14 +349,19 @@ export default function MapPage() {
         setSelectedId(null);
       }
     } else {
-      // Bare /map visit, no URL params — fall back to a saved home, if any.
+      // Bare /map visit, no URL params — fall back to the last-visited
+      // region, then a saved home, if either exists.
+      const savedLastRegion = readLastRegion();
       const savedHome = readHomeLocation();
-      if (savedHome) {
-        setSelectedState(savedHome.state);
-        setSelectedCounty(savedHome.county);
+      const fallbackRegion = savedLastRegion || savedHome;
+      if (fallbackRegion) {
+        setSelectedState(fallbackRegion.state);
+        setSelectedCounty(fallbackRegion.county);
         setSelectedId(null);
       }
     }
+
+    urlSyncRanOnceRef.current = true;
   }, [searchParams]);
 
   // Deep link: once the region above is set and listings have loaded,
@@ -371,6 +382,17 @@ export default function MapPage() {
     setSelectedId(target.id);
     if (isMobile) setDrawerSnap("full");
   }, [listingIdParam, listingsLoaded, allListings, isMobile]);
+
+  // Remember the last-explored region, device-only, so returning through
+  // the site's navigation (rather than a direct link) restores it. Guarded
+  // on urlSyncRanOnceRef so a transient pre-resolution default can never
+  // overwrite a previously saved region — only a region the URL-sync
+  // effect has actually settled on gets written.
+  useEffect(() => {
+    if (!urlSyncRanOnceRef.current) return;
+    if (selectedState === "All") return;
+    writeLastRegion(selectedState, selectedCounty);
+  }, [selectedState, selectedCounty]);
 
   const states = useMemo(() => {
     return ["All", ...STATES];

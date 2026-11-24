@@ -183,6 +183,19 @@ function JoinContent() {
           margin: "0 auto",
         }}
       >
+        <div style={{ marginBottom: 16, fontSize: "0.88rem" }}>
+          <Link
+            href="/founders/bridge"
+            style={{
+              color: "rgba(190,210,235,0.72)",
+              textDecoration: "underline",
+              textUnderlineOffset: 2,
+            }}
+          >
+            ← Back to Bridge the Commons
+          </Link>
+        </div>
+
         <h1
           style={{
             fontSize: "clamp(1.8rem, 4vw, 2.6rem)",

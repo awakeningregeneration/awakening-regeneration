@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
   const { data } = await supabaseAdmin
     .from("listings")
-    .select("id, title, city")
+    .select("id, title, city, state, county")
     .eq("normalized_name", normalized)
     .ilike("city", city)
     .eq("status", "active")

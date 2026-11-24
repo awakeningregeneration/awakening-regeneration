@@ -234,6 +234,12 @@ function EditListingContent({ params }: Props) {
   const [removing, setRemoving] = useState(false);
   const [removalError, setRemovalError] = useState("");
 
+  // Unsaved-input tracking for the back link's discard confirmation
+  const [isDirty, setIsDirty] = useState(false);
+  function markDirty() {
+    setIsDirty(true);
+  }
+
   // ── Auto-redirect after successful save ──
   useEffect(() => {
     if (!submitted) return;
@@ -412,6 +418,7 @@ function EditListingContent({ params }: Props) {
       if (!res.ok) throw new Error(data?.error || "Failed to save.");
 
       setSubmitted(true);
+      setIsDirty(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save.");
     } finally {
@@ -471,6 +478,7 @@ function EditListingContent({ params }: Props) {
       if (!res.ok) throw new Error(data?.error || "Failed to save.");
 
       setSubmitted(true);
+      setIsDirty(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save.");
     } finally {
@@ -507,6 +515,7 @@ function EditListingContent({ params }: Props) {
       if (!res.ok) throw new Error(data?.error || "Failed to submit edit.");
 
       setSubmitted(true);
+      setIsDirty(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit edit.");
     } finally {
@@ -539,6 +548,7 @@ function EditListingContent({ params }: Props) {
       }
 
       setClaimSent(true);
+      setIsDirty(false);
     } catch (err) {
       setClaimError(
         err instanceof Error ? err.message : "Something went wrong."
@@ -600,6 +610,45 @@ function EditListingContent({ params }: Props) {
     }
   }
 
+  // ── Back navigation ──────────────────────────────────────
+  // Prefer the context the visitor arrived from (?return=), fall back to
+  // this listing's pin on the map when we know its region, else the map.
+  const backHref = (() => {
+    if (returnPath && returnPath.startsWith("/")) return returnPath;
+    if (originalListing?.state && originalListing?.county && listingId) {
+      const p = new URLSearchParams({
+        state: originalListing.state,
+        county: originalListing.county,
+        listingId,
+      });
+      return `/map?${p.toString()}`;
+    }
+    return "/map";
+  })();
+
+  function handleBackClick(e: React.MouseEvent) {
+    if (isDirty && !window.confirm("Discard your unsaved changes?")) {
+      e.preventDefault();
+    }
+  }
+
+  const backLink = (
+    <div style={{ marginBottom: 16 }}>
+      <Link
+        href={backHref}
+        onClick={handleBackClick}
+        style={{
+          color: "#3a5a7a",
+          fontWeight: 600,
+          fontSize: "0.88rem",
+          textDecoration: "none",
+        }}
+      >
+        ← Back
+      </Link>
+    </div>
+  );
+
   if (loading) {
     return (
       <main style={pageStyle}>
@@ -621,6 +670,7 @@ function EditListingContent({ params }: Props) {
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
+            {backLink}
             <h1 style={headingStyle}>Suggest an edit</h1>
             <p style={errorStyle}>{error}</p>
           </div>
@@ -636,6 +686,7 @@ function EditListingContent({ params }: Props) {
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
+            {backLink}
             <h1 style={headingStyle}>
               {editMode === "steward_edit" || editMode === "seeder_edit"
                 ? "Done"
@@ -660,6 +711,7 @@ function EditListingContent({ params }: Props) {
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
+            {backLink}
             <h1 style={headingStyle}>A claim is pending for this listing.</h1>
             <p style={textStyle}>
               Someone has recently started the process of becoming the steward
@@ -711,6 +763,7 @@ function EditListingContent({ params }: Props) {
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
+            {!claimSent && backLink}
             {editMode === "claim_or_edit" && !claimSent && (
               <>
                 <h1 style={headingStyle}>Are you the steward of this place?</h1>
@@ -755,7 +808,7 @@ function EditListingContent({ params }: Props) {
                   the one tending this work.
                 </p>
 
-                <form onSubmit={handleClaimSubmit} style={formStyle}>
+                <form onSubmit={handleClaimSubmit} onChange={markDirty} style={formStyle}>
                   <label style={fieldStyle}>
                     <span style={labelStyle}>Your email (for verification)</span>
                     <input
@@ -861,6 +914,7 @@ function EditListingContent({ params }: Props) {
         <div style={contentWrapStyle}>
           <p style={kickerStyle}>Canary Commons</p>
           <div style={cardStyle}>
+            {backLink}
             <h1 style={headingStyle}>Verify you&apos;re the steward</h1>
             <p style={textStyle}>
               This listing has a steward. If that&apos;s you, enter your
@@ -873,7 +927,7 @@ function EditListingContent({ params }: Props) {
                 Check your inbox.
               </p>
             ) : (
-              <form onSubmit={handleVerifyRequest} style={formStyle}>
+              <form onSubmit={handleVerifyRequest} onChange={markDirty} style={formStyle}>
                 <label style={fieldStyle}>
                   <span style={labelStyle}>Your email</span>
                   <input
@@ -1242,6 +1296,7 @@ function EditListingContent({ params }: Props) {
       <div style={contentWrapStyle}>
         <p style={kickerStyle}>Canary Commons</p>
         <div style={cardStyle}>
+          {backLink}
           <h1 style={headingStyle}>
             {editMode === "steward_edit" || editMode === "seeder_edit"
               ? "Edit your listing"
@@ -1259,7 +1314,7 @@ function EditListingContent({ params }: Props) {
           )}
 
           {editMode === "seeder_edit" ? (
-            <form onSubmit={handleSeederSave} style={formStyle}>
+            <form onSubmit={handleSeederSave} onChange={markDirty} style={formStyle}>
               {/* Outreach status context */}
               <div style={{ fontSize: "0.82rem", color: "#6b7c94", marginBottom: 4 }}>
                 Outreach:{" "}
@@ -1489,7 +1544,7 @@ function EditListingContent({ params }: Props) {
               </button>
             </form>
           ) : editMode === "steward_edit" ? (
-            <form onSubmit={handleStewardSave} style={formStyle}>
+            <form onSubmit={handleStewardSave} onChange={markDirty} style={formStyle}>
               {listingFields}
 
               {/* Stewardship section */}
@@ -1643,7 +1698,7 @@ function EditListingContent({ params }: Props) {
               </button>
             </form>
           ) : (
-            <form onSubmit={handleProposeEdit} style={formStyle}>
+            <form onSubmit={handleProposeEdit} onChange={markDirty} style={formStyle}>
               {listingFields}
 
               <label style={fieldStyle}>

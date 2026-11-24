@@ -266,7 +266,7 @@ export async function POST(req: Request) {
       if (!body.override_duplicate) {
         const { data: existing } = await supabaseAdmin
           .from("listings")
-          .select("id, title, city")
+          .select("id, title, city, state, county")
           .eq("normalized_name", normalizedTitle)
           .ilike("city", normalizedCity)
           .eq("status", "active")
@@ -280,6 +280,8 @@ export async function POST(req: Request) {
               id: existing.id,
               title: existing.title,
               city: existing.city,
+              state: existing.state,
+              county: existing.county,
             },
           });
         }

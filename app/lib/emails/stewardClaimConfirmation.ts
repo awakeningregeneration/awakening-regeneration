@@ -12,11 +12,17 @@ export function stewardClaimConfirmationEmail(options: {
   stewardName: string;
   listingTitle: string;
   listingId: string;
+  state?: string | null;
+  county?: string | null;
 }): { subject: string; html: string; text: string } {
-  const { stewardName, listingTitle, listingId } = options;
+  const { stewardName, listingTitle, listingId, state, county } = options;
 
   const greeting = stewardName ? `Hi ${stewardName},` : "Hi there,";
-  const listingUrl = `${SITE_URL}/edit/${listingId}`;
+  let listingUrl = `${SITE_URL}/edit/${listingId}`;
+  if (state && county) {
+    const returnParams = new URLSearchParams({ state, county, listingId });
+    listingUrl += `?return=${encodeURIComponent(`/map?${returnParams.toString()}`)}`;
+  }
   const submitUrl = `${SITE_URL}/submit`;
   const storiesUrl = `${SITE_URL}/stories/submit?listingId=${listingId}`;
 

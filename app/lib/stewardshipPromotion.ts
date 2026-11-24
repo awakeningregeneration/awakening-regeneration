@@ -82,7 +82,7 @@ export async function promoteIfGraceExpired(
         if (!stewardRecord?.confirmation_email_sent_at) {
           const { data: listing } = await supabaseAdmin
             .from("listings")
-            .select("title")
+            .select("title, state, county")
             .eq("id", listingId)
             .single();
 
@@ -90,6 +90,8 @@ export async function promoteIfGraceExpired(
             stewardName: stewardRecord?.display_name || "",
             listingTitle: listing?.title || "your listing",
             listingId,
+            state: listing?.state,
+            county: listing?.county,
           });
 
           await resend.emails.send({

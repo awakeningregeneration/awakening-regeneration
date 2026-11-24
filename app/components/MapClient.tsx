@@ -966,7 +966,16 @@ export default function MapClient({
     editButton.className = "ar-popup-action";
     editButton.textContent = "Suggest an edit";
     editButton.addEventListener("click", () => {
-      window.open(`/edit/${listing.id}`, "_blank");
+      let editUrl = `/edit/${listing.id}`;
+      if (listing.state && listing.county) {
+        const returnParams = new URLSearchParams({
+          state: listing.state,
+          county: listing.county,
+          listingId: listing.id,
+        });
+        editUrl += `?return=${encodeURIComponent(`/map?${returnParams.toString()}`)}`;
+      }
+      window.open(editUrl, "_blank");
     });
     contentDiv.appendChild(editButton);
 

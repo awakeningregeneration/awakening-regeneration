@@ -45,9 +45,24 @@ export async function GET(request: Request) {
 
     // Set cookie and redirect to edit page
     const cookieName = `steward_session_${session.listing_id}`;
-    const response = NextResponse.redirect(
-      new URL(`/edit/${session.listing_id}`, request.url)
-    );
+
+    const { data: listing } = await supabaseAdmin
+      .from("listings")
+      .select("state, county")
+      .eq("id", session.listing_id)
+      .maybeSingle();
+
+    let editUrl = `/edit/${session.listing_id}`;
+    if (listing?.state && listing?.county) {
+      const returnParams = new URLSearchParams({
+        state: listing.state,
+        county: listing.county,
+        listingId: session.listing_id,
+      });
+      editUrl += `?return=${encodeURIComponent(`/map?${returnParams.toString()}`)}`;
+    }
+
+    const response = NextResponse.redirect(new URL(editUrl, request.url));
 
     response.cookies.set(cookieName, token, {
       httpOnly: true,

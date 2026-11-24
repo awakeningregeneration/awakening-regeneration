@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const PRIMARY_CATEGORY_OPTIONS = [
   "Food & Nourishment",
@@ -98,6 +99,13 @@ export default function ContributorSubmitClient({ slug, name }: { slug: string; 
   const [newWhyItMatters, setNewWhyItMatters] = useState("");
   const [newPractices, setNewPractices] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  function handleBackClick(e: React.MouseEvent) {
+    if (isDirty && !window.confirm("Discard your unsaved changes?")) {
+      e.preventDefault();
+    }
+  }
 
   useEffect(() => { fetchResources(); }, [slug]);
 
@@ -200,6 +208,7 @@ export default function ContributorSubmitClient({ slug, name }: { slug: string; 
         setNewName(""); setNewCategory([]); setNewUrl(""); setNewImageUrl("");
         setNewAffiliateUrl(""); setNewDescription(""); setNewWhyItMatters(""); setNewPractices([]);
         showFlash("Added. Live now.");
+        setIsDirty(false);
         await fetchResources();
       } else {
         showFlash("Something went wrong — please try again.", 4000);
@@ -264,6 +273,16 @@ export default function ContributorSubmitClient({ slug, name }: { slug: string; 
         <p style={{ fontSize: "0.82rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", margin: 0, marginBottom: 16 }}>
           Canary Commons
         </p>
+
+        <div style={{ marginBottom: 16, fontSize: "0.9rem" }}>
+          <Link
+            href={`/contributor/${slug}`}
+            onClick={handleBackClick}
+            style={{ color: "#3a5a7a", fontWeight: 600, textDecoration: "none" }}
+          >
+            ← Back to your dashboard
+          </Link>
+        </div>
 
         {flashMessage && (
           <div style={{ position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)", padding: "10px 24px", borderRadius: 999, background: "rgba(255,216,107,0.95)", color: "#1a2a0e", fontWeight: 700, fontSize: "0.9rem", zIndex: 100, boxShadow: "0 4px 20px rgba(255,200,80,0.3)" }}>
