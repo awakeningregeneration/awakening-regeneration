@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import CompassCaption from "./CompassCaption";
 import { useInstallPrompt } from "./useInstallPrompt";
 
 const GOLD = "#FFD86B";
@@ -78,6 +77,15 @@ const diagonals = [45, 315, 225, 135].map((deg) =>
   compassPoint(deg, DIAG_LONG_R, DIAG_SHORT_R, CX, CY)
 );
 
+// Lower interior arc that "MENU" curves along, riding the glass
+// bubble's own rim rather than the compass star (star points reach
+// only to r=19/r=10 — this arc sits at r=26, past the star entirely).
+// The svg's declared viewBox/size stay exactly as before (so the star
+// itself is untouched); `overflow: visible` just lets this one path
+// extend into the bit of glass between the star and the button's true
+// edge, which was previously empty space.
+const MENU_ARC_PATH = "M2.7,38.91 A26,26 0 0 0 45.3,38.91";
+
 const CompassRose = () => (
   <svg
     aria-hidden="true"
@@ -87,6 +95,7 @@ const CompassRose = () => (
     style={{
       position: "relative",
       zIndex: 1,
+      overflow: "visible",
       filter: "drop-shadow(0 0 6px rgba(255,216,107,0.5))",
       animation: "northStarPulse 4s ease-in-out infinite",
     }}
@@ -108,6 +117,27 @@ const CompassRose = () => (
     {/* Center bright point */}
     <circle cx={CX} cy={CY} r="3.2" fill={GOLD} />
     <circle cx={CX} cy={CY} r="1.6" fill="#fff8e0" opacity="0.85" />
+
+    {/* "MENU" curving along the lower interior face */}
+    <defs>
+      <path id="compassMenuArc" d={MENU_ARC_PATH} fill="none" />
+    </defs>
+    <text
+      style={{
+        fontSize: 5.6,
+        fontWeight: 700,
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        letterSpacing: "0.3px",
+      }}
+      fill={GOLD_LIGHT}
+      stroke="rgba(10,25,50,0.55)"
+      strokeWidth={0.35}
+      paintOrder="stroke"
+    >
+      <textPath href="#compassMenuArc" startOffset="50%" textAnchor="middle">
+        MENU
+      </textPath>
+    </text>
   </svg>
 );
 
@@ -454,6 +484,13 @@ export default function NorthStarNav() {
 
         {items.map((item, i) => {
           const current = isCurrentPage(item.href);
+          const isInstall = item.href === "/install";
+          // Soft, resting-state gold glow on the label text only — not a
+          // background tint or ring, so the item keeps the exact same
+          // layout/shape as every other item and never reads as a button.
+          const installGlow = isInstall
+            ? "0 0 6px rgba(255,216,107,0.65), 0 0 14px rgba(255,216,107,0.35)"
+            : undefined;
           const shared: React.CSSProperties = {
             position: "relative",
             display: "block",
@@ -527,7 +564,13 @@ export default function NorthStarNav() {
               >
                 {lensLayer}
                 {glossLayer}
-                <span style={{ position: "relative", zIndex: 1 }}>
+                <span
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    textShadow: installGlow,
+                  }}
+                >
                   {item.label}
                 </span>
               </span>
@@ -563,22 +606,19 @@ export default function NorthStarNav() {
             >
               {lensLayer}
               {glossLayer}
-              <span style={{ position: "relative", zIndex: 1 }}>
+              <span
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  textShadow: installGlow,
+                }}
+              >
                 {item.label}
               </span>
             </Link>
           );
         })}
       </div>
-
-      {/* ── Compass caption bubble ── */}
-      {(pathname === "/" || pathname === "/about" || pathname === "/bridge-the-commons") && (
-        <CompassCaption
-          mode={pathname === "/about" ? "about-permanent" : "homepage-timed"}
-          isDropdownOpen={open}
-        />
-      )}
-
     </div>
   );
 }

@@ -284,7 +284,7 @@ export default function AboutPage() {
               and participation toward the things that give back.
             </p>
 
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>
+            <p style={{ ...bodyStyle, marginBottom: 10 }}>
               <Link
                 href="/install"
                 style={{
@@ -297,6 +297,19 @@ export default function AboutPage() {
               >
                 Canary is an app — a pocket bird to take you to the places
                 where canaries thrive.
+              </Link>
+            </p>
+            <p style={{ ...bodyStyle, marginBottom: 0, fontSize: "0.92rem" }}>
+              <Link
+                href="/install"
+                style={{
+                  color: GOLD,
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                }}
+              >
+                Add Canary to your home screen →
               </Link>
             </p>
           </section>
