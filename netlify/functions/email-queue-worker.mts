@@ -95,7 +95,7 @@ async function sendViaResend(params: Parameters<typeof resend.emails.send>[0]): 
 async function sendQueuedEmail(row: QueueRow): Promise<void> {
   const { data: listing, error } = await supabase
     .from("listings")
-    .select("id, title, steward_email, no_public_email, removal_token, placed_by_seeder_id")
+    .select("id, title, state, county, steward_email, no_public_email, removal_token, placed_by_seeder_id")
     .eq("id", row.listing_id)
     .single();
 
@@ -121,6 +121,8 @@ async function sendQueuedEmail(row: QueueRow): Promise<void> {
     const content = seederOutreach1Email({
       businessName: listing.title,
       listingId: listing.id,
+      state: listing.state,
+      county: listing.county,
       removalToken: listing.removal_token,
       seederName: seeder?.name || "A seeder",
     });

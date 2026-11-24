@@ -161,6 +161,15 @@ export default function MapPage() {
     () => searchParams.get("follow") === "1",
   );
 
+  // Public deep link to one listing (/map?state=..&county=..&listingId=..),
+  // used by the Letter 1 outreach email's "Take a look" link. The
+  // state/county params are handled entirely by the existing URL-sync
+  // effect below — this only adds selecting the one matching listing
+  // once it's loaded, reusing the same selection/highlight/scroll
+  // behavior as tapping its marker.
+  const listingIdParam = searchParams.get("listingId");
+  const appliedListingIdParamRef = useRef<string | null>(null);
+
   // Whether this page load originated from the campaign route — captured
   // once and kept stable even after the panel is dismissed, so the map's
   // camera (not its data/filters) can open over Oregon for the campaign
@@ -343,6 +352,25 @@ export default function MapPage() {
       }
     }
   }, [searchParams]);
+
+  // Deep link: once the region above is set and listings have loaded,
+  // select the one matching listing — same setSelectedId the marker
+  // click path uses, so highlighting, scroll-into-view, and (on mobile)
+  // the drawer all behave exactly as they already do today. Applies at
+  // most once per listingId so later manual selections aren't overridden
+  // if this effect happens to re-run.
+  useEffect(() => {
+    if (!listingIdParam) return;
+    if (!listingsLoaded) return;
+    if (appliedListingIdParamRef.current === listingIdParam) return;
+
+    const target = allListings.find((l) => l.id === listingIdParam);
+    if (!target) return;
+
+    appliedListingIdParamRef.current = listingIdParam;
+    setSelectedId(target.id);
+    if (isMobile) setDrawerSnap("full");
+  }, [listingIdParam, listingsLoaded, allListings, isMobile]);
 
   const states = useMemo(() => {
     return ["All", ...STATES];

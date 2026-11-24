@@ -49,7 +49,7 @@ async function main() {
 
   const { data: listings, error } = await supabase
     .from("listings")
-    .select("id, title, steward_email, removal_token")
+    .select("id, title, state, county, steward_email, removal_token")
     .ilike("city", "ashland")
     .ilike("state", "oregon")
     .eq("source", "seeder_placed")
@@ -78,7 +78,7 @@ async function main() {
   const failures: { title: string; error: string }[] = [];
 
   for (const listing of listings) {
-    const { id, title, steward_email, removal_token } = listing;
+    const { id, title, state, county, steward_email, removal_token } = listing;
 
     if (!steward_email || !removal_token) {
       console.warn(`SKIP ${title}: missing steward_email or removal_token`);
@@ -91,6 +91,8 @@ async function main() {
       const { subject, html, text } = seederOutreach1Email({
         businessName: title,
         listingId: id,
+        state,
+        county,
         removalToken: removal_token,
         seederName: "",
       });

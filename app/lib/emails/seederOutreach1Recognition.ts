@@ -1,8 +1,8 @@
 /**
- * Seeder outreach email 1 — Recognition + Claim.
+ * Seeder outreach email 1 — minimal "you've been added" note.
  *
- * Sent immediately when a seeder places a listing.
- * Content matches EmailModals.tsx → Email1Recognition() exactly.
+ * Sent immediately when a seeder places a listing (queued into
+ * email_queue at placement, sent by the hourly email-queue-worker).
  */
 
 import { getEmailHeader } from "./components/emailHeader";
@@ -13,59 +13,57 @@ const SITE_URL =
 export function seederOutreach1Email(options: {
   businessName: string;
   listingId: string;
+  state: string;
+  county: string;
   removalToken: string;
   seederName: string;
 }): { subject: string; html: string; text: string } {
-  const { businessName, listingId } = options;
+  const { listingId, state, county } = options;
 
-  // removalToken and seederName accepted for interface consistency but not
-  // rendered in Email 1 — new copy does not include a remove button or
-  // seeder attribution.
+  // Accepted for interface consistency with the queue worker's call
+  // shape, but this minimal copy has no greeting or remove button.
+  void options.businessName;
   void options.removalToken;
   void options.seederName;
 
-  const claimUrl = `${SITE_URL}/edit/${listingId}`;
+  // Public map deep link — not /edit/{id}, which opens a claim/edit
+  // workflow for anyone without a steward session. state/county route
+  // to the right region exactly like clicking a pin does; listingId is
+  // read by a small effect in MapPageClient that selects this one
+  // listing once it loads, reusing the existing marker-selection,
+  // highlight, scroll-into-view, and (on mobile) drawer-opening behavior.
+  const listingUrlParams = new URLSearchParams();
+  if (state) listingUrlParams.set("state", state);
+  if (county) listingUrlParams.set("county", county);
+  listingUrlParams.set("listingId", listingId);
+  const listingUrl = `${SITE_URL}/map?${listingUrlParams.toString()}`;
 
-  const subject = "You\u2019ve been added to Canary Commons";
+  const subject = "You’ve been added to Canary Commons";
 
   const html = `
 <div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#1a2a3a;padding:32px 24px;">
   ${getEmailHeader()}
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">Hi ${businessName},</p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    You&rsquo;ve been added to Canary Commons &mdash; a visibility infrastructure
-    bringing a world of good into view, and into reach, helping us all make a
-    difference with every choice.
+    You&rsquo;ve been added to Canary Commons, a free app helping people find
+    and support places that care for people and planet.
   </p>
 
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    Right now it&rsquo;s a map &mdash; soon, as more of the country fills in,
-    it becomes an app.
+    Take a look: <a href="${listingUrl}" style="color:#1a2a3a;font-weight:700;text-decoration:underline;">your listing</a>
   </p>
 
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    You&rsquo;re one of the first listings on it.
+  <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
+    Share if you like: the more people who discover the map, the more
+    people can discover you.
   </p>
 
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    We&rsquo;ll send a couple more notes over the next few weeks, in case you
-    miss this one. You&rsquo;re welcome to interact with your listing here:
+  <p style="font-size:16px;font-style:italic;color:#9c6f12;margin:0 0 6px;">
+    Connected, we dawn brighter.
   </p>
 
-  <div style="text-align:center;margin:24px 0;">
-    <a href="${claimUrl}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#FFD86B;color:#1a2a0e;font-weight:700;font-size:15px;text-decoration:none;">
-      View Your Listing
-    </a>
-  </div>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    We hope to build Canary into a resource people trust and turn to.
-    Thanks for being a business that cares.
-  </p>
-
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
-    &mdash; <a href="${SITE_URL}" style="color:#1a2a3a;text-decoration:none;font-weight:700;">Canary Commons</a>
+  <p style="font-size:14px;margin:0;">
+    <a href="${SITE_URL}" style="color:#1a2a3a;text-decoration:none;">www.canarycommons.org</a>
   </p>
 
   <div style="text-align:center;color:rgba(138,109,42,0.3);font-size:18px;letter-spacing:0.5em;margin:24px 0 8px;">
@@ -73,22 +71,15 @@ export function seederOutreach1Email(options: {
   </div>
 </div>`.trim();
 
-  const text = `Hi ${businessName},
+  const text = `You’ve been added to Canary Commons, a free app helping people find and support places that care for people and planet.
 
-You\u2019ve been added to Canary Commons \u2014 a visibility infrastructure bringing a world of good into view, and into reach, helping us all make a difference with every choice.
+Take a look: ${listingUrl}
 
-Right now it\u2019s a map \u2014 soon, as more of the country fills in, it becomes an app.
+Share if you like: the more people who discover the map, the more people can discover you.
 
-You\u2019re one of the first listings on it.
+Connected, we dawn brighter.
 
-We\u2019ll send a couple more notes over the next few weeks, in case you miss this one. You\u2019re welcome to interact with your listing here:
-
-${claimUrl}
-
-We hope to build Canary into a resource people trust and turn to. Thanks for being a business that cares.
-
-\u2014 Canary Commons
-${SITE_URL}`;
+www.canarycommons.org`;
 
   return { subject, html, text };
 }
