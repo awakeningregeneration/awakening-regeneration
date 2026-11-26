@@ -10,7 +10,9 @@ import { normalizeState, normalizeCounty, normalizeCity, normalizeName } from "@
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+// Server-only geocoding token — never bundled to the browser, distinct
+// from NEXT_PUBLIC_MAPBOX_TOKEN which is scoped to map display only.
+const mapboxToken = process.env.MAPBOX_GEOCODING_TOKEN!;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

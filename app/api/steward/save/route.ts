@@ -5,7 +5,9 @@ import { normalizeState, normalizeCounty, normalizeCity } from "@/app/lib/normal
 import { generateVerificationToken } from "@/app/lib/stewardshipTokens";
 import { sendStewardVerificationEmail } from "@/app/lib/emails/stewardVerification";
 
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+// Server-only geocoding token — never bundled to the browser, distinct
+// from NEXT_PUBLIC_MAPBOX_TOKEN which is scoped to map display only.
+const mapboxToken = process.env.MAPBOX_GEOCODING_TOKEN;
 
 // Result is stored long-term (listing_locations.lat/lng) — Mapbox's
 // Temporary Geocoding tier (the default) prohibits storing results for

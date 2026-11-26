@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { normalizeState, normalizeCounty } from "@/app/lib/normalize";
 import { getClientIp, hashIp, createRateLimiter } from "@/app/lib/rateLimit";
 
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+// Server-only geocoding token — never bundled to the browser, distinct
+// from NEXT_PUBLIC_MAPBOX_TOKEN which is scoped to map display only.
+const mapboxToken = process.env.MAPBOX_GEOCODING_TOKEN;
 
 // This is a direct, unauthenticated proxy to paid Mapbox geocoding — the
 // single cheapest thing in the app to abuse (no write even has to
