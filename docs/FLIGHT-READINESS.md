@@ -10,9 +10,9 @@ Before re-investigating Mapbox/Netlify/Supabase cost or scaling questions from s
 ## Executive summary
 
 - **Current cost: effectively $0/month in infrastructure overage** at today's real traffic (~113 Mapbox web map loads in the most recent billing window). The one exception is Mapbox's Permanent Geocoding product, which has no free tier at all and is already producing small charges from normal listing-placement activity.
-- **Primary risk is not "the site goes down from popularity" — it's two specific, fixable things:** (1) the map currently asks Mapbox to re-identify a region it already knows roughly **5 times per visit** (county selection, marker clicks, Home, clearing filters all trigger a redundant lookup), which is what pushes Mapbox's generous free geocoding allowance down to a much lower real ceiling than it should be; and (2) **Netlify will pause the entire site** ("Site not available") if its monthly credit allotment is exhausted, on either plan, unless auto-recharge is explicitly on — this is a harder failure mode than anything Mapbox or Supabase does.
-- **A fix for (1) is written, tested, and sitting uncommitted in the working tree, awaiting deploy approval.** A related fix — separating the public Mapbox token from a server-only geocoding token, to limit damage if the public token is ever scraped — **is already implemented and live in production** (deployed 2026-11-26).
-- **Next actions:** (a) decide on deploying the pending geocoding-call fix (see §5/§8); (b) confirm Netlify plan + auto-recharge status and Supabase plan + spend-cap status directly in each dashboard — neither is visible from code; (c) get Mapbox's itemized invoice for the unexplained $5 Permanent Geocoding charge (§7).
+- **The previous primary risk — redundant geocoding, not outage risk — is now fixed.** Through 2026-11-26, the map asked Mapbox to re-identify a region it already knew roughly **5 times per visit** (county selection, marker clicks, Home, and clearing filters each triggered a redundant lookup). As of commit `539b28a` (deployed 2026-11-26), those four triggers are removed; only the initial on-load lookup and genuine free-panning still geocode. The remaining structural risk is **Netlify pausing the entire site** ("Site not available") if its monthly credit allotment is exhausted, on either plan, unless auto-recharge is explicitly on — this is a harder failure mode than anything Mapbox or Supabase does.
+- **Both fixes are now implemented and live in production** (deployed 2026-11-26): the redundant reverse-geocode skip in `app/components/MapClient.tsx` (commit `539b28a`), and the server-only Mapbox geocoding token (commit `cb8a2c8`).
+- **Next actions:** (a) watch the next Mapbox Statistics window to confirm the real post-fix ratio (§2's projection table still uses the pre-fix ~5× figure as a conservative baseline until new data comes in — see §8); (b) confirm Netlify plan + auto-recharge status and Supabase plan + spend-cap status directly in each dashboard — neither is visible from code; (c) get Mapbox's itemized invoice for the unexplained $5 Permanent Geocoding charge (§7).
 - **When to come back and re-read this document:** after any sustained jump in traffic, after crossing roughly 1,000 active listings, after any Mapbox/Netlify/Supabase pricing change, or before any planned marketing push/campaign. See the checklist in §8.
 
 ---
@@ -75,12 +75,12 @@ The raw-size drop despite more rows is most likely explained by a field-list tri
 | Visitor action | Mapbox | Netlify function | Supabase |
 |---|---|---|---|
 | Open `/map` (first time this session) | 1 web map load + 1 reverse-geocode (fires on `load`) | `GET /api/listings`, `GET /api/affiliates` | 2 reads, both edge-cached 30s (`Cache-Control: public, s-maxage=30, stale-while-revalidate=60`) |
-| Select a county/state | 1 reverse-geocode (**redundant as of 2026-11-26 code** — see §4/§5; a fix removing this is written and pending deploy) | none | none — filters the already-loaded dataset client-side |
-| Click each of 10 markers (desktop) | 10 reverse-geocodes (**redundant**, same status) | none | none |
+| Select a county/state | 0 — fixed 2026-11-26 (commit `539b28a`), see §4/§5 | none | none — filters the already-loaded dataset client-side |
+| Click each of 10 markers (desktop) | 0 — fixed 2026-11-26 (commit `539b28a`) | none | none |
 | Click markers (mobile) | 0 — map doesn't recenter on mobile marker-select | none | none |
 | Free pan/zoom to a new area | 1 reverse-geocode per settled position — **the one legitimate case** | none | none |
-| Use "Home" | 1 reverse-geocode (**redundant**, same status) | none | none |
-| Clear filters back to default view | 1 reverse-geocode (**redundant**, same status) | none | none |
+| Use "Home" | 0 — fixed 2026-11-26 (commit `539b28a`) | none | none |
+| Clear filters back to default view | 0 — fixed 2026-11-26 (commit `539b28a`) | none | none |
 | Type a search term | 0–1 per changed result set (can also recenter the map → same redundant path) | `GET /api/synonyms` (200ms debounce), `POST /api/search-log` (1s debounce) | 1 read (`synonym_groups`) + 1 write (`search_logs`) per completed term |
 | Close tab, return later | repeats the "open /map" cost exactly | same two GETs | 2 reads again (30s cache almost certainly expired) |
 
@@ -103,7 +103,7 @@ Built from the measured ~5× geocoding ratio and documented tiered pricing above
 
 *Assumes 1.2–1.5 map opens per unique visitor/month on average — **an estimate, not measured analytics.** This is the one number in this table that isn't grounded in a measured or documented figure; treat the "unique visitors" column as illustrative only.
 
-**What the pending geocoding fix (§5) is worth:** removing the four redundant triggers would plausibly cut the ratio from ~5× to ~1.5–2×. At 100,000 map opens, that moves temporary-geocoding cost from roughly $300 of the $550 total down toward $0–38 — the highest-leverage, lowest-risk lever available, and it changes nothing a visitor can see.
+**What the now-deployed geocoding fix (commit `539b28a`, §4/§5) is worth:** removing the four redundant triggers plausibly cuts the ratio from ~5× to ~1.5–2×. At 100,000 map opens, that moves temporary-geocoding cost from roughly $300 of the $550 total down toward $0–38 — the highest-leverage, lowest-risk lever available, and it changed nothing visible to a visitor. The table above still uses the pre-fix ~5× ratio as the conservative baseline; **re-measure against the next full Mapbox Statistics window and update this table once real post-fix data is available** (see §8 checklist).
 
 ---
 
@@ -166,8 +166,8 @@ Everything in this §4 table and the token-architecture bullets above was re-che
 
 | Item | Status |
 |---|---|
-| Server-only geocoding token | ✅ implemented, committed (`cb8a2c8`), **pushed and deployed** |
-| Redundant reverse-geocode skip (county-select, marker-click, Home, clear-filters) | ✅ implemented in `app/components/MapClient.tsx`, `tsc`/build verified — **uncommitted, not pushed, not deployed.** Awaiting deployment approval. |
+| Server-only geocoding token | ✅ implemented, committed (`cb8a2c8`), **pushed and deployed**, functionally verified in production |
+| Redundant reverse-geocode skip (county-select, marker-click, Home, clear-filters) | ✅ implemented, committed (`539b28a`), **pushed and deployed**, `tsc`/build verified before push, production chunk fingerprint confirmed live post-deploy |
 | Multi-location unconditional re-geocode-on-save fix | recommended (§3), **not implemented** |
 | `/api/listings` region-scoping or pagination | recommended (§3/§6), **not implemented** |
 | Client-side session cache for `/api/listings` on return visits | recommended, **not implemented** |
@@ -178,7 +178,7 @@ Everything in this §4 table and the token-architecture bullets above was re-che
 
 **Launch on Netlify's Personal/Free plan, upgrade when traffic justifies it (October 2026).** Recorded as described by the project owner; I could not locate an independent corroborating commit or document for this specific decision in this repository's git history or existing docs — noted here as stated, not independently verified. Rationale as given: avoid paying for infrastructure headroom before real usage exists, with the explicit intention to revisit once traffic data justified the cost. This document's §2/§6 give the concrete numbers to make that call when the time comes — **do not reopen this decision without new usage evidence; the numbers in this document are exactly what "new evidence" should look like.**
 
-**Mapbox remains the map/geocoding provider.** Per the 2026-11-26 audit's explicit conclusion: switching providers is not worth it at any volume modeled in §2 on its own — Mapbox's tiered pricing stays cheap relative to typical revenue-per-visitor at this stage even at 1,000,000 map opens/month (~$5,450, dominated almost entirely by the fixable 5× geocoding ratio). The threshold worth re-evaluating this at: **sustained volume above roughly 200,000–300,000 map opens/month, after the geocoding-ratio fix in §4 is deployed.** Below that, the fix is cheaper than a migration.
+**Mapbox remains the map/geocoding provider.** Per the 2026-11-26 audit's explicit conclusion: switching providers is not worth it at any volume modeled in §2 on its own — Mapbox's tiered pricing stays cheap relative to typical revenue-per-visitor at this stage even at 1,000,000 map opens/month (~$5,450 at the pre-fix ~5× ratio, dominated almost entirely by that now-fixed redundant-geocoding ratio). The threshold worth re-evaluating this at: **sustained volume above roughly 200,000–300,000 map opens/month**, re-measured against the actual post-fix ratio (commit `539b28a`, deployed 2026-11-26) once enough real usage has accumulated. Below that, the already-shipped fix is cheaper than a migration.
 
 **Viral-readiness guardrails (Oct 9, 2026, `9312760`).** Added the four rate limits and the multi-location cap in §4, specifically so a crafted or scripted request couldn't trigger unbounded paid Mapbox calls or flood the map with instantly-public listings (Canary's governance model publishes submissions immediately — intentional, unchanged). Verified at the time against exact-boundary pass/429 behavior and confirmed the protected paid action didn't fire once limited; all temporary test data was removed afterward, leaving exactly 509 real listings.
 
@@ -230,7 +230,8 @@ Thresholds are grounded in documented provider limits where noted; everything el
 | 2026-11-15 | Mobile map bottom-drawer stuck-sheet scroll bug fixed and verified on-device (`8e3ff1f`) | ✅ Implemented, deployed |
 | 2026-11-26 | Full flight-readiness/cost audit completed — visitor journey traced, payload measured (489 KB raw/102 KB gzip, 544 listings), documented pricing fetched live, projections built for 1K–1M map opens/month | Findings recorded in this document |
 | 2026-11-26 | Mapbox server-only geocoding token (`MAPBOX_GEOCODING_TOKEN`) implemented | ✅ Implemented, committed (`cb8a2c8`), **pushed and deployed**, functionally verified in production |
-| 2026-11-26 | Redundant reverse-geocode calls (county-select, marker-click, Home, clear-filters) identified and fix written in `MapClient.tsx` | ✅ Implemented locally, `tsc`/build verified — **not committed, not pushed, not deployed**, awaiting approval |
+| 2026-11-26 | Redundant reverse-geocode calls (county-select, marker-click, Home, clear-filters) identified and fixed in `MapClient.tsx` (commit `539b28a`) | ✅ Implemented, committed, **pushed and deployed**, `tsc`/build verified, production chunk fingerprint confirmed post-deploy |
+| 2026-11-26 | `docs/FLIGHT-READINESS.md` committed locally (`e014dab`), then pushed/deployed alongside `539b28a` after user confirmation | ✅ Committed and pushed |
 | 2026-11-26 | `docs/FLIGHT-READINESS.md` created; linked from `CLAUDE.md` | ✅ This document |
 
 ### Review checklist — run this after any of the following
