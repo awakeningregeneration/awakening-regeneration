@@ -163,6 +163,12 @@ export default function MapClient({
   const listingsRef = useRef(listings);
   const geocodeTimerRef = useRef<number | null>(null);
   const geocodeCacheRef = useRef<Map<string, Region>>(new Map());
+  // Set just before a camera move whose destination region is already
+  // known (filter-driven fitBounds, default-view flyTo, marker-select
+  // flyTo) so the next moveend skips its reverse-geocode call. Consumed
+  // (reset) the instant moveend fires, so it can only ever suppress the
+  // one move that set it — a genuine free pan always leaves it false.
+  const skipNextGeocodeRef = useRef(false);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const popupImageRootRef = useRef<Root | null>(null);
   const animFrameRef = useRef<number>(0);
@@ -473,6 +479,15 @@ export default function MapClient({
     // Reverse geocode on map movement (region indicator)
     const handleMoveEnd = () => {
       if (!onRegionChange) return;
+
+      // Consumed unconditionally the instant this fires, so it can only
+      // ever skip the one move that set it — a later genuine free pan
+      // always finds this false and geocodes normally.
+      if (skipNextGeocodeRef.current) {
+        skipNextGeocodeRef.current = false;
+        return;
+      }
+
       const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || mapboxgl.accessToken;
       if (!token) return;
 
@@ -743,10 +758,13 @@ export default function MapClient({
         source.setData(listingsToGeoJSON(listings));
       }
 
-      // fitBounds when filtered
+      // fitBounds when filtered — the region driving this filter (county/
+      // state selection, search) is already known, so skip the reverse
+      // geocode this move would otherwise trigger.
       if (!selectedId && listings.length > 0 && isFiltered) {
         const bounds = new mapboxgl.LngLatBounds();
         listings.forEach((l) => bounds.extend({ lng: l.lng, lat: l.lat }));
+        skipNextGeocodeRef.current = true;
         map.fitBounds(bounds, { padding: 70, duration: 650, maxZoom: 9 });
       }
     };
@@ -784,6 +802,10 @@ export default function MapClient({
   /* ── Return to default view when filters clear ── */
   useEffect(() => {
     if (!isFiltered && mapRef.current) {
+      // Destination is the fixed default view, not a visitor-discovered
+      // region — skip the reverse geocode this move would otherwise
+      // trigger.
+      skipNextGeocodeRef.current = true;
       mapRef.current.flyTo({
         center: defaultCenter,
         zoom: defaultZoom,
@@ -822,6 +844,9 @@ export default function MapClient({
 
     // On mobile, skip the flyTo — the popup appears centered, map stays put
     if (!isMobileRef.current) {
+      // The listing's own county/state are already known data — skip
+      // the reverse geocode this recenter would otherwise trigger.
+      skipNextGeocodeRef.current = true;
       map.flyTo({
         center: [listing.lng, listing.lat],
         zoom: Math.max(map.getZoom(), 9),
